@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/*
+ * Tokens do canvas "BuscaConcurso · Identidade".
+ *
+ * Três regras governam tudo aqui:
+ *   1. Cinza por padrão, cor só quando informa alguma coisa.
+ *   2. Nada de borda em caixa e nada de sombra. O que separa uma caixa da
+ *      outra é o degrau entre a página cinza e o cartão branco.
+ *   3. Literata em título, Archivo em interface, Spline Sans Mono em número.
+ *
+ * Os nomes são os mesmos do canvas, em português, para que a conversa sobre
+ * o desenho e o código usem uma palavra só.
+ */
+@theme {
+  /* Superfícies. O empilhamento é pagina < cartao, e bloco é o rebaixo
+   * dentro do cartão que agrupa os números. */
+  --color-pagina: #eceeed;
+  --color-cartao: #ffffff;
+  --color-rebaixada: #e2e5e3;
+  --color-bloco: #f4f6f5;
+  --color-escura: #141715;
+
+  /* Tinta. Todo texto e todo o resto sai daqui. */
+  --color-tinta-900: #141715;
+  --color-tinta-800: #2a2e2b;
+  --color-tinta-600: #4e534f;
+  --color-tinta-500: #666c68;
+  --color-tinta-400: #8d938f;
+  --color-tinta-300: #c3c7c5;
+  --color-tinta-200: #d9dddb;
+  --color-tinta-100: #e9ebea;
+
+  /* Ação. Verde 700 é o botão primário, a marca e o filtro marcado. */
+  --color-verde-900: #06361f;
+  --color-verde-700: #0c5434;
+  --color-verde-600: #116b42;
+  --color-verde-500: #1a8c55;
+  --color-verde-300: #5fbe8c;
+
+  /* Sinal. Amarelo é a chamada única da tela, sempre com texto tinta 900.
+   * Ocre é o amarelo quando precisa virar letra e manter contraste. */
+  --color-amarelo: #f2b705;
+  --color-amarelo-escuro: #d9a504;
+  --color-ocre: #8a6407;
+  --color-vermelho: #b3261e;
+  --color-vermelho-800: #8e1c16;
+
+  /* Situação do concurso. O fundo do cartão é o sinal, não uma etiqueta
+   * colorida em cada linha. */
+  --color-urgente: #fdf0ee;
+  --color-urgente-chip: #f8dcd8;
+  --color-urgente-apoio: #6e5450;
+  --color-previsto: #faf4e4;
+  --color-previsto-chip: #f3e6c6;
+  --color-previsto-texto: #6e5005;
+  --color-previsto-apoio: #6b6250;
+  --color-encerrado: #e5e8e6;
+  --color-encerrado-chip: #d9dddb;
+
+  --font-titulo: var(--fonte-literata), Georgia, "Times New Roman", serif;
+  --font-interface: var(--fonte-archivo), "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  --font-numero: var(--fonte-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --radius-caixa: 10px;
+  --radius-controle: 6px;
+}
+
+/* A escala de espaço do Tailwind já é múltipla de 4, que é a do canvas.
+ * Cartões se separam por 12, seções por 32. */
+
+html {
+  background: var(--color-pagina);
+}
+
+body {
+  background: var(--color-pagina);
+  color: var(--color-tinta-900);
+  font-family: var(--font-interface);
+  text-rendering: optimizeLegibility;
+}
+
+/* Sem borda e sem sombra em caixa, então o foco precisa de um anel próprio
+ * para continuar visível em teclado. */
+:focus-visible {
+  outline: 2px solid var(--color-verde-700);
+  outline-offset: 2px;
+}
+
+/* Números de vaga, salário e prazo alinham em coluna quando as figuras têm
+ * a mesma largura. */
+.numero {
+  font-family: var(--font-numero);
+  font-variant-numeric: tabular-nums;
+}
