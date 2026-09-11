@@ -1,0 +1,176 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { BlocoDeNumeros, Numero, Selo } from "@/components/ui/Cartao";
+import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
+import { listarSlugs, obterConcurso } from "@/lib/concursos";
+import {
+  dataLonga,
+  moeda,
+  moedaExata,
+  numero,
+  vagasTexto,
+} from "@/lib/formato";
+import { ROTULO_ESCOLARIDADE, linhaDeContexto } from "@/lib/rotulos";
+import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
+import { urlAbsoluta } from "@/lib/site";
+
+/**
+ * Página do concurso, versão reduzida.
+ *
+ * Existe porque um cartão de resultado precisa levar a algum lugar. Mostra o
+ * que o resumo já traz; cargos, cronograma completo e histórico de
+ * retificação dependem das tabelas que só a API vai expor.
+ */
+export async function generateStaticParams() {
+  return (await listarSlugs()).map((slug) => ({ slug }));
+}
+
+export async function generateMetadata(
+  props: PageProps<"/concursos/[slug]">,
+): Promise<Metadata> {
+  const { slug } = await props.params;
+  const concurso = await obterConcurso(slug);
+  if (!concurso) return { title: "Concurso não encontrado" };
+
+  const titulo = `${concurso.orgao.sigla}: ${concurso.titulo}`;
+  return {
+    title: titulo,
+    description:
+      `${concurso.orgao.nome}. ` +
+      `${vagasTexto(concurso.vagas, concurso.cadastroReserva)}` +
+      (concurso.salarioAte ? `, salário até ${moeda(concurso.salarioAte)}` : "") +
+      (concurso.inscricoesAte
+        ? `, inscrições até ${dataLonga(concurso.inscricoesAte)}.`
+        : "."),
+    alternates: { canonical: `/concursos/${concurso.slug}` },
+  };
+}
+
+export default async function PaginaDoConcurso(
+  props: PageProps<"/concursos/[slug]">,
+) {
+  const { slug } = await props.params;
+  const concurso = await obterConcurso(slug);
+  if (!concurso) notFound();
+
+  const hoje = new Date();
+  const tom = tomDoConcurso(concurso, hoje);
+  const estilo = ESTILO_DO_TOM[tom];
+
+  const trilha = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Concursos",
+        item: urlAbsoluta("/concursos"),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: `${concurso.orgao.sigla}: ${concurso.titulo}`,
+        item: urlAbsoluta(`/concursos/${concurso.slug}`),
+      },
+    ],
+  };
+
+  return (
+    <div className="mx-auto max-w-[880px] px-4 py-8 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(trilha).replace(/</g, "\\u003c"),
+        }}
+      />
+
+      <nav aria-label="Trilha" className="mb-5 text-[13px] text-tinta-600">
+        <Link href="/concursos" className="underline underline-offset-4 hover:text-tinta-900">
+          Concursos
+        </Link>
+        <span aria-hidden="true"> / </span>
+        <span>{concurso.orgao.sigla}</span>
+      </nav>
+
+      <article className={`rounded-caixa p-6 sm:p-8 ${estilo.cartao}`}>
+        <header className="flex items-start gap-4">
+          <Selo sigla={concurso.orgao.sigla} tom={tom} />
+          <div className="min-w-0">
+            <h1 className="font-titulo text-[26px] leading-8 font-semibold tracking-[-0.01em] text-balance">
+              {concurso.orgao.nome}
+            </h1>
+            <p className={`mt-1 text-sm ${estilo.apoio}`}>
+              {linhaDeContexto(concurso.orgao)}
+            </p>
+          </div>
+        </header>
+
+        <p className="mt-5 text-lg font-semibold text-tinta-900">
+          {concurso.titulo}
+        </p>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Etiqueta tom={tom} comPonto>
+            {rotuloDeSituacao(concurso, hoje)}
+          </Etiqueta>
+          {concurso.escolaridades.map((escolaridade) => (
+            <Etiqueta key={escolaridade}>
+              {ROTULO_ESCOLARIDADE[escolaridade]}
+            </Etiqueta>
+          ))}
+          {concurso.banca && <Etiqueta>Banca: {concurso.banca.nome}</Etiqueta>}
+        </div>
+
+        <BlocoDeNumeros className="mt-6 grid-cols-2 sm:grid-cols-4">
+          <Numero rotulo="Vagas">
+            {concurso.vagas === null ? "a definir" : numero(concurso.vagas)}
+          </Numero>
+          <Numero rotulo="Salário até">
+            {concurso.salarioAte === null
+              ? "a definir"
+              : moeda(concurso.salarioAte)}
+          </Numero>
+          <Numero rotulo="Taxa">
+            {concurso.taxaInscricao === null
+              ? "a definir"
+              : moedaExata(concurso.taxaInscricao)}
+          </Numero>
+          <Numero rotulo="Cadastro reserva">
+            {concurso.cadastroReserva ? "sim" : "não"}
+          </Numero>
+        </BlocoDeNumeros>
+
+        <div className="mt-6">
+          <Rotulo>Cronograma</Rotulo>
+          <dl className="mt-2 flex flex-col gap-1.5 text-sm">
+            <div className="flex gap-2">
+              <dt className="w-44 shrink-0 text-tinta-600">Edital publicado</dt>
+              <dd className="numero">
+                {concurso.publicadoEm ? dataLonga(concurso.publicadoEm) : "sem edital"}
+              </dd>
+            </div>
+            <div className="flex gap-2">
+              <dt className="w-44 shrink-0 text-tinta-600">Inscrições</dt>
+              <dd className="numero">
+                {concurso.inscricoesDe && concurso.inscricoesAte
+                  ? `${dataLonga(concurso.inscricoesDe)} a ${dataLonga(concurso.inscricoesAte)}`
+                  : concurso.previstoPara
+                    ? `previstas para ${concurso.previstoPara}`
+                    : "a definir"}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </article>
+
+      <p className="mt-4 rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600">
+        Esta página mostra o resumo do concurso. A lista de cargos, o
+        cronograma completo, as retificações e o link para o PDF do edital
+        entram quando a API do engine estiver conectada. Até lá, confira
+        sempre o edital original no diário oficial ou no site da banca.
+      </p>
+    </div>
+  );
+}
