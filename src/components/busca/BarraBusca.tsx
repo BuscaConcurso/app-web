@@ -151,11 +151,13 @@ export function BarraBusca({
         action="/concursos"
         method="get"
         role="search"
-        className={`flex flex-col gap-2 rounded-caixa bg-cartao sm:flex-row sm:items-center ${
-          compacta ? "p-2" : "p-2.5"
+        className={`flex flex-col gap-2 rounded-3xl bg-cartao transition-shadow
+          ring-0 ring-verde-700/15 focus-within:ring-4
+          sm:flex-row sm:items-center sm:rounded-full ${
+          compacta ? "p-1.5" : "p-2"
         }`}
       >
-        <div className="flex flex-1 items-center gap-2.5 rounded-controle px-3">
+        <div className="flex flex-1 items-center gap-2.5 rounded-full px-4">
           <svg
             aria-hidden="true"
             viewBox="0 0 20 20"
@@ -193,7 +195,7 @@ export function BarraBusca({
               name="uf"
               value={escolhida}
               onChange={(evento) => trocar(evento.target.value)}
-              className={`w-full cursor-pointer appearance-none rounded-controle bg-rebaixada pr-9 pl-3 text-sm font-medium text-tinta-900 outline-none sm:w-[11rem] ${altura}`}
+              className={`w-full cursor-pointer appearance-none rounded-full bg-rebaixada pr-9 pl-4 text-sm font-medium text-tinta-900 outline-none sm:w-[11rem] ${altura}`}
             >
               <option value="">Todo o Brasil</option>
               {UFS.map((sigla) => (
@@ -220,7 +222,7 @@ export function BarraBusca({
 
           <button
             type="submit"
-            className={`shrink-0 rounded-controle bg-verde-700 px-6 font-semibold text-white transition-colors hover:bg-verde-600 ${altura} ${corpo}`}
+            className={`shrink-0 rounded-full bg-verde-700 px-7 font-semibold text-white transition-colors hover:bg-verde-600 ${altura} ${corpo}`}
           >
             Buscar
           </button>
