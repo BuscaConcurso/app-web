@@ -323,12 +323,16 @@ export function ColunaFiltros({
         </div>
       </details>
 
-      {/* No desktop a coluna acompanha a rolagem ancorada embaixo: numa lista
-          de trinta resultados, o filtro precisa continuar ao alcance na altura
-          em que a pessoa está lendo, não lá no topo. O teto de altura com
-          rolagem própria cobre a tela baixa, onde o painel não caberia
-          inteiro. */}
-      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:sticky lg:bottom-4 lg:flex lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:overscroll-contain">
+      {/* No desktop a coluna acompanha a rolagem. Ancora pelo topo, e não pelo
+          rodapé: a restrição de `bottom` só impede o elemento de descer além
+          de uma linha perto da base da janela, e quem rola para baixo faz o
+          painel subir, o que nunca viola essa linha. Com `bottom` sozinho a
+          coluna some junto com a página; é o `top` que prende na descida.
+
+          O teto de altura com rolagem própria cobre a tela baixa, onde o
+          painel não caberia inteiro, e o `overscroll-contain` evita que rolar
+          até o fim da coluna continue rolando a página atrás dela. */}
+      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:sticky lg:top-4 lg:flex lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:overscroll-contain">
         <Painel consulta={consulta} contagens={contagens} prefixo="coluna" />
         <CartaoDeAlerta total={total} />
       </aside>
