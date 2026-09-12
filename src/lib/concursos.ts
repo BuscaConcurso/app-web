@@ -1,11 +1,18 @@
 /**
  * A única porta de entrada de dados do front.
  *
- * Hoje lê o mock; amanhã faz `fetch` da API que o engine vai expor. As
- * funções já são assíncronas por isso: quando a troca acontecer, nenhum
- * componente muda, porque nenhum componente importa mock direto.
+ * Lê a API do engine quando `BC_API_URL` está definida, e o mock quando não
+ * está ou quando a API não responde. As funções já eram assíncronas por isso:
+ * a troca aconteceu aqui dentro e nenhum componente mudou, porque nenhum
+ * componente importa mock direto.
+ *
+ * Tudo o que o buscador faz — filtro, ordenação, paginação, contagem de
+ * faceta — continua rodando aqui, sobre o array que `acervo()` devolve. É por
+ * isso que a API tem uma rota só: uma rota por função duplicaria em Python o
+ * que já está testado em `consulta.test.ts` e `concursos.test.ts`.
  */
-import type { ConcursoResumo, Escolaridade, Uf } from "./dominio";
+import { unstable_rethrow } from "next/navigation";
+import type { Banca, ConcursoResumo, Escolaridade, Orgao, Uf } from "./dominio";
 import {
   filtrar,
   ordenar,
@@ -17,8 +24,6 @@ import {
 import { tomDoConcurso } from "./situacao";
 import { NOME_UF, ROTULO_ESCOLARIDADE } from "./rotulos";
 import { CONCURSOS } from "@/mocks/concursos";
-import { ORGAOS } from "@/mocks/orgaos";
-import { BANCAS } from "@/mocks/bancas";
 
 export interface Consulta extends Filtro {
   ordem?: Ordem;
@@ -36,8 +41,65 @@ export interface Pagina {
 
 const POR_PAGINA = 20;
 
+/**
+ * Onde a API do engine está ouvindo, sem barra no fim. Suba com `bc api`, que
+ * amarra em `127.0.0.1:8787` — o serviço não tem autenticação, e é por isso
+ * que ele só atende o laço local.
+ *
+ * Variável ausente é "usar o mock", não erro: o design do front foi feito
+ * contra o mock e continua demonstrável sem o engine no ar. É também o que
+ * mantém a suíte de testes determinística e sem rede (ver `vitest.config.mts`).
+ */
+const URL_DA_API = process.env.BC_API_URL?.replace(/\/+$/, "");
+
+/** O corpo de `GET /acervo`. Só o que este arquivo usa. */
+interface RespostaDeAcervo {
+  concursos: ConcursoResumo[];
+  /**
+   * Quantos concursos o engine tem e não mandou porque não têm cargo nem
+   * evento — 9.309 de 9.311 na carga de hoje. Chega até aqui e para aqui:
+   * mostrar isso na tela exigiria um componente novo, e nenhuma função
+   * exportada deste arquivo tem por onde devolver o número. Está em
+   * `GET /diagnostico` e no aviso que `bc api` imprime ao subir.
+   */
+  semDado: number;
+}
+
 async function acervo(): Promise<ConcursoResumo[]> {
-  return CONCURSOS;
+  if (!URL_DA_API) return CONCURSOS;
+  try {
+    // `no-store` porque o acervo muda debaixo do app: o engine reprocessa
+    // atos enquanto o app roda, e uma resposta cacheada mostraria um acervo
+    // que não existe mais. Chamadas iguais dentro do mesmo render continuam
+    // sendo uma requisição só, por memoização do `fetch` do Next.
+    const resposta = await fetch(`${URL_DA_API}/acervo`, { cache: "no-store" });
+    if (!resposta.ok) {
+      throw new Error(`a API respondeu ${resposta.status}`);
+    }
+    const corpo: RespostaDeAcervo = await resposta.json();
+    if (!Array.isArray(corpo?.concursos)) {
+      throw new Error("a resposta não tem a lista `concursos`");
+    }
+    return corpo.concursos;
+  } catch (erro) {
+    // `fetch(..., { cache: "no-store" })` é uma das APIs que o Next usa
+    // levantando erro próprio para sair do caminho estático (a lista está em
+    // node_modules/next/dist/docs/01-app/03-api-reference/04-functions/unstable_rethrow.md).
+    // Sem esta linha, o `catch` abaixo engolia esse sinal e o `next build`
+    // renderizava o MOCK dentro da tentativa de prerender, com a API no ar e
+    // respondendo — medido: sete avisos "usando o mock" num build limpo.
+    // Erro de aplicação (API fora do ar, resposta torta) não é afetado:
+    // `unstable_rethrow` só relança o que é do framework.
+    unstable_rethrow(erro);
+    // Cair no mock em silêncio seria pior do que a tela vazia: alguém
+    // demonstraria o mock achando que está vendo o acervo do engine.
+    console.warn(
+      `[concursos] ${URL_DA_API}/acervo falhou (${
+        erro instanceof Error ? erro.message : erro
+      }); usando o mock. Suba a API com \`bc api\` no repositório engine.`,
+    );
+    return CONCURSOS;
+  }
 }
 
 export async function listarConcursos(
@@ -126,6 +188,12 @@ export async function facetas(hoje: Date = new Date()): Promise<{
   const porUf = new Map<Uf, number>();
   const porBanca = new Map<string, number>();
   const porOrgao = new Map<string, number>();
+  // O rótulo sai do próprio concurso, não de `@/mocks/bancas` e
+  // `@/mocks/orgaos` como antes: o acervo do engine tem 1.332 órgãos e
+  // nenhum deles está no mock, então a busca pelo slug voltava `undefined` e
+  // `undefined.nome` derrubava a home inteira na primeira linha real.
+  const bancas = new Map<string, Banca>();
+  const orgaos = new Map<string, Orgao>();
   for (const concurso of abertos) {
     if (concurso.uf) porUf.set(concurso.uf, (porUf.get(concurso.uf) ?? 0) + 1);
     if (concurso.banca) {
@@ -133,11 +201,13 @@ export async function facetas(hoje: Date = new Date()): Promise<{
         concurso.banca.slug,
         (porBanca.get(concurso.banca.slug) ?? 0) + 1,
       );
+      bancas.set(concurso.banca.slug, concurso.banca);
     }
     porOrgao.set(
       concurso.orgao.slug,
       (porOrgao.get(concurso.orgao.slug) ?? 0) + 1,
     );
+    orgaos.set(concurso.orgao.slug, concurso.orgao);
   }
 
   const maisFrequentes = <T>(mapa: Map<T, number>, limite: number) =>
@@ -150,14 +220,18 @@ export async function facetas(hoje: Date = new Date()): Promise<{
       total,
     })),
     bancas: maisFrequentes(porBanca, 8).map(([slug, total]) => ({
-      rotulo: BANCAS[slug as keyof typeof BANCAS].nome,
+      rotulo: bancas.get(slug)!.nome,
       href: `/concursos?banca=${slug}`,
       total,
     })),
     orgaos: maisFrequentes(porOrgao, 10).map(([slug, total]) => ({
-      rotulo: ORGAOS[slug as keyof typeof ORGAOS].nome,
+      rotulo: orgaos.get(slug)!.nome,
+      // A sigla é o termo de busca porque é curta e casa com o texto
+      // buscável do cartão. Órgão do engine ainda não tem sigla (nenhum dos
+      // 1.332), e aí o termo é o nome: `q=` vazio traria o acervo inteiro
+      // atrás de um link que promete um órgão.
       href: `/concursos?q=${encodeURIComponent(
-        ORGAOS[slug as keyof typeof ORGAOS].sigla,
+        orgaos.get(slug)!.sigla || orgaos.get(slug)!.nome,
       )}`,
       total,
     })),
@@ -212,13 +286,12 @@ export async function contagensDeFaceta(
     todos.some((concurso) => concurso.escolaridades.includes(escolaridade)),
   );
 
-  const bancasNoAcervo = [
-    ...new Set(
-      todos
-        .map((concurso) => concurso.banca?.slug)
-        .filter((slug): slug is string => !!slug),
-    ),
-  ];
+  // Slug para nome, tirado do próprio acervo pelo mesmo motivo de `facetas`:
+  // banca do engine não está em `@/mocks/bancas`.
+  const bancasNoAcervo = new Map<string, string>();
+  for (const concurso of todos) {
+    if (concurso.banca) bancasNoAcervo.set(concurso.banca.slug, concurso.banca.nome);
+  }
 
   return {
     situacoes: (Object.keys(SITUACOES) as Situacao[]).map((situacao) => ({
@@ -231,10 +304,10 @@ export async function contagensDeFaceta(
       rotulo: ROTULO_ESCOLARIDADE[escolaridade],
       total: contar({ escolaridades: [escolaridade] }),
     })),
-    bancas: bancasNoAcervo
-      .map((slug) => ({
+    bancas: [...bancasNoAcervo]
+      .map(([slug, nome]) => ({
         valor: slug,
-        rotulo: BANCAS[slug as keyof typeof BANCAS].nome,
+        rotulo: nome,
         total: contar({ bancas: [slug] }),
       }))
       .sort((a, b) => b.total - a.total || a.rotulo.localeCompare(b.rotulo)),

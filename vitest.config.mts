@@ -12,5 +12,13 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],
+    /**
+     * `acervo()` (src/lib/concursos.ts) faz `fetch` da API do engine quando
+     * `BC_API_URL` está definida. Aqui ela nunca está: teste de filtro e de
+     * contagem precisa de um acervo conhecido e de nenhuma rede, e quem tem a
+     * variável exportada no shell não devia ver a suíte mudar de resultado por
+     * causa disso.
+     */
+    env: { BC_API_URL: "" },
   },
 });

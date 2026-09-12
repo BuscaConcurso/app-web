@@ -74,6 +74,21 @@ export interface Orgao {
   poder: Poder;
   uf: Uf | null;
   municipio: string | null;
+  /**
+   * `false` quando ninguém ainda separou o nome do órgão do caminho onde ele
+   * foi publicado — ver `nomeEhCaminho`. Opcional porque o mock não o traz;
+   * a API do engine manda sempre, e hoje manda `false` em todos os 1.332
+   * órgãos do acervo.
+   */
+  resolvido?: boolean;
+  /**
+   * `true` quando `nome` é o caminho de hierarquia do Diário inteiro
+   * ("Ministério da Educação/Universidade Federal de Sergipe/Reitoria") e
+   * não o nome do órgão. São 1.287 dos 1.332 órgãos do acervo. O campo
+   * existe para a tela poder mostrar o que tem sem afirmar o que não tem; a
+   * resolução do nome está sendo especificada em paralelo, no engine.
+   */
+  nomeEhCaminho?: boolean;
 }
 
 export interface Banca {

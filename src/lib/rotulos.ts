@@ -91,10 +91,16 @@ export function linhaDeContexto(orgao: {
   uf: Uf | null;
   municipio: string | null;
 }): string {
+  // `filter(Boolean)` porque o acervo do engine ainda não tem esfera em
+  // nenhum órgão, e `poder` não existe no banco dele: os dois chegam nulos e
+  // o índice volta `undefined`. Sem o filtro, o cartão mostrava " ·  ·
+  // Nacional" — três separadores e nenhuma informação. Enquanto o tipo
+  // `Orgao` declarar os dois campos obrigatórios, isto é defesa contra dado
+  // real, não contra dado inválido.
   const partes: string[] = [
     ROTULO_ESFERA[orgao.esfera],
     ROTULO_PODER[orgao.poder],
-  ];
+  ].filter(Boolean);
   if (orgao.municipio && orgao.uf) partes.push(`${orgao.municipio}, ${orgao.uf}`);
   else if (orgao.uf) partes.push(NOME_UF[orgao.uf]);
   else partes.push("Nacional");
