@@ -47,7 +47,9 @@ Vem do canvas `BuscaConcurso · Identidade`. Três regras:
 1. Cinza por padrão, cor só quando informa alguma coisa.
 2. Sem borda em caixa e sem sombra. O que separa é o degrau entre a página
    cinza e o cartão branco.
-3. Literata nos títulos, Archivo na interface, Spline Sans Mono nos números.
+3. Literata nos títulos e Archivo em todo o resto. Número não tem família
+   própria: é o mesmo Archivo com as figuras de largura fixa ligadas, pela
+   classe `.numero`.
 
 O fundo do cartão é o sinal de situação: branco aberto, salmão encerrando em
 até sete dias, palha previsto, cinza encerrado. O amarelo é a chamada única

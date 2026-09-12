@@ -29,7 +29,7 @@ Vem do canvas `BuscaConcurso · Identidade`. Três regras mandam:
    concursos que fecham esta semana saltam sozinhos.
 2. Sem borda em caixa e sem sombra. O que separa é o degrau entre a página
    cinza e o cartão branco.
-3. Literata nos títulos, Archivo na interface, Spline Sans Mono nos números.
+3. Literata nos títulos e Archivo em todo o resto, número incluído.
 
 O fundo do cartão é o sinal de situação: branco aberto, salmão urgente,
 palha previsto, cinza encerrado. O amarelo é a chamada única da tela.
@@ -76,7 +76,7 @@ Bloco `@theme` em `globals.css`, nomes em português alinhados ao canvas.
 | Ação | verde-700 `#0C5434`, verde-600 `#116B42`, verde-500 `#1A8C55`, verde-300 `#5FBE8C`, verde-900 `#06361F` |
 | Sinal | amarelo `#F2B705`, ocre `#8A6407`, vermelho `#B3261E`, vermelho-800 `#8E1C16` |
 | Situação | urgente `#FDF0EE`/`#F8DCD8`, previsto `#FAF4E4`/`#F3E6C6`, encerrado `#E5E8E6`/`#D9DDDB` |
-| Fonte | titulo Literata, interface Archivo, numero Spline Sans Mono |
+| Fonte | titulo Literata, interface Archivo |
 | Raio | caixa 10px, controle 6px |
 
 Espaçamento fica na escala padrão do Tailwind, que já é múltiplo de 4.
@@ -171,6 +171,12 @@ continuam fora.
 **A paginação entrou no stub.** Estava adiada, mas com vinte itens por página
 a busca mostraria vinte de trinta e cinco resultados sem saída. O componente
 já existia no design system.
+
+**A monoespaçada saiu.** O canvas pede Spline Sans Mono em vaga, salário e
+prazo. Vendo em tela cheia, ela vira uma terceira voz tipográfica e destoa do
+resto. Os números passaram a usar o Archivo com figuras tabulares, o que
+resolve o alinhamento em coluna, que era o motivo real da monoespaçada, sem a
+terceira família nem a requisição extra.
 
 **Menu no celular.** O canvas mostra um botão de menu no cabeçalho do
 celular, e a primeira versão simplesmente escondia a navegação abaixo de

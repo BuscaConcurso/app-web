@@ -7,7 +7,7 @@
  *   1. Cinza por padrão, cor só quando informa alguma coisa.
  *   2. Nada de borda em caixa e nada de sombra. O que separa uma caixa da
  *      outra é o degrau entre a página cinza e o cartão branco.
- *   3. Literata em título, Archivo em interface, Spline Sans Mono em número.
+ *   3. Literata em título e Archivo em todo o resto, número incluído.
  *
  * Os nomes são os mesmos do canvas, em português, para que a conversa sobre
  * o desenho e o código usem uma palavra só.
@@ -61,7 +61,6 @@
   --font-titulo: var(--fonte-literata), Georgia, "Times New Roman", serif;
   --font-interface: var(--fonte-archivo), "Helvetica Neue", Helvetica, Arial,
     sans-serif;
-  --font-numero: var(--fonte-mono), ui-monospace, SFMono-Regular, monospace;
 
   /* Escala tipográfica. Menor que o padrão do Tailwind em todos os degraus:
    * esta é uma interface de leitura em lista, onde caber mais linha na tela
@@ -108,9 +107,13 @@ body {
   outline-offset: 2px;
 }
 
-/* Números de vaga, salário e prazo alinham em coluna quando as figuras têm
- * a mesma largura. */
+/* Número de vaga, salário e prazo.
+ *
+ * Sem família própria: é o Archivo da interface, só com as figuras de largura
+ * fixa ligadas, para que os valores de uma coluna alinhem em vez de dançar
+ * conforme o dígito. Uma monoespaçada aqui resolvia o alinhamento e criava
+ * uma terceira voz tipográfica na tela, que não vale o preço. */
 .numero {
-  font-family: var(--font-numero);
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }

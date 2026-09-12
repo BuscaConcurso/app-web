@@ -18,7 +18,7 @@ import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
  * Tudo que decide se vale a pena clicar cabe aqui: quem abre a vaga, em que
  * situação está, quantas vagas, quanto paga, até quando dá para se
  * inscrever e quanto custa a taxa. Os números vão para um bloco rebaixado
- * porque em Spline Sans Mono eles alinham em coluna e leem como tabela.
+ * e usam figuras de largura fixa, então alinham em coluna e leem como tabela.
  */
 export function CartaoConcurso({
   concurso,

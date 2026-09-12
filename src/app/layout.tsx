@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
-import { Archivo, Literata, Spline_Sans_Mono } from "next/font/google";
+import { Archivo, Literata } from "next/font/google";
 import "./globals.css";
 import { Cabecalho } from "@/components/layout/Cabecalho";
 import { Rodape } from "@/components/layout/Rodape";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 
 /**
- * Literata em título, Archivo em interface, Spline Sans Mono em número.
+ * Literata em título e Archivo em todo o resto, número incluído.
  *
- * As três são variáveis, então uma família cobre todos os pesos que o canvas
+ * As duas são variáveis, então uma família cobre todos os pesos que o canvas
  * usa sem baixar um arquivo por peso. `next/font` as autohospeda, o que tira
  * a requisição para o Google e o deslocamento de layout que vem com ela.
+ *
+ * Duas famílias e não três: os números usam as figuras tabulares do próprio
+ * Archivo, e a família a menos é uma requisição a menos no primeiro carregamento.
  */
 const literata = Literata({
   subsets: ["latin", "latin-ext"],
@@ -21,12 +24,6 @@ const literata = Literata({
 const archivo = Archivo({
   subsets: ["latin", "latin-ext"],
   variable: "--fonte-archivo",
-  display: "swap",
-});
-
-const mono = Spline_Sans_Mono({
-  subsets: ["latin", "latin-ext"],
-  variable: "--fonte-mono",
   display: "swap",
 });
 
@@ -99,7 +96,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${literata.variable} ${archivo.variable} ${mono.variable} h-full antialiased`}
+      className={`${literata.variable} ${archivo.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <script

@@ -86,8 +86,8 @@ export default async function Estilo() {
         <p className="mt-2 max-w-[70ch] text-sm leading-6 text-tinta-600">
           Cinza por padrão, cor só quando informa alguma coisa. Sem borda em
           caixa: o que separa é o degrau entre a página cinza e o cartão
-          branco. Literata nos títulos, Archivo na interface, Spline Sans Mono
-          nos números.
+          branco. Literata nos títulos e Archivo em todo o resto, número
+          incluído.
         </p>
       </header>
 
@@ -171,7 +171,7 @@ export default async function Estilo() {
         </Cartao>
       </Bloco>
 
-      <Bloco titulo="Tipografia" nota="Literata · Archivo · Spline Sans Mono">
+      <Bloco titulo="Tipografia" nota="Literata no título · Archivo no resto">
         <Cartao className="flex flex-col gap-4 p-6">
           <p className="font-titulo text-[30px] leading-[34px] font-semibold tracking-[-0.02em]">
             Concursos abertos
@@ -195,6 +195,10 @@ export default async function Estilo() {
           <Rotulo>Rótulo de seção e de filtro</Rotulo>
           <p className="numero text-[12px] leading-5 font-medium">
             Edital 01/2026 · até 14/04/2026 · R$ 14.852,66
+          </p>
+          <p className="text-[11px] leading-4 text-tinta-500">
+            Número usa o mesmo Archivo, com as figuras de largura fixa ligadas
+            para alinhar em coluna.
           </p>
         </Cartao>
       </Bloco>
