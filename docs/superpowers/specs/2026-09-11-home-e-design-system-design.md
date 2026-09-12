@@ -178,6 +178,18 @@ resto. Os números passaram a usar o Archivo com figuras tabulares, o que
 resolve o alinhamento em coluna, que era o motivo real da monoespaçada, sem a
 terceira família nem a requisição extra.
 
+**Pré-seleção de estado por geolocalização.** Pedido depois, e é o que
+quebra a propriedade de zero JavaScript no cliente. A barra de busca virou
+uma ilha de cliente; o resto do site continua servido. A troca vale porque a
+barra não sustenta nada: sem script, o formulário nativo continua funcionando.
+A coordenada é resolvida no navegador contra contornos que nós mesmos
+servimos, então a localização exata de ninguém sai da máquina.
+
+**Dois arquivos de ícone.** O canvas diz que abaixo de 24 px as linhas do
+documento caem, e um SVG só não sabe em que tamanho está sendo desenhado.
+O PNG de 32, sem as linhas, atende a aba do navegador; o SVG com a marca
+completa atende o resto.
+
 **Menu no celular.** O canvas mostra um botão de menu no cabeçalho do
 celular, e a primeira versão simplesmente escondia a navegação abaixo de
 768px. Virou um `<details>`, que abre e fecha sem JavaScript.

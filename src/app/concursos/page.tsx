@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ColunaFiltros } from "@/components/busca/ColunaFiltros";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
-import { BarraBusca } from "@/components/home/BarraBusca";
+import { BarraBusca } from "@/components/busca/BarraBusca";
 import { Paginacao } from "@/components/ui/Paginacao";
 import { contagensDeFaceta, listarConcursos } from "@/lib/concursos";
 import { ORDENS, SITUACOES } from "@/lib/consulta";

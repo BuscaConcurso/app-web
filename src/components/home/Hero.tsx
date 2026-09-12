@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarraBusca } from "./BarraBusca";
+import { BarraBusca } from "@/components/busca/BarraBusca";
 import { numero } from "@/lib/formato";
 
 const ATALHOS = [

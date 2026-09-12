@@ -55,6 +55,19 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" },
   },
   category: "education",
+  /**
+   * Dois arquivos, um por faixa de tamanho, como o canvas manda: abaixo de
+   * 24 px as três linhas do documento viram um borrão amarelo, então o ícone
+   * pequeno fica só com a lente. O PNG de 32 é o que a aba do navegador usa;
+   * o SVG serve o resto, de atalho na tela inicial a favorito.
+   */
+  icons: {
+    icon: [
+      { url: "/icone-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icone.svg", type: "image/svg+xml", sizes: "any" },
+    ],
+    apple: { url: "/icone.svg", type: "image/svg+xml" },
+  },
 };
 
 /**

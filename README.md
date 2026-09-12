@@ -35,10 +35,32 @@ fora do sitemap.
 | `/concursos/[slug]` | Resumo do concurso |
 | `/estilo` | Vitrine do design system |
 
-Tudo é Server Component. A barra de busca é um `<form method="get">` nativo,
-os filtros e a ordenação são âncoras, e o menu do celular é um `<details>`.
-Não há JavaScript de cliente próprio, o que é bom para SEO e faz a página
+Quase tudo é Server Component. A barra de busca é um `<form method="get">`
+nativo, os filtros e a ordenação são âncoras, e o menu do celular e o painel
+de filtros do celular são `<details>`. Isso é bom para SEO e faz a página
 funcionar antes de qualquer hidratação.
+
+A única ilha de cliente é a barra de busca, por causa da pré-seleção de
+estado. Ela acrescenta comportamento e não sustenta nada: sem JavaScript, o
+formulário continua submetendo e a busca continua inteira.
+
+### Pré-seleção de estado
+
+A barra tenta descobrir em que estado a pessoa está e deixar o seletor já
+preenchido. Três regras:
+
+1. **Nunca dispara busca sozinha.** Preenche e avisa; a pessoa decide.
+2. **Nunca pede permissão sem gesto.** No primeiro acesso aparece um botão, e
+   o prompt do navegador só sobe se a pessoa clicar. Quem já concedeu antes é
+   resolvido em silêncio, via Permissions API, sem prompt.
+3. **A coordenada não sai da máquina.** Os contornos dos 27 estados vêm de
+   `public/geo/uf.json`, servido por nós, e o ponto em polígono roda no
+   navegador. O arquivo tem 22 KB comprimidos e só é baixado depois da
+   permissão, então quem recusa não paga por ele.
+
+O arquivo de contornos é gerado da malha do IBGE por `pnpm geo`. A conversão
+de coordenada para sigla está em `src/lib/localizacao.ts` e é testada contra
+as 27 capitais.
 
 ## Direção visual
 

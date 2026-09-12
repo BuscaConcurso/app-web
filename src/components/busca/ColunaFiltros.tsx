@@ -323,7 +323,12 @@ export function ColunaFiltros({
         </div>
       </details>
 
-      <aside className="hidden w-[288px] shrink-0 flex-col gap-3 lg:flex">
+      {/* No desktop a coluna acompanha a rolagem ancorada embaixo: numa lista
+          de trinta resultados, o filtro precisa continuar ao alcance na altura
+          em que a pessoa está lendo, não lá no topo. O teto de altura com
+          rolagem própria cobre a tela baixa, onde o painel não caberia
+          inteiro. */}
+      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:sticky lg:bottom-4 lg:flex lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:overscroll-contain">
         <Painel consulta={consulta} contagens={contagens} prefixo="coluna" />
         <CartaoDeAlerta total={total} />
       </aside>
