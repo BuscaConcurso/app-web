@@ -70,12 +70,49 @@ describe("filtrar", () => {
     ];
     const achados = filtrar(
       itens,
-      { uf: "SP", escolaridade: "superior" as Escolaridade },
+      { uf: "SP", escolaridades: ["superior" as Escolaridade] },
       HOJE,
     );
     expect(achados).toHaveLength(1);
     expect(achados[0].uf).toBe("SP");
     expect(achados[0].escolaridades).toContain("superior");
+  });
+
+  // Dentro de uma dimensão a relação é OU: quem marca superior e médio quer
+  // os dois, não a interseção, que seria vazia na maioria dos editais.
+  it("soma os valores dentro de uma dimensão", () => {
+    const itens = [
+      fixture({ escolaridades: ["superior"] }),
+      fixture({ escolaridades: ["medio"] }),
+      fixture({ escolaridades: ["fundamental"] }),
+    ];
+    expect(
+      filtrar(itens, { escolaridades: ["superior", "medio"] }, HOJE),
+    ).toHaveLength(2);
+  });
+
+  // Entre dimensões a relação é E: superior ou médio, mas só em São Paulo.
+  it("multiplica as dimensões entre si", () => {
+    const itens = [
+      fixture({ uf: "SP", escolaridades: ["superior"] }),
+      fixture({ uf: "SP", escolaridades: ["fundamental"] }),
+      fixture({ uf: "RJ" as Uf, escolaridades: ["medio"] }),
+    ];
+    expect(
+      filtrar(itens, { uf: "SP", escolaridades: ["superior", "medio"] }, HOJE),
+    ).toHaveLength(1);
+  });
+
+  it("basta uma escolaridade do concurso bater com uma da lista", () => {
+    const itens = [fixture({ escolaridades: ["superior", "medio"] })];
+    expect(filtrar(itens, { escolaridades: ["medio"] }, HOJE)).toHaveLength(1);
+  });
+
+  it("lista vazia não filtra nada", () => {
+    const itens = [fixture(), fixture({ escolaridades: ["medio"] })];
+    expect(
+      filtrar(itens, { escolaridades: [], situacoes: [], bancas: [] }, HOJE),
+    ).toHaveLength(2);
   });
 
   it("agrupa urgente e aberto sob inscrições abertas", () => {
@@ -85,12 +122,20 @@ describe("filtrar", () => {
       fixture({ status: "previsto", inscricoesAte: null }),
       fixture({ status: "encerrado", inscricoesAte: "2026-01-10" }),
     ];
-    expect(filtrar(itens, { situacao: "abertas" }, HOJE)).toHaveLength(2);
-    expect(filtrar(itens, { situacao: "previstos" }, HOJE)).toHaveLength(1);
-    expect(filtrar(itens, { situacao: "encerrados" }, HOJE)).toHaveLength(1);
+    expect(filtrar(itens, { situacoes: ["abertas"] }, HOJE)).toHaveLength(2);
+    expect(filtrar(itens, { situacoes: ["previstos"] }, HOJE)).toHaveLength(1);
+    expect(filtrar(itens, { situacoes: ["encerrados"] }, HOJE)).toHaveLength(1);
+    expect(
+      filtrar(itens, { situacoes: ["previstos", "encerrados"] }, HOJE),
+    ).toHaveLength(2);
   });
 
-  it("descarta salário desconhecido quando há piso pedido", () => {
+  it("concurso sem banca não entra em filtro de banca", () => {
+    const itens = [fixture(), fixture({ banca: null })];
+    expect(filtrar(itens, { bancas: ["vunesp"] }, HOJE)).toHaveLength(1);
+  });
+
+  it("descarta salário desconhecido quando há faixa pedida", () => {
     const itens = [
       fixture({ salarioAte: 12000 }),
       fixture({ salarioAte: 4000 }),
@@ -99,6 +144,16 @@ describe("filtrar", () => {
     const achados = filtrar(itens, { salarioMin: 5000 }, HOJE);
     expect(achados).toHaveLength(1);
     expect(achados[0].salarioAte).toBe(12000);
+  });
+
+  it("respeita o teto da faixa de salário", () => {
+    const itens = [
+      fixture({ salarioAte: 12000 }),
+      fixture({ salarioAte: 4000 }),
+    ];
+    const achados = filtrar(itens, { salarioMin: 3000, salarioMax: 5000 }, HOJE);
+    expect(achados).toHaveLength(1);
+    expect(achados[0].salarioAte).toBe(4000);
   });
 });
 

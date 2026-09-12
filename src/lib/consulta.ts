@@ -6,6 +6,12 @@
  * sobretudo a ordenação "encerrando primeiro", onde um concurso sem data de
  * fim precisa ir para o fim da lista e não para o começo, que é onde
  * qualquer comparação ingênua o coloca.
+ *
+ * As dimensões de faceta aceitam vários valores. Dentro de uma dimensão a
+ * relação é OU, entre dimensões é E: quem marca superior e médio quer os
+ * dois, e quem marca São Paulo junto quer os dois em São Paulo. É como busca
+ * por faceta funciona em qualquer lugar, e é o que os quadradinhos de
+ * seleção do canvas prometem.
  */
 import type {
   ConcursoResumo,
@@ -35,12 +41,14 @@ export const SITUACOES: Record<Situacao, string> = {
 
 export interface Filtro {
   q?: string;
+  /** Um só: vem do seletor da barra de busca, não da coluna de facetas. */
   uf?: Uf;
-  escolaridade?: Escolaridade;
-  situacao?: Situacao;
-  banca?: string;
-  esfera?: Esfera;
+  escolaridades?: Escolaridade[];
+  situacoes?: Situacao[];
+  bancas?: string[];
+  esferas?: Esfera[];
   salarioMin?: number;
+  salarioMax?: number;
 }
 
 /** Minúscula e sem acento, para "sao paulo" achar "São Paulo". */
@@ -74,15 +82,19 @@ function combinaComTermos(concurso: ConcursoResumo, q: string): boolean {
     .every((termo) => alvo.includes(termo));
 }
 
-function combinaComSituacao(
+/** Lista vazia ou ausente não filtra nada. */
+function vazia<T>(valores: T[] | undefined): valores is undefined {
+  return !valores || valores.length === 0;
+}
+
+export function situacaoDoConcurso(
   concurso: ConcursoResumo,
-  situacao: Situacao,
   hoje: Date,
-): boolean {
+): Situacao {
   const tom = tomDoConcurso(concurso, hoje);
-  if (situacao === "abertas") return tom === "aberto" || tom === "urgente";
-  if (situacao === "previstos") return tom === "previsto";
-  return tom === "encerrado";
+  if (tom === "aberto" || tom === "urgente") return "abertas";
+  if (tom === "previsto") return "previstos";
+  return "encerrados";
 }
 
 export function filtrar(
@@ -93,25 +105,39 @@ export function filtrar(
   return itens.filter((concurso) => {
     if (filtro.q && !combinaComTermos(concurso, filtro.q)) return false;
     if (filtro.uf && concurso.uf !== filtro.uf) return false;
-    if (filtro.esfera && concurso.orgao.esfera !== filtro.esfera) return false;
-    if (filtro.banca && concurso.banca?.slug !== filtro.banca) return false;
+
+    if (!vazia(filtro.esferas) && !filtro.esferas.includes(concurso.orgao.esfera)) {
+      return false;
+    }
     if (
-      filtro.escolaridade &&
-      !concurso.escolaridades.includes(filtro.escolaridade)
+      !vazia(filtro.bancas) &&
+      (!concurso.banca || !filtro.bancas.includes(concurso.banca.slug))
     ) {
       return false;
     }
+    if (
+      !vazia(filtro.escolaridades) &&
+      !concurso.escolaridades.some((e) => filtro.escolaridades!.includes(e))
+    ) {
+      return false;
+    }
+    if (
+      !vazia(filtro.situacoes) &&
+      !filtro.situacoes.includes(situacaoDoConcurso(concurso, hoje))
+    ) {
+      return false;
+    }
+
+    // Sem salário publicado não dá para afirmar que cabe na faixa pedida.
     if (filtro.salarioMin != null) {
-      // Sem salário publicado não dá para afirmar que passa do piso pedido.
       if (concurso.salarioAte == null) return false;
       if (concurso.salarioAte < filtro.salarioMin) return false;
     }
-    if (
-      filtro.situacao &&
-      !combinaComSituacao(concurso, filtro.situacao, hoje)
-    ) {
-      return false;
+    if (filtro.salarioMax != null) {
+      if (concurso.salarioAte == null) return false;
+      if (concurso.salarioAte > filtro.salarioMax) return false;
     }
+
     return true;
   });
 }

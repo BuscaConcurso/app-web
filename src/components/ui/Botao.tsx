@@ -26,9 +26,9 @@ const VARIANTE: Record<VarianteDoBotao, string> = {
 };
 
 const TAMANHO: Record<TamanhoDoBotao, string> = {
-  sm: "h-8 px-3 text-[13px]",
+  sm: "h-8 px-3 text-[12px]",
   md: "h-10 px-[18px] text-sm",
-  lg: "h-12 px-[22px] text-[15px]",
+  lg: "h-12 px-[22px] text-[13px]",
 };
 
 const BASE =

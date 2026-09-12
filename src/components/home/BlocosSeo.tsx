@@ -18,7 +18,7 @@ function Coluna({
   links: LinkDeFaceta[];
 }) {
   return (
-    <nav aria-label={titulo} className="rounded-caixa bg-cartao p-5">
+    <nav aria-label={titulo} className="rounded-caixa bg-cartao p-4">
       <Rotulo>{titulo}</Rotulo>
       <ul className="mt-3 flex flex-col">
         {links.map((link) => (
@@ -49,23 +49,23 @@ export function BlocosSeo({
   orgaos: LinkDeFaceta[];
 }) {
   return (
-    <section className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6">
-      <h2 className="font-titulo text-[22px] leading-7 font-semibold tracking-[-0.01em]">
+    <section className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
+      <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em]">
         Onde procurar
       </h2>
-      <p className="mt-1 max-w-[70ch] text-[13px] leading-5 text-tinta-600">
+      <p className="mt-1 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
         Os recortes mais buscados do acervo. O número ao lado é quantos
         concursos estão com inscrição aberta agora em cada um.
       </p>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+      <div className="mt-3 grid gap-2 md:grid-cols-3">
         <Coluna titulo="Por estado" links={ufs} />
         <Coluna titulo="Por órgão" links={orgaos} />
         <Coluna titulo="Por banca" links={bancas} />
       </div>
 
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
-        <div className="rounded-caixa bg-cartao p-6">
+      <div className="mt-2 grid gap-2 md:grid-cols-2">
+        <div className="rounded-caixa bg-cartao p-5">
           <h3 className="font-titulo text-lg font-semibold">
             De onde vêm estes dados
           </h3>
@@ -78,7 +78,7 @@ export function BlocosSeo({
             original em vez de acreditar na nossa palavra.
           </p>
         </div>
-        <div className="rounded-caixa bg-cartao p-6">
+        <div className="rounded-caixa bg-cartao p-5">
           <h3 className="font-titulo text-lg font-semibold">
             Como usar a busca
           </h3>

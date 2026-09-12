@@ -9,10 +9,10 @@ import { numero } from "@/lib/formato";
  */
 export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
   return (
-    <section className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6">
+    <section className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
       <div className="flex flex-col items-start gap-5 rounded-caixa bg-amarelo px-7 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-titulo text-[22px] leading-7 font-semibold tracking-[-0.01em] text-tinta-900">
+          <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em] text-tinta-900">
             Receba os {numero(totalAbertos)} concursos abertos por e-mail
           </h2>
           <p className="mt-1.5 max-w-[62ch] text-sm leading-5 text-tinta-900/75">
@@ -39,7 +39,7 @@ export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
           />
           <button
             type="submit"
-            className="h-12 shrink-0 rounded-controle bg-escura px-6 text-[15px] font-semibold text-white transition-colors hover:bg-tinta-800"
+            className="h-12 shrink-0 rounded-controle bg-escura px-6 text-[13px] font-semibold text-white transition-colors hover:bg-tinta-800"
           >
             Criar alerta grátis
           </button>

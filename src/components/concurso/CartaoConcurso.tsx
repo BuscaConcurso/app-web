@@ -32,12 +32,12 @@ export function CartaoConcurso({
   const escolaridadeMaisAlta = concurso.escolaridades[0];
 
   return (
-    <Cartao tom={tom} as="article" className="flex flex-col gap-3.5 p-5">
+    <Cartao tom={tom} as="article" className="flex flex-col gap-2.5 p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <Selo sigla={concurso.orgao.sigla} tom={tom} />
           <div className="min-w-0">
-            <h3 className="font-titulo text-[17px] leading-6 font-semibold tracking-tight">
+            <h3 className="font-titulo text-[15px] leading-6 font-semibold tracking-tight">
               <Link
                 href={`/concursos/${concurso.slug}`}
                 className="hover:underline hover:underline-offset-4"
@@ -45,7 +45,7 @@ export function CartaoConcurso({
                 {concurso.orgao.nome}
               </Link>
             </h3>
-            <p className={`truncate text-[13px] ${estilo.apoio}`}>
+            <p className={`truncate text-[12px] ${estilo.apoio}`}>
               {linhaDeContexto(concurso.orgao)}
             </p>
           </div>
@@ -90,14 +90,14 @@ export function CartaoConcurso({
       </BlocoDeNumeros>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className={`text-[13px] ${estilo.apoio}`}>
+        <p className={`text-[12px] ${estilo.apoio}`}>
           {concurso.publicadoEm
             ? `Publicado em ${dataLonga(concurso.publicadoEm)}`
             : "Sem edital publicado"}
         </p>
         <Link
           href={`/concursos/${concurso.slug}`}
-          className="text-[13px] font-semibold text-verde-700 underline underline-offset-4 hover:text-verde-600"
+          className="text-[12px] font-semibold text-verde-700 underline underline-offset-4 hover:text-verde-600"
         >
           Ver detalhes
         </Link>

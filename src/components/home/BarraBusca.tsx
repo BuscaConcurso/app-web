@@ -33,7 +33,7 @@ export function BarraBusca({
           aria-hidden="true"
           viewBox="0 0 20 20"
           fill="none"
-          className="size-[18px] shrink-0 text-tinta-500"
+          className="size-[16px] shrink-0 text-tinta-500"
         >
           <circle cx="9" cy="9" r="6.2" stroke="currentColor" strokeWidth="1.8" />
           <path
@@ -53,7 +53,7 @@ export function BarraBusca({
           defaultValue={q}
           placeholder="Cargo, órgão ou banca. Ex.: analista judiciário"
           className={`w-full bg-transparent text-tinta-900 outline-none placeholder:text-tinta-400 ${
-            compacta ? "h-10 text-sm" : "h-12 text-[15px]"
+            compacta ? "h-10 text-sm" : "h-12 text-[13px]"
           }`}
         />
       </div>
@@ -97,7 +97,7 @@ export function BarraBusca({
         <button
           type="submit"
           className={`shrink-0 rounded-controle bg-verde-700 px-6 font-semibold text-white transition-colors hover:bg-verde-600 ${
-            compacta ? "h-10 text-sm" : "h-12 text-[15px]"
+            compacta ? "h-10 text-sm" : "h-12 text-[13px]"
           }`}
         >
           Buscar

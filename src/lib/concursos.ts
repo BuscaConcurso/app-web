@@ -5,10 +5,17 @@
  * funções já são assíncronas por isso: quando a troca acontecer, nenhum
  * componente muda, porque nenhum componente importa mock direto.
  */
-import type { ConcursoResumo, Uf } from "./dominio";
-import { filtrar, ordenar, type Filtro, type Ordem } from "./consulta";
+import type { ConcursoResumo, Escolaridade, Uf } from "./dominio";
+import {
+  filtrar,
+  ordenar,
+  SITUACOES,
+  type Filtro,
+  type Ordem,
+  type Situacao,
+} from "./consulta";
 import { tomDoConcurso } from "./situacao";
-import { NOME_UF } from "./rotulos";
+import { NOME_UF, ROTULO_ESCOLARIDADE } from "./rotulos";
 import { CONCURSOS } from "@/mocks/concursos";
 import { ORGAOS } from "@/mocks/orgaos";
 import { BANCAS } from "@/mocks/bancas";
@@ -75,7 +82,7 @@ export interface Destaques {
 export async function obterDestaques(hoje: Date = new Date()): Promise<Destaques> {
   const todos = await acervo();
   const abertos = ordenar(
-    filtrar(todos, { situacao: "abertas" }, hoje),
+    filtrar(todos, { situacoes: ["abertas"] }, hoje),
     "encerrando",
     hoje,
   );
@@ -90,7 +97,7 @@ export async function obterDestaques(hoje: Date = new Date()): Promise<Destaques
       .filter((concurso) => !slugsEmDestaque.has(concurso.slug))
       .slice(0, 6),
     previstos: ordenar(
-      filtrar(todos, { situacao: "previstos" }, hoje),
+      filtrar(todos, { situacoes: ["previstos"] }, hoje),
       "vagas",
       hoje,
     ).slice(0, 4),
@@ -105,7 +112,7 @@ export interface LinkDeFaceta {
 }
 
 /**
- * Os links internos dos blocos de SEO. São âncoras de verdade para
+ * Os links internos dos blocos de SEO da home. São âncoras de verdade para
  * `/concursos?uf=SP`, não botões com JavaScript, porque o valor delas é
  * exatamente serem rastreáveis.
  */
@@ -114,7 +121,7 @@ export async function facetas(hoje: Date = new Date()): Promise<{
   bancas: LinkDeFaceta[];
   orgaos: LinkDeFaceta[];
 }> {
-  const abertos = filtrar(await acervo(), { situacao: "abertas" }, hoje);
+  const abertos = filtrar(await acervo(), { situacoes: ["abertas"] }, hoje);
 
   const porUf = new Map<Uf, number>();
   const porBanca = new Map<string, number>();
@@ -154,6 +161,83 @@ export async function facetas(hoje: Date = new Date()): Promise<{
       )}`,
       total,
     })),
+  };
+}
+
+export interface OpcaoDeFaceta {
+  valor: string;
+  rotulo: string;
+  total: number;
+}
+
+export interface ContagensDeFaceta {
+  situacoes: OpcaoDeFaceta[];
+  escolaridades: OpcaoDeFaceta[];
+  bancas: OpcaoDeFaceta[];
+}
+
+/** Ordem em que a escolaridade aparece na coluna: da mais baixa à mais alta. */
+const ORDEM_DE_ESCOLARIDADE: Escolaridade[] = [
+  "fundamental_incompleto",
+  "fundamental",
+  "medio",
+  "medio_tecnico",
+  "superior",
+  "pos_graduacao",
+  "mestrado",
+  "doutorado",
+];
+
+/**
+ * Quantos resultados cada opção da coluna traria.
+ *
+ * A contagem de uma opção é feita com todas as outras dimensões do filtro
+ * atual valendo, e com a própria dimensão reduzida àquela opção sozinha. É
+ * a contagem que responde "quantos, se eu escolher exatamente este", e é o
+ * que impede alguém marcar um filtro e cair numa lista vazia.
+ *
+ * Opção que zeraria o resultado continua na lista: sumir com a linha faria
+ * a coluna mudar de tamanho a cada clique, e saber que não há nenhum
+ * também é resposta.
+ */
+export async function contagensDeFaceta(
+  filtro: Filtro = {},
+  hoje: Date = new Date(),
+): Promise<ContagensDeFaceta> {
+  const todos = await acervo();
+  const contar = (sozinha: Filtro) =>
+    filtrar(todos, { ...filtro, ...sozinha }, hoje).length;
+
+  const escolaridadesNoAcervo = ORDEM_DE_ESCOLARIDADE.filter((escolaridade) =>
+    todos.some((concurso) => concurso.escolaridades.includes(escolaridade)),
+  );
+
+  const bancasNoAcervo = [
+    ...new Set(
+      todos
+        .map((concurso) => concurso.banca?.slug)
+        .filter((slug): slug is string => !!slug),
+    ),
+  ];
+
+  return {
+    situacoes: (Object.keys(SITUACOES) as Situacao[]).map((situacao) => ({
+      valor: situacao,
+      rotulo: SITUACOES[situacao],
+      total: contar({ situacoes: [situacao] }),
+    })),
+    escolaridades: escolaridadesNoAcervo.map((escolaridade) => ({
+      valor: escolaridade,
+      rotulo: ROTULO_ESCOLARIDADE[escolaridade],
+      total: contar({ escolaridades: [escolaridade] }),
+    })),
+    bancas: bancasNoAcervo
+      .map((slug) => ({
+        valor: slug,
+        rotulo: BANCAS[slug as keyof typeof BANCAS].nome,
+        total: contar({ bancas: [slug] }),
+      }))
+      .sort((a, b) => b.total - a.total || a.rotulo.localeCompare(b.rotulo)),
   };
 }
 

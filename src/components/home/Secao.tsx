@@ -21,18 +21,18 @@ export function Secao({
   children: ReactNode;
 }) {
   return (
-    <section className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6">
+    <section className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
         <div>
-          <h2 className="font-titulo text-[22px] leading-7 font-semibold tracking-[-0.01em]">
+          <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em]">
             {titulo}
           </h2>
-          {apoio && <p className="mt-1 text-[13px] text-tinta-600">{apoio}</p>}
+          {apoio && <p className="mt-1 text-[12px] text-tinta-600">{apoio}</p>}
         </div>
         {href && (
           <Link
             href={href}
-            className="text-[13px] font-semibold text-verde-700 underline underline-offset-4 hover:text-verde-600"
+            className="text-[12px] font-semibold text-verde-700 underline underline-offset-4 hover:text-verde-600"
           >
             {hrefRotulo ?? "Ver todos"}
           </Link>

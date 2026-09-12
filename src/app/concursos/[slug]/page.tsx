@@ -78,7 +78,7 @@ export default async function PaginaDoConcurso(
   };
 
   return (
-    <div className="mx-auto max-w-[880px] px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-[880px] px-4 py-5 sm:px-6">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -86,7 +86,7 @@ export default async function PaginaDoConcurso(
         }}
       />
 
-      <nav aria-label="Trilha" className="mb-5 text-[13px] text-tinta-600">
+      <nav aria-label="Trilha" className="mb-5 text-[12px] text-tinta-600">
         <Link href="/concursos" className="underline underline-offset-4 hover:text-tinta-900">
           Concursos
         </Link>
@@ -98,7 +98,7 @@ export default async function PaginaDoConcurso(
         <header className="flex items-start gap-4">
           <Selo sigla={concurso.orgao.sigla} tom={tom} />
           <div className="min-w-0">
-            <h1 className="font-titulo text-[26px] leading-8 font-semibold tracking-[-0.01em] text-balance">
+            <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance">
               {concurso.orgao.nome}
             </h1>
             <p className={`mt-1 text-sm ${estilo.apoio}`}>

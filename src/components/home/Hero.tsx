@@ -19,11 +19,11 @@ export function Hero({
   atualizadoEm: string;
 }) {
   return (
-    <section className="mx-auto max-w-[1240px] px-4 pt-12 pb-10 sm:px-6 sm:pt-16">
-      <h1 className="max-w-[18ch] font-titulo text-[34px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance sm:text-[44px]">
+    <section className="mx-auto max-w-[1240px] px-4 pt-8 pb-6 sm:px-6 sm:pt-10">
+      <h1 className="max-w-[18ch] font-titulo text-[27px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance sm:text-[34px]">
         Concursos públicos abertos, em um lugar só
       </h1>
-      <p className="mt-4 max-w-[58ch] text-[15px] leading-6 text-tinta-600 text-pretty">
+      <p className="mt-4 max-w-[58ch] text-[13px] leading-6 text-tinta-600 text-pretty">
         Buscamos os editais direto nas bancas e nos diários oficiais, extraímos
         cargo, vaga, salário e prazo de cada um, e guardamos o link para o
         documento original. Hoje são{" "}
@@ -38,12 +38,12 @@ export function Hero({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-[13px] text-tinta-500">Atalhos:</span>
+        <span className="text-[12px] text-tinta-500">Atalhos:</span>
         {ATALHOS.map((atalho) => (
           <Link
             key={atalho.rotulo}
             href={atalho.href}
-            className="rounded-controle bg-rebaixada px-3 py-1.5 text-[13px] font-medium text-tinta-800 transition-colors hover:bg-tinta-200"
+            className="rounded-controle bg-rebaixada px-3 py-1.5 text-[12px] font-medium text-tinta-800 transition-colors hover:bg-tinta-200"
           >
             {atalho.rotulo}
           </Link>

@@ -33,7 +33,7 @@ function Bloco({
   return (
     <section className="mb-8">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-titulo text-[22px] font-semibold tracking-[-0.01em]">
+        <h2 className="font-titulo text-[18px] font-semibold tracking-[-0.01em]">
           {titulo}
         </h2>
         {nota && <Rotulo>{nota}</Rotulo>}
@@ -80,7 +80,7 @@ export default async function Estilo() {
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6">
       <header className="mb-8">
-        <h1 className="font-titulo text-[34px] font-semibold tracking-[-0.02em]">
+        <h1 className="font-titulo text-[27px] font-semibold tracking-[-0.02em]">
           Design system
         </h1>
         <p className="mt-2 max-w-[70ch] text-sm leading-6 text-tinta-600">
@@ -92,9 +92,9 @@ export default async function Estilo() {
       </header>
 
       <Bloco titulo="Marca" nota="Uma lente sobre um edital">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <Cartao className="flex flex-col items-start gap-4 p-5">
-            <Logo tamanho={26} />
+            <Logo tamanho={22} />
             <Rotulo>Horizontal · padrão</Rotulo>
           </Cartao>
           <Cartao className="flex flex-col items-start gap-4 p-5">
@@ -118,7 +118,7 @@ export default async function Estilo() {
           </Cartao>
         </div>
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <div className="mt-2 grid gap-2 sm:grid-cols-3">
           <div className="rounded-caixa bg-escura p-6">
             <Logo tom="claro" tamanho={28} />
           </div>
@@ -132,12 +132,12 @@ export default async function Estilo() {
       </Bloco>
 
       <Bloco titulo="Superfícies" nota="O degrau separa, não a borda">
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {SUPERFICIES.map((superficie) => (
             <Cartao key={superficie.nome} className="flex flex-col gap-2 p-4">
               <div className={`h-9 rounded-md ${superficie.classe}`} />
-              <p className="text-[13px] font-semibold">{superficie.nome}</p>
-              <p className="numero text-[11px] text-tinta-500">{superficie.hex}</p>
+              <p className="text-[12px] font-semibold">{superficie.nome}</p>
+              <p className="numero text-[10px] text-tinta-500">{superficie.hex}</p>
             </Cartao>
           ))}
         </div>
@@ -149,8 +149,8 @@ export default async function Estilo() {
             <div key={tinta.nome} className="overflow-hidden rounded-lg bg-cartao">
               <div className={`h-12 ${tinta.classe}`} />
               <div className="px-2.5 py-2">
-                <p className="text-[11px] font-semibold">{tinta.nome}</p>
-                <p className="numero text-[10px] text-tinta-500">{tinta.hex}</p>
+                <p className="text-[10px] font-semibold">{tinta.nome}</p>
+                <p className="numero text-[9px] text-tinta-500">{tinta.hex}</p>
               </div>
             </div>
           ))}
@@ -162,7 +162,7 @@ export default async function Estilo() {
           {SINAIS.map((sinal) => (
             <div key={sinal.nome} className="flex items-center gap-3">
               <span className={`size-7 shrink-0 rounded-[7px] ${sinal.classe}`} />
-              <p className="text-[13px] leading-5">
+              <p className="text-[12px] leading-5">
                 <span className="font-semibold">{sinal.nome}.</span>{" "}
                 <span className="text-tinta-600">{sinal.uso}</span>
               </p>
@@ -173,10 +173,10 @@ export default async function Estilo() {
 
       <Bloco titulo="Tipografia" nota="Literata · Archivo · Spline Sans Mono">
         <Cartao className="flex flex-col gap-4 p-6">
-          <p className="font-titulo text-[38px] leading-[44px] font-semibold tracking-[-0.02em]">
+          <p className="font-titulo text-[30px] leading-[34px] font-semibold tracking-[-0.02em]">
             Concursos abertos
           </p>
-          <p className="font-titulo text-[26px] leading-8 font-semibold tracking-[-0.01em]">
+          <p className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em]">
             Tribunal de Justiça de São Paulo
           </p>
           <p className="text-xl leading-7 font-semibold tracking-[-0.02em]">
@@ -185,15 +185,15 @@ export default async function Estilo() {
           <p className="text-base leading-6 font-semibold tracking-[-0.01em]">
             Analista judiciário · Área administrativa
           </p>
-          <p className="max-w-[60ch] text-[15px] leading-6 text-tinta-800">
+          <p className="max-w-[60ch] text-[13px] leading-6 text-tinta-800">
             Corpo de texto do edital e das notícias. Linha de 60 a 75
             caracteres, alinhada à esquerda, nunca justificada.
           </p>
-          <p className="text-[13px] leading-5 text-tinta-600">
+          <p className="text-[12px] leading-5 text-tinta-600">
             Texto de apoio e metadado de cartão.
           </p>
           <Rotulo>Rótulo de seção e de filtro</Rotulo>
-          <p className="numero text-[13px] leading-5 font-medium">
+          <p className="numero text-[12px] leading-5 font-medium">
             Edital 01/2026 · até 14/04/2026 · R$ 14.852,66
           </p>
         </Cartao>
@@ -263,9 +263,9 @@ export default async function Estilo() {
       </Bloco>
 
       <Bloco titulo="Cartão de concurso" nota="Unidade central do produto">
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid gap-2 lg:grid-cols-2">
           {urgente && <CartaoConcurso concurso={urgente} hoje={hoje} />}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {itens.slice(0, 3).map((concurso) => (
               <LinhaConcurso key={concurso.slug} concurso={concurso} hoje={hoje} />
             ))}
@@ -280,7 +280,7 @@ export default async function Estilo() {
       </Bloco>
 
       <Bloco titulo="Espaço e separação">
-        <Cartao className="flex flex-col gap-2 p-5 text-[13px] leading-5 text-tinta-600">
+        <Cartao className="flex flex-col gap-2 p-5 text-[12px] leading-5 text-tinta-600">
           <p>
             Escala de 4:{" "}
             <span className="numero text-tinta-900">

@@ -67,7 +67,7 @@ export default async function Home() {
           href="/concursos?situacao=abertas"
           hrefRotulo="Ver tudo que está aberto"
         >
-          <ul className="grid gap-3">
+          <ul className="grid gap-2">
             {destaques.encerrando.map((concurso) => (
               <li key={concurso.slug}>
                 <LinhaConcurso concurso={concurso} hoje={hoje} acao="Abrir" />
@@ -83,7 +83,7 @@ export default async function Home() {
         href="/concursos?situacao=abertas"
         hrefRotulo={`Ver os ${destaques.totalAbertos} abertos`}
       >
-        <ul className="grid gap-3 lg:grid-cols-2">
+        <ul className="grid gap-2 lg:grid-cols-2">
           {destaques.abertos.map((concurso) => (
             <li key={concurso.slug}>
               <CartaoConcurso concurso={concurso} hoje={hoje} />
@@ -99,7 +99,7 @@ export default async function Home() {
           href="/concursos?situacao=previstos"
           hrefRotulo="Ver todos os previstos"
         >
-          <ul className="grid gap-3">
+          <ul className="grid gap-2">
             {destaques.previstos.map((concurso) => (
               <li key={concurso.slug}>
                 <LinhaConcurso concurso={concurso} hoje={hoje} acao="Avisar" />

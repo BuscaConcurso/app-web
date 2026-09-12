@@ -39,7 +39,7 @@ export function LinhaConcurso({
     <Cartao
       tom={tom}
       as="article"
-      className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4"
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3"
     >
       <Selo sigla={concurso.orgao.sigla} tom={tom} tamanho="sm" />
 
@@ -62,7 +62,7 @@ export function LinhaConcurso({
 
       <Link
         href={`/concursos/${concurso.slug}`}
-        className="ml-auto inline-flex h-[34px] items-center rounded-controle bg-escura px-4 text-[13px] font-semibold text-white hover:bg-tinta-800"
+        className="ml-auto inline-flex h-[30px] items-center rounded-controle bg-escura px-4 text-[12px] font-semibold text-white hover:bg-tinta-800"
       >
         {acao ?? "Abrir"}
       </Link>

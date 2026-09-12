@@ -1,9 +1,14 @@
 /**
- * Leitura da query string.
+ * Leitura e escrita da query string.
  *
  * Tudo que chega pela URL é texto de estranho: um `?uf=banana` não pode
  * derrubar a página nem virar filtro. Cada parâmetro é conferido contra o
  * conjunto de valores válidos e descartado quando não bate.
+ *
+ * As dimensões de faceta são parâmetros repetidos, no plural natural do
+ * HTTP: `?escolaridade=superior&escolaridade=medio`. O nome no singular é
+ * de propósito, porque é o que os links da home já usam e o que uma pessoa
+ * escreveria na mão.
  */
 import { UFS, type Escolaridade, type Esfera, type Uf } from "./dominio";
 import { ORDENS, SITUACOES, type Ordem, type Situacao } from "./consulta";
@@ -12,10 +17,31 @@ import { BANCAS } from "@/mocks/bancas";
 
 export type Parametros = Record<string, string | string[] | undefined>;
 
+/** As dimensões que aceitam vários valores. */
+export type Dimensao = "escolaridades" | "situacoes" | "bancas" | "esferas";
+
+/** Como cada dimensão se chama na URL, no singular. */
+export const PARAMETRO_DA_DIMENSAO: Record<Dimensao, string> = {
+  escolaridades: "escolaridade",
+  situacoes: "situacao",
+  bancas: "banca",
+  esferas: "esfera",
+};
+
 function primeiro(valor: string | string[] | undefined): string | undefined {
   const texto = Array.isArray(valor) ? valor[0] : valor;
   const limpo = texto?.trim();
   return limpo ? limpo : undefined;
+}
+
+function todos(valor: string | string[] | undefined): string[] {
+  const brutos = Array.isArray(valor) ? valor : valor === undefined ? [] : [valor];
+  // Um parâmetro repetido pode chegar como lista ou, dependendo de quem
+  // montou o link, como "a,b" numa string só. Aceita os dois.
+  return brutos
+    .flatMap((bruto) => bruto.split(","))
+    .map((bruto) => bruto.trim())
+    .filter(Boolean);
 }
 
 function dentroDe<T extends string>(
@@ -27,62 +53,137 @@ function dentroDe<T extends string>(
     : undefined;
 }
 
+function apenasValidos<T extends string>(
+  valores: string[],
+  validos: readonly T[],
+): T[] {
+  const conhecidos = new Set<string>(validos);
+  // `Set` no fim porque `?uf=SP&uf=SP` não deve contar duas vezes.
+  return [...new Set(valores.filter((valor) => conhecidos.has(valor)))] as T[];
+}
+
+const ESCOLARIDADES = Object.keys(ROTULO_ESCOLARIDADE) as Escolaridade[];
+const ESFERAS = Object.keys(ROTULO_ESFERA) as Esfera[];
+const SITUACOES_VALIDAS = Object.keys(SITUACOES) as Situacao[];
+const BANCAS_VALIDAS = Object.keys(BANCAS);
+
 export interface ConsultaDaUrl {
   q?: string;
   uf?: Uf;
-  escolaridade?: Escolaridade;
-  esfera?: Esfera;
-  situacao?: Situacao;
-  banca?: string;
+  escolaridades: Escolaridade[];
+  situacoes: Situacao[];
+  bancas: string[];
+  esferas: Esfera[];
   salarioMin?: number;
+  salarioMax?: number;
   ordem: Ordem;
   pagina: number;
 }
 
+function inteiroPositivo(texto: string | undefined): number | undefined {
+  if (texto === undefined) return undefined;
+  // Aceita "3.000" e "3000": o campo mostra o valor formatado.
+  const numero = Number(texto.replace(/[^\d]/g, ""));
+  return Number.isFinite(numero) && numero > 0 ? numero : undefined;
+}
+
 export function lerConsulta(parametros: Parametros): ConsultaDaUrl {
-  const salario = Number(primeiro(parametros.salarioMin));
   const pagina = Number(primeiro(parametros.pagina));
 
   return {
     q: primeiro(parametros.q),
     uf: dentroDe(primeiro(parametros.uf), UFS),
-    escolaridade: dentroDe(
-      primeiro(parametros.escolaridade),
-      Object.keys(ROTULO_ESCOLARIDADE) as Escolaridade[],
-    ),
-    esfera: dentroDe(
-      primeiro(parametros.esfera),
-      Object.keys(ROTULO_ESFERA) as Esfera[],
-    ),
-    situacao: dentroDe(
-      primeiro(parametros.situacao),
-      Object.keys(SITUACOES) as Situacao[],
-    ),
-    banca: dentroDe(primeiro(parametros.banca), Object.keys(BANCAS)),
-    salarioMin: Number.isFinite(salario) && salario > 0 ? salario : undefined,
-    ordem: dentroDe(primeiro(parametros.ordem), Object.keys(ORDENS) as Ordem[]) ?? "encerrando",
+    escolaridades: apenasValidos(todos(parametros.escolaridade), ESCOLARIDADES),
+    situacoes: apenasValidos(todos(parametros.situacao), SITUACOES_VALIDAS),
+    bancas: apenasValidos(todos(parametros.banca), BANCAS_VALIDAS),
+    esferas: apenasValidos(todos(parametros.esfera), ESFERAS),
+    salarioMin: inteiroPositivo(primeiro(parametros.salarioMin)),
+    salarioMax: inteiroPositivo(primeiro(parametros.salarioMax)),
+    ordem:
+      dentroDe(primeiro(parametros.ordem), Object.keys(ORDENS) as Ordem[]) ??
+      "encerrando",
     pagina: Number.isInteger(pagina) && pagina > 0 ? pagina : 1,
   };
 }
 
-/** Monta a URL da busca de novo, trocando ou removendo um parâmetro. */
-export function comParametro(
+/**
+ * Monta o endereço da busca a partir de uma consulta, aplicando as
+ * alterações pedidas.
+ *
+ * Ordenação padrão e primeira página não aparecem na URL: deixá-las de fora
+ * evita dois endereços diferentes para exatamente a mesma lista.
+ */
+export function urlDaBusca(
   consulta: ConsultaDaUrl,
-  chave: keyof ConsultaDaUrl,
-  valor: string | number | undefined,
+  alteracoes: Partial<ConsultaDaUrl> = {},
 ): string {
+  const final = { ...consulta, ...alteracoes };
   const busca = new URLSearchParams();
-  const base: Record<string, unknown> = { ...consulta, [chave]: valor };
 
-  for (const [nome, bruto] of Object.entries(base)) {
-    if (bruto === undefined || bruto === "") continue;
-    // Ordenação padrão e primeira página não precisam aparecer na URL, e
-    // deixá-las de fora evita dois endereços para a mesma lista.
-    if (nome === "ordem" && bruto === "encerrando") continue;
-    if (nome === "pagina" && bruto === 1) continue;
-    busca.set(nome, String(bruto));
+  if (final.q) busca.set("q", final.q);
+  if (final.uf) busca.set("uf", final.uf);
+
+  for (const [dimensao, parametro] of Object.entries(PARAMETRO_DA_DIMENSAO)) {
+    for (const valor of final[dimensao as Dimensao]) {
+      busca.append(parametro, valor);
+    }
   }
+
+  if (final.salarioMin) busca.set("salarioMin", String(final.salarioMin));
+  if (final.salarioMax) busca.set("salarioMax", String(final.salarioMax));
+  if (final.ordem !== "encerrando") busca.set("ordem", final.ordem);
+  if (final.pagina > 1) busca.set("pagina", String(final.pagina));
 
   const texto = busca.toString();
   return texto ? `/concursos?${texto}` : "/concursos";
+}
+
+/**
+ * O endereço que marca ou desmarca uma opção, conforme ela já esteja
+ * marcada. É o que faz cada quadradinho da coluna ser só um link: o estado
+ * resultante já está no `href`.
+ *
+ * Mexer em filtro sempre volta para a primeira página. Estar na página 3 de
+ * um resultado e trocar o filtro costuma levar a uma página que não existe
+ * mais no resultado novo.
+ */
+export function urlAlternando(
+  consulta: ConsultaDaUrl,
+  dimensao: Dimensao,
+  valor: string,
+): string {
+  const atuais = consulta[dimensao] as string[];
+  const proximos = atuais.includes(valor)
+    ? atuais.filter((item) => item !== valor)
+    : [...atuais, valor];
+
+  return urlDaBusca(consulta, {
+    [dimensao]: proximos,
+    pagina: 1,
+  } as Partial<ConsultaDaUrl>);
+}
+
+export function urlSemValor(
+  consulta: ConsultaDaUrl,
+  dimensao: Dimensao,
+  valor: string,
+): string {
+  const atuais = consulta[dimensao] as string[];
+  return urlDaBusca(consulta, {
+    [dimensao]: atuais.filter((item) => item !== valor),
+    pagina: 1,
+  } as Partial<ConsultaDaUrl>);
+}
+
+/** Quantos filtros estão em uso, para o rótulo "Filtros · 2" no celular. */
+export function quantosFiltros(consulta: ConsultaDaUrl): number {
+  return (
+    consulta.escolaridades.length +
+    consulta.situacoes.length +
+    consulta.bancas.length +
+    consulta.esferas.length +
+    (consulta.uf ? 1 : 0) +
+    (consulta.salarioMin ? 1 : 0) +
+    (consulta.salarioMax ? 1 : 0)
+  );
 }

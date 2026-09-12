@@ -59,7 +59,7 @@ export function Rotulo({
   return (
     <p
       className={[
-        "text-[11px] leading-4 font-semibold tracking-[0.08em] uppercase",
+        "text-[10px] leading-4 font-semibold tracking-[0.08em] uppercase",
         "text-tinta-500",
         className,
       ]

@@ -25,7 +25,7 @@ export function Cartao({
       className={[
         "rounded-caixa",
         ESTILO_DO_TOM[tom].cartao,
-        className ?? "p-5",
+        className ?? "p-4",
       ].join(" ")}
     >
       {children}
@@ -47,7 +47,7 @@ export function BlocoDeNumeros({
   return (
     <dl
       className={[
-        "grid gap-3 rounded-lg bg-bloco px-4 py-3",
+        "grid gap-2 rounded-lg bg-bloco px-3 py-2.5",
         className ?? "grid-cols-3",
       ].join(" ")}
     >
@@ -65,7 +65,7 @@ export function Numero({
 }) {
   return (
     <div>
-      <dt className="mb-0.5 text-[11px] font-semibold tracking-[0.06em] uppercase text-tinta-500">
+      <dt className="mb-0.5 text-[10px] font-semibold tracking-[0.06em] uppercase text-tinta-500">
         {rotulo}
       </dt>
       <dd className="numero text-base font-medium text-tinta-900">{children}</dd>
@@ -97,11 +97,11 @@ export function Selo({
   // quadrado sem quebrar em duas linhas.
   const corpo =
     sigla.length > 6
-      ? "text-[8px]"
+      ? "text-[7px]"
       : sigla.length > 4
-        ? "text-[9px]"
+        ? "text-[8px]"
         : tamanho === "sm"
-          ? "text-[11px]"
+          ? "text-[10px]"
           : "text-xs";
 
   return (

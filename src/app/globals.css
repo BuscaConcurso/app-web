@@ -63,6 +63,26 @@
     sans-serif;
   --font-numero: var(--fonte-mono), ui-monospace, SFMono-Regular, monospace;
 
+  /* Escala tipográfica. Menor que o padrão do Tailwind em todos os degraus:
+   * esta é uma interface de leitura em lista, onde caber mais linha na tela
+   * vale mais do que o conforto de um corpo grande. A hierarquia entre os
+   * degraus é a mesma do canvas, só que comprimida. */
+  --text-xs: 11px;
+  --text-xs--line-height: 15px;
+  --text-sm: 13px;
+  --text-sm--line-height: 18px;
+  --text-base: 14px;
+  --text-base--line-height: 20px;
+  --text-lg: 16px;
+  --text-lg--line-height: 22px;
+  --text-xl: 18px;
+  --text-xl--line-height: 24px;
+
+  /* Unidade da escala de espaço. O canvas pede múltiplos de 4; 3.5px mantém
+   * a proporção entre os degraus e aperta tudo em 12% de uma vez só, das
+   * margens de seção à altura dos controles. */
+  --spacing: 0.22rem;
+
   --radius-caixa: 10px;
   --radius-controle: 6px;
 }

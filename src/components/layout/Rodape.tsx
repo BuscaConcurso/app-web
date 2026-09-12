@@ -29,10 +29,10 @@ const COLUNAS = [
 export function Rodape() {
   return (
     <footer className="mt-16 bg-escura text-white">
-      <div className="mx-auto grid max-w-[1240px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-4">
+      <div className="mx-auto grid max-w-[1240px] gap-10 px-4 py-8 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-1">
-          <Logo tom="claro" tamanho={26} />
-          <p className="mt-3 max-w-[28ch] text-[13px] leading-5 text-white/60">
+          <Logo tom="claro" tamanho={22} />
+          <p className="mt-3 max-w-[28ch] text-[12px] leading-5 text-white/60">
             Editais de concurso público coletados na fonte, com rastro até o
             documento que originou cada dado.
           </p>
@@ -46,7 +46,7 @@ export function Rodape() {
                 <li key={link.rotulo}>
                   <Link
                     href={link.href}
-                    className="text-[13px] text-white/75 hover:text-white"
+                    className="text-[12px] text-white/75 hover:text-white"
                   >
                     {link.rotulo}
                   </Link>
@@ -63,7 +63,7 @@ export function Rodape() {
               <li key={uf}>
                 <Link
                   href={`/concursos?uf=${uf}`}
-                  className="text-[13px] text-white/75 hover:text-white"
+                  className="text-[12px] text-white/75 hover:text-white"
                 >
                   {NOME_UF[uf]}
                 </Link>
