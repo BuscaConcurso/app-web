@@ -31,7 +31,7 @@ export function Rodape() {
     <footer className="mt-16 bg-escura text-white">
       <div className="mx-auto grid max-w-[1240px] gap-10 px-4 py-8 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-1">
-          <Logo tom="claro" tamanho={22} />
+          <Logo tom="claro" tamanho={26} />
           <p className="mt-3 max-w-[28ch] text-[12px] leading-5 text-white/60">
             Editais de concurso público coletados na fonte, com rastro até o
             documento que originou cada dado.

@@ -5,6 +5,12 @@
  * círculo e o cabo são a busca. Abaixo de 24px as linhas somem, porque nesse
  * tamanho elas viram uma mancha em vez de um documento.
  *
+ * Esse corte é para o símbolo isolado, em favicon e ícone de app. No
+ * logotipo horizontal ele não deveria ser alcançado nunca: o canvas desenha
+ * a marca com símbolo de 26 e palavra de 17, e o mínimo é 120px de largura.
+ * Encolher a marca junto com o resto da interface faz as linhas caírem sem
+ * ninguém pedir, que foi exatamente o que aconteceu uma vez.
+ *
  * O canvas proíbe sombra, contorno, gradiente e inclinação.
  */
 

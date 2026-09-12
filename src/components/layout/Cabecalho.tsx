@@ -23,7 +23,7 @@ export function Cabecalho() {
     <header className="bg-cartao">
       <div className="mx-auto flex max-w-[1240px] items-center gap-x-8 px-4 py-2.5 sm:px-6">
         <Link href="/" aria-label="BuscaConcurso, página inicial">
-          <Logo tamanho={22} />
+          <Logo tamanho={26} />
         </Link>
 
         <nav aria-label="Principal" className="hidden md:block">
