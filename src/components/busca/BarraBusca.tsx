@@ -31,6 +31,13 @@ import {
  *   3. A coordenada não sai da máquina. Os contornos dos estados vêm do nosso
  *      próprio servidor e a conta acontece no navegador. O arquivo só é
  *      baixado depois da permissão, então quem recusa não paga por ele.
+ *
+ * A cápsula não tem anel de foco: em campo de texto o `:focus-visible` do
+ * navegador dispara também no clique do mouse, então o anel aparecia sempre
+ * que alguém clicava para digitar. O campo fica sem contorno e se apoia no
+ * cursor piscando, que é indicador suficiente para quem está digitando. O
+ * seletor e o botão mantêm o contorno nativo, que só aparece na navegação
+ * por teclado e é o único aviso de foco que essas duas peças teriam.
  */
 type Origem = "detectada" | "lembrada";
 type Estado = "ocioso" | "detectando" | "negada" | "falhou" | "fora";
@@ -151,9 +158,7 @@ export function BarraBusca({
         action="/concursos"
         method="get"
         role="search"
-        className={`flex flex-col gap-2 rounded-3xl bg-cartao transition-shadow
-          ring-0 ring-verde-700/15 focus-within:ring-4
-          sm:flex-row sm:items-center sm:rounded-full ${
+        className={`aurora flex flex-col gap-2 rounded-3xl bg-cartao sm:flex-row sm:items-center sm:rounded-full ${
           compacta ? "p-1.5" : "p-2"
         }`}
       >
@@ -195,7 +200,7 @@ export function BarraBusca({
               name="uf"
               value={escolhida}
               onChange={(evento) => trocar(evento.target.value)}
-              className={`w-full cursor-pointer appearance-none rounded-full bg-rebaixada pr-9 pl-4 text-sm font-medium text-tinta-900 outline-none sm:w-[11rem] ${altura}`}
+              className={`w-full cursor-pointer appearance-none rounded-full bg-rebaixada pr-9 pl-4 text-sm font-medium text-tinta-900 sm:w-[11rem] ${altura}`}
             >
               <option value="">Todo o Brasil</option>
               {UFS.map((sigla) => (

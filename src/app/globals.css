@@ -117,3 +117,70 @@ body {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
+
+/**
+ * Aurora: um anel de gradiente cônico girando devagar em volta da caixa.
+ *
+ * O truque é uma máscara que recorta o miolo do pseudoelemento, deixando
+ * visível só a faixa de dois pixels que sobra para fora da caixa. Sem ela o
+ * gradiente cobriria o campo inteiro.
+ *
+ * O giro é uma propriedade registrada com `@property`, porque um ângulo
+ * declarado só como variável não é interpolável e a animação daria saltos.
+ *
+ * As cores são as da marca, não um arco-íris: verde de ação, verde claro e
+ * um fio de amarelo. Numa página cinza por padrão, isto é o único movimento
+ * da tela, e é por isso que funciona.
+ */
+@property --aurora-giro {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes aurora-girar {
+  to {
+    --aurora-giro: 360deg;
+  }
+}
+
+.aurora {
+  position: relative;
+}
+
+.aurora::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--aurora-giro),
+    transparent 0deg,
+    var(--color-verde-500) 40deg,
+    var(--color-verde-300) 90deg,
+    var(--color-amarelo) 130deg,
+    transparent 190deg,
+    transparent 260deg,
+    var(--color-verde-500) 320deg,
+    transparent 360deg
+  );
+  /* Recorta o miolo: fica só a moldura. */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: aurora-girar 8s linear infinite;
+}
+
+/* Quem pediu menos movimento fica com o mesmo anel, parado. */
+@media (prefers-reduced-motion: reduce) {
+  .aurora::before {
+    animation: none;
+  }
+}
