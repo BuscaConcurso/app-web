@@ -227,7 +227,7 @@ export function BarraBusca({
 
           <button
             type="submit"
-            className={`shrink-0 rounded-full bg-verde-700 px-7 font-semibold text-white transition-colors hover:bg-verde-600 ${altura} ${corpo}`}
+            className={`shrink-0 rounded-full bg-acao px-7 font-semibold text-acao-texto transition-colors hover:bg-acao-hover ${altura} ${corpo}`}
           >
             Buscar
           </button>
@@ -242,7 +242,7 @@ export function BarraBusca({
           <button
             type="button"
             onClick={detectar}
-            className="inline-flex items-center gap-1.5 font-medium text-tinta-600 underline underline-offset-[3px] hover:text-verde-700"
+            className="inline-flex items-center gap-1.5 font-medium text-tinta-600 underline underline-offset-[3px] hover:text-link"
           >
             <svg
               aria-hidden="true"
@@ -279,7 +279,7 @@ export function BarraBusca({
             <button
               type="button"
               onClick={() => trocar("")}
-              className="font-medium text-tinta-600 underline underline-offset-[3px] hover:text-verde-700"
+              className="font-medium text-tinta-600 underline underline-offset-[3px] hover:text-link"
             >
               Ver todo o Brasil
             </button>

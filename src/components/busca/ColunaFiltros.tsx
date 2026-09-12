@@ -33,7 +33,7 @@ function Quadradinho({ marcado }: { marcado: boolean }) {
     <span
       aria-hidden="true"
       className={`flex size-[16px] shrink-0 items-center justify-center rounded-[5px] ${
-        marcado ? "bg-verde-700" : "bg-tinta-200"
+        marcado ? "bg-acao" : "bg-tinta-200"
       }`}
     >
       {marcado && (
@@ -117,7 +117,7 @@ function GrupoDeBancas({
                 }`}
                 className={`inline-block rounded-controle px-2.5 py-1.5 text-[12px] transition-colors ${
                   marcada
-                    ? "bg-verde-700 font-medium text-white hover:bg-verde-600"
+                    ? "bg-acao font-medium text-acao-texto hover:bg-acao-hover"
                     : "bg-rebaixada text-tinta-800 hover:bg-tinta-200"
                 }`}
               >
@@ -172,7 +172,7 @@ function FaixaDeSalario({
   const campo =
     "h-[34px] w-full rounded-controle bg-rebaixada px-2.5 text-[12px] " +
     "text-tinta-900 outline-none placeholder:text-tinta-500 " +
-    "focus:bg-cartao focus:ring-2 focus:ring-verde-700 numero";
+    "focus:bg-cartao focus:ring-2 focus:ring-acao numero";
 
   return (
     <form action="/concursos" method="get" className="flex flex-col gap-2.5">
@@ -243,7 +243,7 @@ function Painel({
                 salarioMax: undefined,
                 pagina: 1,
               })}
-              className="text-[12px] font-semibold text-tinta-900 underline underline-offset-[3px] hover:text-verde-700"
+              className="text-[12px] font-semibold text-tinta-900 underline underline-offset-[3px] hover:text-link"
             >
               Limpar
             </Link>
@@ -280,7 +280,7 @@ function CartaoDeAlerta({ total }: { total: number }) {
       </p>
       <Link
         href="/concursos"
-        className="flex h-10 items-center justify-center rounded-controle bg-verde-700 text-sm font-semibold text-white transition-colors hover:bg-verde-600"
+        className="flex h-10 items-center justify-center rounded-controle bg-acao text-sm font-semibold text-acao-texto transition-colors hover:bg-acao-hover"
       >
         Criar alerta grátis
       </Link>

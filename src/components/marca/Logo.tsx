@@ -21,11 +21,14 @@ const PALETA: Record<
   TomDaMarca,
   { lente: string; documento: string; palavra: string; destaque: string }
 > = {
+  // No claro é lente verde e documento em tinta; no escuro os mesmos tokens
+  // valem a variante "sobre fundo" do canvas, com lente branca e linhas
+  // amarelas. Um tom só, dois desenhos, sem o componente saber do tema.
   cor: {
-    lente: "var(--color-verde-700)",
-    documento: "var(--color-tinta-900)",
-    palavra: "var(--color-tinta-900)",
-    destaque: "var(--color-verde-700)",
+    lente: "var(--color-marca-lente)",
+    documento: "var(--color-marca-documento)",
+    palavra: "var(--color-marca-palavra)",
+    destaque: "var(--color-marca-destaque)",
   },
   claro: {
     lente: "#ffffff",

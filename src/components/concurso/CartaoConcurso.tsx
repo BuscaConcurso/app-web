@@ -97,7 +97,7 @@ export function CartaoConcurso({
         </p>
         <Link
           href={`/concursos/${concurso.slug}`}
-          className="text-[12px] font-semibold text-verde-700 underline underline-offset-4 hover:text-verde-600"
+          className="text-[12px] font-semibold text-link underline underline-offset-4 hover:text-link-hover"
         >
           Ver detalhes
         </Link>

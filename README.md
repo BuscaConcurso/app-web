@@ -80,6 +80,24 @@ da tela.
 Os tokens ficam num bloco `@theme` em `src/app/globals.css`, com nomes em
 português: `bg-cartao`, `text-tinta-600`, `font-titulo`, `rounded-caixa`.
 
+Ao lado dos nomes de cor existem nomes de papel: `acao`, `link`, `inverso`,
+`rodape`, `marca-*`. `verde-700` diz que cor é, `acao` diz para que serve, e a
+diferença só aparece no tema escuro, onde o botão primário e o texto de link
+precisam de verdes diferentes. Componente novo usa o papel, não a cor.
+
+### Temas
+
+Claro, escuro e sistema, com o seletor no cabeçalho. O escuro só troca o valor
+dos tokens; nenhum componente sabe que ele existe.
+
+Cada par de texto e fundo do tema escuro foi medido antes de entrar: os de
+leitura passam de 4.5:1 e as superfícies de ação passam de 3:1.
+
+A escolha vai para `localStorage` e é aplicada em `data-tema` no `html` por um
+script síncrono no `head`, senão quem escolhe o contrário do sistema vê um
+lampejo do tema errado. Sem escolha, e portanto também sem JavaScript, o CSS
+segue a preferência do aparelho.
+
 ## Onde mexer
 
 ```

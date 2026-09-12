@@ -43,27 +43,29 @@ function Bloco({
   );
 }
 
+// Sem hexadecimal: o valor muda com o tema e um número fixo aqui mentiria
+// metade do tempo. O nome do token é o que vale nos dois.
 const SUPERFICIES = [
-  { nome: "Cartão", classe: "bg-cartao", hex: "#FFFFFF" },
-  { nome: "Página", classe: "bg-pagina", hex: "#ECEEED" },
-  { nome: "Rebaixada", classe: "bg-rebaixada", hex: "#E2E5E3" },
-  { nome: "Bloco", classe: "bg-bloco", hex: "#F4F6F5" },
-  { nome: "Escura", classe: "bg-escura", hex: "#141715" },
+  { nome: "Cartão", classe: "bg-cartao", token: "cartao" },
+  { nome: "Página", classe: "bg-pagina", token: "pagina" },
+  { nome: "Rebaixada", classe: "bg-rebaixada", token: "rebaixada" },
+  { nome: "Bloco", classe: "bg-bloco", token: "bloco" },
+  { nome: "Rodapé", classe: "bg-rodape", token: "rodape" },
 ];
 
 const TINTAS = [
-  { nome: "900", classe: "bg-tinta-900", hex: "141715" },
-  { nome: "800", classe: "bg-tinta-800", hex: "2A2E2B" },
-  { nome: "600", classe: "bg-tinta-600", hex: "4E534F" },
-  { nome: "500", classe: "bg-tinta-500", hex: "666C68" },
-  { nome: "400", classe: "bg-tinta-400", hex: "8D938F" },
-  { nome: "300", classe: "bg-tinta-300", hex: "C3C7C5" },
-  { nome: "200", classe: "bg-tinta-200", hex: "D9DDDB" },
-  { nome: "100", classe: "bg-tinta-100", hex: "E9EBEA" },
+  { nome: "900", classe: "bg-tinta-900" },
+  { nome: "800", classe: "bg-tinta-800" },
+  { nome: "600", classe: "bg-tinta-600" },
+  { nome: "500", classe: "bg-tinta-500" },
+  { nome: "400", classe: "bg-tinta-400" },
+  { nome: "300", classe: "bg-tinta-300" },
+  { nome: "200", classe: "bg-tinta-200" },
+  { nome: "100", classe: "bg-tinta-100" },
 ];
 
 const SINAIS = [
-  { nome: "Verde 700 · ação", classe: "bg-verde-700", uso: "Botão primário, marca, filtro marcado." },
+  { nome: "Ação", classe: "bg-acao", uso: "Botão primário, marca, filtro marcado." },
   { nome: "Amarelo · chamada única", classe: "bg-amarelo", uso: "Uma por tela, sempre com texto tinta 900." },
   { nome: "Vermelho · prazo curto", classe: "bg-vermelho", uso: "Encerra em até sete dias." },
   { nome: "Verde 500 · abertas", classe: "bg-verde-500", uso: "Só como ponto de 6 px." },
@@ -122,7 +124,7 @@ export default async function Estilo() {
           <div className="rounded-caixa bg-escura p-6">
             <Logo tom="claro" tamanho={28} />
           </div>
-          <div className="rounded-caixa bg-verde-900 p-6">
+          <div className="rounded-caixa bg-escura p-6">
             <Logo tom="claro" tamanho={28} />
           </div>
           <div className="rounded-caixa bg-rebaixada p-6">
@@ -137,7 +139,7 @@ export default async function Estilo() {
             <Cartao key={superficie.nome} className="flex flex-col gap-2 p-4">
               <div className={`h-9 rounded-md ${superficie.classe}`} />
               <p className="text-[12px] font-semibold">{superficie.nome}</p>
-              <p className="numero text-[10px] text-tinta-500">{superficie.hex}</p>
+              <p className="numero text-[10px] text-tinta-500">{superficie.token}</p>
             </Cartao>
           ))}
         </div>
@@ -150,8 +152,7 @@ export default async function Estilo() {
               <div className={`h-12 ${tinta.classe}`} />
               <div className="px-2.5 py-2">
                 <p className="text-[10px] font-semibold">{tinta.nome}</p>
-                <p className="numero text-[9px] text-tinta-500">{tinta.hex}</p>
-              </div>
+                              </div>
             </div>
           ))}
         </div>

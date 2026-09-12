@@ -12,10 +12,10 @@ export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
     <section className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
       <div className="flex flex-col items-start gap-5 rounded-caixa bg-amarelo px-7 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em] text-tinta-900">
+          <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em] text-amarelo-texto">
             Receba os {numero(totalAbertos)} concursos abertos por e-mail
           </h2>
-          <p className="mt-1.5 max-w-[62ch] text-sm leading-5 text-tinta-900/75">
+          <p className="mt-1.5 max-w-[62ch] text-sm leading-5 text-amarelo-texto/75">
             Salvamos a sua busca e avisamos assim que sair edital novo, sem
             custo. Um e-mail por dia, no máximo, e só quando houver novidade.
           </p>
@@ -39,7 +39,7 @@ export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
           />
           <button
             type="submit"
-            className="h-12 shrink-0 rounded-controle bg-escura px-6 text-[13px] font-semibold text-white transition-colors hover:bg-tinta-800"
+            className="h-12 shrink-0 rounded-controle bg-inverso px-6 text-[13px] font-semibold text-inverso-texto transition-colors hover:bg-inverso-hover"
           >
             Criar alerta grátis
           </button>

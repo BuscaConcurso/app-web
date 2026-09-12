@@ -70,7 +70,7 @@ export function Paginacao({
           <span
             key={item}
             aria-current="page"
-            className={`${QUADRADO} bg-escura font-semibold text-white`}
+            className={`${QUADRADO} bg-inverso font-semibold text-inverso-texto`}
           >
             {item}
           </span>

@@ -185,6 +185,18 @@ barra não sustenta nada: sem script, o formulário nativo continua funcionando.
 A coordenada é resolvida no navegador contra contornos que nós mesmos
 servimos, então a localização exata de ninguém sai da máquina.
 
+**Tema escuro, e o refatorar que ele forçou.** Pedido depois. Construí-lo
+mostrou que os tokens tinham nome de cor e não de papel: `verde-700` servia ao
+mesmo tempo de fundo de botão e de cor de link, e no escuro esses dois querem
+verdes opostos, um escuro para segurar texto branco e outro claro para ler
+sobre a página. Entraram `acao`, `link`, `inverso`, `rodape` e `marca-*`, e o
+tema escuro passou a ser só uma troca de valores.
+
+O rodapé foi o caso mais interessante. No claro é uma faixa escura fechando a
+página; no escuro esse gesto não tem para onde ir, porque a página já é quase
+preta. Lá ele inverte e vira faixa elevada, como um cartão, separando pelo
+mesmo degrau.
+
 **Dois arquivos de ícone.** O canvas diz que abaixo de 24 px as linhas do
 documento caem, e um SVG só não sabe em que tamanho está sendo desenhado.
 O PNG de 32, sem as linhas, atende a aba do navegador; o SVG com a marca
@@ -197,5 +209,4 @@ celular, e a primeira versão simplesmente escondia a navegação abaixo de
 ## Fora de escopo
 
 Autenticação, alertas de verdade, notícias, planos, coluna de filtros da
-busca, lista de cargos e cronograma completo no concurso, modo escuro,
-internacionalização.
+busca, lista de cargos e cronograma completo no concurso, internacionalização.

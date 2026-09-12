@@ -11,7 +11,7 @@ import type { ComponentProps, ReactNode } from "react";
 const CONTROLE =
   "h-10 w-full rounded-controle px-3 text-sm text-tinta-900 " +
   "placeholder:text-tinta-500 outline-none transition-colors " +
-  "focus:bg-cartao focus:ring-2 focus:ring-verde-700";
+  "focus:bg-cartao focus:ring-2 focus:ring-acao";
 
 function Envelope({
   etiqueta,

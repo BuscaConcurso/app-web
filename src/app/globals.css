@@ -58,6 +58,45 @@
   --color-encerrado: #e5e8e6;
   --color-encerrado-chip: #d9dddb;
 
+  /* Papéis, e não nomes de cor.
+   *
+   * `verde-700` diz que cor é; `acao` diz para que serve. A diferença só
+   * aparece no tema escuro, onde o botão primário e o texto de link precisam
+   * de verdes diferentes: um claro o bastante para ler sobre fundo escuro, e
+   * outro escuro o bastante para segurar texto branco. Com nome de papel, o
+   * componente não muda; muda o valor por trás dele. */
+  --color-acao: #0c5434;
+  --color-acao-hover: #116b42;
+  --color-acao-texto: #ffffff;
+  --color-link: #0c5434;
+  --color-link-hover: #116b42;
+  /* Superfície de contraste máximo: botão preto, página atual, filtro ativo. */
+  --color-inverso: #141715;
+  --color-inverso-hover: #2a2e2b;
+  --color-inverso-texto: #ffffff;
+  /* O rodapé.
+   *
+   * No claro ele é uma faixa escura com texto claro, um gesto forte de
+   * fechamento de página. No escuro esse gesto não tem para onde ir: a página
+   * já é quase preta e uma faixa ainda mais escura não se distingue. Lá ele
+   * inverte a lógica e vira uma faixa elevada, como um cartão, que separa
+   * pelo degrau do mesmo jeito. Por isso tem tokens próprios em vez de
+   * reaproveitar `escura`. */
+  --color-rodape: #141715;
+  --color-rodape-texto: #ffffff;
+  --color-rodape-suave: rgb(255 255 255 / 0.75);
+  --color-rodape-tenue: rgb(255 255 255 / 0.48);
+  --color-rodape-faixa: rgb(255 255 255 / 0.06);
+
+  /* O amarelo é o mesmo nos dois temas, e o texto sobre ele também. */
+  --color-amarelo-texto: #141715;
+  --color-amarelo-hover: #d9a504;
+  /* A marca. No escuro ela usa a variante "sobre fundo" do canvas. */
+  --color-marca-lente: #0c5434;
+  --color-marca-documento: #141715;
+  --color-marca-palavra: #141715;
+  --color-marca-destaque: #0c5434;
+
   --font-titulo: var(--fonte-literata), Georgia, "Times New Roman", serif;
   --font-interface: var(--fonte-archivo), "Helvetica Neue", Helvetica, Arial,
     sans-serif;
@@ -89,6 +128,144 @@
 /* A escala de espaço do Tailwind já é múltipla de 4, que é a do canvas.
  * Cartões se separam por 12, seções por 32. */
 
+/**
+ * Tema escuro.
+ *
+ * Só troca o valor dos tokens; nenhum componente sabe que ele existe. As
+ * regras do canvas continuam valendo, invertidas: o que separa as caixas é o
+ * degrau entre superfícies, e agora o cartão é mais claro que a página em vez
+ * de mais branco.
+ *
+ * Todo par de texto e fundo aqui foi medido antes de entrar: os de leitura
+ * passam de 4.5:1 e as superfícies de ação passam de 3:1. O verde de ação
+ * escurece para segurar texto branco e o verde de link clareia para ler sobre
+ * fundo escuro, que é exatamente o motivo de existirem dois tokens.
+ *
+ * A segunda regra cobre tanto a escolha "sistema" quanto a ausência do
+ * atributo. Isso vale antes de qualquer JavaScript rodar, então quem usa o
+ * sistema no escuro nunca vê um lampejo claro.
+ */
+:root[data-tema="escuro"],
+:root:not([data-tema="claro"]):not([data-tema="escuro"]):not([data-tema="sistema"]) {
+  color-scheme: dark;
+
+  --color-pagina: #121513;
+  --color-cartao: #1c201e;
+  --color-rebaixada: #272c29;
+  --color-bloco: #171a18;
+  --color-escura: #0c0e0d;
+
+  --color-tinta-900: #edefee;
+  --color-tinta-800: #d5d9d7;
+  --color-tinta-600: #a2a8a4;
+  --color-tinta-500: #8a908c;
+  --color-tinta-400: #6e7571;
+  --color-tinta-300: #4c534e;
+  --color-tinta-200: #363b38;
+  --color-tinta-100: #282d2a;
+
+  --color-verde-900: #0a2b1a;
+  --color-verde-700: #17804d;
+  --color-verde-600: #1c9159;
+  --color-verde-500: #34b37a;
+  --color-verde-300: #5fbe8c;
+
+  --color-ocre: #e0c067;
+  --color-vermelho: #e07b82;
+  --color-vermelho-800: #f3aea6;
+
+  --color-urgente: #2a1b1a;
+  --color-urgente-chip: #43241f;
+  --color-urgente-apoio: #c9a49e;
+  --color-previsto: #241e12;
+  --color-previsto-chip: #3a2f16;
+  --color-previsto-texto: #e8c97a;
+  --color-previsto-apoio: #c4b58d;
+  --color-encerrado: #191c1a;
+  --color-encerrado-chip: #2a2e2b;
+
+  --color-acao: #17804d;
+  --color-acao-hover: #1c9159;
+  --color-acao-texto: #ffffff;
+  --color-link: #5fbe8c;
+  --color-link-hover: #7dcda2;
+  --color-inverso: #edefee;
+  --color-inverso-hover: #d5d9d7;
+  --color-inverso-texto: #121513;
+
+  --color-rodape: #1c201e;
+  --color-rodape-texto: #edefee;
+  --color-rodape-suave: #a2a8a4;
+  --color-rodape-tenue: #8a908c;
+  --color-rodape-faixa: rgb(255 255 255 / 0.04);
+
+  --color-marca-lente: #ffffff;
+  --color-marca-documento: #f2b705;
+  --color-marca-palavra: #ffffff;
+  --color-marca-destaque: #5fbe8c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-tema="sistema"] {
+    color-scheme: dark;
+
+    --color-pagina: #121513;
+    --color-cartao: #1c201e;
+    --color-rebaixada: #272c29;
+    --color-bloco: #171a18;
+    --color-escura: #0c0e0d;
+
+    --color-tinta-900: #edefee;
+    --color-tinta-800: #d5d9d7;
+    --color-tinta-600: #a2a8a4;
+    --color-tinta-500: #8a908c;
+    --color-tinta-400: #6e7571;
+    --color-tinta-300: #4c534e;
+    --color-tinta-200: #363b38;
+    --color-tinta-100: #282d2a;
+
+    --color-verde-900: #0a2b1a;
+    --color-verde-700: #17804d;
+    --color-verde-600: #1c9159;
+    --color-verde-500: #34b37a;
+    --color-verde-300: #5fbe8c;
+
+    --color-ocre: #e0c067;
+    --color-vermelho: #e07b82;
+    --color-vermelho-800: #f3aea6;
+
+    --color-urgente: #2a1b1a;
+    --color-urgente-chip: #43241f;
+    --color-urgente-apoio: #c9a49e;
+    --color-previsto: #241e12;
+    --color-previsto-chip: #3a2f16;
+    --color-previsto-texto: #e8c97a;
+    --color-previsto-apoio: #c4b58d;
+    --color-encerrado: #191c1a;
+    --color-encerrado-chip: #2a2e2b;
+
+    --color-acao: #17804d;
+    --color-acao-hover: #1c9159;
+    --color-acao-texto: #ffffff;
+    --color-link: #5fbe8c;
+    --color-link-hover: #7dcda2;
+    --color-inverso: #edefee;
+    --color-inverso-hover: #d5d9d7;
+    --color-inverso-texto: #121513;
+
+    --color-rodape: #1c201e;
+    --color-rodape-texto: #edefee;
+    --color-rodape-suave: #a2a8a4;
+    --color-rodape-tenue: #8a908c;
+    --color-rodape-faixa: rgb(255 255 255 / 0.04);
+
+    --color-marca-lente: #ffffff;
+    --color-marca-documento: #f2b705;
+    --color-marca-palavra: #ffffff;
+    --color-marca-destaque: #5fbe8c;
+  }
+}
+
 html {
   background: var(--color-pagina);
 }
@@ -103,7 +280,7 @@ body {
 /* Sem borda e sem sombra em caixa, então o foco precisa de um anel próprio
  * para continuar visível em teclado. */
 :focus-visible {
-  outline: 2px solid var(--color-verde-700);
+  outline: 2px solid var(--color-acao);
   outline-offset: 2px;
 }
 

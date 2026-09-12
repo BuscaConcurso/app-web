@@ -83,7 +83,7 @@ export function Ilustracao({ className }: { className?: string }) {
           cy="14"
           r="10.4"
           fill="var(--color-cartao)"
-          stroke="var(--color-verde-700)"
+          stroke="var(--color-acao)"
           strokeWidth="2.6"
         />
         <path
@@ -94,7 +94,7 @@ export function Ilustracao({ className }: { className?: string }) {
         />
         <path
           d="M21.9 21.9 28.2 28.2"
-          stroke="var(--color-verde-700)"
+          stroke="var(--color-acao)"
           strokeWidth="3.2"
           strokeLinecap="round"
         />

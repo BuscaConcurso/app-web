@@ -222,7 +222,7 @@ export default async function BuscaDeConcursos(
                   aria-current={chave === ordem ? "true" : undefined}
                   className={`rounded-controle px-3 py-1.5 text-[12px] font-medium transition-colors ${
                     chave === ordem
-                      ? "bg-escura text-white"
+                      ? "bg-inverso text-inverso-texto"
                       : "bg-rebaixada text-tinta-800 hover:bg-tinta-200"
                   }`}
                 >
@@ -239,7 +239,7 @@ export default async function BuscaDeConcursos(
                   key={chip.chave}
                   href={chip.href}
                   aria-label={`Remover filtro ${chip.rotulo}`}
-                  className="inline-flex items-center gap-2 rounded-[5px] bg-verde-700 px-2.5 py-1 text-xs font-semibold text-white hover:bg-verde-600"
+                  className="inline-flex items-center gap-2 rounded-[5px] bg-acao px-2.5 py-1 text-xs font-semibold text-acao-texto hover:bg-acao-hover"
                 >
                   {chip.rotulo}
                   <span aria-hidden="true" className="text-white/70">
@@ -268,7 +268,7 @@ export default async function BuscaDeConcursos(
               </p>
               <Link
                 href="/concursos"
-                className="mt-4 inline-flex h-10 items-center rounded-controle bg-verde-700 px-4 text-sm font-semibold text-white hover:bg-verde-600"
+                className="mt-4 inline-flex h-10 items-center rounded-controle bg-acao px-4 text-sm font-semibold text-acao-texto hover:bg-acao-hover"
               >
                 Ver todos os concursos
               </Link>

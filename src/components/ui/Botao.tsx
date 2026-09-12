@@ -19,10 +19,10 @@ export type VarianteDoBotao =
 export type TamanhoDoBotao = "sm" | "md" | "lg";
 
 const VARIANTE: Record<VarianteDoBotao, string> = {
-  primario: "bg-verde-700 text-white hover:bg-verde-600 font-semibold",
+  primario: "bg-acao text-acao-texto hover:bg-acao-hover font-semibold",
   secundario: "bg-rebaixada text-tinta-900 hover:bg-tinta-200 font-medium",
   fantasma: "text-tinta-800 hover:bg-rebaixada font-medium",
-  chamada: "bg-amarelo text-tinta-900 hover:bg-amarelo-escuro font-semibold",
+  chamada: "bg-amarelo text-amarelo-texto hover:bg-amarelo-hover font-semibold",
 };
 
 const TAMANHO: Record<TamanhoDoBotao, string> = {

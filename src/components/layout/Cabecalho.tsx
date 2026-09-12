@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/marca/Logo";
 import { BotaoLink } from "@/components/ui/Botao";
+import { SeletorDeTema } from "./SeletorDeTema";
 
 const NAVEGACAO = [
   { rotulo: "Concursos", href: "/concursos" },
@@ -42,6 +43,7 @@ export function Cabecalho() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-2 sm:flex">
+          <SeletorDeTema className="mr-1" />
           <BotaoLink href="/concursos" variante="fantasma" tamanho="sm">
             Entrar
           </BotaoLink>
@@ -80,6 +82,12 @@ export function Cabecalho() {
                   </Link>
                 </li>
               ))}
+              <li className="mt-1 flex items-center justify-between p-2">
+                <span className="text-[13px] font-medium text-tinta-600">
+                  Tema
+                </span>
+                <SeletorDeTema />
+              </li>
               <li className="mt-1 flex gap-2 p-1 sm:hidden">
                 <BotaoLink
                   href="/concursos"

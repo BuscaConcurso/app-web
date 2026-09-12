@@ -4,6 +4,7 @@ import "./globals.css";
 import { Cabecalho } from "@/components/layout/Cabecalho";
 import { Rodape } from "@/components/layout/Rodape";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
+import { SCRIPT_DO_TEMA } from "@/lib/tema";
 
 /**
  * Literata em título e Archivo em todo o resto, número incluído.
@@ -111,6 +112,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="pt-BR"
       className={`${literata.variable} ${archivo.variable} h-full antialiased`}
     >
+      <head>
+        {/* Antes da primeira pintura, senão quem escolheu o contrário do
+            sistema vê um lampejo do tema errado. O CSS já trata a ausência
+            do atributo como "sistema", então isto só corrige a escolha
+            explícita. */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_DO_TEMA }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <script
           type="application/ld+json"
