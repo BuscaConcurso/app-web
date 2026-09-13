@@ -144,3 +144,118 @@ export type Tom = "urgente" | "aberto" | "previsto" | "encerrado";
 
 /** Quantos dias faltando para o fim das inscrições contam como urgente. */
 export const DIAS_DE_URGENCIA = 7;
+
+/** `create type evento_tipo` */
+export type EventoTipo =
+  | "autorizacao"
+  | "banca_definida"
+  | "publicacao_edital"
+  | "inicio_inscricao"
+  | "fim_inscricao"
+  | "pedido_isencao"
+  | "pagamento_taxa"
+  | "prova_objetiva"
+  | "prova_discursiva"
+  | "prova_pratica"
+  | "prova_titulos"
+  | "resultado_preliminar"
+  | "resultado_final"
+  | "homologacao"
+  | "convocacao"
+  | "suspensao"
+  | "cancelamento";
+
+/**
+ * Um fato datado da vida do concurso, com a citação do ato que o sustenta.
+ *
+ * `evidencia` é o que separa este produto de uma lista de datas copiada: é o
+ * trecho do documento de onde a data saiu, e o engine a grava em todos os
+ * eventos que extrai. Uma data sem ela é um número que ninguém tem como
+ * conferir.
+ */
+export interface EventoDoCronograma {
+  tipo: EventoTipo;
+  /** `AAAA-MM-DD`. A data única do fato vive aqui, mesmo em `fim_inscricao`. */
+  inicio: string | null;
+  /** Só quando o ato deu um intervalo. Raro: 2 de 439 eventos do acervo. */
+  fim: string | null;
+  hora: string | null;
+  localidades: string[];
+  observacao: string | null;
+  evidencia: string | null;
+}
+
+export interface Requisito {
+  descricao: string;
+  formacoes: string[];
+}
+
+export interface Vaga {
+  /** Como o ato escreveu, que costuma ser mais específico que o município. */
+  localidade: string | null;
+  uf: Uf | null;
+  ampla: number;
+  pcd: number;
+  negros: number;
+  outras: number;
+  total: number;
+  cadastroReserva: boolean;
+  crQuantidade: number | null;
+}
+
+export interface Remuneracao {
+  base: number | null;
+  total: number | null;
+  /** "mensal" na prática; é texto livre no banco. */
+  tipo: string;
+  observacao: string | null;
+}
+
+/** O campo do cargo e o trecho do ato que o sustenta. */
+export interface TrechoDeEvidencia {
+  campo: string;
+  trecho: string;
+}
+
+/**
+ * Um cargo do concurso.
+ *
+ * Os três estados que a tela precisa aguentar são todos comuns no acervo:
+ * cargo com vaga detalhada e remuneração, cargo com vaga e sem remuneração
+ * (a maioria), e cargo só com nome e área. Lista vazia quer dizer "o ato não
+ * informou", e é isso que a tela diz.
+ */
+export interface Cargo {
+  nome: string;
+  codigo: string | null;
+  escolaridade: Escolaridade | null;
+  area: string | null;
+  jornadaHoras: number | null;
+  requisitos: Requisito[];
+  taxaInscricao: number | null;
+  vagas: Vaga[];
+  remuneracoes: Remuneracao[];
+  evidencia: TrechoDeEvidencia[];
+}
+
+/**
+ * De onde este concurso veio: o ato no Diário Oficial.
+ *
+ * Não é "o PDF do edital". O Diário publica o ato ou o extrato; o edital
+ * completo, com anexos, fica no site da banca. O acervo do engine não tem
+ * nenhuma linha de edital, e isso é por desenho.
+ */
+export interface Origem {
+  url: string;
+  titulo: string | null;
+  fonte: string | null;
+  /** ISO completo: é quando o motor viu o ato, não quando ele foi publicado. */
+  vistoEm: string;
+}
+
+/** O concurso inteiro, como a página de detalhe precisa dele. */
+export interface ConcursoDetalhe extends ConcursoResumo {
+  cronograma: EventoDoCronograma[];
+  cargos: Cargo[];
+  origens: Origem[];
+}

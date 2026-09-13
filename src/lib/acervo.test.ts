@@ -240,3 +240,108 @@ describe("acervo", () => {
     expect(links.orgaos[0].href).toContain(encodeURIComponent("Ministério"));
   });
 });
+
+describe("obterDetalhe", () => {
+  const DETALHE = {
+    ...UM_CONCURSO,
+    cronograma: [
+      {
+        tipo: "inicio_inscricao",
+        inicio: "2026-05-18",
+        fim: null,
+        hora: null,
+        localidades: [],
+        observacao: null,
+        evidencia: "As inscrições serão realizadas de 18 de maio a 21 de junho",
+      },
+    ],
+    cargos: [
+      {
+        nome: "Professor Visitante",
+        codigo: null,
+        escolaridade: "superior",
+        area: "Antropologia",
+        jornadaHoras: 40,
+        requisitos: [],
+        taxaInscricao: 200,
+        vagas: [],
+        remuneracoes: [],
+        evidencia: [],
+      },
+    ],
+    origens: [
+      {
+        url: "https://www.in.gov.br/web/dou/-/49284164",
+        titulo: "EDITAL Nº 10",
+        fonte: "Diário Oficial da União",
+        vistoEm: "2026-09-12T03:55:48Z",
+      },
+    ],
+  };
+
+  it("vem da rota do concurso, com cronograma, cargos e origem", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    const rede = vi.fn(async () => respostaCom(DETALHE));
+    vi.stubGlobal("fetch", rede);
+
+    const { obterDetalhe } = await carregar();
+    const detalhe = await obterDetalhe("so-este");
+
+    expect(rede).toHaveBeenCalledWith(`${API}/concurso/so-este`, {
+      cache: "no-store",
+    });
+    expect(detalhe!.cronograma[0].evidencia).toContain("18 de maio");
+    expect(detalhe!.cargos[0].nome).toBe("Professor Visitante");
+    expect(detalhe!.origens[0].url).toContain("in.gov.br");
+  });
+
+  it("404 vira nulo, e não o mock", async () => {
+    // A página mostra "não encontrado" a partir daqui. Cair no mock faria um
+    // slug inexistente abrir um concurso de mentira, com nome de órgão de
+    // verdade — o pior dos dois mundos.
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ detail: "x" }, 404)));
+
+    const { obterDetalhe } = await carregar();
+
+    expect(await obterDetalhe("trt-2-analista-judiciario-2026")).toBeNull();
+    expect(avisos).toEqual([]);
+  });
+
+  it("API fora do ar cai no resumo do mock, sem inventar detalhe", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new Error("ECONNREFUSED");
+    }));
+
+    const { obterDetalhe } = await carregar();
+    const detalhe = await obterDetalhe("trt-2-analista-judiciario-2026");
+
+    expect(detalhe!.titulo).toBe("Analista e técnico judiciário");
+    // Cronograma vazio, não um cronograma inventado a partir das datas do
+    // resumo: o mock não tem evento nenhum, e a página sabe dizer isso.
+    expect(detalhe!.cronograma).toEqual([]);
+    expect(detalhe!.cargos).toEqual([]);
+    expect(avisos.join()).toContain("usando o mock");
+  });
+
+  it("sem BC_API_URL não toca a rede e devolve o resumo do mock", async () => {
+    const rede = vi.fn();
+    vi.stubGlobal("fetch", rede);
+
+    const { obterDetalhe } = await carregar();
+    const detalhe = await obterDetalhe("trt-2-analista-judiciario-2026");
+
+    expect(rede).not.toHaveBeenCalled();
+    expect(detalhe!.cronograma).toEqual([]);
+    expect(detalhe!.origens).toEqual([]);
+  });
+
+  it("slug que não existe no mock também é nulo", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+
+    const { obterDetalhe } = await carregar();
+
+    expect(await obterDetalhe("nao-existe")).toBeNull();
+  });
+});

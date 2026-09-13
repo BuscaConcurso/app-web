@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { linhaDeContexto, tituloComOrgao } from "./rotulos";
+import type { ConcursoDetalhe } from "./dominio";
+import { linhaDeContexto, textoDeRodape, tituloComOrgao } from "./rotulos";
 
 describe("tituloComOrgao", () => {
   it("órgão sem sigla não deixa dois-pontos solto no começo", () => {
@@ -44,5 +45,108 @@ describe("linhaDeContexto", () => {
         municipio: "São Paulo",
       }),
     ).toBe("Estadual · Judiciário · São Paulo, SP");
+  });
+});
+
+describe("textoDeRodape", () => {
+  const BASE = {
+    slug: "x",
+    titulo: "Edital nº 1",
+    tipo: "concurso_publico",
+    status: "previsto",
+    orgao: {
+      slug: "o",
+      nome: "Órgão",
+      sigla: null,
+      esfera: null,
+      poder: null,
+      uf: null,
+      municipio: null,
+    },
+    banca: null,
+    uf: null,
+    inscricoesDe: null,
+    inscricoesAte: null,
+    publicadoEm: null,
+    previstoPara: null,
+    vagas: null,
+    cadastroReserva: false,
+    salarioAte: null,
+    taxaInscricao: null,
+    escolaridades: [],
+    editalUrl: null,
+    cronograma: [],
+    cargos: [],
+    origens: [],
+  } satisfies ConcursoDetalhe;
+
+  const CARGO = {
+    nome: "Professor",
+    codigo: null,
+    escolaridade: null,
+    area: null,
+    jornadaHoras: null,
+    requisitos: [],
+    taxaInscricao: null,
+    vagas: [],
+    remuneracoes: [],
+    evidencia: [],
+  };
+
+  const EVENTO = {
+    tipo: "publicacao_edital",
+    inicio: "2026-05-13",
+    fim: null,
+    hora: null,
+    localidades: [],
+    observacao: null,
+    evidencia: "EDITAL Nº 1",
+  } satisfies ConcursoDetalhe["cronograma"][number];
+
+  it("não fala mais de API não conectada, e manda conferir na banca", () => {
+    const texto = textoDeRodape({ ...BASE, cronograma: [EVENTO] });
+
+    expect(texto).not.toContain("API");
+    expect(texto).not.toContain("PDF do edital");
+    expect(texto).toContain("site da banca");
+    expect(texto).toContain("o cronograma");
+  });
+
+  it("diz o que existe neste concurso, não o que existe em geral", () => {
+    const so_cargos = textoDeRodape({ ...BASE, cargos: [CARGO] });
+    const os_dois = textoDeRodape({
+      ...BASE,
+      cargos: [CARGO],
+      cronograma: [EVENTO],
+    });
+
+    expect(so_cargos).toContain("os cargos");
+    expect(so_cargos).not.toContain("o cronograma");
+    expect(os_dois).toContain("o cronograma e os cargos");
+  });
+
+  it("concurso ainda não lido não promete conteúdo nenhum", () => {
+    const texto = textoDeRodape(BASE);
+
+    expect(texto).toContain("ainda não foi lido");
+    expect(texto).not.toContain("Esta página mostra");
+  });
+
+  it("remuneração ausente é dita, em vez de ficar por conta do leitor", () => {
+    const sem = textoDeRodape({ ...BASE, cargos: [CARGO] });
+    const com = textoDeRodape({
+      ...BASE,
+      cargos: [
+        {
+          ...CARGO,
+          remuneracoes: [
+            { base: 9000, total: null, tipo: "mensal", observacao: null },
+          ],
+        },
+      ],
+    });
+
+    expect(sem).toContain("O ato não informou remuneração.");
+    expect(com).not.toContain("não informou remuneração");
   });
 });

@@ -12,7 +12,14 @@
  * que já está testado em `consulta.test.ts` e `concursos.test.ts`.
  */
 import { unstable_rethrow } from "next/navigation";
-import type { Banca, ConcursoResumo, Escolaridade, Orgao, Uf } from "./dominio";
+import type {
+  Banca,
+  ConcursoDetalhe,
+  ConcursoResumo,
+  Escolaridade,
+  Orgao,
+  Uf,
+} from "./dominio";
 import {
   filtrar,
   ordenar,
@@ -353,10 +360,50 @@ export async function contagensDeFaceta(
   };
 }
 
-export async function obterConcurso(
+/**
+ * Um concurso inteiro: o resumo, o cronograma com a evidência de cada data,
+ * os cargos e de onde tudo veio.
+ *
+ * Rota própria, e não uma busca no acervo, porque o detalhe é o único lugar
+ * que precisa de cronograma, cargo, vaga e remuneração — carregar isso para
+ * os 181 concursos só para mostrar um seria pagar a lista inteira por página.
+ *
+ * Sem API, ou com a API fora do ar, cai no mock: o resumo que o mock tem, com
+ * cronograma, cargos e origens vazios. A página trata vazio, então ela
+ * continua demonstrável sem o engine no ar — e não inventa um cronograma que
+ * o mock não tem.
+ */
+export async function obterDetalhe(
   slug: string,
-): Promise<ConcursoResumo | null> {
-  return (await acervo()).find((concurso) => concurso.slug === slug) ?? null;
+): Promise<ConcursoDetalhe | null> {
+  if (URL_DA_API) {
+    try {
+      const resposta = await fetch(
+        `${URL_DA_API}/concurso/${encodeURIComponent(slug)}`,
+        { cache: "no-store" },
+      );
+      // 404 é resposta, não falha: o slug não existe, e quem chamou mostra a
+      // página de não encontrado em vez do mock.
+      if (resposta.status === 404) return null;
+      if (!resposta.ok) throw new Error(`a API respondeu ${resposta.status}`);
+      const corpo: ConcursoDetalhe = await resposta.json();
+      if (typeof corpo?.slug !== "string") {
+        throw new Error("a resposta não tem um concurso");
+      }
+      return corpo;
+    } catch (erro) {
+      unstable_rethrow(erro);
+      console.warn(
+        `[concursos] ${URL_DA_API}/concurso/${slug} falhou (${
+          erro instanceof Error ? erro.message : erro
+        }); usando o mock.`,
+      );
+    }
+  }
+  const resumo = CONCURSOS.find((concurso) => concurso.slug === slug);
+  return resumo
+    ? { ...resumo, cronograma: [], cargos: [], origens: [] }
+    : null;
 }
 
 /** Todos os slugs, para prerenderizar as páginas de concurso. */

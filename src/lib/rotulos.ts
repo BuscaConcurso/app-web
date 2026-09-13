@@ -5,9 +5,11 @@
  * não, e cargo em caixa baixa. Por isso nada aqui é gritado.
  */
 import type {
+  ConcursoDetalhe,
   ConcursoStatus,
   Escolaridade,
   Esfera,
+  EventoTipo,
   Poder,
   Uf,
 } from "./dominio";
@@ -115,4 +117,64 @@ export function linhaDeContexto(orgao: {
  */
 export function tituloComOrgao(sigla: string | null, titulo: string): string {
   return sigla ? `${sigla}: ${titulo}` : titulo;
+}
+
+/**
+ * Os eventos do cronograma em português de tela.
+ *
+ * Nomeados do ponto de vista de quem lê a página, não do enum: o banco chama
+ * de `publicacao_edital` o que o candidato lê como "Edital publicado".
+ */
+export const ROTULO_EVENTO: Record<EventoTipo, string> = {
+  autorizacao: "Concurso autorizado",
+  banca_definida: "Banca definida",
+  publicacao_edital: "Edital publicado",
+  inicio_inscricao: "Inscrições abrem",
+  fim_inscricao: "Inscrições encerram",
+  pedido_isencao: "Pedido de isenção",
+  pagamento_taxa: "Pagamento da taxa",
+  prova_objetiva: "Prova objetiva",
+  prova_discursiva: "Prova discursiva",
+  prova_pratica: "Prova prática",
+  prova_titulos: "Prova de títulos",
+  resultado_preliminar: "Resultado preliminar",
+  resultado_final: "Resultado final",
+  homologacao: "Homologação",
+  convocacao: "Convocação",
+  suspensao: "Suspensão",
+  cancelamento: "Cancelamento",
+};
+
+/**
+ * O rodapé diz o que é verdade deste concurso, não o que falta no projeto.
+ *
+ * Ele dizia que cargos, cronograma e o PDF do edital entrariam "quando a API
+ * do engine estiver conectada". A API está conectada; o que varia agora é o
+ * que cada ato publicado informou. E o link do Diário nunca foi o PDF do
+ * edital: o Diário publica o ato ou o extrato, e o edital completo, com
+ * anexos e programa de provas, sai no site da banca.
+ */
+export function textoDeRodape(concurso: ConcursoDetalhe): string {
+  const lido = [
+    concurso.cronograma.length > 0 ? "o cronograma" : null,
+    concurso.cargos.length > 0 ? "os cargos" : null,
+  ].filter(Boolean);
+
+  const oQueTemos =
+    lido.length > 0
+      ? `Esta página mostra ${lido.join(" e ")} que lemos do ato publicado no diário oficial.`
+      : "Este concurso foi publicado no diário oficial e o conteúdo do ato ainda não foi lido.";
+
+  const semRemuneracao =
+    concurso.cargos.length > 0 &&
+    concurso.cargos.every((cargo) => cargo.remuneracoes.length === 0)
+      ? " O ato não informou remuneração."
+      : "";
+
+  return (
+    `${oQueTemos}${semRemuneracao}` +
+    " O edital completo, com anexos, programa de provas e eventuais" +
+    " retificações, sai no site da banca — confira sempre lá antes de se" +
+    " inscrever."
+  );
 }

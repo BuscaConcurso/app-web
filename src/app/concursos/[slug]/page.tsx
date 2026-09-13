@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlocoDeNumeros, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
-import { listarSlugs, obterConcurso } from "@/lib/concursos";
+import { Cargos } from "@/components/concurso/Cargos";
+import { Cronograma } from "@/components/concurso/Cronograma";
+import { listarSlugs, obterDetalhe } from "@/lib/concursos";
 import {
   dataLonga,
   moeda,
@@ -14,6 +16,7 @@ import {
 import {
   ROTULO_ESCOLARIDADE,
   linhaDeContexto,
+  textoDeRodape,
   tituloComOrgao,
 } from "@/lib/rotulos";
 import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
@@ -35,7 +38,7 @@ export async function generateMetadata(
   props: PageProps<"/concursos/[slug]">,
 ): Promise<Metadata> {
   const { slug } = await props.params;
-  const concurso = await obterConcurso(slug);
+  const concurso = await obterDetalhe(slug);
   if (!concurso) return { title: "Concurso não encontrado" };
 
   return {
@@ -55,7 +58,7 @@ export default async function PaginaDoConcurso(
   props: PageProps<"/concursos/[slug]">,
 ) {
   const { slug } = await props.params;
-  const concurso = await obterConcurso(slug);
+  const concurso = await obterDetalhe(slug);
   if (!concurso) notFound();
 
   const hoje = new Date();
@@ -151,33 +154,53 @@ export default async function PaginaDoConcurso(
         </BlocoDeNumeros>
 
         <div className="mt-6">
-          <Rotulo>Cronograma</Rotulo>
-          <dl className="mt-2 flex flex-col gap-1.5 text-sm">
-            <div className="flex gap-2">
-              <dt className="w-44 shrink-0 text-tinta-600">Edital publicado</dt>
-              <dd className="numero">
-                {concurso.publicadoEm ? dataLonga(concurso.publicadoEm) : "sem edital"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="w-44 shrink-0 text-tinta-600">Inscrições</dt>
-              <dd className="numero">
-                {concurso.inscricoesDe && concurso.inscricoesAte
-                  ? `${dataLonga(concurso.inscricoesDe)} a ${dataLonga(concurso.inscricoesAte)}`
-                  : concurso.previstoPara
-                    ? `previstas para ${concurso.previstoPara}`
-                    : "a definir"}
-              </dd>
-            </div>
-          </dl>
+          {concurso.cronograma.length > 0 ? (
+            <Cronograma eventos={concurso.cronograma} />
+          ) : (
+            <>
+              <Rotulo>Cronograma</Rotulo>
+              <p className="mt-1.5 text-sm text-tinta-600">
+                Nenhuma data foi lida do ato publicado até agora.
+                {concurso.previstoPara
+                  ? ` O concurso é de ${concurso.previstoPara}.`
+                  : ""}
+              </p>
+            </>
+          )}
         </div>
+
+        {concurso.cargos.length > 0 && (
+          <div className="mt-7">
+            <Cargos cargos={concurso.cargos} />
+          </div>
+        )}
+
+        {concurso.origens.length > 0 && (
+          <div className="mt-7">
+            <Rotulo>Onde isto foi publicado</Rotulo>
+            <ul className="mt-2 flex flex-col gap-1.5 text-sm">
+              {concurso.origens.map((origem) => (
+                <li key={origem.url}>
+                  <a
+                    href={origem.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-link underline underline-offset-4 hover:text-link-hover"
+                  >
+                    {origem.titulo ?? origem.url}
+                  </a>
+                  {origem.fonte && (
+                    <span className="text-tinta-600"> · {origem.fonte}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </article>
 
       <p className="mt-4 rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600">
-        Esta página mostra o resumo do concurso. A lista de cargos, o
-        cronograma completo, as retificações e o link para o PDF do edital
-        entram quando a API do engine estiver conectada. Até lá, confira
-        sempre o edital original no diário oficial ou no site da banca.
+        {textoDeRodape(concurso)}
       </p>
     </div>
   );
