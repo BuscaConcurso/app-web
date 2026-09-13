@@ -4,13 +4,18 @@ import { dataLonga } from "@/lib/formato";
 import { ROTULO_EVENTO } from "@/lib/rotulos";
 
 /**
- * A linha do tempo do concurso, com a citação do ato embaixo de cada data.
+ * A linha do tempo do concurso, com a procedência de cada data embaixo dela.
  *
- * A citação é o ponto. Qualquer site copia uma data de edital; o que este
- * mostra é a frase do documento de onde ela saiu, para o candidato poder
- * conferir sem acreditar em nós. O engine grava essa evidência em todo evento
- * que extrai, e jogá-la fora na tela seria desperdiçar o que o produto tem de
- * diferente.
+ * A procedência é o ponto. Qualquer site copia uma data de edital; o que este
+ * mostra é de onde ela saiu, e o ato inteiro fica na mesma página, a um clique
+ * do link "ver o ato".
+ *
+ * **Sem aspas, de propósito.** O campo `evidencia` às vezes é o trecho
+ * literal do ato e às vezes é a descrição que o modelo fez de onde leu —
+ * medido no acervo: 279 de 813 evidências (34%) aparecem palavra por palavra
+ * no texto do ato, o resto é paráfrase. Aspas afirmariam citação literal em
+ * dois terços dos casos em que não há. "Lido de" cobre os dois, e quem quiser
+ * conferir abre o ato.
  *
  * A ordem é a que a API mandou: por data, com o que não tem data no fim.
  */
@@ -19,7 +24,7 @@ export function Cronograma({ eventos }: { eventos: EventoDoCronograma[] }) {
     <section>
       <Rotulo>Cronograma</Rotulo>
       <p className="mt-1 text-[12px] text-tinta-600">
-        Cada data com o trecho do ato publicado de onde ela foi lida.
+        Cada data com a procedência: de qual ato publicado ela foi lida.
       </p>
 
       <ol className="mt-3 flex flex-col gap-3.5">
@@ -43,7 +48,19 @@ export function Cronograma({ eventos }: { eventos: EventoDoCronograma[] }) {
               </p>
               {evento.evidencia && (
                 <p className="mt-0.5 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
-                  “{evento.evidencia}”
+                  <span className="text-tinta-500">Lido de: </span>
+                  {evento.evidencia}
+                  {evento.ato && (
+                    <>
+                      {" "}
+                      <a
+                        href={`#ato-${evento.ato}`}
+                        className="whitespace-nowrap underline underline-offset-4 hover:text-tinta-900"
+                      >
+                        ver o ato
+                      </a>
+                    </>
+                  )}
                 </p>
               )}
               {evento.observacao && (

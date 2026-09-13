@@ -190,6 +190,12 @@ export type EventoTipo =
  */
 export interface EventoDoCronograma {
   tipo: EventoTipo;
+  /**
+   * A `chave` da origem de onde este evento foi lido, quando se sabe. É o que
+   * liga a linha do tempo ao ato: a pessoa lê de onde tiramos a data e abre
+   * o documento que a produziu, na mesma página.
+   */
+  ato: string | null;
   /** `AAAA-MM-DD`. A data única do fato vive aqui, mesmo em `fim_inscricao`. */
   inicio: string | null;
   /** Só quando o ato deu um intervalo. Raro: 2 de 439 eventos do acervo. */
@@ -261,6 +267,8 @@ export interface Cargo {
  * nenhuma linha de edital, e isso é por desenho.
  */
 export interface Origem {
+  /** Identificador do ato na fonte. É o alvo do link vindo do cronograma. */
+  chave: string;
   /**
    * `null` quando a fonte não registrou o endereço público do ato — hoje,
    * todo o acervo. O ato existe e foi publicado; o que falta é o endereço, e
@@ -274,6 +282,17 @@ export interface Origem {
   fonte: string | null;
   /** ISO completo: é quando o motor viu o ato, não quando ele foi publicado. */
   vistoEm: string;
+  /**
+   * O ato inteiro, como saiu publicado. **Não é o edital**: o diário publica
+   * o ato ou o extrato dele, e o edital completo com anexos fica na banca.
+   *
+   * É o que o produto tem de mais garantido — o texto está no nosso banco,
+   * não depende de link nenhum continuar existindo. Vem só na rota de
+   * detalhe.
+   */
+  texto: string | null;
+  /** Tamanho do texto. É por ele que a página decide o que abrir sozinho. */
+  caracteres: number | null;
 }
 
 /** O concurso inteiro, como a página de detalhe precisa dele. */

@@ -102,6 +102,7 @@ describe("textoDeRodape", () => {
 
   const EVENTO = {
     tipo: "publicacao_edital",
+    ato: "49284164",
     inicio: "2026-05-13",
     fim: null,
     hora: null,

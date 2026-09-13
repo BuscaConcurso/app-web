@@ -249,6 +249,7 @@ describe("obterDetalhe", () => {
     cronograma: [
       {
         tipo: "inicio_inscricao",
+        ato: "49284164",
         inicio: "2026-05-18",
         fim: null,
         hora: null,
@@ -273,10 +274,13 @@ describe("obterDetalhe", () => {
     ],
     origens: [
       {
-        url: "https://www.in.gov.br/web/dou/-/49284164",
+        chave: "49284164",
+        url: "https://www.in.gov.br/leiturajornal?data=13-05-2026",
         titulo: "EDITAL Nº 10",
         fonte: "Diário Oficial da União",
         vistoEm: "2026-09-12T03:55:48Z",
+        texto: "EDITAL Nº 10, DE 13 DE MAIO DE 2026 ...",
+        caracteres: 2911,
       },
     ],
   };
@@ -460,10 +464,13 @@ describe("origem sem endereço", () => {
         cargos: [],
         origens: [
           {
+            chave: "1",
             url: null,
             titulo: "EDITAL Nº 1, DE 5 DE MARÇO DE 2026",
             fonte: "Diário Oficial da União",
             vistoEm: "2026-09-12T03:55:48Z",
+            texto: "EDITAL Nº 1, DE 5 DE MARÇO DE 2026 ...",
+            caracteres: 1837,
           },
         ],
       }),

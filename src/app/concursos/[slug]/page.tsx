@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlocoDeNumeros, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
+import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Cargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
 import { listarSlugs, obterDetalhe } from "@/lib/concursos";
@@ -177,49 +178,7 @@ export default async function PaginaDoConcurso(
 
         {concurso.origens.length > 0 && (
           <div className="mt-7">
-            <Rotulo>Onde isto foi publicado</Rotulo>
-            {concurso.origens.some((origem) => origem.url) && (
-              <p className="mt-1 text-[12px] text-tinta-600">
-                O endereço leva à página do diário em que o ato saiu, que pode
-                trazer outros atos do mesmo dia.
-              </p>
-            )}
-            <ul className="mt-2 flex flex-col gap-2.5 text-sm">
-              {concurso.origens.map((origem, indice) => (
-                <li key={origem.url ?? `${origem.titulo}-${indice}`}>
-                  {origem.url ? (
-                    <a
-                      href={origem.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-medium text-link underline underline-offset-4 hover:text-link-hover"
-                    >
-                      {origem.titulo ?? origem.url}
-                    </a>
-                  ) : (
-                    <span className="font-medium text-tinta-900">
-                      {origem.titulo ?? "Ato sem título registrado"}
-                    </span>
-                  )}
-                  {origem.fonte && (
-                    <span className="text-tinta-600"> · {origem.fonte}</span>
-                  )}
-                  {!origem.url && (
-                    /* O endereço público não está gravado para este ato, e
-                       não dá para inventá-lo: o que o motor montava a partir
-                       do identificador respondia 404. Dizer onde procurar é
-                       o que resta de útil e verdadeiro. */
-                    <p className="mt-0.5 text-[12px] leading-5 text-tinta-600">
-                      O endereço público deste ato não está registrado
-                      {concurso.publicadoEm
-                        ? `. Ele saiu na edição de ${dataLonga(concurso.publicadoEm)}`
-                        : ""}
-                      , que pode ser consultada no site da Imprensa Nacional.
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ul>
+            <AtosPublicados origens={concurso.origens} />
           </div>
         )}
       </article>
