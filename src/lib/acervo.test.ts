@@ -446,3 +446,33 @@ describe("dimensoesDoAcervo", () => {
     });
   });
 });
+
+describe("origem sem endereço", () => {
+  it("o detalhe aceita origem sem url e não inventa uma", async () => {
+    // O endereço que o motor montava para o Diário respondia 404, e os atos
+    // ingeridos antes do campo novo não têm endereço nenhum — hoje, todo o
+    // acervo. A origem chega assim mesmo: o ato existe.
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({
+        ...UM_CONCURSO,
+        cronograma: [],
+        cargos: [],
+        origens: [
+          {
+            url: null,
+            titulo: "EDITAL Nº 1, DE 5 DE MARÇO DE 2026",
+            fonte: "Diário Oficial da União",
+            vistoEm: "2026-09-12T03:55:48Z",
+          },
+        ],
+      }),
+    ));
+
+    const { obterDetalhe } = await carregar();
+    const detalhe = await obterDetalhe("so-este");
+
+    expect(detalhe!.origens[0].url).toBeNull();
+    expect(detalhe!.origens[0].titulo).toContain("EDITAL");
+  });
+});

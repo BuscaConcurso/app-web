@@ -261,7 +261,15 @@ export interface Cargo {
  * nenhuma linha de edital, e isso é por desenho.
  */
 export interface Origem {
-  url: string;
+  /**
+   * `null` quando a fonte não registrou o endereço público do ato — hoje,
+   * todo o acervo. O ato existe e foi publicado; o que falta é o endereço, e
+   * a página diz isso em vez de oferecer um link que não abre.
+   *
+   * Quando existe, aponta para a **página** do Diário em que o ato saiu, não
+   * para o ato: a mesma página costuma trazer outros atos do mesmo dia.
+   */
+  url: string | null;
   titulo: string | null;
   fonte: string | null;
   /** ISO completo: é quando o motor viu o ato, não quando ele foi publicado. */
