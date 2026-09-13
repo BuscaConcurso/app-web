@@ -27,7 +27,23 @@ function Coluna({
               href={link.href}
               className="flex items-baseline justify-between gap-3 rounded-controle px-2 py-1.5 text-sm text-tinta-800 transition-colors hover:bg-rebaixada"
             >
-              <span className="truncate">{link.rotulo}</span>
+              {/* `min-w-0` é o que conserta a rolagem horizontal no celular,
+                  e `truncate` era a causa. Item de flex nasce com
+                  `min-width: auto`, que o proíbe de encolher abaixo do
+                  conteúdo; com `white-space: nowrap` junto (que é o que
+                  `truncate` liga), a largura mínima do item vira a linha
+                  INTEIRA. Um nome de órgão de 190 caracteres esticava a
+                  coluna, a grade inteira ia junto, e o documento ganhava
+                  204 px de rolagem lateral — medido em Chrome a 400 px:
+                  `scrollWidth 689` contra `clientWidth 485`, e 485 contra
+                  485 depois.
+
+                  E quebra de linha em vez de reticências porque cortar
+                  esconderia o que distingue dois órgãos congelados pela
+                  resolução, que só diferem no fim do caminho
+                  (".../Campus X"). Trocar rolagem por ambiguidade seria
+                  piorar. */}
+              <span className="min-w-0 break-words">{link.rotulo}</span>
               <span className="numero shrink-0 text-xs text-tinta-500">
                 {link.total}
               </span>
