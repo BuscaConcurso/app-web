@@ -11,7 +11,11 @@ import {
   numero,
   vagasTexto,
 } from "@/lib/formato";
-import { ROTULO_ESCOLARIDADE, linhaDeContexto } from "@/lib/rotulos";
+import {
+  ROTULO_ESCOLARIDADE,
+  linhaDeContexto,
+  tituloComOrgao,
+} from "@/lib/rotulos";
 import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
 import { urlAbsoluta } from "@/lib/site";
 
@@ -26,6 +30,7 @@ export async function generateStaticParams() {
   return (await listarSlugs()).map((slug) => ({ slug }));
 }
 
+
 export async function generateMetadata(
   props: PageProps<"/concursos/[slug]">,
 ): Promise<Metadata> {
@@ -33,9 +38,8 @@ export async function generateMetadata(
   const concurso = await obterConcurso(slug);
   if (!concurso) return { title: "Concurso não encontrado" };
 
-  const titulo = `${concurso.orgao.sigla}: ${concurso.titulo}`;
   return {
-    title: titulo,
+    title: tituloComOrgao(concurso.orgao.sigla, concurso.titulo),
     description:
       `${concurso.orgao.nome}. ` +
       `${vagasTexto(concurso.vagas, concurso.cadastroReserva)}` +
@@ -71,7 +75,7 @@ export default async function PaginaDoConcurso(
       {
         "@type": "ListItem",
         position: 2,
-        name: `${concurso.orgao.sigla}: ${concurso.titulo}`,
+        name: tituloComOrgao(concurso.orgao.sigla, concurso.titulo),
         item: urlAbsoluta(`/concursos/${concurso.slug}`),
       },
     ],
@@ -91,7 +95,11 @@ export default async function PaginaDoConcurso(
           Concursos
         </Link>
         <span aria-hidden="true"> / </span>
-        <span>{concurso.orgao.sigla}</span>
+        {/* Sem sigla, o nome do órgão — que no acervo do engine ainda é o
+            caminho de hierarquia do Diário, daí o corte em uma linha. */}
+        <span className="inline-block max-w-[40ch] truncate align-bottom">
+          {concurso.orgao.sigla ?? concurso.orgao.nome}
+        </span>
       </nav>
 
       <article className={`rounded-caixa p-6 sm:p-8 ${estilo.cartao}`}>

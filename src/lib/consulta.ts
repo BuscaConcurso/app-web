@@ -65,7 +65,7 @@ function textoBuscavel(concurso: ConcursoResumo): string {
     [
       concurso.titulo,
       concurso.orgao.nome,
-      concurso.orgao.sigla,
+      concurso.orgao.sigla ?? "",
       concurso.orgao.municipio ?? "",
       concurso.banca?.nome ?? "",
     ].join(" "),
@@ -106,8 +106,13 @@ export function filtrar(
     if (filtro.q && !combinaComTermos(concurso, filtro.q)) return false;
     if (filtro.uf && concurso.uf !== filtro.uf) return false;
 
-    if (!vazia(filtro.esferas) && !filtro.esferas.includes(concurso.orgao.esfera)) {
-      return false;
+    if (!vazia(filtro.esferas)) {
+      // Órgão sem esfera não casa com nenhuma esfera pedida — continua fora,
+      // que é o que já acontecia quando o campo era declarado não anulável e
+      // chegava nulo assim mesmo. Hoje isso é todo o acervo do engine, e o
+      // aviso disso está em `/diagnostico`.
+      const esfera = concurso.orgao.esfera;
+      if (!esfera || !filtro.esferas.includes(esfera)) return false;
     }
     if (
       !vazia(filtro.bancas) &&

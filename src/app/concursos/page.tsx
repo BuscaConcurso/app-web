@@ -4,7 +4,8 @@ import { ColunaFiltros } from "@/components/busca/ColunaFiltros";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import { BarraBusca } from "@/components/busca/BarraBusca";
 import { Paginacao } from "@/components/ui/Paginacao";
-import { contagensDeFaceta, listarConcursos } from "@/lib/concursos";
+import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
+import { avisoDoAcervo, contagensDeFaceta, listarConcursos } from "@/lib/concursos";
 import { ORDENS, SITUACOES } from "@/lib/consulta";
 import { moeda, numero } from "@/lib/formato";
 import {
@@ -181,6 +182,7 @@ export default async function BuscaDeConcursos(
   };
   const resultado = await listarConcursos({ ...filtro, ordem, pagina }, hoje);
   const contagens = await contagensDeFaceta(filtro, hoje);
+  const aviso = await avisoDoAcervo();
   const chips = chipsAtivos(consulta);
 
   return (
@@ -292,6 +294,15 @@ export default async function BuscaDeConcursos(
                   urlDaBusca(consulta, { pagina: numeroDaPagina })
                 }
               />
+            </div>
+          )}
+
+          {/* Aqui a contagem de resultados aparece escrita, e é aqui que o
+              silêncio sobre o resto do acervo mais engana: "2 concursos
+              encontrados" sobre um acervo de nove mil. */}
+          {aviso && (
+            <div className="mt-6">
+              <AcervoIncompleto aviso={aviso} />
             </div>
           )}
         </div>

@@ -26,8 +26,15 @@ cd ../app-web && BC_API_URL=http://127.0.0.1:8787 pnpm dev
 ```
 
 O acervo do engine ainda está quase todo vazio: dos 9.311 concursos, 2 têm
-cargo ou evento e é só isso que a lista mostra. `curl -s
-http://127.0.0.1:8787/diagnostico` diz o que falta, campo por campo.
+cargo ou evento e é só isso que a lista mostra. Os outros aparecem como aviso
+na home e na busca (`avisoDoAcervo()` em `src/lib/concursos.ts`), porque uma
+tela que mostra dois concursos sem dizer isso afirma, por omissão, que o
+acervo tem dois. `curl -s http://127.0.0.1:8787/diagnostico` diz o que falta,
+campo por campo.
+
+`sigla`, `esfera` e `poder` do órgão são anuláveis em `dominio.ts` porque o
+acervo não os tem: o selo do cartão fica sem letra e a linha de contexto mostra
+só o que existe. É o tipo descrevendo o dado, não a tela.
 
 `BC_API_URL` definida torna as rotas dinâmicas (`fetch` com `no-store`, para
 o acervo não congelar no build). Sem ela, o build segue estático como antes.

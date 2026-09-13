@@ -1,4 +1,32 @@
+import type { AvisoDoAcervo } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
+
+/**
+ * O que a lista não está mostrando, dito em voz baixa.
+ *
+ * A lista traz só os concursos que já têm cargo ou evento extraído. Os outros
+ * existem no acervo e ainda não foram lidos pelo modelo — hoje são 9.309 de
+ * 9.311 —, e uma tela que mostra dois concursos sem dizer isso afirma, por
+ * omissão, que o acervo tem dois. Não é "não há mais resultados": é "ainda
+ * não lemos o resto".
+ *
+ * Cinza e não amarelo de propósito. O amarelo desta página é um só, o do
+ * `BlocoAlerta` logo abaixo; dois amarelos e nenhum dos dois chama.
+ */
+export function AcervoIncompleto({ aviso }: { aviso: AvisoDoAcervo }) {
+  return (
+    <p className="rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600">
+      Outros{" "}
+      <strong className="numero font-medium text-tinta-900">
+        {numero(aviso.semDado)}
+      </strong>{" "}
+      dos {numero(aviso.total)} concursos do acervo ainda não foram lidos: o
+      diário oficial publicou o ato, e o cargo, as vagas e o cronograma ainda
+      não foram extraídos do documento. Eles entram na lista conforme forem
+      lidos.
+    </p>
+  );
+}
 
 /**
  * A chamada única da tela.

@@ -76,13 +76,20 @@ export function Numero({
 /**
  * O quadrado com a sigla do órgão. Faz o papel do logotipo que não temos:
  * o acervo tem mais de mil órgãos e nenhum arquivo de marca para eles.
+ *
+ * Sem sigla — o caso de todos os 1.332 órgãos vindos do Diário hoje — o
+ * quadrado fica sem letra, e continua fazendo o trabalho que sobra: ele é
+ * pintado pelo tom, então marca a situação do concurso na lista, e segura o
+ * alinhamento das linhas. Tirar o quadrado faria a lista dançar conforme o
+ * órgão tivesse ou não sigla; inventar iniciais a partir do nome afirmaria
+ * uma sigla que ninguém publicou. O nome do órgão está do lado, por extenso.
  */
 export function Selo({
   sigla,
   tom = "aberto",
   tamanho = "md",
 }: {
-  sigla: string;
+  sigla: string | null;
   tom?: Tom;
   tamanho?: "sm" | "md";
 }) {
@@ -95,10 +102,11 @@ export function Selo({
 
   // "SEFAZ-CE" tem o dobro das letras de "PF" e precisa caber no mesmo
   // quadrado sem quebrar em duas linhas.
+  const letras = sigla?.length ?? 0;
   const corpo =
-    sigla.length > 6
+    letras > 6
       ? "text-[7px]"
-      : sigla.length > 4
+      : letras > 4
         ? "text-[8px]"
         : tamanho === "sm"
           ? "text-[10px]"

@@ -26,13 +26,11 @@ const UM_CONCURSO: ConcursoResumo = {
   orgao: {
     slug: "orgao-do-engine",
     nome: "Ministério da Educação/Universidade Federal de Alfenas",
-    sigla: "",
-    // A API manda nulo nos dois: nenhum órgão do acervo tem esfera, e `poder`
-    // não existe no banco do engine. Os tipos do front os declaram
-    // obrigatórios, e é isso que estes `as never` registram — a divergência é
-    // real e está no relatório, não é descuido do teste.
-    esfera: null as never,
-    poder: null as never,
+    // A API manda nulo nos três: nenhum órgão do acervo tem sigla ou esfera,
+    // e `poder` não existe no banco do engine.
+    sigla: null,
+    esfera: null,
+    poder: null,
     uf: null,
     municipio: null,
     resolvido: false,
@@ -160,6 +158,57 @@ describe("acervo", () => {
 
     expect(pagina.total).toBe(CONCURSOS.length);
     expect(avisos.join()).toContain("`concursos`");
+  });
+
+  it("o aviso conta os concursos que a rota não mandou", async () => {
+    // A decisão de produto é que a lista traz só quem tem dado e a contagem
+    // do resto aparece como aviso. Sem esta função, o número chegava no app e
+    // morria aqui, e a tela afirmava por omissão que o acervo tem um
+    // concurso.
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({ concursos: [UM_CONCURSO], total: 9311, semDado: 9310 }),
+    ));
+
+    const { avisoDoAcervo, listarConcursos } = await carregar();
+
+    expect(await avisoDoAcervo()).toEqual({ semDado: 9310, total: 9311 });
+    expect((await listarConcursos({ porPagina: 1000 })).total).toBe(1);
+  });
+
+  it("acervo sem buraco não vira aviso", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({ concursos: [UM_CONCURSO], total: 1, semDado: 0 }),
+    ));
+
+    const { avisoDoAcervo } = await carregar();
+
+    expect(await avisoDoAcervo()).toBeNull();
+  });
+
+  it("com o mock não há aviso: o mock não é um acervo pela metade", async () => {
+    const rede = vi.fn();
+    vi.stubGlobal("fetch", rede);
+
+    const { avisoDoAcervo } = await carregar();
+
+    expect(rede).not.toHaveBeenCalled();
+    expect(await avisoDoAcervo()).toBeNull();
+  });
+
+  it("API fora do ar não inventa aviso", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new Error("ECONNREFUSED");
+    }));
+
+    const { avisoDoAcervo } = await carregar();
+
+    // Caiu no mock: dizer "faltam 9.309" sobre o mock seria uma afirmação
+    // falsa sobre um acervo que nem está sendo mostrado.
+    expect(await avisoDoAcervo()).toBeNull();
+    expect(avisos.join()).toContain("usando o mock");
   });
 
   it("as facetas rotulam órgão e banca com o que vem da rota", async () => {

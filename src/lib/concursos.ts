@@ -55,18 +55,30 @@ const URL_DA_API = process.env.BC_API_URL?.replace(/\/+$/, "");
 /** O corpo de `GET /acervo`. Só o que este arquivo usa. */
 interface RespostaDeAcervo {
   concursos: ConcursoResumo[];
+  /** Quantos concursos o engine tem, com dado ou sem. */
+  total: number;
   /**
-   * Quantos concursos o engine tem e não mandou porque não têm cargo nem
-   * evento — 9.309 de 9.311 na carga de hoje. Chega até aqui e para aqui:
-   * mostrar isso na tela exigiria um componente novo, e nenhuma função
-   * exportada deste arquivo tem por onde devolver o número. Está em
-   * `GET /diagnostico` e no aviso que `bc api` imprime ao subir.
+   * Quantos o engine tem e não mandou porque não têm cargo nem evento —
+   * 9.309 de 9.311 na carga de hoje. A lista traz só quem tem dado, e esta
+   * contagem é o que impede a tela de fingir que o acervo tem duas linhas.
+   * Sai por `avisoDoAcervo()`, aqui embaixo.
    */
   semDado: number;
 }
 
-async function acervo(): Promise<ConcursoResumo[]> {
-  if (!URL_DA_API) return CONCURSOS;
+/**
+ * O que o mock é, na forma da resposta da API. `semDado: 0` porque o mock é
+ * um acervo completo de mentira, não um acervo real pela metade: aviso de
+ * "faltam 9.309" sobre o mock seria falso.
+ */
+const ACERVO_DE_MOCK: RespostaDeAcervo = {
+  concursos: CONCURSOS,
+  total: CONCURSOS.length,
+  semDado: 0,
+};
+
+async function carregar(): Promise<RespostaDeAcervo> {
+  if (!URL_DA_API) return ACERVO_DE_MOCK;
   try {
     // `no-store` porque o acervo muda debaixo do app: o engine reprocessa
     // atos enquanto o app roda, e uma resposta cacheada mostraria um acervo
@@ -80,7 +92,7 @@ async function acervo(): Promise<ConcursoResumo[]> {
     if (!Array.isArray(corpo?.concursos)) {
       throw new Error("a resposta não tem a lista `concursos`");
     }
-    return corpo.concursos;
+    return corpo;
   } catch (erro) {
     // `fetch(..., { cache: "no-store" })` é uma das APIs que o Next usa
     // levantando erro próprio para sair do caminho estático (a lista está em
@@ -98,8 +110,35 @@ async function acervo(): Promise<ConcursoResumo[]> {
         erro instanceof Error ? erro.message : erro
       }); usando o mock. Suba a API com \`bc api\` no repositório engine.`,
     );
-    return CONCURSOS;
+    return ACERVO_DE_MOCK;
   }
+}
+
+async function acervo(): Promise<ConcursoResumo[]> {
+  return (await carregar()).concursos;
+}
+
+/**
+ * Quantos concursos existem no acervo do engine e ainda não têm o que
+ * mostrar, para a tela dizer isso em vez de calar.
+ *
+ * `null` quando não há nada a avisar — acervo completo, ou mock. A lista traz
+ * só quem tem cargo ou evento, e sem este aviso uma página que mostra dois
+ * concursos sobre nove mil afirmaria, por omissão, que o acervo tem dois.
+ *
+ * Não custa requisição: dentro do mesmo render, o `fetch` do Next memoriza a
+ * chamada que `acervo()` já fez.
+ */
+export interface AvisoDoAcervo {
+  /** Sem cargo nem evento extraído ainda. */
+  semDado: number;
+  /** Total no acervo do engine, os com dado e os sem. */
+  total: number;
+}
+
+export async function avisoDoAcervo(): Promise<AvisoDoAcervo | null> {
+  const { semDado, total } = await carregar();
+  return semDado > 0 ? { semDado, total } : null;
 }
 
 export async function listarConcursos(

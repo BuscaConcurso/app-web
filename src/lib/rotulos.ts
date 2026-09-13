@@ -86,23 +86,33 @@ export const NOME_UF: Record<Uf, string> = {
 
 /** "Estadual · Judiciário · São Paulo, SP", a linha de contexto do cartão. */
 export function linhaDeContexto(orgao: {
-  esfera: Esfera;
-  poder: Poder;
+  esfera: Esfera | null;
+  poder: Poder | null;
   uf: Uf | null;
   municipio: string | null;
 }): string {
-  // `filter(Boolean)` porque o acervo do engine ainda não tem esfera em
-  // nenhum órgão, e `poder` não existe no banco dele: os dois chegam nulos e
-  // o índice volta `undefined`. Sem o filtro, o cartão mostrava " ·  ·
-  // Nacional" — três separadores e nenhuma informação. Enquanto o tipo
-  // `Orgao` declarar os dois campos obrigatórios, isto é defesa contra dado
-  // real, não contra dado inválido.
+  // Esfera e poder chegam nulos em todo o acervo do engine (nenhum dos 1.332
+  // órgãos tem esfera; `poder` não existe no banco). A linha mostra o que
+  // existe e cala sobre o resto: sem este filtro ela saía como
+  // " ·  · Nacional", três separadores e nenhuma informação.
   const partes: string[] = [
-    ROTULO_ESFERA[orgao.esfera],
-    ROTULO_PODER[orgao.poder],
-  ].filter(Boolean);
+    orgao.esfera && ROTULO_ESFERA[orgao.esfera],
+    orgao.poder && ROTULO_PODER[orgao.poder],
+  ].filter((parte): parte is string => Boolean(parte));
   if (orgao.municipio && orgao.uf) partes.push(`${orgao.municipio}, ${orgao.uf}`);
   else if (orgao.uf) partes.push(NOME_UF[orgao.uf]);
   else partes.push("Nacional");
   return partes.join(" · ");
+}
+
+/**
+ * "TJSP: Analista judiciário", ou só o título quando o órgão não tem sigla.
+ *
+ * Vive aqui, e não na página, para ter teste: com a sigla nula — o caso de
+ * todos os 1.332 órgãos do acervo do engine — a interpolação direta produzia
+ * ": EDITAL Nº 1, DE 12 DE MAIO DE 2026", com dois-pontos solto, no título da
+ * aba, no `og:title` e na trilha estruturada que o buscador lê.
+ */
+export function tituloComOrgao(sigla: string | null, titulo: string): string {
+  return sigla ? `${sigla}: ${titulo}` : titulo;
 }

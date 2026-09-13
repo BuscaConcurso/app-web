@@ -53,9 +53,10 @@ export type Uf = (typeof UFS)[number];
 
 /**
  * Poder ao qual o órgão pertence. Aparece na linha de contexto do cartão
- * ("Estadual · Judiciário · SP") mas ainda não existe no banco do engine,
- * que só guarda esfera e UF em `orgao`. Fica como campo de exibição do front
- * até a API decidir de onde ele sai.
+ * ("Estadual · Judiciário · SP") e **não existe no banco do engine**, que só
+ * guarda esfera e UF em `orgao` — a API devolve nulo em 100% dos órgãos, e não
+ * há de onde derivá-lo. Por isso `Orgao.poder` é anulável: o tipo descreve o
+ * dado que chega, não o dado que a tela gostaria de ter.
  */
 export type Poder =
   | "judiciario"
@@ -66,12 +67,23 @@ export type Poder =
   | "militar"
   | "autarquia";
 
+/**
+ * O órgão que publica o concurso.
+ *
+ * `sigla`, `esfera` e `poder` são anuláveis porque o acervo do engine não os
+ * tem: nenhum dos 1.332 órgãos tem sigla ou esfera preenchida, e `poder` não
+ * existe no banco. A regra do projeto é que campo que o banco não tem chega
+ * nulo e nunca inventado — um tipo não anulável sobre um campo nulo em 1.332
+ * de 1.332 obrigaria a API a inventar, ou o teste a mentir. Quem exibe trata
+ * a ausência; ver `linhaDeContexto` em `rotulos.ts` e `Selo` em
+ * `components/ui/Cartao.tsx`.
+ */
 export interface Orgao {
   slug: string;
   nome: string;
-  sigla: string;
-  esfera: Esfera;
-  poder: Poder;
+  sigla: string | null;
+  esfera: Esfera | null;
+  poder: Poder | null;
   uf: Uf | null;
   municipio: string | null;
   /**
