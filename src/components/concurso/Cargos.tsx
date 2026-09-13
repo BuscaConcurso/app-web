@@ -62,7 +62,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
                   cargo.remuneracoes.map((remuneracao, i) => (
                     <span key={i} className="numero">
                       {faixa(remuneracao.base, remuneracao.total)}
-                      <span className="text-tinta-600"> / {remuneracao.tipo}</span>
+                      <span className="text-tinta-600"> · {remuneracao.tipo}</span>
                       {remuneracao.observacao && (
                         <span className="text-tinta-600">
                           {" "}
@@ -163,11 +163,14 @@ function faixa(base: number | null, total: number | null): string {
  */
 function descreverVaga(vaga: Vaga): string {
   const onde = [vaga.localidade, vaga.uf].filter(Boolean).join(" — ");
+  // "ampla concorrência: 8", e não "8 ampla concorrência": com uma vaga só,
+  // a segunda forma vira "1 outras reservas". O dois-pontos atravessa
+  // singular e plural sem precisar concordar com nada.
   const reparticao = [
-    vaga.ampla > 0 ? `${numero(vaga.ampla)} ampla concorrência` : null,
-    vaga.pcd > 0 ? `${numero(vaga.pcd)} PCD` : null,
-    vaga.negros > 0 ? `${numero(vaga.negros)} negros` : null,
-    vaga.outras > 0 ? `${numero(vaga.outras)} outras reservas` : null,
+    vaga.ampla > 0 ? `ampla concorrência: ${numero(vaga.ampla)}` : null,
+    vaga.pcd > 0 ? `PCD: ${numero(vaga.pcd)}` : null,
+    vaga.negros > 0 ? `negros: ${numero(vaga.negros)}` : null,
+    vaga.outras > 0 ? `outras reservas: ${numero(vaga.outras)}` : null,
   ].filter(Boolean);
 
   const quantas =
@@ -183,8 +186,14 @@ function descreverVaga(vaga: Vaga): string {
       : "cadastro reserva"
     : null;
 
+  // A repartição aparece sempre que as vagas NÃO forem todas de ampla
+  // concorrência, e não só quando houver duas ou mais categorias. Visto na
+  // tela com dado real: uma vaga com `outras: 1` e `ampla: 0` saía como
+  // "Pelotas: 1 vaga", escondendo que a única vaga é reservada — que é
+  // justamente o que faz alguém decidir se vale concorrer.
+  const soAmplaConcorrencia = vaga.ampla === vaga.total;
   const detalhe = [
-    reparticao.length > 1 ? reparticao.join(", ") : null,
+    soAmplaConcorrencia ? null : reparticao.join(", ") || null,
     reserva,
   ].filter(Boolean);
 
