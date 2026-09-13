@@ -47,6 +47,8 @@ const UM_CONCURSO: ConcursoResumo = {
   salarioAte: null,
   taxaInscricao: null,
   escolaridades: [],
+  nomesDeCargo: ["Professor Visitante"],
+  localidades: ["Pelotas"],
   editalUrl: null,
 };
 

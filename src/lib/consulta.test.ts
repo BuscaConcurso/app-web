@@ -33,6 +33,8 @@ function fixture(parcial: Partial<ConcursoResumo> = {}): ConcursoResumo {
     salarioAte: 10000,
     taxaInscricao: 90,
     escolaridades: ["superior"],
+    nomesDeCargo: [],
+    localidades: [],
     editalUrl: null,
     ...parcial,
   };
@@ -60,6 +62,53 @@ describe("filtrar", () => {
     const itens = [fixture()];
     expect(filtrar(itens, { q: "tjsp" }, HOJE)).toHaveLength(1);
     expect(filtrar(itens, { q: "vunesp" }, HOJE)).toHaveLength(1);
+  });
+
+  it("busca pelo nome do cargo, que não está no título", () => {
+    // É como o acervo do engine é: o título é o cabeçalho do ato publicado
+    // ("Universidade Federal de Pelotas — Edital nº 10/2026") e a palavra que
+    // o candidato digita está no cargo. Nenhum dos 181 títulos do acervo tem
+    // "professor"; 105 dos 181 têm um cargo de professor.
+    const itens = [
+      fixture({
+        titulo: "Universidade Federal de Pelotas — Edital nº 10/2026",
+        nomesDeCargo: ["Professor Visitante Indígena"],
+      }),
+      fixture({ titulo: "Edital nº 2/2026", nomesDeCargo: ["Auditor fiscal"] }),
+    ];
+
+    expect(filtrar(itens, { q: "professor" }, HOJE)).toHaveLength(1);
+    expect(filtrar(itens, { q: "professor visitante" }, HOJE)).toHaveLength(1);
+    expect(filtrar(itens, { q: "auditor" }, HOJE)).toHaveLength(1);
+  });
+
+  it("busca pela cidade da vaga, que não está no órgão", () => {
+    // `orgao.municipio` é nulo nos 1.332 órgãos do acervo; a cidade está na
+    // vaga, escrita pelo ato. E sem acento, como qualquer busca daqui.
+    const itens = [
+      fixture({
+        orgao: { ...fixture().orgao, municipio: null, uf: null },
+        localidades: ["Goiânia"],
+      }),
+      fixture({
+        orgao: { ...fixture().orgao, municipio: null, uf: null },
+        localidades: ["Coxim"],
+      }),
+    ];
+
+    expect(filtrar(itens, { q: "goiania" }, HOJE)).toHaveLength(1);
+    expect(filtrar(itens, { q: "coxim" }, HOJE)).toHaveLength(1);
+  });
+
+  it("concurso de um servidor antigo, sem os campos novos, não derruba a busca", () => {
+    // Um `bc api` de versão anterior não manda `nomesDeCargo` nem
+    // `localidades`. A lista inteira em branco por causa disso seria caro
+    // demais para o que custa a guarda.
+    const antigo = fixture();
+    delete (antigo as Partial<ConcursoResumo>).nomesDeCargo;
+    delete (antigo as Partial<ConcursoResumo>).localidades;
+
+    expect(filtrar([antigo], { q: "analista" }, HOJE)).toHaveLength(1);
   });
 
   it("combina estado com escolaridade", () => {

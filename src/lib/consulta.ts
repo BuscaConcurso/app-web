@@ -68,6 +68,15 @@ function textoBuscavel(concurso: ConcursoResumo): string {
       concurso.orgao.sigla ?? "",
       concurso.orgao.municipio ?? "",
       concurso.banca?.nome ?? "",
+      // O nome do cargo e a cidade da vaga. Sem os dois, procurar
+      // "professor" ou o nome de uma cidade no acervo do engine não acha
+      // nada: o título é o cabeçalho do ato e a cidade não está no órgão.
+      //
+      // `?? []` porque um `bc api` de versão anterior não manda estes
+      // campos, e uma lista inteira em branco por causa de um servidor
+      // desatualizado é caro demais para o que custa esta guarda.
+      (concurso.nomesDeCargo ?? []).join(" "),
+      (concurso.localidades ?? []).join(" "),
     ].join(" "),
   );
 }

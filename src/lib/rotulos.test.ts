@@ -74,6 +74,8 @@ describe("textoDeRodape", () => {
     salarioAte: null,
     taxaInscricao: null,
     escolaridades: [],
+    nomesDeCargo: [],
+    localidades: [],
     editalUrl: null,
     cronograma: [],
     cargos: [],

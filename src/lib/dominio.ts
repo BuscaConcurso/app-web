@@ -135,6 +135,21 @@ export interface ConcursoResumo {
   salarioAte: number | null;
   taxaInscricao: number | null;
   escolaridades: Escolaridade[];
+  /**
+   * Nomes dos cargos vigentes, distintos. Existem para a busca achar o
+   * concurso pelo cargo, que é a primeira coisa que um candidato digita:
+   * `titulo` é o cabeçalho do ato publicado, e no acervo do engine nenhum
+   * deles contém a palavra "professor" enquanto 105 de 181 concursos têm um
+   * cargo de professor. O cargo inteiro — vagas, requisitos, remuneração —
+   * só vem na página de detalhe.
+   */
+  nomesDeCargo: string[];
+  /**
+   * Cidades das vagas, distintas. A cidade do concurso não está no órgão
+   * (`orgao.municipio` é nulo em todos os 1.332), está na vaga, escrita pelo
+   * ato — e é a cidade da vaga que o candidato procura.
+   */
+  localidades: string[];
   /** Link para o PDF do edital no diário ou no site da banca. */
   editalUrl: string | null;
 }

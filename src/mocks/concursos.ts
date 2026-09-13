@@ -540,6 +540,11 @@ function paraResumo(rascunho: Rascunho): ConcursoResumo {
     salarioAte: rascunho.salarioAte ?? null,
     taxaInscricao: rascunho.taxa ?? null,
     escolaridades: rascunho.escolaridades,
+    // Vazios de propósito: o mock existe para demonstrar o desenho, e o
+    // acervo de verdade é que preenche nome de cargo e cidade de vaga. No
+    // mock a cidade vem do órgão, que é onde o mock a tem.
+    nomesDeCargo: [],
+    localidades: [],
     editalUrl: rascunho.publicado == null ? null : `/editais/${rascunho.slug}.pdf`,
   };
 }
