@@ -7,6 +7,7 @@
 import type {
   ConcursoDetalhe,
   ConcursoStatus,
+  FaqPergunta,
   Escolaridade,
   Esfera,
   EventoTipo,
@@ -217,3 +218,19 @@ export function avisoDeFiltroSemDado(
     "A lista vazia quer dizer que não sabemos, não que não exista."
   );
 }
+
+/**
+ * As seis perguntas do FAQ como o candidato as faria.
+ *
+ * Perguntas, não rótulos de campo: quem chega nesta página está decidindo se
+ * presta, e "Até quando dá para se inscrever?" é o que ele quer saber —
+ * `ate_quando` é nome de coluna.
+ */
+export const ROTULO_PERGUNTA: Record<FaqPergunta, string> = {
+  quem_pode: "Quem pode se inscrever?",
+  ate_quando: "Até quando dá para se inscrever?",
+  quanto_custa: "Quanto custa a inscrição?",
+  onde_inscrever: "Onde se inscrever?",
+  como_inscrever: "Como se inscrever?",
+  etapas_prova: "Quais são as etapas e as provas?",
+};

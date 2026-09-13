@@ -274,6 +274,48 @@ export interface Cargo {
   evidencia: TrechoDeEvidencia[];
 }
 
+/** `create type faq_pergunta` — as seis perguntas de candidato. */
+export type FaqPergunta =
+  | "ate_quando"
+  | "onde_inscrever"
+  | "etapas_prova"
+  | "como_inscrever"
+  | "quem_pode"
+  | "quanto_custa";
+
+/**
+ * As três coisas que podem ter acontecido com uma pergunta.
+ *
+ * `nao_respondida` é o ato não dizer, e é resposta: homologação não informa
+ * como se inscrever porque não tem como informar. `descartada` é o motor ter
+ * recusado o trecho que o modelo devolveu, porque ele não conferiu palavra
+ * por palavra com o texto do ato. A tela precisa dizer as duas coisas com
+ * palavras diferentes — uma é lacuna do documento, a outra é falha nossa.
+ */
+export type SituacaoDaResposta =
+  | "respondida"
+  | "nao_respondida"
+  | "descartada";
+
+/**
+ * Uma pergunta respondida pelo próprio ato.
+ *
+ * `trecho` **não é prosa do modelo**: é o pedaço literal do documento, e
+ * `inicioChar`/`fimChar` dizem onde ele está dentro de `Origem.texto`. É o
+ * que deixa a página destacar a resposta na frase que a produziu, em vez de
+ * pedir que se acredite na nossa leitura.
+ */
+export interface RespostaDoFaq {
+  pergunta: FaqPergunta;
+  situacao: SituacaoDaResposta;
+  /** Só quando respondida. O trecho recusado não chega aqui. */
+  trecho: string | null;
+  inicioChar: number | null;
+  fimChar: number | null;
+  /** Vocabulário de motor, não de tela. A página diz que houve descarte. */
+  motivoDescarte: string | null;
+}
+
 /**
  * De onde este concurso veio: o ato no Diário Oficial.
  *
@@ -308,6 +350,15 @@ export interface Origem {
   texto: string | null;
   /** Tamanho do texto. É por ele que a página decide o que abrir sozinho. */
   caracteres: number | null;
+  /**
+   * As seis perguntas respondidas por **este** ato. Vazia quando ele não foi
+   * lido pelo estágio de FAQ — só edital de abertura é elegível.
+   *
+   * Fica no ato, e não no concurso, porque a resposta é do documento: um
+   * concurso com abertura e retificação pode ter respostas de mais de um, e
+   * atribuir cada uma ao seu ato evita escolher qual vale.
+   */
+  faq: RespostaDoFaq[];
   /**
    * O endereço onde **este ato diz** que o edital completo pode ser lido.
    *

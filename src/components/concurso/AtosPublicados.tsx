@@ -1,6 +1,8 @@
 import { Rotulo } from "@/components/ui/Etiqueta";
-import type { Origem } from "@/lib/dominio";
+import { destacar } from "@/lib/destaque";
+import type { Origem, RespostaDoFaq } from "@/lib/dominio";
 import { dataLonga, numero } from "@/lib/formato";
+import { ROTULO_PERGUNTA } from "@/lib/rotulos";
 
 /**
  * Os atos publicados de onde tudo nesta página foi lido, com o texto inteiro.
@@ -74,6 +76,14 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
               </p>
             )}
 
+            {/* `?? []` porque um `bc api` de versão anterior não manda `faq`,
+                e sem a guarda a página inteira morre com 500 — visto na tela,
+                não suposto: a instância que eu tinha no ar era de antes do
+                campo existir, e o detalhe deixou de abrir. */}
+            {(origem.faq ?? []).length > 0 && (
+              <Faq respostas={origem.faq ?? []} />
+            )}
+
             {origem.texto ? (
               <details
                 open={(origem.caracteres ?? 0) <= ABRE_SOZINHO_ATE}
@@ -93,7 +103,23 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                     zero em 9.274 documentos —, então é um parágrafo só. */}
                 <div className="mt-2 max-h-[28rem] overflow-y-auto">
                   <p className="max-w-[78ch] text-[13px] leading-6 text-tinta-800">
-                    {origem.texto}
+                    {/* As respostas do FAQ marcadas onde elas estão. É o que a
+                        posição gravada junto do trecho paga: em vez de repetir
+                        a resposta fora de contexto, a página mostra a frase do
+                        ato que a produziu, dentro do documento. */}
+                    {destacar(origem.texto, faixasDoFaq(origem.faq ?? [])).map(
+                      (pedaco, indice) =>
+                        pedaco.destacado ? (
+                          <mark
+                            key={indice}
+                            className="rounded-[3px] bg-amarelo/40 text-tinta-900"
+                          >
+                            {pedaco.texto}
+                          </mark>
+                        ) : (
+                          <span key={indice}>{pedaco.texto}</span>
+                        ),
+                    )}
                   </p>
                 </div>
               </details>
@@ -141,4 +167,78 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
       </ul>
     </section>
   );
+}
+
+
+/**
+ * As perguntas que o ato responde, e as que ele não responde.
+ *
+ * A resposta é o trecho literal do documento — o modelo escolhe onde ela
+ * está, o motor confere palavra por palavra e descarta o que não casar. Por
+ * isso esta seção pode dizer "o ato responde" em vez de "segundo a nossa
+ * leitura", e por isso o mesmo trecho aparece destacado no texto logo abaixo.
+ *
+ * As duas formas de não haver resposta aparecem com palavras diferentes,
+ * porque são coisas diferentes: o ato não dizer é lacuna do documento (46 das
+ * 120 respostas do piloto), e o trecho ser descartado é recusa nossa (2 das
+ * 120). "Não informado" para as duas esconderia a segunda, que é a única que
+ * aponta defeito.
+ */
+function Faq({ respostas }: { respostas: RespostaDoFaq[] }) {
+  const respondidas = respostas.filter((r) => r.situacao === "respondida");
+  const ausentes = respostas.filter((r) => r.situacao === "nao_respondida");
+  const descartadas = respostas.filter((r) => r.situacao === "descartada");
+
+  return (
+    <div className="mt-3">
+      <h3 className="text-[12px] font-semibold text-tinta-800">
+        O que este ato responde
+      </h3>
+
+      {respondidas.length > 0 && (
+        <dl className="mt-2 flex flex-col gap-2.5">
+          {respondidas.map((resposta) => (
+            <div key={resposta.pergunta}>
+              <dt className="text-[13px] font-medium text-tinta-900">
+                {ROTULO_PERGUNTA[resposta.pergunta]}
+              </dt>
+              <dd className="mt-0.5 max-w-[74ch] border-l-2 border-tinta-200 pl-3 text-[13px] leading-6 text-tinta-700">
+                {resposta.trecho}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      {ausentes.length > 0 && (
+        <p className="mt-2.5 max-w-[74ch] text-[12px] leading-5 text-tinta-600">
+          O ato não responde:{" "}
+          {ausentes
+            .map((r) => ROTULO_PERGUNTA[r.pergunta].replace("?", "").toLowerCase())
+            .join("; ")}
+          .
+        </p>
+      )}
+
+      {descartadas.length > 0 && (
+        /* Dito, e não escondido: é a conferência funcionando. O trecho que o
+           modelo devolveu não existia no ato palavra por palavra, então não
+           virou resposta — e quem lê fica sabendo que existe essa régua, em
+           vez de ver um silêncio igual ao da lacuna. */
+        <p className="mt-1.5 max-w-[74ch] text-[12px] leading-5 text-tinta-600">
+          {descartadas.length === 1
+            ? "Uma resposta foi descartada"
+            : `${descartadas.length} respostas foram descartadas`}{" "}
+          por não conferir com o texto do ato, palavra por palavra.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** As posições das respostas aceitas, para o destaque no texto. */
+function faixasDoFaq(respostas: RespostaDoFaq[]) {
+  return respostas
+    .filter((r) => r.inicioChar !== null && r.fimChar !== null)
+    .map((r) => ({ inicio: r.inicioChar as number, fim: r.fimChar as number }));
 }
