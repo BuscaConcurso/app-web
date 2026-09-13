@@ -5,7 +5,12 @@ import { AcervoIncompleto, BlocoAlerta } from "@/components/home/BlocoAlerta";
 import { BlocosSeo } from "@/components/home/BlocosSeo";
 import { Hero } from "@/components/home/Hero";
 import { Secao } from "@/components/home/Secao";
-import { avisoDoAcervo, facetas, obterDestaques } from "@/lib/concursos";
+import {
+  avisoDoAcervo,
+  dimensoesDoAcervo,
+  facetas,
+  obterDestaques,
+} from "@/lib/concursos";
 import { dataLonga } from "@/lib/formato";
 import { DESCRICAO_SITE, NOME_SITE, urlAbsoluta } from "@/lib/site";
 
@@ -26,6 +31,7 @@ export default async function Home() {
   const destaques = await obterDestaques(hoje);
   const { ufs, bancas, orgaos } = await facetas(hoje);
   const aviso = await avisoDoAcervo();
+  const dimensoes = await dimensoesDoAcervo();
 
   /**
    * ItemList sobre os concursos em destaque. Descreve para o buscador que
@@ -59,6 +65,7 @@ export default async function Home() {
       <Hero
         totalAbertos={destaques.totalAbertos}
         atualizadoEm={dataLonga(isoDeHoje(hoje))}
+        dimensoes={dimensoes}
       />
 
       {destaques.encerrando.length > 0 && (

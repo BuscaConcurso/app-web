@@ -5,7 +5,12 @@ import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import { BarraBusca } from "@/components/busca/BarraBusca";
 import { Paginacao } from "@/components/ui/Paginacao";
 import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
-import { avisoDoAcervo, contagensDeFaceta, listarConcursos } from "@/lib/concursos";
+import {
+  avisoDoAcervo,
+  contagensDeFaceta,
+  dimensoesDoAcervo,
+  listarConcursos,
+} from "@/lib/concursos";
 import { ORDENS, SITUACOES } from "@/lib/consulta";
 import { moeda, numero } from "@/lib/formato";
 import {
@@ -14,7 +19,12 @@ import {
   urlSemValor,
   type ConsultaDaUrl,
 } from "@/lib/parametros";
-import { NOME_UF, ROTULO_ESCOLARIDADE, ROTULO_ESFERA } from "@/lib/rotulos";
+import {
+  NOME_UF,
+  ROTULO_ESCOLARIDADE,
+  ROTULO_ESFERA,
+  avisoDeFiltroSemDado,
+} from "@/lib/rotulos";
 import { BANCAS } from "@/mocks/bancas";
 
 /**
@@ -183,11 +193,13 @@ export default async function BuscaDeConcursos(
   const resultado = await listarConcursos({ ...filtro, ordem, pagina }, hoje);
   const contagens = await contagensDeFaceta(filtro, hoje);
   const aviso = await avisoDoAcervo();
+  const dimensoes = await dimensoesDoAcervo();
+  const semDado = avisoDeFiltroSemDado(consulta, dimensoes);
   const chips = chipsAtivos(consulta);
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
-      <BarraBusca q={q} uf={uf} compacta />
+      <BarraBusca q={q} uf={uf} compacta dimensoes={dimensoes} />
 
       <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-start">
         <ColunaFiltros
@@ -210,6 +222,14 @@ export default async function BuscaDeConcursos(
                   ? "concurso encontrado"
                   : "concursos encontrados"}
               </p>
+              {/* Zero resultados por falta de dado nosso não é zero
+                  resultados. Quem marcou "Espírito Santo" e recebeu uma lista
+                  vazia conclui que não há concurso no estado dele. */}
+              {semDado && (
+                <p className="mt-1.5 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
+                  {semDado}
+                </p>
+              )}
             </div>
 
             <nav

@@ -347,3 +347,102 @@ describe("obterDetalhe", () => {
     expect(await obterDetalhe("nao-existe")).toBeNull();
   });
 });
+
+describe("origemDoAcervo", () => {
+  it("diz `api` quando a API respondeu", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({ concursos: [UM_CONCURSO], total: 1, semDado: 0 }),
+    ));
+
+    const { origemDoAcervo } = await carregar();
+
+    expect(await origemDoAcervo()).toBe("api");
+  });
+
+  it("diz `falha` quando a API estava configurada e não respondeu", async () => {
+    // O caso que motivou isto: a API reiniciando, a tela mostrando o mock com
+    // cara de acervo real, e quem olhava quase relatando o mock como dado.
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new Error("ECONNREFUSED");
+    }));
+
+    const { origemDoAcervo, listarConcursos } = await carregar();
+
+    expect(await origemDoAcervo()).toBe("falha");
+    // E a lista continua vindo: a reserva não foi tirada, só deixou de ser
+    // silenciosa.
+    expect((await listarConcursos({ porPagina: 1000 })).total).toBe(
+      CONCURSOS.length,
+    );
+  });
+
+  it("diz `mock` quando ninguém configurou a API", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+
+    const { origemDoAcervo } = await carregar();
+
+    expect(await origemDoAcervo()).toBe("mock");
+  });
+
+  it("resposta torta também é falha, não `api`", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ ok: true })));
+
+    const { origemDoAcervo } = await carregar();
+
+    expect(await origemDoAcervo()).toBe("falha");
+  });
+});
+
+describe("dimensoesDoAcervo", () => {
+  it("conta os campos que o filtro lê, não os parecidos", async () => {
+    // `filtrar` casa `concurso.uf` no filtro de estado e
+    // `concurso.orgao.esfera` no de esfera. Contar `orgao.uf` no lugar de
+    // `concurso.uf` faria a tela prometer um filtro que o filtro não entrega.
+    vi.stubEnv("BC_API_URL", API);
+    const comUfSoNoOrgao = {
+      ...UM_CONCURSO,
+      slug: "uf-so-no-orgao",
+      uf: null,
+      orgao: { ...UM_CONCURSO.orgao, uf: "SP" },
+    };
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({
+        concursos: [UM_CONCURSO, comUfSoNoOrgao],
+        total: 2,
+        semDado: 0,
+      }),
+    ));
+
+    const { dimensoesDoAcervo } = await carregar();
+
+    expect(await dimensoesDoAcervo()).toEqual({
+      total: 2,
+      comUf: 0,
+      comEsfera: 0,
+    });
+  });
+
+  it("conta quem tem, quando tem", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    const comDado = {
+      ...UM_CONCURSO,
+      slug: "com-dado",
+      uf: "SP",
+      orgao: { ...UM_CONCURSO.orgao, esfera: "federal" },
+    };
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({ concursos: [UM_CONCURSO, comDado], total: 2, semDado: 0 }),
+    ));
+
+    const { dimensoesDoAcervo } = await carregar();
+
+    expect(await dimensoesDoAcervo()).toEqual({
+      total: 2,
+      comUf: 1,
+      comEsfera: 1,
+    });
+  });
+});

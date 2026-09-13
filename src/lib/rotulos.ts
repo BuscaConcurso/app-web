@@ -178,3 +178,36 @@ export function textoDeRodape(concurso: ConcursoDetalhe): string {
     " inscrever."
   );
 }
+
+/**
+ * A frase que explica um filtro que o acervo não tem como responder.
+ *
+ * Devolve `null` quando não há o que explicar. A diferença que ela existe
+ * para marcar é a que separa informação de mentira: "ainda não sabemos o
+ * estado destes concursos" não é "não há concurso neste estado", e uma lista
+ * vazia sem explicação diz a segunda.
+ *
+ * Hoje isso vale para estado e esfera, nulos em 100% do acervo. Quando a
+ * resolução de órgão preencher parte deles, a contagem sobe e a frase
+ * desaparece sozinha para quem já tem dado.
+ */
+export function avisoDeFiltroSemDado(
+  filtro: { uf?: Uf; esferas?: Esfera[] },
+  dimensoes: { total: number; comUf: number; comEsfera: number },
+): string | null {
+  const pedidos: string[] = [];
+  if (filtro.uf && dimensoes.comUf === 0) {
+    pedidos.push(`o estado (${NOME_UF[filtro.uf]})`);
+  }
+  if (filtro.esferas?.length && dimensoes.comEsfera === 0) {
+    const esferas = filtro.esferas.map((esfera) => ROTULO_ESFERA[esfera]);
+    pedidos.push(`a esfera (${esferas.join(", ").toLowerCase()})`);
+  }
+  if (pedidos.length === 0) return null;
+
+  return (
+    `Este filtro não tem como responder ainda: nenhum dos ${dimensoes.total} ` +
+    `concursos do acervo tem ${pedidos.join(" nem ")} identificado. ` +
+    "A lista vazia quer dizer que não sabemos, não que não exista."
+  );
+}

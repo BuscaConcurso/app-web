@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { UFS, type Uf } from "@/lib/dominio";
 import { ufDeCoordenada, type Contornos } from "@/lib/localizacao";
+import { numero } from "@/lib/formato";
 import { NOME_UF } from "@/lib/rotulos";
 import {
   assinarUfLembrada,
@@ -55,9 +56,22 @@ export function BarraBusca({
   q,
   uf,
   compacta = false,
+  dimensoes,
 }: {
   q?: string;
   uf?: string;
+  /**
+   * O que a lista consegue filtrar hoje. `undefined` quando quem renderiza
+   * não perguntou (a vitrine do design system), e aí o seletor funciona como
+   * sempre.
+   *
+   * `comUf: 0` desabilita o seletor e diz por quê. Oferecer os 27 estados
+   * quando nenhum deles devolve nada é a tela afirmando uma capacidade que o
+   * dado não tem — e quem clica conclui que não há concurso no estado dele,
+   * que é falso. Desabilitado e explicado, a pessoa sabe que a falta é nossa,
+   * e o controle volta sozinho quando o dado chegar.
+   */
+  dimensoes?: { total: number; comUf: number };
   compacta?: boolean;
 }) {
   const hidratado = useHidratado();
@@ -147,10 +161,17 @@ export function BarraBusca({
     hidratado &&
     "geolocation" in navigator &&
     !escolhida &&
-    estado !== "detectando";
+    estado !== "detectando" &&
+    // Pedir a localização de alguém para preencher um filtro que não filtra
+    // nada seria pedir permissão por nada.
+    !(dimensoes !== undefined && dimensoes.comUf === 0);
 
   const altura = compacta ? "h-9" : "h-11";
   const corpo = compacta ? "text-sm" : "text-base";
+
+  // Quem perguntou e recebeu zero: o acervo não sabe o estado de nenhum
+  // concurso, e o seletor não tem como cumprir o que oferece.
+  const semEstado = dimensoes !== undefined && dimensoes.comUf === 0;
 
   return (
     <div>
@@ -200,7 +221,13 @@ export function BarraBusca({
               name="uf"
               value={escolhida}
               onChange={(evento) => trocar(evento.target.value)}
-              className={`w-full cursor-pointer appearance-none rounded-full bg-rebaixada pr-9 pl-4 text-sm font-medium text-tinta-900 sm:w-[11rem] ${altura}`}
+              disabled={semEstado}
+              aria-describedby={semEstado ? "busca-uf-motivo" : undefined}
+              className={`w-full appearance-none rounded-full bg-rebaixada pr-9 pl-4 text-sm font-medium sm:w-[11rem] ${altura} ${
+                semEstado
+                  ? "cursor-not-allowed text-tinta-500"
+                  : "cursor-pointer text-tinta-900"
+              }`}
             >
               <option value="">Todo o Brasil</option>
               {UFS.map((sigla) => (
@@ -233,6 +260,15 @@ export function BarraBusca({
           </button>
         </div>
       </form>
+
+      {semEstado && (
+        <p id="busca-uf-motivo" className="mt-2 text-[12px] text-tinta-600">
+          Ainda não sabemos o estado de nenhum dos{" "}
+          <strong className="numero font-medium">{numero(dimensoes!.total)}</strong>{" "}
+          concursos do acervo, então o filtro por estado está desligado.
+          Procure pelo nome da cidade ou do órgão enquanto isso.
+        </p>
+      )}
 
       <div
         aria-live="polite"

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Archivo, Literata } from "next/font/google";
 import "./globals.css";
+import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
 import { Cabecalho } from "@/components/layout/Cabecalho";
 import { Rodape } from "@/components/layout/Rodape";
+import { origemDoAcervo } from "@/lib/concursos";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 import { SCRIPT_DO_TEMA } from "@/lib/tema";
 
@@ -106,7 +108,18 @@ const dadosEstruturados = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * `async` por causa de uma linha só: a faixa que diz de onde o acervo veio.
+ *
+ * Ela fica no layout, e não em cada página, porque é o único lugar onde
+ * nenhuma página nova pode esquecer de mostrá-la — e a coisa que ela avisa, o
+ * mock se passando por acervo, é justamente a que ninguém nota quando falta.
+ * Não custa requisição: o `fetch` do Next memoriza a chamada que a página já
+ * faz no mesmo render, e sem `BC_API_URL` não há requisição nenhuma.
+ */
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const origem = await origemDoAcervo();
+
   return (
     <html
       lang="pt-BR"
@@ -126,6 +139,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: JSON.stringify(dadosEstruturados).replace(/</g, "\\u003c"),
           }}
         />
+        <AvisoDeOrigem origem={origem} />
         <Cabecalho />
         <main className="flex-1">{children}</main>
         <Rodape />

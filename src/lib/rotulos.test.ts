@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoDetalhe } from "./dominio";
-import { linhaDeContexto, textoDeRodape, tituloComOrgao } from "./rotulos";
+import {
+  avisoDeFiltroSemDado,
+  linhaDeContexto,
+  textoDeRodape,
+  tituloComOrgao,
+} from "./rotulos";
 
 describe("tituloComOrgao", () => {
   it("órgão sem sigla não deixa dois-pontos solto no começo", () => {
@@ -150,5 +155,40 @@ describe("textoDeRodape", () => {
 
     expect(sem).toContain("O ato não informou remuneração.");
     expect(com).not.toContain("não informou remuneração");
+  });
+});
+
+describe("avisoDeFiltroSemDado", () => {
+  const NADA = { total: 325, comUf: 0, comEsfera: 0 };
+  const TUDO = { total: 325, comUf: 325, comEsfera: 325 };
+
+  it("explica o estado que o acervo não tem como responder", () => {
+    const texto = avisoDeFiltroSemDado({ uf: "ES" }, NADA);
+
+    // A primeira asserção é a que o teste promete: existe explicação. Sem
+    // ela, a falha aparece como "null não é string", que não diz nada sobre
+    // o que quebrou.
+    expect(texto, "filtro sem dado tem de explicar").not.toBeNull();
+    expect(texto).toContain("Espírito Santo");
+    expect(texto).toContain("325");
+    // A frase existe para marcar esta diferença, e é ela que não pode sumir.
+    expect(texto).toContain("não sabemos, não que não exista");
+  });
+
+  it("explica a esfera pelo mesmo motivo", () => {
+    const texto = avisoDeFiltroSemDado({ esferas: ["federal"] }, NADA);
+
+    expect(texto, "filtro sem dado tem de explicar").not.toBeNull();
+    expect(texto).toContain("esfera");
+  });
+
+  it("cala quando o acervo tem o dado", () => {
+    expect(avisoDeFiltroSemDado({ uf: "ES" }, TUDO)).toBeNull();
+    expect(avisoDeFiltroSemDado({ esferas: ["federal"] }, TUDO)).toBeNull();
+  });
+
+  it("cala quando ninguém filtrou por estado nem por esfera", () => {
+    expect(avisoDeFiltroSemDado({}, NADA)).toBeNull();
+    expect(avisoDeFiltroSemDado({ esferas: [] }, NADA)).toBeNull();
   });
 });

@@ -71,7 +71,21 @@ interface RespostaDeAcervo {
    * Sai por `avisoDoAcervo()`, aqui embaixo.
    */
   semDado: number;
+  /** Preenchido aqui, não pela API: é quem leu que sabe de onde leu. */
+  origem: OrigemDoAcervo;
 }
+
+/**
+ * De onde veio o que está na tela.
+ *
+ * - `api`: o acervo do engine, dado de verdade.
+ * - `mock`: `BC_API_URL` não está configurada. É o modo de desenhar a tela
+ *   sem o engine no ar, e é escolha de quem rodou.
+ * - `falha`: a API estava configurada e não respondeu. **Este é o perigoso**:
+ *   a tela mostra "Prefeitura de Curitiba, banca AOCP" com cara de acervo
+ *   real, e é indistinguível de um acervo pequeno para quem olha.
+ */
+export type OrigemDoAcervo = "api" | "mock" | "falha";
 
 /**
  * O que o mock é, na forma da resposta da API. `semDado: 0` porque o mock é
@@ -82,6 +96,7 @@ const ACERVO_DE_MOCK: RespostaDeAcervo = {
   concursos: CONCURSOS,
   total: CONCURSOS.length,
   semDado: 0,
+  origem: "mock",
 };
 
 async function carregar(): Promise<RespostaDeAcervo> {
@@ -99,7 +114,7 @@ async function carregar(): Promise<RespostaDeAcervo> {
     if (!Array.isArray(corpo?.concursos)) {
       throw new Error("a resposta não tem a lista `concursos`");
     }
-    return corpo;
+    return { ...corpo, origem: "api" };
   } catch (erro) {
     // `fetch(..., { cache: "no-store" })` é uma das APIs que o Next usa
     // levantando erro próprio para sair do caminho estático (a lista está em
@@ -117,8 +132,43 @@ async function carregar(): Promise<RespostaDeAcervo> {
         erro instanceof Error ? erro.message : erro
       }); usando o mock. Suba a API com \`bc api\` no repositório engine.`,
     );
-    return ACERVO_DE_MOCK;
+    return { ...ACERVO_DE_MOCK, origem: "falha" };
   }
+}
+
+/**
+ * De onde veio o acervo que está na tela, para a tela poder dizer.
+ *
+ * Sem isto, uma API fora do ar parece um app funcionando com dado errado: o
+ * `console.warn` fica no terminal de quem roda o servidor, e quem olha a
+ * página vê um acervo pequeno e plausível. Aconteceu de verdade nesta
+ * integração, com quem sabia da existência do mock.
+ */
+export async function origemDoAcervo(): Promise<OrigemDoAcervo> {
+  return (await carregar()).origem;
+}
+
+/**
+ * O que a lista consegue filtrar hoje, contado sobre o acervo de verdade.
+ *
+ * Os campos contados são exatamente os que `filtrar` lê (`consulta.ts`):
+ * `concurso.uf` para o filtro de estado e `concurso.orgao.esfera` para o de
+ * esfera. Contar outro campo — `orgao.uf`, por exemplo — faria a tela
+ * prometer um filtro que o filtro não entrega.
+ */
+export interface DimensoesDoAcervo {
+  total: number;
+  comUf: number;
+  comEsfera: number;
+}
+
+export async function dimensoesDoAcervo(): Promise<DimensoesDoAcervo> {
+  const todos = await acervo();
+  return {
+    total: todos.length,
+    comUf: todos.filter((concurso) => concurso.uf !== null).length,
+    comEsfera: todos.filter((concurso) => concurso.orgao.esfera !== null).length,
+  };
 }
 
 async function acervo(): Promise<ConcursoResumo[]> {
