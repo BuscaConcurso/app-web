@@ -293,6 +293,16 @@ export interface Origem {
   texto: string | null;
   /** Tamanho do texto. É por ele que a página decide o que abrir sozinho. */
   caracteres: number | null;
+  /**
+   * O endereço onde **este ato diz** que o edital completo pode ser lido.
+   *
+   * Campo separado de `ConcursoResumo.editalUrl` de propósito: aquele é um
+   * arquivo que o motor baixou e guardou; este é um endereço que o ato
+   * afirma e que **nunca visitamos**. O ato pode ter meses e site de banca
+   * muda, então a tela oferece o link dizendo isso, em vez de prometer que
+   * ele abre.
+   */
+  editalCitadoUrl: string | null;
 }
 
 /** O concurso inteiro, como a página de detalhe precisa dele. */
@@ -300,4 +310,10 @@ export interface ConcursoDetalhe extends ConcursoResumo {
   cronograma: EventoDoCronograma[];
   cargos: Cargo[];
   origens: Origem[];
+  /**
+   * O endereço do edital completo escolhido entre os atos — abertura
+   * primeiro, depois o mais recente. Mesma ressalva de `Origem`: é o que o
+   * ato afirma, não o que nós conferimos.
+   */
+  editalCitadoUrl: string | null;
 }

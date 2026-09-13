@@ -171,12 +171,18 @@ export function textoDeRodape(concurso: ConcursoDetalhe): string {
       ? " O ato não informou remuneração."
       : "";
 
-  return (
-    `${oQueTemos}${semRemuneracao}` +
-    " O edital completo, com anexos, programa de provas e eventuais" +
-    " retificações, sai no site da banca — confira sempre lá antes de se" +
-    " inscrever."
-  );
+  // Quando um ato diz onde o edital está, a frase manda a pessoa para lá em
+  // vez de deixá-la procurar: é o documento que ela veio buscar. Sem
+  // prometer, porque o endereço é o que o ato afirma e não o que conferimos —
+  // a ressalva inteira fica ao lado do link, na seção do ato.
+  const ondeEstaOEdital = concurso.editalCitadoUrl
+    ? " O endereço do edital completo, informado pelo próprio ato, está logo" +
+      " abaixo, na seção do ato publicado."
+    : " O edital completo, com anexos, programa de provas e eventuais" +
+      " retificações, sai no site da banca — confira sempre lá antes de se" +
+      " inscrever.";
+
+  return `${oQueTemos}${semRemuneracao}${ondeEstaOEdital}`;
 }
 
 /**

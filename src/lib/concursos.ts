@@ -452,7 +452,13 @@ export async function obterDetalhe(
   }
   const resumo = CONCURSOS.find((concurso) => concurso.slug === slug);
   return resumo
-    ? { ...resumo, cronograma: [], cargos: [], origens: [] }
+    ? {
+        ...resumo,
+        cronograma: [],
+        cargos: [],
+        origens: [],
+        editalCitadoUrl: null,
+      }
     : null;
 }
 

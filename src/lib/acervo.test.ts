@@ -281,8 +281,10 @@ describe("obterDetalhe", () => {
         vistoEm: "2026-09-12T03:55:48Z",
         texto: "EDITAL Nº 10, DE 13 DE MAIO DE 2026 ...",
         caracteres: 2911,
+        editalCitadoUrl: "https://www.vunesp.com.br/TRT2601",
       },
     ],
+    editalCitadoUrl: "https://www.vunesp.com.br/TRT2601",
   };
 
   it("vem da rota do concurso, com cronograma, cargos e origem", async () => {
@@ -471,6 +473,7 @@ describe("origem sem endereço", () => {
             vistoEm: "2026-09-12T03:55:48Z",
             texto: "EDITAL Nº 1, DE 5 DE MARÇO DE 2026 ...",
             caracteres: 1837,
+            editalCitadoUrl: null,
           },
         ],
       }),

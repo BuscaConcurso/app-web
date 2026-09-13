@@ -85,6 +85,7 @@ describe("textoDeRodape", () => {
     cronograma: [],
     cargos: [],
     origens: [],
+    editalCitadoUrl: null,
   } satisfies ConcursoDetalhe;
 
   const CARGO = {
@@ -191,5 +192,55 @@ describe("avisoDeFiltroSemDado", () => {
   it("cala quando ninguém filtrou por estado nem por esfera", () => {
     expect(avisoDeFiltroSemDado({}, NADA)).toBeNull();
     expect(avisoDeFiltroSemDado({ esferas: [] }, NADA)).toBeNull();
+  });
+});
+
+describe("textoDeRodape com o endereço do edital", () => {
+  it("manda a pessoa para o endereço quando o ato informa um", () => {
+    const BASE = {
+      slug: "x",
+      titulo: "Edital nº 1",
+      tipo: "concurso_publico",
+      status: "previsto",
+      orgao: {
+        slug: "o",
+        nome: "Órgão",
+        sigla: null,
+        esfera: null,
+        poder: null,
+        uf: null,
+        municipio: null,
+      },
+      banca: null,
+      uf: null,
+      inscricoesDe: null,
+      inscricoesAte: null,
+      publicadoEm: null,
+      previstoPara: null,
+      vagas: null,
+      cadastroReserva: false,
+      salarioAte: null,
+      taxaInscricao: null,
+      escolaridades: [],
+      nomesDeCargo: [],
+      localidades: [],
+      editalUrl: null,
+      cronograma: [],
+      cargos: [],
+      origens: [],
+      editalCitadoUrl: null,
+    } satisfies ConcursoDetalhe;
+
+    const com = textoDeRodape({
+      ...BASE,
+      editalCitadoUrl: "https://www.vunesp.com.br/X",
+    });
+    const sem = textoDeRodape(BASE);
+
+    expect(com).toContain("está logo abaixo");
+    // Sem endereço, a frase continua dizendo onde procurar em geral, em vez
+    // de apontar para uma seção que não vai ter link nenhum.
+    expect(sem).toContain("site da banca");
+    expect(sem).not.toContain("logo abaixo");
   });
 });

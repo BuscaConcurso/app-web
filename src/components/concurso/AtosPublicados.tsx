@@ -103,10 +103,35 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
               </p>
             )}
 
-            {/* Aqui entra o endereço do edital completo no site da banca,
-                quando o contrato de extração começar a trazê-lo: é mais uma
-                linha desta mesma lista, ao lado do ato de onde ele foi
-                citado. */}
+            {origem.editalCitadoUrl && (
+              /* O endereço do edital completo, dito pelo próprio ato. Fica ao
+                 lado do ato que o citou, e não solto no topo da página, porque
+                 é a procedência que sustenta o link: foi este documento, desta
+                 data, que afirmou isso.
+
+                 A ressalva não é decoração. Nós nunca visitamos este endereço:
+                 ele saiu do texto de um ato que pode ter meses, e site de
+                 banca muda de lugar. Oferecer "leia o edital completo" sem
+                 dizer isso seria prometer uma porta que talvez não abra — a
+                 mesma classe do link do Diário que dava 404. */
+              <p className="mt-2 text-[13px] leading-5">
+                <span className="text-tinta-600">
+                  Este ato informa que o edital completo está em:{" "}
+                </span>
+                <a
+                  href={origem.editalCitadoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium break-all text-link underline underline-offset-4 hover:text-link-hover"
+                >
+                  {origem.editalCitadoUrl.replace(/^https?:\/\//, "")}
+                </a>
+                <span className="text-tinta-600">
+                  {" "}
+                  — endereço informado pelo ato, que não conferimos.
+                </span>
+              </p>
+            )}
 
             <p className="mt-2 text-[11px] text-tinta-500">
               Coletado do diário em {dataLonga(origem.vistoEm.slice(0, 10))}.
