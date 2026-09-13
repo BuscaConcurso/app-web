@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ConcursoResumo } from "./dominio";
+import type { ConcursoResumo, Uf } from "./dominio";
 import { CONCURSOS } from "@/mocks/concursos";
 
 /**
@@ -38,6 +38,7 @@ const UM_CONCURSO: ConcursoResumo = {
   },
   banca: null,
   uf: null,
+  ufs: [],
   inscricoesDe: null,
   inscricoesAte: null,
   publicadoEm: "2026-05-12",
@@ -431,12 +432,39 @@ describe("dimensoesDoAcervo", () => {
     });
   });
 
+  it("o concurso multiestadual conta como filtrável, e o cartão não o mostra", async () => {
+    // O caso que a contagem tem de enxergar: `uf` nula porque são vários
+    // estados, e mesmo assim filtrável por qualquer um deles. Contar `uf`
+    // diria que este concurso não dá para filtrar, e o seletor de estado
+    // ficaria desligado com 7 concursos alcançáveis no acervo.
+    vi.stubEnv("BC_API_URL", API);
+    const nacional = {
+      ...UM_CONCURSO,
+      slug: "nacional",
+      uf: null,
+      ufs: ["ES", "SP"] as Uf[],
+    };
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({ concursos: [nacional], total: 1, semDado: 0 }),
+    ));
+
+    const { dimensoesDoAcervo, listarConcursos } = await carregar();
+
+    expect(await dimensoesDoAcervo()).toEqual({
+      total: 1,
+      comUf: 1,
+      comEsfera: 0,
+    });
+    expect((await listarConcursos({ uf: "ES" })).total).toBe(1);
+  });
+
   it("conta quem tem, quando tem", async () => {
     vi.stubEnv("BC_API_URL", API);
     const comDado = {
       ...UM_CONCURSO,
       slug: "com-dado",
       uf: "SP",
+      ufs: ["SP"] as Uf[],
       orgao: { ...UM_CONCURSO.orgao, esfera: "federal" },
     };
     vi.stubGlobal("fetch", vi.fn(async () =>

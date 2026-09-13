@@ -6,8 +6,17 @@ const HOJE = new Date(2026, 3, 10, 9, 0);
 
 let contador = 0;
 
+/**
+ * `ufs` acompanha `uf` quando quem chama não disser o contrário, que é a
+ * invariante do banco: `concurso.uf` é coluna gerada a partir de `ufs`, a UF
+ * quando é uma só e nula quando são várias. Fixture em que as duas
+ * discordassem testaria um estado que o banco não produz.
+ */
 function fixture(parcial: Partial<ConcursoResumo> = {}): ConcursoResumo {
   contador += 1;
+  const ufs =
+    parcial.ufs ??
+    (parcial.uf !== undefined ? ([parcial.uf].filter(Boolean) as Uf[]) : undefined);
   return {
     slug: `concurso-${contador}`,
     titulo: "Analista judiciário",
@@ -24,6 +33,7 @@ function fixture(parcial: Partial<ConcursoResumo> = {}): ConcursoResumo {
     },
     banca: { slug: "vunesp", nome: "Vunesp" },
     uf: "SP",
+    ufs: ["SP"] as Uf[],
     inscricoesDe: "2026-03-01",
     inscricoesAte: "2026-05-01",
     publicadoEm: "2026-02-20",
@@ -37,6 +47,7 @@ function fixture(parcial: Partial<ConcursoResumo> = {}): ConcursoResumo {
     localidades: [],
     editalUrl: null,
     ...parcial,
+    ...(ufs === undefined ? {} : { ufs }),
   };
 }
 
@@ -108,6 +119,41 @@ describe("filtrar", () => {
     delete (antigo as Partial<ConcursoResumo>).nomesDeCargo;
     delete (antigo as Partial<ConcursoResumo>).localidades;
 
+    expect(filtrar([antigo], { q: "analista" }, HOJE)).toHaveLength(1);
+  });
+
+  it("acha o concurso multiestadual em cada um dos seus estados", () => {
+    // São 7 no acervo, e o do IBGE tem vaga em 23 estados. `uf` é nula neles
+    // por desenho — é o cartão que não pode afirmar um estado só —, e um
+    // filtro que olhasse `uf` os deixaria fora de todo estado.
+    const nacional = fixture({
+      titulo: "Censo",
+      uf: null,
+      ufs: ["ES", "SP", "BA"],
+    });
+    const paulista = fixture({ uf: "SP" });
+
+    expect(filtrar([nacional, paulista], { uf: "ES" }, HOJE)).toHaveLength(1);
+    expect(filtrar([nacional, paulista], { uf: "BA" }, HOJE)).toHaveLength(1);
+    expect(filtrar([nacional, paulista], { uf: "SP" }, HOJE)).toHaveLength(2);
+    expect(filtrar([nacional, paulista], { uf: "RJ" }, HOJE)).toHaveLength(0);
+  });
+
+  it("concurso sem estado nenhum continua fora do filtro de estado", () => {
+    const semEstado = fixture({ uf: null, ufs: [] });
+
+    expect(filtrar([semEstado], { uf: "SP" }, HOJE)).toHaveLength(0);
+    // E aparece quando ninguém filtra por estado: ausência não é exclusão.
+    expect(filtrar([semEstado], {}, HOJE)).toHaveLength(1);
+  });
+
+  it("servidor antigo, sem `ufs`, não derruba o filtro de estado", () => {
+    const antigo = fixture({ uf: "SP" });
+    delete (antigo as Partial<ConcursoResumo>).ufs;
+
+    // Sem `ufs`, ele não casa nenhum estado — mas a lista não quebra, e a
+    // busca por texto continua achando.
+    expect(filtrar([antigo], { uf: "SP" }, HOJE)).toHaveLength(0);
     expect(filtrar([antigo], { q: "analista" }, HOJE)).toHaveLength(1);
   });
 

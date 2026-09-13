@@ -166,7 +166,10 @@ export async function dimensoesDoAcervo(): Promise<DimensoesDoAcervo> {
   const todos = await acervo();
   return {
     total: todos.length,
-    comUf: todos.filter((concurso) => concurso.uf !== null).length,
+    // O que o filtro lê é `ufs`, não `uf`: contar `uf` diria que 249 dos 325
+    // são filtráveis quando são 256, e esconderia justamente os
+    // multiestaduais, que são os que só o conjunto alcança.
+    comUf: todos.filter((concurso) => (concurso.ufs ?? []).length > 0).length,
     comEsfera: todos.filter((concurso) => concurso.orgao.esfera !== null).length,
   };
 }

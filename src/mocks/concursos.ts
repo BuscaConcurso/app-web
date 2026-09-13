@@ -531,6 +531,9 @@ function paraResumo(rascunho: Rascunho): ConcursoResumo {
     orgao,
     banca: rascunho.banca ? BANCAS[rascunho.banca] : null,
     uf: orgao.uf,
+    // O mock é de um estado por concurso, então o conjunto é o próprio: é o
+    // acervo do engine que tem concurso multiestadual.
+    ufs: orgao.uf ? [orgao.uf] : [],
     inscricoesDe: rascunho.de == null ? null : dia(rascunho.de),
     inscricoesAte: rascunho.ate == null ? null : dia(rascunho.ate),
     publicadoEm: rascunho.publicado == null ? null : dia(rascunho.publicado),

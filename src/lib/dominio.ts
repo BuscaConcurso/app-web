@@ -122,7 +122,22 @@ export interface ConcursoResumo {
   status: ConcursoStatus;
   orgao: Orgao;
   banca: Banca | null;
+  /**
+   * O que o cartão mostra: a UF quando é uma só, e **nula quando são
+   * várias**. É coluna gerada a partir de `ufs` no banco do engine, então as
+   * duas não têm como discordar — um cartão que dissesse "SP" para um
+   * concurso com vaga em 23 estados mentiria.
+   */
   uf: Uf | null;
+  /**
+   * O que o filtro casa. Publicada porque `uf` sozinha torna os concursos
+   * multiestaduais **invisíveis a qualquer estado**: eles têm `uf` nula por
+   * desenho, e são 7 no acervo — o do IBGE tem vaga em 23 estados.
+   *
+   * O tamanho distingue "não sabemos" (vazia) de "são vários" (mais de um),
+   * sem precisar de um terceiro campo.
+   */
+  ufs: Uf[];
   /** Datas em ISO curto, `AAAA-MM-DD`, como vêm de uma coluna `date`. */
   inscricoesDe: string | null;
   inscricoesAte: string | null;

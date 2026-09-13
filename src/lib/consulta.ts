@@ -113,7 +113,16 @@ export function filtrar(
 ): ConcursoResumo[] {
   return itens.filter((concurso) => {
     if (filtro.q && !combinaComTermos(concurso, filtro.q)) return false;
-    if (filtro.uf && concurso.uf !== filtro.uf) return false;
+    // Casa contra o CONJUNTO de estados, não contra o valor único que o
+    // cartão mostra. `concurso.uf` é nula quando o concurso tem vaga em mais
+    // de um estado, e comparar com ela deixava os multiestaduais fora de
+    // todo filtro — o concurso do IBGE, com vaga em 23 estados, não aparecia
+    // em nenhum deles.
+    //
+    // `?? []` porque um `bc api` de versão anterior não manda `ufs`: sem a
+    // guarda, o filtro derrubaria a lista inteira contra um servidor
+    // desatualizado.
+    if (filtro.uf && !(concurso.ufs ?? []).includes(filtro.uf)) return false;
 
     if (!vazia(filtro.esferas)) {
       // Órgão sem esfera não casa com nenhuma esfera pedida — continua fora,
