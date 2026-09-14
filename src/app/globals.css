@@ -284,6 +284,27 @@ body {
   outline-offset: 2px;
 }
 
+/**
+ * A saída declarada do anel global: quem marca `data-sem-anel` abre mão dele
+ * porque **outro elemento desenha o foco por ele**. Não é permissão para
+ * apagar o sinal de foco; é permissão para mudá-lo de dono, e quem usar tem
+ * de dizer no código quem passou a desenhar.
+ *
+ * Hoje há um: o campo da barra de busca, cujo anel passou para a cápsula
+ * inteira (ver `BarraBusca.tsx`). Em campo de texto o `:focus-visible`
+ * dispara também no clique do mouse, então o anel aparecia toda vez que
+ * alguém clicava para digitar.
+ *
+ * Precisa estar aqui, fora de camada, e não numa classe utilitária: medido no
+ * Chrome 152, `outline-none` do Tailwind **não** apaga a regra acima, porque
+ * utilitário mora em `@layer utilities` e regra sem camada ganha de regra em
+ * camada, por mais específica que a segunda seja. O `outline-none` estava no
+ * campo desde sempre e o anel continuava lá.
+ */
+[data-sem-anel]:focus-visible {
+  outline: none;
+}
+
 /* Número de vaga, salário e prazo.
  *
  * Sem família própria: é o Archivo da interface, só com as figuras de largura

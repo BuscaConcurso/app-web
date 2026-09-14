@@ -1,10 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type MouseEvent,
+} from "react";
+import { Sugestoes, useSugestoes } from "@/components/ui/Sugestoes";
 import { UFS, type Uf } from "@/lib/dominio";
 import { ufDeCoordenada, type Contornos } from "@/lib/localizacao";
 import { numero } from "@/lib/formato";
 import { NOME_UF } from "@/lib/rotulos";
+import {
+  assinarTermosBuscados,
+  termosBuscados,
+  termosBuscadosNoServidor,
+} from "@/lib/termosBuscados";
 import {
   assinarUfLembrada,
   lembrarUf,
@@ -33,12 +46,60 @@ import {
  *      próprio servidor e a conta acontece no navegador. O arquivo só é
  *      baixado depois da permissão, então quem recusa não paga por ele.
  *
- * A cápsula não tem anel de foco: em campo de texto o `:focus-visible` do
+ * ## O foco: o campo perde o anel, a cápsula ganha
+ *
+ * O campo de texto não tem anel de foco: em `<input>` o `:focus-visible` do
  * navegador dispara também no clique do mouse, então o anel aparecia sempre
- * que alguém clicava para digitar. O campo fica sem contorno e se apoia no
- * cursor piscando, que é indicador suficiente para quem está digitando. O
- * seletor e o botão mantêm o contorno nativo, que só aparece na navegação
- * por teclado e é o único aviso de foco que essas duas peças teriam.
+ * que alguém clicava para digitar. Medido: `outline-none` sozinho **não**
+ * bastava, porque a regra `:focus-visible` de `globals.css` não está em
+ * camada e ganha do utilitário, que está — o anel continuava lá.
+ *
+ * Tirar o anel e não pôr nada no lugar deixaria quem navega por teclado cego
+ * ao próprio cursor, e esta é a barra que recebe o primeiro Tab da página.
+ * Então **o sinal de foco mudou de dono**: quem acende é a cápsula inteira,
+ * com `has-[input:focus]`, nos 2px de `acao` do anel global. É o campo que
+ * perde o contorno, e não a barra.
+ *
+ * A folga é 4px e não os 2px do anel global, e isto foi medido na tela: o
+ * `.aurora` já ocupa os 2px logo fora da cápsula, então com 2px de folga o
+ * anel de foco encostava nele e os dois liam como uma borda verde grossa só —
+ * que é a borda que a barra tem o tempo todo, focada ou não, e portanto não
+ * sinaliza nada. Com 4px são dois anéis separados: a aurora colada na cápsula
+ * e o foco por fora dela. A 375px a cápsula vai de x=14 a x=361, então o anel
+ * vai de 10 a 365 e não encosta na borda da tela.
+ *
+ * `has-[input:focus]` e não `focus-within`: o seletor e o botão mantêm o
+ * contorno nativo deles, que só aparece na navegação por teclado, e com
+ * `focus-within` a cápsula acenderia junto — dois anéis concêntricos para um
+ * foco só.
+ *
+ * ## Clicar em qualquer lugar da barra foca o campo
+ *
+ * A "barra" é a cápsula inteira, e o vão entre as peças dela não fazia nada
+ * ao ser clicado. Agora faz: o clique que não achou dono vai para o campo.
+ *
+ * Quem responde "isto já tem dono?" é o navegador, e não uma lista de tags
+ * nossa — lista fechada envelhece e ninguém percebe. O tratador roda no
+ * `click`, quando o navegador **já** decidiu o foco: se o foco está dentro da
+ * barra, o clique acertou alguém focável (o próprio campo, o seletor, o
+ * botão, ou o que vier depois) e não há nada a fazer. Duas consequências
+ * caem de graça: arrastar para selecionar texto dentro do campo continua
+ * intacto, porque o campo já está com o foco e não chamamos `focus()` de
+ * novo; e a sugestão, que por contrato de combobox segura o foco no campo,
+ * nunca tem o clique sequestrado.
+ *
+ * ## A lista de sugestões
+ *
+ * Ao focar, o campo abre a lista dos últimos termos que deram resultado. Ela
+ * é **aprimoramento pendurado**: sem JavaScript não há `localStorage`, não há
+ * lista, e a barra é o mesmo `<form method="get">` de sempre. Por isso o
+ * `role="combobox"` e o `aria-expanded` só aparecem quando existe lista para
+ * controlar — afirmar um combobox sem popup seria mentir para o leitor de
+ * tela, pelo mesmo motivo que o revelador só escreve `aria-modal` depois da
+ * hidratação.
+ *
+ * Quem **escreve** na memória não é a barra: é a página, que é a única que
+ * sabe quantos resultados a busca deu (ver `RegistroDaBusca`). A barra só lê.
  */
 type Origem = "detectada" | "lembrada";
 type Estado = "ocioso" | "detectando" | "negada" | "falhou" | "fora";
@@ -80,6 +141,42 @@ export function BarraBusca({
     ufLembrada,
     ufLembradaNoServidor,
   );
+  const termos = useSyncExternalStore(
+    assinarTermosBuscados,
+    termosBuscados,
+    termosBuscadosNoServidor,
+  );
+
+  const formulario = useRef<HTMLFormElement>(null);
+  const campoDeTexto = useRef<HTMLInputElement>(null);
+
+  const { raiz, campo, lista } = useSugestoes({
+    itens: termos,
+    /**
+     * Escolher uma sugestão é buscar por ela: o campo recebe o texto e o
+     * formulário submete pelo caminho nativo, o mesmo do botão. Os filtros
+     * que estiverem na barra vão junto — inclusive o estado, que tem memória
+     * própria e é por isso que ele não é guardado em cada termo.
+     */
+    aoEscolher: (termo) => {
+      const campoDeBusca = campoDeTexto.current;
+      if (!campoDeBusca) return;
+      campoDeBusca.value = termo;
+      formulario.current?.requestSubmit();
+    },
+  });
+
+  /**
+   * O clique que não achou dono vai para o campo. Ver a docstring: quem
+   * responde se o alvo já era interativo é o navegador, pelo foco que ele
+   * acabou de dar.
+   */
+  const aoClicarNaBarra = (evento: MouseEvent<HTMLFormElement>) => {
+    const dentro = evento.currentTarget;
+    const focado = document.activeElement;
+    if (focado && focado !== document.body && dentro.contains(focado)) return;
+    campoDeTexto.current?.focus();
+  };
 
   /** `null` significa que a pessoa não mexeu no seletor nesta navegação. */
   const [manual, setManual] = useState<string | null>(null);
@@ -193,108 +290,122 @@ export function BarraBusca({
 
   return (
     <div>
-      <form
-        action="/concursos"
-        method="get"
-        role="search"
-        className={`aurora flex flex-col gap-2 rounded-3xl bg-cartao sm:flex-row sm:items-center sm:rounded-full ${
-          compacta ? "p-1.5" : "p-2"
-        }`}
-      >
-        <div className="flex flex-1 items-center gap-2.5 rounded-full px-4">
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 20 20"
-            fill="none"
-            className="size-4 shrink-0 text-tinta-500"
-          >
-            <circle cx="9" cy="9" r="6.2" stroke="currentColor" strokeWidth="1.8" />
-            <path
-              d="m13.6 13.6 3.2 3.2"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-          <label htmlFor="busca-q" className="sr-only">
-            Cargo, órgão ou banca
-          </label>
-          {/*
-            `autoComplete="off"` nos dois controles: o navegador restaura o
-            valor dos campos no recarregamento, ANTES de o React hidratar. O
-            que ele restaura é o que a pessoa digitou da última vez; o que o
-            servidor renderizou é o `q` da URL e "Todo o Brasil" no seletor
-            (`ufLembradaNoServidor` devolve nulo, porque no servidor não há
-            `localStorage`). A divergência aparece como "attributes of the
-            server rendered HTML didn't match the client properties", que é a
-            redação do React para propriedade de controle de formulário.
-
-            Desligar a restauração devolve a verdade ao servidor, e não custa
-            nada aqui: a URL já é a fonte do que a pessoa buscou, e a memória
-            do estado é lida do `localStorage` depois da hidratação, de
-            propósito.
-          */}
-          <input
-            id="busca-q"
-            name="q"
-            type="search"
-            defaultValue={q}
-            autoComplete="off"
-            placeholder="Cargo, órgão ou banca. Ex.: analista judiciário"
-            className={`w-full bg-transparent text-tinta-900 outline-none placeholder:text-tinta-400 ${altura} ${corpo}`}
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <label htmlFor="busca-uf" className="sr-only">
-            Estado
-          </label>
-          <div className="relative">
-            <select
-              id="busca-uf"
-              name="uf"
-              value={escolhida}
-              autoComplete="off"
-              onChange={(evento) => trocar(evento.target.value)}
-              disabled={semEstado}
-              aria-describedby={semEstado ? "busca-uf-motivo" : undefined}
-              className={`w-full appearance-none rounded-full bg-rebaixada pr-9 pl-4 text-sm font-medium sm:w-[11rem] ${altura} ${
-                semEstado
-                  ? "cursor-not-allowed text-tinta-500"
-                  : "cursor-pointer text-tinta-900"
-              }`}
-            >
-              <option value="">Todo o Brasil</option>
-              {UFS.map((sigla) => (
-                <option key={sigla} value={sigla}>
-                  {NOME_UF[sigla]}
-                </option>
-              ))}
-            </select>
+      {/* O embrulho é o "dentro" da lista: a cápsula mais o painel que cai
+          dela. `relative` fica aqui e não no `<form>` porque o `.aurora` já
+          usa o `position` do formulário para a moldura girante, e porque a
+          lista precisa medir a largura da barra inteira. */}
+      <div ref={raiz} className="relative">
+        <form
+          ref={formulario}
+          action="/concursos"
+          method="get"
+          role="search"
+          onClick={aoClicarNaBarra}
+          className={`aurora flex flex-col gap-2 rounded-3xl bg-cartao outline-acao outline-offset-4 has-[input:focus]:outline-2 sm:flex-row sm:items-center sm:rounded-full ${
+            compacta ? "p-1.5" : "p-2"
+          }`}
+        >
+          <div className="flex flex-1 items-center gap-2.5 rounded-full px-4">
             <svg
               aria-hidden="true"
-              viewBox="0 0 16 16"
+              viewBox="0 0 20 20"
               fill="none"
-              className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-tinta-600"
+              className="size-4 shrink-0 text-tinta-500"
             >
+              <circle cx="9" cy="9" r="6.2" stroke="currentColor" strokeWidth="1.8" />
               <path
-                d="M4 6.5 8 10.5l4-4"
+                d="m13.6 13.6 3.2 3.2"
                 stroke="currentColor"
-                strokeWidth="1.6"
+                strokeWidth="2"
                 strokeLinecap="round"
-                strokeLinejoin="round"
               />
             </svg>
+            <label htmlFor="busca-q" className="sr-only">
+              Cargo, órgão ou banca
+            </label>
+            {/*
+              `autoComplete="off"` nos dois controles: o navegador restaura o
+              valor dos campos no recarregamento, ANTES de o React hidratar. O
+              que ele restaura é o que a pessoa digitou da última vez; o que o
+              servidor renderizou é o `q` da URL e "Todo o Brasil" no seletor
+              (`ufLembradaNoServidor` devolve nulo, porque no servidor não há
+              `localStorage`). A divergência aparece como "attributes of the
+              server rendered HTML didn't match the client properties", que é a
+              redação do React para propriedade de controle de formulário.
+
+              Desligar a restauração devolve a verdade ao servidor, e não custa
+              nada aqui: a URL já é a fonte do que a pessoa buscou, e a memória
+              do estado é lida do `localStorage` depois da hidratação, de
+              propósito.
+            */}
+            <input
+              ref={campoDeTexto}
+              id="busca-q"
+              name="q"
+              type="search"
+              defaultValue={q}
+              autoComplete="off"
+              placeholder="Cargo, órgão ou banca. Ex.: analista judiciário"
+              /* Quem desenha o foco deste campo é a cápsula, logo acima. */
+              data-sem-anel=""
+              className={`w-full bg-transparent text-tinta-900 placeholder:text-tinta-400 ${altura} ${corpo}`}
+              {...campo}
+            />
           </div>
 
-          <button
-            type="submit"
-            className={`shrink-0 rounded-full bg-acao px-7 font-semibold text-acao-texto transition-colors hover:bg-acao-hover ${altura} ${corpo}`}
-          >
-            Buscar
-          </button>
-        </div>
-      </form>
+          <div className="flex gap-2">
+            <label htmlFor="busca-uf" className="sr-only">
+              Estado
+            </label>
+            <div className="relative">
+              <select
+                id="busca-uf"
+                name="uf"
+                value={escolhida}
+                autoComplete="off"
+                onChange={(evento) => trocar(evento.target.value)}
+                disabled={semEstado}
+                aria-describedby={semEstado ? "busca-uf-motivo" : undefined}
+                className={`w-full appearance-none rounded-full bg-rebaixada pr-9 pl-4 text-sm font-medium sm:w-[11rem] ${altura} ${
+                  semEstado
+                    ? "cursor-not-allowed text-tinta-500"
+                    : "cursor-pointer text-tinta-900"
+                }`}
+              >
+                <option value="">Todo o Brasil</option>
+                {UFS.map((sigla) => (
+                  <option key={sigla} value={sigla}>
+                    {NOME_UF[sigla]}
+                  </option>
+                ))}
+              </select>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 16 16"
+                fill="none"
+                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-tinta-600"
+              >
+                <path
+                  d="M4 6.5 8 10.5l4-4"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+
+            <button
+              type="submit"
+              className={`shrink-0 rounded-full bg-acao px-7 font-semibold text-acao-texto transition-colors hover:bg-acao-hover ${altura} ${corpo}`}
+            >
+              Buscar
+            </button>
+          </div>
+        </form>
+
+        <Sugestoes rotulo="Buscas recentes que deram resultado" lista={lista} />
+      </div>
 
       {semEstado && (
         <p id="busca-uf-motivo" className="mt-2 text-[12px] text-tinta-600">
