@@ -9,13 +9,16 @@
  * você veio escrever um painel que abre e fecha em `busca/`, `concurso/` ou
  * `layout/`, pare: estenda este arquivo.
  *
- * O motivo está no que existia antes desta linha: três `<details>` e um
- * `<dialog>`, um em cada tela, nenhum compartilhado. Nenhum dos quatro fechava
+ * O motivo está no que existia antes desta linha: quatro `<details>` e um
+ * `<dialog>`, um em cada tela, nenhum compartilhado. Nenhum dos cinco fechava
  * com Escape, nenhum fechava com clique fora, nenhum travava a rolagem do
  * fundo, nenhum devolvia o foco ao gatilho e nenhum animava. Não porque
  * alguém decidiu abrir mão disso: porque resolver essas cinco coisas custa
- * caro uma vez e caríssimo quatro, e quem estava escrevendo a tela estava
+ * caro uma vez e caríssimo cinco, e quem estava escrevendo a tela estava
  * escrevendo a tela.
+ *
+ * Três deles tinham forma de sobreposição e vieram para cá: o painel do ato
+ * publicado, o menu do cabeçalho e os filtros do celular.
  *
  * ## Por que `<details>` e não `<dialog>`
  *
@@ -80,14 +83,30 @@
  * temos. `<details>`/`<summary>` já anuncia um revelador com estado, que é o
  * que isto é.
  *
- * ## A exceção, declarada
+ * ## As duas exceções, declaradas
  *
- * O `<dialog>` de `concurso/Avaliacao.tsx` continua onde está. Ele só é
- * alcançável depois de um `fetch` que já exige JavaScript, então não há
- * sem-script a preservar; `showModal()` já lhe dá foco preso e camada de topo;
- * e ele é um modal centrado, que não é nem gaveta nem menu. Migrá-lo
- * significaria acrescentar uma terceira forma para um consumidor só. Quando
- * aparecer o segundo modal centrado, ele vem para cá.
+ * A regra é "sempre", então cada coisa que ficou de fora precisa de argumento
+ * escrito. São duas, e as duas têm o mesmo teste: **acrescentar uma forma nova
+ * ao revelador para um consumidor só não é compartilhar, é mudar de lugar.**
+ *
+ * 1. **O `<dialog>` de `concurso/Avaliacao.tsx`.** Só é alcançável depois de
+ *    um `fetch` que já exige JavaScript, então não há sem-script a preservar;
+ *    `showModal()` já lhe dá foco preso e camada de topo; e ele é um modal
+ *    centrado, que não é nem gaveta nem menu. Quando aparecer o segundo modal
+ *    centrado, ele vem para cá.
+ *
+ * 2. **O `<details>` de "De onde isto foi lido", em `concurso/Cargos.tsx`.**
+ *    Este é o que quase passou despercebido, e vale dizer por que ele fica:
+ *    ele não é sobreposição nenhuma. Abre no fluxo, empurrando o conteúdo de
+ *    baixo, e é isso que se quer dele — a citação aparece embaixo do cargo a
+ *    que pertence. Nada do que este módulo resolve tem onde se aplicar ali:
+ *    não há fundo para travar, não há fora para clicar, não há foco para
+ *    prender e não há camada para escapar. Gaveta o cobriria por cima e Menu o
+ *    faria flutuar, e as duas coisas seriam piores do que está.
+ *
+ *    Se um dia dois lugares precisarem da mesma revelação em fluxo — com
+ *    altura animada e `prefers-reduced-motion` —, é aqui que ela nasce, como
+ *    terceira forma, dividindo `useRevelador` com as outras duas.
  */
 
 import {
