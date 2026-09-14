@@ -9,6 +9,7 @@ import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
 import { Paginacao } from "@/components/ui/Paginacao";
 import { Gaveta, Menu } from "@/components/ui/Revelador";
 import { Secao } from "@/components/ui/Secao";
+import { Trilha } from "@/components/ui/Trilha";
 import { Cronograma } from "@/components/concurso/Cronograma";
 import { listarConcursos } from "@/lib/concursos";
 import type { EventoDoCronograma, EventoTipo, Tom } from "@/lib/dominio";
@@ -77,6 +78,17 @@ const SINAIS = [
 ];
 
 const TONS: Tom[] = ["aberto", "urgente", "previsto", "encerrado"];
+
+/**
+ * O pior degrau que a trilha tem de aguentar: o título mais longo do acervo
+ * de 2026-09-14, com 208 caracteres. Fica escrito aqui, e não lido da API,
+ * para a vitrine mostrar o pior caso mesmo quando ela roda contra o mock.
+ */
+const TITULO_MAIS_LONGO =
+  "Conselho Nacional de Combate à Pirataria e aos Delitos contra a " +
+  "Propriedade Intelectual da Secretaria Nacional do Consumidor do " +
+  "Ministério da Justiça e Segurança Pública - CNCP/SENACON/MJSP — " +
+  "Edital nº 1/2026";
 
 /**
  * As siglas do selo, todas tiradas do acervo: as quatro larguras que ele
@@ -336,6 +348,38 @@ export default async function Estilo() {
             ))}
           </div>
         </div>
+      </Bloco>
+
+      {/*
+        A trilha, nos dois tamanhos que o acervo produz: a de dois degraus da
+        página do órgão e a de três da página do concurso, esta com o pior
+        título do acervo (208 caracteres) no degrau corrente.
+
+        O que conferir aqui, porque a suíte é Node sem DOM: o degrau corrente
+        não é link e os de cima são; o corte em `40ch` aparece no degrau longo;
+        o separador tem 2px de cada lado; e a 375px a trilha ocupa uma linha
+        nos dois casos. O `BreadcrumbList` que sai da mesma lista está no
+        código-fonte da página, em `application/ld+json`.
+      */}
+      <Bloco titulo="Trilha" nota="A tela e o buscador, da mesma lista">
+        <Cartao className="flex flex-col gap-4 p-5">
+          <Trilha
+            degraus={[
+              { nome: "Concursos", href: "/concursos" },
+              { nome: "CRA-RJ", href: "/orgaos/cra-rj" },
+            ]}
+          />
+          <Trilha
+            degraus={[
+              { nome: "Concursos", href: "/concursos" },
+              { nome: "FUNAI", href: "/orgaos/fundacao-nacional-povos-indigenas" },
+              {
+                nome: TITULO_MAIS_LONGO,
+                href: "/concursos/exemplo-do-titulo-mais-longo",
+              },
+            ]}
+          />
+        </Cartao>
       </Bloco>
 
       <Bloco titulo="Paginação">
