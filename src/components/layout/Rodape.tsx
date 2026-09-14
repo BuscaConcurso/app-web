@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/marca/Logo";
+import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { cargosEmDestaque } from "@/lib/concursos";
 import { NOME_UF } from "@/lib/rotulos";
@@ -119,11 +120,39 @@ export async function Rodape() {
 
       {/* Degrau de superfície no lugar de uma linha: o canvas não usa borda. */}
       <div className="bg-rodape-faixa">
-        <p className="mx-auto max-w-[1240px] px-4 py-5 text-xs text-rodape-tenue sm:px-6">
-          BuscaConcurso não organiza concursos. Confira sempre o edital
-          original no diário oficial ou no site da banca antes de se
-          inscrever.
-        </p>
+        <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
+          <p className="text-xs text-rodape-tenue">
+            BuscaConcurso não organiza concursos. Confira sempre o edital
+            original no diário oficial ou no site da banca antes de se
+            inscrever.
+          </p>
+
+          {/* Quem responde pelo site. Os dados são os do cadastro público do
+              CNPJ na Receita Federal (situação ativa em 14/09/2026); mudou o
+              endereço lá, muda aqui. */}
+          <div className="mt-4">
+            <a
+              href="https://gvtechlab.com.br/"
+              className="inline-flex items-center gap-2 text-[12px] font-semibold text-rodape-suave hover:text-rodape-texto"
+            >
+              <LogoGvTechLab tamanho={20} />
+              Desenvolvido por GV Tech Lab
+            </a>
+            <address className="mt-2 text-xs leading-5 not-italic text-rodape-tenue">
+              GV TECH LAB LTDA · CNPJ 50.810.346/0001-23
+              <br />
+              Av. Brig. Faria Lima, 1811, Sala 1119 · Jardim Paulistano · São
+              Paulo/SP · CEP 01452-001
+              <br />
+              <a
+                href="mailto:contato@gvtechlab.com.br"
+                className="hover:text-rodape-texto"
+              >
+                contato@gvtechlab.com.br
+              </a>
+            </address>
+          </div>
+        </div>
       </div>
     </footer>
   );
