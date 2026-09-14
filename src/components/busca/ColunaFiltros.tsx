@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Rotulo } from "@/components/ui/Etiqueta";
+import { Gaveta } from "@/components/ui/Revelador";
 import type { ContagensDeFaceta, OpcaoDeFaceta } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
 import {
@@ -219,16 +220,29 @@ function Painel({
   consulta,
   contagens,
   prefixo,
+  moldura = true,
 }: {
   consulta: ConsultaDaUrl;
   contagens: ContagensDeFaceta;
   prefixo: string;
+  /**
+   * O cartão em volta. Na coluna do desktop ele é o que separa o painel da
+   * página cinza; dentro da gaveta, que já é um cartão de ponta a ponta, ele
+   * seria branco sobre branco com uma sangria a mais.
+   */
+  moldura?: boolean;
 }) {
   const ativos = quantosFiltros(consulta);
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-5 rounded-caixa bg-cartao p-4">
+      <div
+        className={
+          moldura
+            ? "flex flex-col gap-5 rounded-caixa bg-cartao p-4"
+            : "flex flex-col gap-5"
+        }
+      >
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">Filtros</p>
           {ativos > 0 && (
@@ -301,27 +315,59 @@ export function ColunaFiltros({
 
   return (
     <>
-      {/* Celular: mesmo painel dentro de um `details`, que abre e fecha sem
-          script, igual ao menu do cabeçalho. O conteúdo é duplicado no DOM
-          porque não há como forçar um `details` a ficar aberto por CSS, e o
-          painel é leve. */}
-      <details className="lg:hidden">
-        <summary className="flex h-10 w-fit cursor-pointer list-none items-center gap-2 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 hover:bg-tinta-200 [&::-webkit-details-marker]:hidden">
-          <svg aria-hidden="true" viewBox="0 0 18 18" className="size-4">
-            <path
-              d="M2 4.5h14M4.5 9h9M7 13.5h4"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-            />
-          </svg>
-          Filtros
-          {ativos > 0 && <span className="numero text-tinta-600">· {ativos}</span>}
-        </summary>
-        <div className="mt-3">
-          <Painel consulta={consulta} contagens={contagens} prefixo="celular" />
-        </div>
-      </details>
+      {/*
+        Celular: o mesmo painel, agora numa gaveta de `ui/Revelador`. O
+        conteúdo é duplicado no DOM porque não há como forçar um `details` a
+        ficar aberto por CSS, e o painel é leve.
+
+        **Virou gaveta, e a razão é medida.** Ele era um `details` que expandia
+        no fluxo, e a 375px isso custava o seguinte: o painel tem 945,4px de
+        altura — 27 opções em quatro grupos, mais os dois campos de salário —
+        numa janela de 812px. Ele não cabe na tela de jeito nenhum, então ou
+        rola por dentro ou empurra a página. Empurrando, o primeiro resultado
+        ia de y=390 para y=1346: com os filtros abertos, nenhum resultado
+        sobrava na tela, e era preciso rolar 534px além do fim do painel para
+        ver um. A contagem ao lado de cada opção é a única resposta que a
+        pessoa tem enquanto filtra, e o que ela conta estava fora da tela.
+
+        Como gaveta, os resultados continuam onde estavam, atrás; fechar os
+        mostra de novo sem rolar nada.
+
+        Isto não contradiz a decisão de não dar rolagem própria a esta coluna
+        (ver o comentário do `aside`, abaixo): lá o problema eram duas áreas
+        roláveis lado a lado, com a roda do mouse fazendo uma coisa sobre a
+        coluna e outra a dois centímetros dali. A gaveta é modal e trava a
+        rolagem do fundo, então enquanto ela está aberta existe uma área
+        rolável só na tela — que é o mesmo princípio, e não o contrário dele.
+      */}
+      <Gaveta
+        className="lg:hidden"
+        titulo="Filtros"
+        gatilho="h-10 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 transition-colors hover:bg-tinta-200"
+        rotulo={
+          <span className="inline-flex items-center gap-2">
+            <svg aria-hidden="true" viewBox="0 0 18 18" className="size-4">
+              <path
+                d="M2 4.5h14M4.5 9h9M7 13.5h4"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+              />
+            </svg>
+            Filtros
+            {ativos > 0 && (
+              <span className="numero text-tinta-600">· {ativos}</span>
+            )}
+          </span>
+        }
+      >
+        <Painel
+          consulta={consulta}
+          contagens={contagens}
+          prefixo="celular"
+          moldura={false}
+        />
+      </Gaveta>
 
       {/* A coluna rola com a página, e não acompanha a rolagem.
 
