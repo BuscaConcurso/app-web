@@ -231,21 +231,50 @@ export function BarraBusca({
     }
   }, []);
 
+  /**
+   * A busca começa pedindo a localização, por decisão do parceiro humano.
+   *
+   * Antes só pedia quem já tinha concedido — sem gesto, sem prompt —, e o
+   * resto dependia do botão. Agora o pedido sai ao carregar, com o prompt do
+   * navegador, sempre que ainda não sabemos o estado.
+   *
+   * O custo, registrado para quem vier mexer: prompt de permissão sem
+   * contexto é recusado com mais frequência, e **a recusa vale para a origem
+   * inteira** — depois dela nem o botão consegue perguntar de novo; só a
+   * própria pessoa, nas configurações do navegador. Por isso o pedido não
+   * sai quando não adiantaria ou não caberia:
+   *
+   * - o estado já veio pela URL ou pela memória;
+   * - a permissão já foi negada (o navegador não mostraria prompt, e
+   *   insistir só gravaria "negada" de novo);
+   * - o contexto é inseguro (`http://192.168...`): a API recusa sem prompt;
+   * - o acervo não sabe o estado de concurso nenhum, e o filtro não filtra.
+   *
+   * `jaPediu` segura um pedido por montagem. Em desenvolvimento o React roda
+   * o efeito duas vezes de propósito, e a ref sobrevive a essa repetição.
+   */
+  const jaPediu = useRef(false);
   useEffect(() => {
-    // Já sabemos o estado por URL ou por memória: nada a descobrir.
+    if (jaPediu.current) return;
     if (uf || lembrada) return;
+    if (!window.isSecureContext || !("geolocation" in navigator)) return;
+    if (dimensoes !== undefined && dimensoes.comUf === 0) return;
 
-    // Sem gesto, só resolve quem já concedeu antes. Aí não há prompt.
-    navigator.permissions
-      ?.query({ name: "geolocation" })
+    jaPediu.current = true;
+    // Sempre por promessa, inclusive sem Permissions API: `detectar` muda o
+    // estado logo no início, e chamá-lo direto no corpo do efeito dispara
+    // renderização em cascata (`react-hooks/set-state-in-effect`). Sem a API
+    // não dá para saber se já foi negada, então pede — o pior caso é o mesmo
+    // "negada" que o botão daria.
+    const consulta: Promise<PermissionStatus | null> =
+      navigator.permissions?.query({ name: "geolocation" }) ??
+      Promise.resolve(null);
+    consulta
       .then((permissao) => {
-        if (permissao.state === "granted") void detectar();
+        if (permissao?.state !== "denied") void detectar();
       })
-      .catch(() => {
-        // Navegador sem Permissions API fica com o botão, que é o caminho
-        // seguro de qualquer forma.
-      });
-  }, [uf, lembrada, detectar]);
+      .catch(() => void detectar());
+  }, [uf, lembrada, detectar, dimensoes]);
 
   const trocar = (valor: string) => {
     setManual(valor);
