@@ -71,11 +71,16 @@ export type Poder =
  * O órgão que publica o concurso.
  *
  * `sigla`, `esfera` e `poder` são anuláveis porque o acervo do engine não os
- * tem: nenhum dos 1.332 órgãos tem sigla ou esfera preenchida, e `poder` não
- * existe no banco. A regra do projeto é que campo que o banco não tem chega
- * nulo e nunca inventado — um tipo não anulável sobre um campo nulo em 1.332
- * de 1.332 obrigaria a API a inventar, ou o teste a mentir. Quem exibe trata
- * a ausência; ver `linhaDeContexto` em `rotulos.ts` e `Selo` em
+ * tem para todo mundo: a regra que recupera a sigla do título do concurso
+ * chegou a 129 dos 1.946 órgãos, e `poder` não existe no banco. Os 1.615
+ * cartões que seguem sem sigla são recusa deliberada do engine — a sigla
+ * existe no mundo, mas ele não consegue conferir que ela nomeia aquele órgão,
+ * e sigla errada afirma uma falsidade enquanto sigla ausente não afirma nada.
+ *
+ * A regra do projeto é que campo que o banco não tem chega nulo e nunca
+ * inventado — um tipo não anulável sobre um campo nulo em um terço do acervo
+ * obrigaria a API a inventar, ou o teste a mentir. Quem exibe trata a
+ * ausência; ver `linhaDeContexto` em `rotulos.ts` e `Selo` em
  * `components/ui/Cartao.tsx`.
  */
 export interface Orgao {

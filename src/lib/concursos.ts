@@ -382,9 +382,9 @@ export async function facetas(hoje: Date = new Date()): Promise<{
     orgaos: maisFrequentes(porOrgao, 10).map(([slug, total]) => ({
       rotulo: orgaos.get(slug)!.nome,
       // A sigla é o termo de busca porque é curta e casa com o texto
-      // buscável do cartão. Órgão do engine ainda não tem sigla (nenhum dos
-      // 1.332), e aí o termo é o nome: `q=` vazio traria o acervo inteiro
-      // atrás de um link que promete um órgão.
+      // buscável do cartão. Só 129 dos 1.946 órgãos do engine têm sigla, e
+      // sem ela o termo é o nome: `q=` vazio traria o acervo inteiro atrás de
+      // um link que promete um órgão.
       href: `/concursos?q=${encodeURIComponent(
         orgaos.get(slug)!.sigla || orgaos.get(slug)!.nome,
       )}`,
