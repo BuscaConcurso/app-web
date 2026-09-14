@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ColunaFiltros } from "@/components/busca/ColunaFiltros";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import { BarraBusca } from "@/components/busca/BarraBusca";
+import { RegistroDaBusca } from "@/components/busca/RegistroDaBusca";
 import { Paginacao } from "@/components/ui/Paginacao";
 import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
 import {
@@ -200,6 +201,24 @@ export default async function BuscaDeConcursos(
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
       <BarraBusca q={q} uf={uf} compacta dimensoes={dimensoes} />
+
+      {/*
+        Não desenha nada: só grava o termo na memória do navegador quando a
+        busca deu resultado. Mora aqui, e não dentro da `BarraBusca`, porque
+        quem sabe o desfecho é esta página — a barra recebe `q` por prop e
+        aparece também na home e na vitrine, onde ninguém tem esse número.
+
+        `filtrada` sai de `chips`, que é a mesma lista de filtros ativos que a
+        tela desenha logo abaixo: sem uma segunda contagem para divergir da
+        primeira. Ela existe porque zero com filtro não é culpa do termo —
+        "analista" no Acre devolve zero por causa do Acre, e esquecer o termo
+        aí seria punir o inocente.
+      */}
+      <RegistroDaBusca
+        termo={q}
+        resultados={resultado.total}
+        filtrada={chips.length > 0}
+      />
 
       <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-start">
         <ColunaFiltros
