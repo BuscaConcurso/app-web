@@ -65,12 +65,31 @@ interface RespostaDeAcervo {
   /** Quantos concursos o engine tem, com dado ou sem. */
   total: number;
   /**
-   * Quantos o engine tem e não mandou porque não têm cargo nem evento —
-   * 9.309 de 9.311 na carga de hoje. A lista traz só quem tem dado, e esta
-   * contagem é o que impede a tela de fingir que o acervo tem duas linhas.
-   * Sai por `avisoDoAcervo()`, aqui embaixo.
+   * Quantos o engine tem e não mandou porque não têm cargo nem evento — 293
+   * de 4.942 na carga de 2026-09-14. A lista traz só quem tem dado, e esta
+   * contagem é o que impede a tela de fingir que o acervo tem só o que ela
+   * lista. Sai por `avisoDoAcervo()`, aqui embaixo.
    */
   semDado: number;
+  /**
+   * Por que cada um dos `semDado` está fora, repartido em três. Os campos
+   * somam `semDado` e são excludentes; o que cada um quer dizer está na
+   * classe `ForaDaLista` de `engine/src/buscaconcurso/api.py`.
+   *
+   * A repartição existe porque o número sozinho fazia a tela mentir: ela
+   * dizia que os 293 "entram na lista conforme forem lidos", e isso vale
+   * para os 104 da fila e para mais ninguém. `acervoIncompletoEmPartes()`
+   * (src/lib/rotulos.ts) é quem transforma estes três números em frase.
+   *
+   * Opcional no tipo porque um engine mais velho não manda o campo — é o
+   * estado normal do mundo, API e app sobem separados. Quem lê valida.
+   */
+  foraDaLista?: {
+    total: number;
+    naFila: number;
+    naoAbreConcurso: number;
+    lacuna: number;
+  };
   /** Preenchido aqui, não pela API: é quem leu que sabe de onde leu. */
   origem: OrigemDoAcervo;
 }
@@ -90,7 +109,7 @@ export type OrigemDoAcervo = "api" | "mock" | "falha";
 /**
  * O que o mock é, na forma da resposta da API. `semDado: 0` porque o mock é
  * um acervo completo de mentira, não um acervo real pela metade: aviso de
- * "faltam 9.309" sobre o mock seria falso.
+ * "293 estão fora desta lista" sobre o mock seria falso.
  */
 const ACERVO_DE_MOCK: RespostaDeAcervo = {
   concursos: CONCURSOS,
@@ -179,26 +198,62 @@ async function acervo(): Promise<ConcursoResumo[]> {
 }
 
 /**
- * Quantos concursos existem no acervo do engine e ainda não têm o que
- * mostrar, para a tela dizer isso em vez de calar.
+ * Quantos concursos do acervo do engine estão fora da lista, e por quê, para
+ * a tela dizer isso em vez de calar — ou, pior, em vez de adivinhar.
  *
  * `null` quando não há nada a avisar — acervo completo, ou mock. A lista traz
- * só quem tem cargo ou evento, e sem este aviso uma página que mostra dois
- * concursos sobre nove mil afirmaria, por omissão, que o acervo tem dois.
+ * só quem tem cargo ou evento, e sem este aviso uma página que mostra 4.649
+ * concursos afirmaria, por omissão, que o acervo tem 4.649.
+ *
+ * **O aviso carrega a repartição, não só o total.** Um número só descreve
+ * quatro mil e tantos concursos como se fossem uma coisa, e eles não são:
+ * uns esperam leitura, outros nunca vão entrar porque o ato nem abre
+ * concurso, e outros são falha nossa. `acervoIncompletoEmPartes()` é quem
+ * decide o que disso vira frase — aqui o trabalho é passar os números
+ * adiante sem perder nenhum.
  *
  * Não custa requisição: dentro do mesmo render, o `fetch` do Next memoriza a
  * chamada que `acervo()` já fez.
  */
 export interface AvisoDoAcervo {
-  /** Sem cargo nem evento extraído ainda. */
+  /** Sem cargo nem evento extraído. */
   semDado: number;
   /** Total no acervo do engine, os com dado e os sem. */
   total: number;
+  /**
+   * Há job pendente ou rodando que ainda pode render cargo ou evento. Os
+   * únicos de quem a tela pode dizer "entram quando forem lidos".
+   */
+  naFila: number;
+  /**
+   * Lidos com sucesso, e o ato é retificação, anexo, complementar,
+   * homologação ou "outro". Nunca viram linha da lista.
+   */
+  naoAbreConcurso: number;
+  /**
+   * Leitura que falhou, documento que ninguém baixou nem enfileirou, ou ato
+   * de abertura que não rendeu cargo nem cronograma. Deveriam estar na
+   * lista, e é isso que os separa dos de cima.
+   */
+  lacuna: number;
 }
 
 export async function avisoDoAcervo(): Promise<AvisoDoAcervo | null> {
-  const { semDado, total } = await carregar();
-  return semDado > 0 ? { semDado, total } : null;
+  const { semDado, total, foraDaLista } = await carregar();
+  if (semDado <= 0) return null;
+  // Zeros quando a API não mandou a repartição: são números legítimos, e por
+  // isso `acervoIncompletoEmPartes()` confere a SOMA em vez de conferir a
+  // presença. Três zeros não somam `semDado`, a repartição é descartada, e a
+  // tela cai na frase que não afirma repartição nenhuma. Inventar aqui um
+  // `naFila: semDado` seria refazer, do lado do front, exatamente a promessa
+  // que este trabalho existe para desfazer.
+  return {
+    semDado,
+    total,
+    naFila: foraDaLista?.naFila ?? 0,
+    naoAbreConcurso: foraDaLista?.naoAbreConcurso ?? 0,
+    lacuna: foraDaLista?.lacuna ?? 0,
+  };
 }
 
 export async function listarConcursos(

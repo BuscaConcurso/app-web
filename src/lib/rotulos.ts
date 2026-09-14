@@ -380,6 +380,125 @@ export function avisoDeFiltroSemDado(
 }
 
 /**
+ * Um pedaço da frase do acervo incompleto: o número e o que dizer dele.
+ *
+ * Sai partido em dois porque a tela destaca o número e o texto não — e
+ * porque devolver HTML daqui tiraria a frase do alcance do teste, que é
+ * justamente onde ela precisa estar.
+ */
+export interface ParteDoAcervoIncompleto {
+  /** Quantos concursos esta parte conta. Sempre maior que zero. */
+  quantos: number;
+  /** O que vem depois do número, já concordando com ele, com ponto final. */
+  texto: string;
+}
+
+/**
+ * A frase que diz por que N concursos do acervo estão fora da lista.
+ *
+ * **Ela existia e afirmava três coisas falsas.** Dizia: *"Outros N dos T
+ * concursos do acervo ainda não foram lidos: o diário oficial publicou o
+ * ato, e o cargo, as vagas e o cronograma ainda não foram extraídos do
+ * documento. Eles entram na lista conforme forem lidos."* Medido no banco em
+ * 2026-09-14, dos 293 concursos fora da lista:
+ *
+ * - *"ainda não foram lidos"* era falso para 138. Foram lidos, deu certo, e
+ *   não há o que extrair — o ato é retificação, anexo, complementar ou
+ *   "outro".
+ * - *"o cargo ... ainda não foi extraído"* sugeria, para esses mesmos 138,
+ *   um trabalho pendente que não existe. Uma retificação de prazo não tem
+ *   cargo para extrair: ela atualiza um concurso que já está na lista.
+ * - *"entram na lista conforme forem lidos"* valia para 104 — os que estão
+ *   na fila — e para mais ninguém. Os 138 nunca entram, e os 51 restantes só
+ *   entram se a leitura for refeita.
+ *
+ * **Três partes, e não quatro nem uma.** Quatro seria a repartição do banco
+ * (fila, ato que não abre concurso, leitura que falhou, abertura que não
+ * rendeu nada), e as duas últimas dizem a mesma coisa ao candidato: é dado
+ * que deveria estar aqui e não está, e ele não pode fazer nada a respeito.
+ * Juntá-las num "lacuna nossa" tira uma oração da tela sem tirar nenhuma
+ * informação que mude o que o leitor faz. Uma parte só seria voltar ao
+ * número sozinho, que é de onde as três mentiras vieram.
+ *
+ * **Quantas cabem, medido na tela e não estimado.** O parágrafo renderizado
+ * em Chrome com a fonte do app (Archivo 13px/21,12px, que é o que
+ * `text-sm leading-6` produz aqui), nas quatro larguras reais em que ele
+ * aparece — a home a 1240px, a coluna de resultados da busca a 1240px e a
+ * 1024px (ela divide a faixa com os 288px da coluna de filtros), e o
+ * telefone a 375px:
+ *
+ * | largura útil | a frase antiga | 1 parte | 2 partes | **3 partes** |
+ * |---|---|---|---|---|
+ * | 1150px (home) | 2 linhas | 1 | 2 | **2** |
+ * | 842px (busca, 1240) | 2 | 1 | 2 | **3** |
+ * | 626px (busca, 1024) | 2 | 1 | 3 | **4** |
+ * | 301px (telefone) | 5 | 3 | 6 | **8** |
+ *
+ * Na home as três partes custam as mesmas duas linhas que a frase falsa
+ * custava. No telefone custam três linhas a mais, e é aí que a decisão
+ * aperta: 8 linhas num bloco cinza de rodapé é muito. Foi por essa medição
+ * que a primeira parte perdeu o final ", em vez de criar outro" — tirar 23
+ * caracteres tirou uma linha inteira da home. Duas partes economizariam mais
+ * duas linhas no telefone, e a parte que sairia seria justamente a da fila:
+ * a tela perderia a única promessa verdadeira que ela tem para fazer, ou
+ * juntaria a fila com a lacuna e voltaria a mentir, pelo outro lado.
+ *
+ * A ordem é fixa e não é a ordem de tamanho: primeiro o que nunca vai
+ * entrar, porque é isso que tira o leitor da espera; depois a fila, que é a
+ * única promessa que se pode fazer; por último a lacuna, que é nossa e é a
+ * parte que não dá para maquiar.
+ *
+ * **Devolve lista vazia quando a repartição não fecha** — engine mais velho
+ * que não manda `foraDaLista`, ou soma que não bate com `semDado`. Aí a tela
+ * usa a frase curta, que conta o total e não afirma repartição nenhuma.
+ * Conferir a soma, e não a presença dos campos, é de propósito: zero é um
+ * valor legítimo em qualquer uma das três, e é a soma que distingue "não há
+ * nenhum na fila" de "não sei quantos estão na fila".
+ */
+export function acervoIncompletoEmPartes(aviso: {
+  semDado: number;
+  naFila: number;
+  naoAbreConcurso: number;
+  lacuna: number;
+}): ParteDoAcervoIncompleto[] {
+  const naoAbre = quantidade(aviso.naoAbreConcurso) ?? -1;
+  const fila = quantidade(aviso.naFila) ?? -1;
+  const nossa = quantidade(aviso.lacuna) ?? -1;
+  if (naoAbre < 0 || fila < 0 || nossa < 0) return [];
+  if (naoAbre + fila + nossa !== quantidade(aviso.semDado)) return [];
+
+  return [
+    {
+      quantos: naoAbre,
+      texto:
+        (naoAbre === 1
+          ? "não vai entrar: é uma retificação, um anexo ou outro ato que não" +
+            " abre concurso"
+          : "não vão entrar: são retificações, anexos e outros atos que não" +
+            " abrem concurso") +
+        " — uma retificação de prazo atualiza um concurso que já está aqui.",
+    },
+    {
+      quantos: fila,
+      // A única promessa de entrada automática que sobra, e ela é do tamanho
+      // certo: 104, não 293. Um teste em rotulos.test.ts quebra se esta
+      // oração voltar a ser escrita sobre o total.
+      texto:
+        `${fila === 1 ? "está" : "estão"} na fila de leitura e` +
+        ` ${fila === 1 ? "entra" : "entram"} quando` +
+        ` ${fila === 1 ? "for lido" : "forem lidos"}.`,
+    },
+    {
+      quantos: nossa,
+      texto:
+        `${nossa === 1 ? "é" : "são"} lacuna nossa: a leitura falhou, ou não` +
+        " achou cargo nem cronograma no ato —" +
+        ` ${nossa === 1 ? "só entra" : "só entram"} se for refeita.`,
+    },
+  ].filter((parte) => parte.quantos > 0);
+}
+
+/**
  * As seis perguntas do FAQ como o candidato as faria.
  *
  * Perguntas, não rótulos de campo: quem chega nesta página está decidindo se

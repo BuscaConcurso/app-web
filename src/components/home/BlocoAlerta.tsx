@@ -1,29 +1,72 @@
+import { Fragment } from "react";
 import type { AvisoDoAcervo } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
+import { acervoIncompletoEmPartes } from "@/lib/rotulos";
 
 /**
  * O que a lista não está mostrando, dito em voz baixa.
  *
  * A lista traz só os concursos que já têm cargo ou evento extraído. Os outros
- * existem no acervo e ainda não foram lidos pelo modelo — hoje são 9.309 de
- * 9.311 —, e uma tela que mostra dois concursos sem dizer isso afirma, por
- * omissão, que o acervo tem dois. Não é "não há mais resultados": é "ainda
- * não lemos o resto".
+ * existem no acervo e não aparecem — em 2026-09-14 são 293 de 4.942 —, e uma
+ * tela que mostra 4.649 concursos sem dizer isso afirma, por omissão, que o
+ * acervo tem 4.649.
+ *
+ * **Este parágrafo já mentiu, e é bom saber como.** Ele dizia que os 293
+ * "ainda não foram lidos" e que "entram na lista conforme forem lidos". Nada
+ * disso descrevia o banco: 138 tinham sido lidos, com sucesso, e o ato era
+ * retificação ou anexo — não há cargo para extrair de uma retificação de
+ * prazo, e esses 138 nunca virariam linha da lista. O número não estava
+ * errado; a frase em volta dele é que descrevia uma realidade que não
+ * existe, e um leitor que a levasse a sério ficaria esperando o 293 virar
+ * zero. Era o mesmo erro que o produto recusa do lado do dado — afirmar o
+ * que o ato não disse — cometido do lado da tela.
+ *
+ * O conserto foi a API passar a publicar a repartição (`foraDaLista`) e a
+ * frase passar a ser montada a partir dela, em `acervoIncompletoEmPartes()`.
+ * A regra de produto não mudou: a lista traz só concurso com dado, e a
+ * contagem do resto aparece como aviso. O que mudou é o aviso dizer o que
+ * essa contagem é.
  *
  * Cinza e não amarelo de propósito. O amarelo desta página é um só, o do
  * `BlocoAlerta` logo abaixo; dois amarelos e nenhum dos dois chama.
  */
 export function AcervoIncompleto({ aviso }: { aviso: AvisoDoAcervo }) {
+  const partes = acervoIncompletoEmPartes(aviso);
   return (
     <p className="rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600">
       Outros{" "}
       <strong className="numero font-medium text-tinta-900">
         {numero(aviso.semDado)}
       </strong>{" "}
-      dos {numero(aviso.total)} concursos do acervo ainda não foram lidos: o
-      diário oficial publicou o ato, e o cargo, as vagas e o cronograma ainda
-      não foram extraídos do documento. Eles entram na lista conforme forem
-      lidos.
+      dos {numero(aviso.total)} concursos do acervo estão fora desta lista
+      {/*
+        Sem a repartição — engine mais velho, ou soma que não fecha —, a frase
+        conta o total e para por aí. Ela não promete entrada automática nem
+        finge que está tudo certo; é menos do que a tela sabe dizer num dia
+        bom, e é tudo o que ela pode afirmar num dia ruim.
+      */}
+      {partes.length === 0 ? (
+        <>
+          : não temos cargo nem cronograma deles. Nem todos vão entrar — parte
+          dos atos é retificação ou anexo, que não abre concurso.
+        </>
+      ) : (
+        <>
+          {/* O ponto que fecha a abertura. Ele mora aqui e não no texto da
+              abertura porque o ramo de cima continua a mesma oração com
+              dois-pontos; cada parte já traz o seu. */}
+          .
+          {partes.map((parte) => (
+            <Fragment key={parte.texto}>
+              {" "}
+              <strong className="numero font-medium text-tinta-900">
+                {numero(parte.quantos)}
+              </strong>{" "}
+              {parte.texto}
+            </Fragment>
+          ))}
+        </>
+      )}
     </p>
   );
 }

@@ -325,8 +325,9 @@ export default async function BuscaDeConcursos(
           )}
 
           {/* Aqui a contagem de resultados aparece escrita, e é aqui que o
-              silêncio sobre o resto do acervo mais engana: "2 concursos
-              encontrados" sobre um acervo de nove mil. */}
+              silêncio sobre o resto do acervo mais engana: "12 concursos
+              encontrados" sobre um acervo de 4.942, dos quais 293 estão fora
+              da lista por três motivos diferentes. */}
           {aviso && (
             <div className="mt-6">
               <AcervoIncompleto aviso={aviso} />

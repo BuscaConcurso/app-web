@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoDetalhe } from "./dominio";
 import {
+  acervoIncompletoEmPartes,
   avisoDeFiltroSemDado,
   cargosDoCartao,
   etiquetasDeVagas,
@@ -436,5 +437,140 @@ describe("cargosDoCartao", () => {
 
   it("descarta entrada vazia em vez de virar separador solto", () => {
     expect(cargosDoCartao(["Pedagogo", "", "   ", null]).texto).toBe("Pedagogo");
+  });
+});
+
+
+/**
+ * A frase do acervo incompleto, que é a que já mentiu.
+ *
+ * Os números destes testes são a medição de 2026-09-14 no banco do engine:
+ * 4.942 concursos no acervo, 4.649 na lista, 293 fora — 104 na fila, 138 de atos que
+ * não abrem concurso, 51 de lacuna nossa. Não são números de exemplo; são a
+ * carga que fez a frase antiga ser falsa, e é por isso que estão aqui.
+ */
+const HOJE = {
+  semDado: 293,
+  naFila: 104,
+  naoAbreConcurso: 138,
+  lacuna: 51,
+};
+
+/** A frase inteira como a tela a monta, para o teste poder ler o que o
+ * candidato lê em vez de ler três objetos. */
+function frase(aviso: Parameters<typeof acervoIncompletoEmPartes>[0]): string {
+  return acervoIncompletoEmPartes(aviso)
+    .map((parte) => `${parte.quantos} ${parte.texto}`)
+    .join(" ");
+}
+
+describe("acervoIncompletoEmPartes", () => {
+  it("reparte os 293 da carga real em três, na ordem que tira o leitor da espera", () => {
+    expect(acervoIncompletoEmPartes(HOJE).map((p) => p.quantos)).toEqual([
+      138, 104, 51,
+    ]);
+  });
+
+  it("diz que 138 nunca entram, e por quê", () => {
+    // A afirmação que a frase antiga não fazia, e que é a razão de o número
+    // nunca ir a zero. Sem ela, quem lê fica esperando.
+    const [naoAbre] = acervoIncompletoEmPartes(HOJE);
+
+    expect(naoAbre.quantos).toBe(138);
+    expect(naoAbre.texto).toContain("não vão entrar: são retificações");
+    expect(naoAbre.texto).toContain("retificação");
+    // E diz o que a retificação FAZ, porque "não é concurso" sozinho soa como
+    // dado descartado: ela atualiza um concurso que está na lista.
+    expect(naoAbre.texto).toContain("atualiza um concurso que já está aqui");
+  });
+
+  it("a promessa de entrada automática é feita sobre a fila, e só sobre ela", () => {
+    // ESTE é o teste que a frase antiga reprovava. Ela dizia "Eles entram na
+    // lista conforme forem lidos" sobre os 293 inteiros, com zero na fila no
+    // dia da medição. A promessa agora tem dono e tamanho: 104.
+    const [, fila] = acervoIncompletoEmPartes(HOJE);
+
+    expect(fila.quantos).toBe(104);
+    expect(fila.texto).toContain("na fila de leitura");
+    expect(fila.texto).toContain("entram quando forem lidos");
+  });
+
+  it("com a fila vazia, a frase inteira não promete entrada nenhuma", () => {
+    // O dia em que o worker está parado: 0 na fila. Nenhuma oração da frase
+    // pode sugerir que o número anda sozinho — era exatamente a situação
+    // medida quando a frase antiga foi escrita.
+    const parada = { ...HOJE, naFila: 0, lacuna: 155 };
+
+    const texto = frase(parada);
+
+    expect(texto).not.toContain("fila");
+    expect(texto).not.toContain("entram quando");
+    expect(texto).not.toContain("conforme forem lidos");
+    expect(texto).toContain("155 são lacuna nossa");
+  });
+
+  it("a lacuna é confessada como lacuna, não maquiada", () => {
+    // Os 51 são falha nossa: deveriam estar na lista. Uma frase que só
+    // dissesse "138 não são concurso e 104 estão na fila" fingiria que está
+    // tudo certo, que é o outro jeito de mentir aqui.
+    const [, , nossa] = acervoIncompletoEmPartes(HOJE);
+
+    expect(nossa.quantos).toBe(51);
+    expect(nossa.texto).toContain("lacuna nossa");
+    expect(nossa.texto).toContain("só entram se for refeita");
+  });
+
+  it("categoria zerada não vira oração", () => {
+    // Uma oração "0 estão na fila de leitura" gastaria uma linha da tela
+    // para não dizer nada.
+    const partes = acervoIncompletoEmPartes({
+      semDado: 138, naFila: 0, naoAbreConcurso: 138, lacuna: 0,
+    });
+
+    expect(partes).toHaveLength(1);
+    expect(partes[0].quantos).toBe(138);
+  });
+
+  it("no singular, os verbos concordam", () => {
+    // Três concursos, um em cada categoria. "1 estão na fila" apareceria na
+    // tela do candidato no dia em que a fila esvaziasse até o último.
+    const texto = frase({
+      semDado: 3, naFila: 1, naoAbreConcurso: 1, lacuna: 1,
+    });
+
+    expect(texto).toContain("1 não vai entrar: é uma retificação");
+    expect(texto).toContain("1 está na fila de leitura e entra quando for lido");
+    expect(texto).toContain("1 é lacuna nossa");
+    expect(texto).toContain("só entra se for refeita");
+  });
+
+  it("engine velho, sem a repartição, não vira frase repartida", () => {
+    // API e app sobem separados, e o app novo pode chegar primeiro. Aí os
+    // três campos chegam zerados por `avisoDoAcervo()`, a soma não fecha, e a
+    // tela cai na frase curta em vez de anunciar "0 estão na fila" — ou, pior,
+    // de chutar que os 293 estão todos na fila.
+    expect(
+      acervoIncompletoEmPartes({
+        semDado: 293, naFila: 0, naoAbreConcurso: 0, lacuna: 0,
+      }),
+    ).toEqual([]);
+  });
+
+  it("soma que não fecha é repartição descartada, não repartição publicada", () => {
+    // O caso do contrato que mudou de um lado só: a API passa a ter uma quarta
+    // categoria e o app ainda soma três. Publicar a repartição incompleta
+    // diria "138 + 104 + 10 de 293" e deixaria 41 concursos sem explicação
+    // nenhuma, no meio de uma frase que se apresenta como completa.
+    expect(acervoIncompletoEmPartes({ ...HOJE, lacuna: 10 })).toEqual([]);
+  });
+
+  it("campo que chegou undefined também descarta a repartição", () => {
+    // `AvisoDoAcervo` é uma promessa sobre o JSON de outro processo, e o tipo
+    // não a cumpre sozinho: sem esta guarda, `naFila` ausente viraria
+    // "NaN estão na fila de leitura" na tela — o mesmo acidente que
+    // `quantidade()` existe para impedir no cartão.
+    const torto = { ...HOJE, naFila: undefined as unknown as number };
+
+    expect(acervoIncompletoEmPartes(torto)).toEqual([]);
   });
 });

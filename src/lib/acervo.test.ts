@@ -100,7 +100,7 @@ describe("acervo", () => {
   it("com BC_API_URL, o acervo é o que a rota devolve", async () => {
     vi.stubEnv("BC_API_URL", API);
     const rede = vi.fn(async () =>
-      respostaCom({ concursos: [UM_CONCURSO], semDado: 9309 }),
+      respostaCom({ concursos: [UM_CONCURSO], semDado: 293 }),
     );
     vi.stubGlobal("fetch", rede);
 
@@ -165,20 +165,90 @@ describe("acervo", () => {
     expect(avisos.join()).toContain("`concursos`");
   });
 
-  it("o aviso conta os concursos que a rota não mandou", async () => {
+  it("o aviso conta os concursos que a rota não mandou, e por que estão fora", async () => {
     // A decisão de produto é que a lista traz só quem tem dado e a contagem
     // do resto aparece como aviso. Sem esta função, o número chegava no app e
     // morria aqui, e a tela afirmava por omissão que o acervo tem um
     // concurso.
+    //
+    // A repartição vem junto porque o número sozinho fazia a tela mentir:
+    // ela dizia que os 293 "entram na lista conforme forem lidos", e isso só
+    // vale para os 104 da fila. Números da carga real de 2026-09-14.
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () =>
-      respostaCom({ concursos: [UM_CONCURSO], total: 9311, semDado: 9310 }),
+      respostaCom({
+        concursos: [UM_CONCURSO],
+        total: 4942,
+        semDado: 293,
+        foraDaLista: {
+          total: 293, naFila: 104, naoAbreConcurso: 138, lacuna: 51,
+        },
+      }),
     ));
 
     const { avisoDoAcervo, listarConcursos } = await carregar();
 
-    expect(await avisoDoAcervo()).toEqual({ semDado: 9310, total: 9311 });
+    expect(await avisoDoAcervo()).toEqual({
+      semDado: 293,
+      total: 4942,
+      naFila: 104,
+      naoAbreConcurso: 138,
+      lacuna: 51,
+    });
     expect((await listarConcursos({ porPagina: 1000 })).total).toBe(1);
+  });
+
+  it("engine sem `foraDaLista` zera a repartição em vez de chutá-la", async () => {
+    // API e app sobem separados, e o app novo chega antes do engine novo com
+    // frequência. O que NÃO se pode fazer aqui é preencher `naFila: semDado`
+    // para a frase ficar bonita: seria refazer, do lado do front, a promessa
+    // de entrada automática que este trabalho existe para desfazer. Três
+    // zeros não somam 293, `acervoIncompletoEmPartes` descarta a repartição,
+    // e a tela usa a frase curta.
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({ concursos: [UM_CONCURSO], total: 4942, semDado: 293 }),
+    ));
+
+    const { avisoDoAcervo } = await carregar();
+
+    expect(await avisoDoAcervo()).toEqual({
+      semDado: 293, total: 4942, naFila: 0, naoAbreConcurso: 0, lacuna: 0,
+    });
+  });
+
+  it("a frase da tela nunca promete entrada automática sobre o total", async () => {
+    // O teste que a frase antiga reprovava, montado ponta a ponta: a resposta
+    // da API atravessa `avisoDoAcervo()` e chega em
+    // `acervoIncompletoEmPartes()` como a tela a recebe. No dia medido, a
+    // fila tem 104 e os outros 189 não entram por leitura nenhuma — 138
+    // porque o ato não abre concurso, 51 porque a leitura precisa ser
+    // refeita. Nenhuma oração da frase pode falar de leitura sobre os 293.
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({
+        concursos: [UM_CONCURSO],
+        total: 4942,
+        semDado: 293,
+        foraDaLista: {
+          total: 293, naFila: 104, naoAbreConcurso: 138, lacuna: 51,
+        },
+      }),
+    ));
+
+    const { avisoDoAcervo } = await carregar();
+    const { acervoIncompletoEmPartes } = await import("./rotulos");
+    const aviso = (await avisoDoAcervo())!;
+    const partes = acervoIncompletoEmPartes(aviso);
+
+    const prometem = partes.filter((parte) =>
+      /entra(m)? quando/.test(parte.texto),
+    );
+    expect(prometem).toHaveLength(1);
+    expect(prometem[0].quantos).toBe(104);
+    expect(prometem[0].quantos).toBeLessThan(aviso.semDado);
+    // E o que a promessa NÃO cobre continua na frase, dito por inteiro.
+    expect(partes.reduce((soma, parte) => soma + parte.quantos, 0)).toBe(293);
   });
 
   it("acervo sem buraco não vira aviso", async () => {
@@ -210,8 +280,8 @@ describe("acervo", () => {
 
     const { avisoDoAcervo } = await carregar();
 
-    // Caiu no mock: dizer "faltam 9.309" sobre o mock seria uma afirmação
-    // falsa sobre um acervo que nem está sendo mostrado.
+    // Caiu no mock: dizer "293 estão fora desta lista" sobre o mock seria uma
+    // afirmação falsa sobre um acervo que nem está sendo mostrado.
     expect(await avisoDoAcervo()).toBeNull();
     expect(avisos.join()).toContain("usando o mock");
   });
