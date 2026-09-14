@@ -201,11 +201,27 @@ export function BarraBusca({
           <label htmlFor="busca-q" className="sr-only">
             Cargo, órgão ou banca
           </label>
+          {/*
+            `autoComplete="off"` nos dois controles: o navegador restaura o
+            valor dos campos no recarregamento, ANTES de o React hidratar. O
+            que ele restaura é o que a pessoa digitou da última vez; o que o
+            servidor renderizou é o `q` da URL e "Todo o Brasil" no seletor
+            (`ufLembradaNoServidor` devolve nulo, porque no servidor não há
+            `localStorage`). A divergência aparece como "attributes of the
+            server rendered HTML didn't match the client properties", que é a
+            redação do React para propriedade de controle de formulário.
+
+            Desligar a restauração devolve a verdade ao servidor, e não custa
+            nada aqui: a URL já é a fonte do que a pessoa buscou, e a memória
+            do estado é lida do `localStorage` depois da hidratação, de
+            propósito.
+          */}
           <input
             id="busca-q"
             name="q"
             type="search"
             defaultValue={q}
+            autoComplete="off"
             placeholder="Cargo, órgão ou banca. Ex.: analista judiciário"
             className={`w-full bg-transparent text-tinta-900 outline-none placeholder:text-tinta-400 ${altura} ${corpo}`}
           />
@@ -220,6 +236,7 @@ export function BarraBusca({
               id="busca-uf"
               name="uf"
               value={escolhida}
+              autoComplete="off"
               onChange={(evento) => trocar(evento.target.value)}
               disabled={semEstado}
               aria-describedby={semEstado ? "busca-uf-motivo" : undefined}
