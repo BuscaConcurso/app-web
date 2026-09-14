@@ -7,8 +7,11 @@ import type { ComponentProps, ReactNode } from "react";
  * Cinco variantes e nada mais. O amarelo é a chamada única da tela: se
  * houver dois numa página, nenhum dos dois chama.
  *
- * Altura de 40px no padrão, 48px na chamada, 32px no compacto, que são os
- * três tamanhos do canvas. Nada de borda e nada de sombra.
+ * Três tamanhos, que são os três do canvas: 10, 12 e 8 degraus de escala. Na
+ * tela eles medem 35, 42 e 28px, e **não** os 40, 48 e 32 do canvas — a
+ * unidade deste projeto é 3,52px e não 4 (`--spacing` em `globals.css`), e
+ * ela aperta a altura dos controles junto com o resto. Nada de borda e nada
+ * de sombra.
  */
 export type VarianteDoBotao =
   | "primario"
