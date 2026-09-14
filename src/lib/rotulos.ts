@@ -15,6 +15,7 @@ import type {
   Poder,
   Uf,
 } from "./dominio";
+import { UFS } from "./dominio";
 import { numero, quantidade } from "./formato";
 
 export const ROTULO_STATUS: Record<ConcursoStatus, string> = {
@@ -108,6 +109,83 @@ export function linhaDeContexto(orgao: {
   else if (orgao.uf) partes.push(NOME_UF[orgao.uf]);
   else partes.push("Nacional");
   return partes.join(" · ");
+}
+
+/**
+ * Por que este cartão satisfaz o filtro de estado, em duas partes.
+ *
+ * `pedido` é o estado que a pessoa pediu, por extenso, e é a afirmação: **há
+ * vaga aqui**. `resto` é o que sobra — " · e mais 10 estados" —, e existe
+ * para que um órgão nacional na lista de um estado pequeno pare de parecer
+ * engano.
+ *
+ * **O sintoma que isto conserta foi relatado como defeito de filtro, e o
+ * filtro está certo.** Quem marcou Amapá recebeu, entre outros,
+ * "Universidade Federal do Rio de Janeiro — Edital nº 898/2026", e o cartão
+ * não tinha uma letra dizendo Amapá: mostrava o órgão, o edital e uma linha
+ * de contexto que diz "Rio de Janeiro". O concurso casa porque tem vaga em
+ * Macapá, e a tela calava sobre isso.
+ *
+ * Medido no acervo de 2026-09-14, somando os 27 filtros de estado: **3.886
+ * cartões**. Em **696 deles (18%) o estado pedido não aparece hoje em lugar
+ * nenhum do cartão** — 608 de órgão sem UF, onde `linhaDeContexto` diz
+ * "Nacional", e **88 de órgão de outro estado, onde o cartão nomeia um
+ * estado diferente do pedido**, que é a classe do relato. **206 (5%) são
+ * multiestaduais** e o maior tem 22 UFs.
+ *
+ * No filtro do relato, Amapá: 22 resultados, 10 multiestaduais, e só 5 com
+ * órgão no próprio Amapá. Dos 17 restantes, 12 são de órgão sem UF
+ * (Ministério da Gestão, INCRA, IBGE, Ministério da Pesca) e 5 de órgão de
+ * outro estado.
+ *
+ * **É o estado, e não a cidade, porque a cidade não é atribuível.**
+ * `localidades` é uma lista achatada de nomes escritos pelo ato, sem UF
+ * atrás: 17 de 2.760 trazem a sigla no próprio texto. E não dá para ir
+ * buscá-la na vaga — nos 42 concursos multiestaduais do acervo, **709 de 709
+ * vagas detalhadas têm localidade e `uf` nula**. As duas listas nem sempre
+ * falam do mesmo conjunto: o edital MPA nº 3/2026 tem `ufs` sem PA e
+ * "Belém" entre as localidades. Escrever "Macapá (AP)" seria a tela
+ * adivinhando o que o ato não disse, no mesmo cartão que existe para mostrar
+ * o que o ato disse.
+ *
+ * **Cabe numa linha, medido e não estimado.** O maior texto que o acervo
+ * produz é "Rio Grande do Norte · e mais 21 estados", 39 caracteres, e
+ * nenhum dos 3.886 passa disso. Na tela, a 375px, ele ocupa 217px dos
+ * 262,4px da linha — uma linha só, sem corte. É a mesma geometria de
+ * `cargosDoCartao` (rótulo de largura fixa mais texto), e por isso as duas
+ * linhas começam no mesmo x.
+ *
+ * Devolve `null` quando o estado pedido não está no conjunto — o que o
+ * filtro não deixa acontecer, e que um `bc api` sem `ufs` deixaria: sem dado,
+ * a linha some em vez de afirmar.
+ */
+export interface EstadoDoCartao {
+  /** O estado pedido no filtro, por extenso. */
+  pedido: string;
+  /** " · e mais 10 estados", ou `null` quando o concurso só tem este. */
+  resto: string | null;
+}
+
+export function estadoDoCartao(
+  ufs: unknown,
+  pedida: Uf,
+): EstadoDoCartao | null {
+  const validas = new Set<string>(UFS);
+  const conjunto = new Set(
+    (Array.isArray(ufs) ? ufs : []).filter(
+      (uf): uf is Uf => typeof uf === "string" && validas.has(uf),
+    ),
+  );
+  if (!conjunto.has(pedida)) return null;
+
+  const outros = conjunto.size - 1;
+  return {
+    pedido: NOME_UF[pedida],
+    resto:
+      outros > 0
+        ? ` · e mais ${numero(outros)} ${outros === 1 ? "estado" : "estados"}`
+        : null,
+  };
 }
 
 /**

@@ -4,6 +4,7 @@ import {
   acervoIncompletoEmPartes,
   avisoDeFiltroSemDado,
   cargosDoCartao,
+  estadoDoCartao,
   etiquetasDeVagas,
   linhaDeContexto,
   textoDeRodape,
@@ -251,6 +252,74 @@ describe("textoDeRodape com o endereço do edital", () => {
     // de apontar para uma seção que não vai ter link nenhum.
     expect(sem).toContain("site da banca");
     expect(sem).not.toContain("logo abaixo");
+  });
+});
+
+/**
+ * A linha que diz por que o cartão satisfaz o filtro de estado.
+ *
+ * Os casos são os do acervo real, e o primeiro é o do relato: o filtro de
+ * Amapá trazendo a UFRJ, que casa porque tem vaga em Macapá e não tinha como
+ * dizer isso.
+ */
+describe("estadoDoCartao", () => {
+  it("o multiestadual diz o estado pedido primeiro, e quantos mais tem", () => {
+    // `Universidade Federal do Rio de Janeiro — Edital nº 898/2026`, o cartão
+    // do relato: o órgão nomeia o Rio, e o que o filtro casou é o Amapá.
+    expect(estadoDoCartao(["AP", "DF", "RJ", "RN", "RS"], "AP")).toEqual({
+      pedido: "Amapá",
+      resto: " · e mais 4 estados",
+    });
+  });
+
+  it("com um estado só não há resto que dizer", () => {
+    // O Instituto Federal do Amapá: o cartão afirma o estado e cala sobre o
+    // que não existe.
+    expect(estadoDoCartao(["AP"], "AP")).toEqual({
+      pedido: "Amapá",
+      resto: null,
+    });
+  });
+
+  it("dois estados concordam no singular", () => {
+    expect(estadoDoCartao(["AP", "PA"], "PA")?.resto).toBe(" · e mais 1 estado");
+  });
+
+  it("o maior do acervo cabe na linha: 39 caracteres para 47 disponíveis", () => {
+    // 22 UFs é o maior conjunto do acervo (Ministério da Gestão), e "Rio
+    // Grande do Norte" é o nome mais comprido que aparece num deles. É o pior
+    // caso que o acervo produz, e é por isso que a linha não tem corte.
+    const vinteEDois = [
+      "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MT",
+      "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RS", "SC", "SE", "SP",
+    ] as const;
+    const linha = estadoDoCartao([...vinteEDois], "RN")!;
+    expect(`${linha.pedido}${linha.resto}`).toBe(
+      "Rio Grande do Norte · e mais 21 estados",
+    );
+    expect(`${linha.pedido}${linha.resto}`.length).toBeLessThanOrEqual(47);
+  });
+
+  it("estado repetido no conjunto não vira um estado a mais", () => {
+    expect(estadoDoCartao(["SP", "SP", "RJ"], "SP")?.resto).toBe(
+      " · e mais 1 estado",
+    );
+  });
+
+  it("conjunto sem o estado pedido não afirma nada", () => {
+    // Não acontece pelo filtro, que casa exatamente contra este conjunto.
+    // Acontece com um `bc api` anterior a `ufs`: sem dado, a linha some em
+    // vez de afirmar um estado que ninguém publicou.
+    expect(estadoDoCartao(["RJ"], "AP")).toBeNull();
+    expect(estadoDoCartao(undefined, "AP")).toBeNull();
+    expect(estadoDoCartao([], "AP")).toBeNull();
+  });
+
+  it("lixo no conjunto não vira estado nem conta como um a mais", () => {
+    expect(estadoDoCartao(["AP", "XX", null, 7, "RJ"], "AP")).toEqual({
+      pedido: "Amapá",
+      resto: " · e mais 1 estado",
+    });
   });
 });
 

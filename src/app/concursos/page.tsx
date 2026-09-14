@@ -306,7 +306,13 @@ export default async function BuscaDeConcursos(
                 // na busca. O corte é da `Etiqueta`; aqui é só a licença para
                 // encolher.
                 <li key={concurso.slug} className="min-w-0">
-                  <CartaoConcurso concurso={concurso} hoje={hoje} />
+                  {/* `ufDoFiltro` só aqui: é a busca que faz a pergunta
+                      "por que este veio", e é só ela que tem a resposta. */}
+                  <CartaoConcurso
+                    concurso={concurso}
+                    hoje={hoje}
+                    ufDoFiltro={uf}
+                  />
                 </li>
               ))}
             </ul>

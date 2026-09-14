@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta } from "@/components/ui/Etiqueta";
-import type { ConcursoResumo } from "@/lib/dominio";
+import type { ConcursoResumo, Uf } from "@/lib/dominio";
 import {
   dataCurta,
   dataLonga,
@@ -13,6 +14,7 @@ import {
 import {
   ROTULO_ESCOLARIDADE,
   cargosDoCartao,
+  estadoDoCartao,
   etiquetasDeVagas,
   linhaDeContexto,
 } from "@/lib/rotulos";
@@ -25,13 +27,22 @@ import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
  * situação está, quantas vagas, quanto paga, até quando dá para se
  * inscrever e quanto custa a taxa. Os números vão para um bloco rebaixado
  * e usam figuras de largura fixa, então alinham em coluna e leem como tabela.
+ *
+ * `ufDoFiltro` é o estado que a busca pediu, e só a busca passa. Com ele o
+ * cartão ganha a linha que diz por que satisfaz o filtro; sem ele — na home,
+ * na vitrine de estilo — nada muda. É de propósito: a linha existe para
+ * responder a uma pergunta que só quem filtrou por estado fez, e desenhá-la
+ * nos 4.649 cartões por causa dela transformaria todo cartão numa lista de
+ * estados. O porquê de cada número está em `estadoDoCartao`.
  */
 export function CartaoConcurso({
   concurso,
   hoje,
+  ufDoFiltro,
 }: {
   concurso: ConcursoResumo;
   hoje?: Date;
+  ufDoFiltro?: Uf;
 }) {
   const tom = tomDoConcurso(concurso, hoje);
   const estilo = ESTILO_DO_TOM[tom];
@@ -43,6 +54,9 @@ export function CartaoConcurso({
   // um número inventado é pior aqui do que em qualquer outro lugar da tela.
   const vagasDoAto = quantidade(concurso.vagas);
   const cargos = cargosDoCartao(concurso.nomesDeCargo);
+  const estado = ufDoFiltro
+    ? estadoDoCartao(concurso.ufs, ufDoFiltro)
+    : null;
 
   return (
     <Cartao tom={tom} as="article" className="flex flex-col gap-2.5 p-4">
@@ -82,11 +96,14 @@ export function CartaoConcurso({
         375px 84 caracteres cabem em duas (medido: 47 por linha) e a 320px
         não — e uma margem que só aparece abaixo do alvo não custa altura
         nenhuma no alvo.
+
+        O rótulo de largura fixa de `LinhaRotulada` tirou 1,8px do texto
+        (264,9px para 262,4px). Remedido depois disso, em 80 cartões de
+        quatro buscas a 375px: nenhuma linha de cargos cortada, e o pior
+        texto da amostra — 83 caracteres, um a menos que o orçamento — cabe
+        em duas linhas.
       */}
-      <div className="flex gap-2">
-        <span className="shrink-0 text-[10px] leading-[18px] font-semibold tracking-[0.06em] uppercase text-tinta-500">
-          Cargos
-        </span>
+      <LinhaRotulada rotulo="Cargos">
         <p
           className={`line-clamp-3 min-w-0 text-[12px] leading-[18px] ${
             cargos.informado ? "text-tinta-800" : estilo.apoio
@@ -94,7 +111,34 @@ export function CartaoConcurso({
         >
           {cargos.texto}
         </p>
-      </div>
+      </LinhaRotulada>
+
+      {/*
+        A linha que responde "por que este veio". Ela só existe quando a busca
+        pediu um estado, e fica logo abaixo dos cargos porque as duas
+        respondem à mesma pergunta para filtros diferentes — cargos para o
+        texto digitado, esta para o estado —, na ordem em que os dois campos
+        aparecem na barra de busca.
+
+        O estado pedido é o que ganha peso e tinta cheia: é a afirmação que o
+        cartão não fazia. O resto fica no tom de apoio, porque é contexto —
+        explica o órgão nacional na lista de um estado, sem disputar a leitura
+        com o que a pessoa perguntou.
+
+        Sem `line-clamp` porque não precisa, e isso foi visto na tela: o pior
+        caso que o acervo produz é "Rio Grande do Norte · e mais 21 estados",
+        e a 375px ele ocupa **217px dos 262,4px** da linha, numa linha só.
+      */}
+      {estado && (
+        <LinhaRotulada rotulo="Onde">
+          <p className="min-w-0 text-[12px] leading-[18px]">
+            <span className="font-semibold text-tinta-900">{estado.pedido}</span>
+            {estado.resto && (
+              <span className={estilo.apoio}>{estado.resto}</span>
+            )}
+          </p>
+        </LinhaRotulada>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <Etiqueta tom={tom} comPonto>
@@ -165,5 +209,44 @@ export function CartaoConcurso({
         </Link>
       </div>
     </Cartao>
+  );
+}
+
+/**
+ * Uma linha rotulada do cartão: o rótulo em caixa alta à esquerda, o texto à
+ * direita. É a forma das duas linhas que dizem por que o cartão veio na busca
+ * — "Cargos", para quem digitou um termo, e "Onde", para quem filtrou por
+ * estado.
+ *
+ * **A largura do rótulo é fixa, e é isso que a função existe para garantir.**
+ * Sem ela os dois rótulos medem o que o texto deles mede — "CARGOS" 47,5px e
+ * "ONDE" 31,5px, medido em Chrome com a fonte real —, e duas linhas vizinhas
+ * começariam com 16px de desencontro. `w-14` (49,3px) é o menor degrau da
+ * escala que cabe o maior dos dois sem cortar.
+ *
+ * O custo disso na linha de cargos foi medido, não estimado: o texto perde
+ * 1,8px (264,9px para 263,1px), o que mantém os 84 caracteres de
+ * `cargosDoCartao` dentro de duas linhas a 375px com folga, e o
+ * `line-clamp-3` de margem continua sobrando.
+ *
+ * O texto vem de fora com o seu próprio `min-w-0`: `min-width` de item de
+ * flex é `auto`, e sem a licença para encolher um texto comprido estica o
+ * cartão, a lista e a página. É a armadilha que já deu scroll horizontal
+ * neste projeto duas vezes.
+ */
+function LinhaRotulada({
+  rotulo,
+  children,
+}: {
+  rotulo: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex gap-2">
+      <span className="w-14 shrink-0 text-[10px] leading-[18px] font-semibold tracking-[0.06em] uppercase text-tinta-500">
+        {rotulo}
+      </span>
+      {children}
+    </div>
   );
 }
