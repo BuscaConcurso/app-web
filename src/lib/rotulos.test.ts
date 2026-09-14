@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { ConcursoDetalhe } from "./dominio";
 import {
   avisoDeFiltroSemDado,
+  cargosDoCartao,
+  etiquetasDeVagas,
   linhaDeContexto,
   textoDeRodape,
   tituloComOrgao,
@@ -76,6 +78,8 @@ describe("textoDeRodape", () => {
     publicadoEm: null,
     previstoPara: null,
     vagas: null,
+    vagasPcd: null,
+    vagasNegros: null,
     cadastroReserva: false,
     salarioAte: null,
     taxaInscricao: null,
@@ -220,6 +224,8 @@ describe("textoDeRodape com o endereço do edital", () => {
       publicadoEm: null,
       previstoPara: null,
       vagas: null,
+      vagasPcd: null,
+      vagasNegros: null,
       cadastroReserva: false,
       salarioAte: null,
       taxaInscricao: null,
@@ -244,5 +250,191 @@ describe("textoDeRodape com o endereço do edital", () => {
     // de apontar para uma seção que não vai ter link nenhum.
     expect(sem).toContain("site da banca");
     expect(sem).not.toContain("logo abaixo");
+  });
+});
+
+describe("etiquetasDeVagas", () => {
+  const NADA = { vagasPcd: null, vagasNegros: null, cadastroReserva: false };
+
+  it("não etiqueta nada quando o ato não disse nada de vaga", () => {
+    // 2.646 dos 3.071 cartões do acervo. A fileira de etiquetas é de
+    // tamanho variável e por isso não consegue mostrar ausência: quem diz
+    // "não sabemos quantas" é a casa "Vagas" do bloco de números, que é
+    // desenhada sempre. Uma etiqueta apagada aqui repetiria aquilo em 70%
+    // dos cartões e empurraria para baixo, no celular, as que afirmam algo.
+    expect(etiquetasDeVagas(NADA)).toEqual([]);
+  });
+
+  it("não repete o total: a etiqueta diz para quem, o bloco diz quantas", () => {
+    // Uma etiqueta de total apareceria em 922 cartões repetindo o número
+    // logo abaixo, e em 602 deles diria "1 vaga".
+    expect(etiquetasDeVagas({ ...NADA, vagasPcd: 3 })).toEqual(["3 vagas PcD"]);
+  });
+
+  it("diz o cadastro de reserva por extenso, e sozinho quando é só ele", () => {
+    // 171 cartões do acervo: soma zero e cadastro de reserva. O bloco de
+    // números mostrava "CR" numa casa de número, como se fosse quantidade.
+    expect(etiquetasDeVagas({ ...NADA, cadastroReserva: true })).toEqual([
+      "Cadastro reserva",
+    ]);
+  });
+
+  it("junta a reserva legal e o cadastro, nesta ordem", () => {
+    // O caso mais carregado do acervo: 59 concursos têm PcD e negros, e 83
+    // dos que têm número também têm cadastro de reserva — a etiqueta é o
+    // único lugar onde este último fato aparece nesses 83 cartões.
+    expect(
+      etiquetasDeVagas({ vagasPcd: 21, vagasNegros: 84, cadastroReserva: true }),
+    ).toEqual(["21 vagas PcD", "84 vagas para negros", "Cadastro reserva"]);
+  });
+
+  it("concorda o singular e agrupa o milhar", () => {
+    expect(etiquetasDeVagas({ ...NADA, vagasPcd: 1 })).toEqual(["1 vaga PcD"]);
+    expect(etiquetasDeVagas({ ...NADA, vagasNegros: 1 })).toEqual([
+      "1 vaga para negros",
+    ]);
+    expect(etiquetasDeVagas({ ...NADA, vagasNegros: 1200 })).toEqual([
+      "1.200 vagas para negros",
+    ]);
+  });
+
+  it("resumo de engine mais velho não vira etiqueta nenhuma", () => {
+    // O caso que aconteceu de verdade: o app subiu com `vagasPcd` e
+    // `vagasNegros` antes de o engine passar a publicá-los. Os campos chegam
+    // `undefined`, `Intl.NumberFormat().format(undefined)` devolve "NaN", e a
+    // busca anunciou "NaN vagas PcD" em cartões reais — uma reserva de vaga
+    // afirmada a partir de um campo que não existia.
+    //
+    // O tipo não protege: `acervo()` faz `await resposta.json()` e anota o
+    // resultado com `ConcursoResumo` sem conferir campo nenhum. Por isso o
+    // `as` aqui — ele reproduz exatamente a mentira que o `fetch` conta.
+    const antigo = {
+      vagas: 18,
+      cadastroReserva: false,
+    } as Parameters<typeof etiquetasDeVagas>[0];
+
+    expect(etiquetasDeVagas(antigo)).toEqual([]);
+    // E o mesmo para um resumo sem campo algum, que é o limite do caso.
+    expect(etiquetasDeVagas({})).toEqual([]);
+  });
+
+  it("valor que não é número finito é ausência, nunca texto com o valor", () => {
+    // Um a um, porque cada um chega por um caminho diferente: `undefined` de
+    // campo que não veio, `NaN` de conta que deu errado, string de JSON
+    // frouxo. Nenhum deles pode virar afirmação.
+    for (const lixo of [undefined, NaN, Infinity, -Infinity, "12", null]) {
+      const etiquetas = etiquetasDeVagas({
+        vagasPcd: lixo,
+        vagasNegros: lixo,
+        cadastroReserva: lixo,
+      } as Parameters<typeof etiquetasDeVagas>[0]);
+      expect(etiquetas).toEqual([]);
+    }
+  });
+
+  it("negativo também não vira etiqueta", () => {
+    // Não existe no acervo (as colunas são `not null` e a extração não grava
+    // negativo), e é justamente por isso: se um dia existir, é dado estragado,
+    // e "-3 vagas PcD" seria a tela repetindo o estrago em voz alta.
+    expect(etiquetasDeVagas({ ...NADA, vagasPcd: -3 })).toEqual([]);
+  });
+
+  it("zero não vira etiqueta, pelo mesmo motivo de não virar número", () => {
+    // O engine já manda nulo; se um dia mandar zero, a etiqueta não pode
+    // afirmar "0 vagas PcD" — o ato não reservar nenhuma e o ato não ter
+    // repartido são coisas diferentes, e nenhum ato do acervo diz a
+    // primeira.
+    expect(etiquetasDeVagas({ ...NADA, vagasPcd: 0, vagasNegros: 0 })).toEqual([]);
+  });
+});
+
+describe("cargosDoCartao", () => {
+  it("mostra o cargo único inteiro, que é o caso de 2.360 dos 2.717", () => {
+    expect(cargosDoCartao(["Escrevente técnico judiciário"])).toEqual({
+      texto: "Escrevente técnico judiciário",
+      informado: true,
+    });
+  });
+
+  it("junta os poucos que cabem sem cortar nada", () => {
+    // A lista completa tem mediana de 23 caracteres no acervo: o caso normal
+    // é caber tudo, e nele não pode sobrar sinal de corte nenhum.
+    expect(cargosDoCartao(["Analista judiciário", "Técnico judiciário"])).toEqual({
+      texto: "Analista judiciário · Técnico judiciário",
+      informado: true,
+    });
+  });
+
+  it("quando corta, diz quantos cortou", () => {
+    // Sumir com cargos em silêncio faria o cartão descrever um concurso menor
+    // do que ele é — e quem procura o cargo que sumiu concluiria que ele não
+    // existe. O acervo tem um concurso com 91 cargos.
+    const nomes = Array.from({ length: 91 }, (_, i) => `Cargo número ${i + 1}`);
+    const { texto } = cargosDoCartao(nomes);
+
+    expect(texto.startsWith("Cargo número 1 · Cargo número 2")).toBe(true);
+    expect(texto.length).toBeLessThanOrEqual(84);
+    expect(texto).toMatch(/ · e mais \d+$/);
+    const cortados = Number(texto.match(/e mais (\d+)$/)![1]);
+    const mostrados = texto.split(" · ").length - 1;
+    // A conta fecha: o que aparece mais o que foi declarado dá o total.
+    expect(mostrados + cortados).toBe(91);
+  });
+
+  it("nome que não cabe sozinho cede, e o aviso de corte sobrevive", () => {
+    // O maior nome de cargo do acervo tem 290 caracteres — 59 cartões caem
+    // aqui. Deixar o nome inteiro empurraria "e mais 1" para fora das linhas
+    // visíveis e o cartão voltaria a sumir com cargo em silêncio. Cortar o nome
+    // diz as duas verdades: este nome continua, e há mais cargos.
+    const gigante = "Professor do Magistério Superior - ".repeat(9);
+    const { texto, informado } = cargosDoCartao([gigante, "Pedagogo"]);
+
+    expect(informado).toBe(true);
+    expect(texto.startsWith("Professor do Magistério Superior")).toBe(true);
+    expect(texto).toContain("…");
+    expect(texto.endsWith(" · e mais 1")).toBe(true);
+    expect(texto.length).toBeLessThanOrEqual(84);
+  });
+
+  it("o texto nunca passa do que cabe em duas linhas, medido a 375px", () => {
+    // 84 caracteres: a 375px o maior texto que ainda ocupa uma linha só tem
+    // 47, e duas linhas dão folga. É este limite que garante que o aviso não seja ele
+    // próprio a coisa cortada — a honestidade do cartão não pode depender de
+    // uma regra de CSS.
+    const casos = [
+      ["Pedagogo"],
+      Array.from({ length: 91 }, (_, i) => `Cargo número ${i + 1}`),
+      ["x".repeat(290)],
+      ["x".repeat(290), "Pedagogo", "Analista"],
+      Array.from({ length: 40 }, () => "Professor do Magistério Superior"),
+    ];
+    for (const caso of casos) {
+      expect(cargosDoCartao(caso).texto.length).toBeLessThanOrEqual(84);
+    }
+  });
+
+  it("sem cargo, a linha diz que não sabe em vez de sumir", () => {
+    // 354 dos 3.071 concursos do acervo. Uma linha que some quando falta dado
+    // não consegue mostrar que falta dado.
+    expect(cargosDoCartao([])).toEqual({
+      texto: "não informados",
+      informado: false,
+    });
+  });
+
+  it("campo que não veio é ausência, e não derruba o cartão", () => {
+    // Mesmo caso do "NaN vagas PcD": o tipo promete `string[]`, quem entrega é
+    // o JSON de outro processo. `nomes.length` em `undefined` derrubaria a
+    // busca inteira.
+    for (const lixo of [undefined, null, "Professor", 7, {}]) {
+      expect(cargosDoCartao(lixo)).toEqual({
+        texto: "não informados",
+        informado: false,
+      });
+    }
+  });
+
+  it("descarta entrada vazia em vez de virar separador solto", () => {
+    expect(cargosDoCartao(["Pedagogo", "", "   ", null]).texto).toBe("Pedagogo");
   });
 });

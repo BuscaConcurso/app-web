@@ -44,6 +44,8 @@ const UM_CONCURSO: ConcursoResumo = {
   publicadoEm: "2026-05-12",
   previstoPara: 2026,
   vagas: 1,
+  vagasPcd: null,
+  vagasNegros: null,
   cadastroReserva: false,
   salarioAte: null,
   taxaInscricao: null,

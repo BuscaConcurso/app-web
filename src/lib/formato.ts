@@ -95,6 +95,27 @@ export function numero(valor: number): string {
 }
 
 /**
+ * A quantidade, se for mesmo uma quantidade; `null` em qualquer outro caso.
+ *
+ * Existe porque o tipo `ConcursoResumo` é uma promessa sobre o JSON de outro
+ * processo, e o JSON não a cumpre sozinho: `acervo()` faz `await
+ * resposta.json()` e anota o resultado com o tipo, sem conferir campo nenhum.
+ * Um engine mais velho — que é o estado normal do mundo, porque API e app
+ * sobem separados e a versão do app pode chegar antes — simplesmente não
+ * manda o campo, ele chega `undefined`, e `Intl.NumberFormat().format(
+ * undefined)` devolve a string **"NaN"**.
+ *
+ * Foi o que aconteceu: a busca mostrou "NaN vagas PcD" em cartões reais. O
+ * erro não é cosmético. A tela afirmou uma reserva de vagas a partir de um
+ * campo que não existia, num produto cujo contrato inteiro é não afirmar o
+ * que o ato não disse. Campo que não veio é ausência de dado, e ausência de
+ * dado não vira texto com valor dentro — vira nada.
+ */
+export function quantidade(valor: unknown): number | null {
+  return typeof valor === "number" && Number.isFinite(valor) ? valor : null;
+}
+
+/**
  * O texto de vagas do cartão. Um concurso sem número de vagas mas com
  * cadastro reserva não tem zero vagas, tem uma fila, e dizer "0 vagas"
  * afastaria quem deveria se inscrever.

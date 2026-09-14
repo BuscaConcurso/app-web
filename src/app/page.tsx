@@ -93,7 +93,10 @@ export default async function Home() {
       >
         <ul className="grid gap-2 lg:grid-cols-2">
           {destaques.abertos.map((concurso) => (
-            <li key={concurso.slug}>
+            // `min-w-0` pelo mesmo motivo da lista da busca: item de grid não
+            // encolhe abaixo do min-content sem isto, e o mesmo cartão está
+            // aqui.
+            <li key={concurso.slug} className="min-w-0">
               <CartaoConcurso concurso={concurso} hoje={hoje} />
             </li>
           ))}

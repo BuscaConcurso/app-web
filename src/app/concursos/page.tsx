@@ -298,7 +298,14 @@ export default async function BuscaDeConcursos(
           ) : (
             <ul className="mt-4 grid gap-2 xl:grid-cols-2">
               {resultado.itens.map((concurso) => (
-                <li key={concurso.slug}>
+                // `min-w-0`: item de grid tem `min-width: auto`, que vale o
+                // min-content do conteúdo — então uma etiqueta que se recusa
+                // a encolher (`whitespace-nowrap`) estica a célula, a lista e
+                // a página. Medido a 375px: 2 dos 15 nomes de banca do acervo
+                // passam dos 319px úteis da fileira e davam scroll horizontal
+                // na busca. O corte é da `Etiqueta`; aqui é só a licença para
+                // encolher.
+                <li key={concurso.slug} className="min-w-0">
                   <CartaoConcurso concurso={concurso} hoje={hoje} />
                 </li>
               ))}

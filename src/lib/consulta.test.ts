@@ -39,6 +39,8 @@ function fixture(parcial: Partial<ConcursoResumo> = {}): ConcursoResumo {
     publicadoEm: "2026-02-20",
     previstoPara: null,
     vagas: 100,
+    vagasPcd: null,
+    vagasNegros: null,
     cadastroReserva: false,
     salarioAte: 10000,
     taxaInscricao: 90,

@@ -6,6 +6,7 @@
  */
 import type {
   ConcursoDetalhe,
+  ConcursoResumo,
   ConcursoStatus,
   FaqPergunta,
   Escolaridade,
@@ -14,6 +15,7 @@ import type {
   Poder,
   Uf,
 } from "./dominio";
+import { numero, quantidade } from "./formato";
 
 export const ROTULO_STATUS: Record<ConcursoStatus, string> = {
   previsto: "Previsto",
@@ -106,6 +108,164 @@ export function linhaDeContexto(orgao: {
   else if (orgao.uf) partes.push(NOME_UF[orgao.uf]);
   else partes.push("Nacional");
   return partes.join(" · ");
+}
+
+/**
+ * As etiquetas de vagas do cartão da busca: **para quem** as vagas são.
+ *
+ * A divisão de trabalho com o bloco de números é o desenho inteiro. O bloco
+ * é de posições fixas — o rótulo "Vagas" é sempre desenhado —, então ele é o
+ * único lugar da tela onde a ausência de dado consegue aparecer, e é lá que
+ * o "quantas" mora. A fileira de etiquetas é de tamanho variável: uma
+ * etiqueta que não existe é invisível, e por isso ela só pode carregar
+ * afirmação, nunca ausência. Daí a regra: **o bloco diz quantas, as
+ * etiquetas dizem para quem, e nenhuma das duas repete a outra.**
+ *
+ * É também por isso que não há etiqueta com o total. Ela apareceria em 922
+ * cartões repetindo o número que está três linhas abaixo, e em 602 deles
+ * (65%) diria "1 vaga" — uma etiqueta que não separa um cartão de outro.
+ *
+ * O que as etiquetas acrescentam, medido no acervo de 3.071 concursos:
+ * - cadastro de reserva, em 254 cartões. Em 83 deles o cartão perdia o fato
+ *   por completo (o bloco mostrava só o número) e nos outros 171 ele saía
+ *   como a abreviação "CR" dentro de uma casa de número.
+ * - a reserva legal, em 197 cartões (94 com PcD, 162 com negros), que o
+ *   resumo nem publicava.
+ * Ao todo 425 cartões (14%) ganham pelo menos uma.
+ */
+export function etiquetasDeVagas(
+  concurso: Partial<
+    Pick<ConcursoResumo, "vagasPcd" | "vagasNegros" | "cadastroReserva">
+  >,
+): string[] {
+  return [
+    // "1 vaga PcD" e não "PcD: 1": a etiqueta fica acima do bloco de
+    // números, então precisa dizer sozinha de que ela está falando.
+    reservadas(concurso.vagasPcd, "PcD"),
+    reservadas(concurso.vagasNegros, "para negros"),
+    // Por extenso, e por último. "CR" é jargão de edital, e quem não o
+    // conhece é exatamente quem a etiqueta serve: o cadastro de reserva é o
+    // caso em que vale se inscrever mesmo sem vaga imediata anunciada.
+    //
+    // `=== true` e não o valor cru: um engine que não conhece o campo manda
+    // `undefined`, e "não veio" não pode virar "sim" por acidente de
+    // coerção. Aqui daria `false` de qualquer jeito; está explícito porque a
+    // regra é da fileira inteira, não deste ramo.
+    concurso.cadastroReserva === true ? "Cadastro reserva" : null,
+  ].filter((etiqueta): etiqueta is string => etiqueta !== null);
+}
+
+/**
+ * Uma etiqueta de reserva, ou nada.
+ *
+ * `quantidade()` antes de qualquer coisa, e é o ponto todo desta função: o
+ * parâmetro chega tipado como `number | null`, mas o tipo é uma promessa
+ * sobre o JSON de outro processo — um engine mais velho não manda o campo e
+ * ele chega `undefined`. Sem esta guarda, `numero(undefined)` devolve "NaN" e
+ * a busca anuncia **"NaN vagas PcD"**, que foi o que aconteceu em cartões
+ * reais. Uma tela que afirma reserva de vaga a partir de campo inexistente é
+ * o erro exato que este produto não pode cometer.
+ *
+ * Zero também não vira etiqueta, pelo mesmo motivo de não virar número: o
+ * ato não repartir e o ato reservar nenhuma são coisas diferentes.
+ */
+function reservadas(quantas: unknown, para: string): string | null {
+  const quantas_ = quantidade(quantas);
+  if (quantas_ === null || quantas_ <= 0) return null;
+  return `${numero(quantas_)} ${quantas_ === 1 ? "vaga" : "vagas"} ${para}`;
+}
+
+/**
+ * Quanto texto de cargo cabe na linha do cartão, contando o aviso de corte.
+ *
+ * Medido na tela, não escolhido: a 375px a linha tem 264px úteis (o rótulo
+ * "Cargos" come o resto dos 319px do cartão) e o maior texto que ainda ocupa
+ * uma linha só tem **47 caracteres**. Duas linhas dão folga para **84**,
+ * que é o orçamento; o `line-clamp-3` do cartão é margem para telas mais
+ * estreitas que o alvo (a 320px cabem 32 por linha).
+ *
+ * O orçamento vale para o texto INTEIRO, com o " · e mais 12" dentro. É a
+ * diferença que importa: orçar só os nomes deixaria o aviso de corte cair
+ * fora das linhas visíveis, e aí o cartão voltaria a sumir com cargos em
+ * silêncio — justamente o que o aviso existe para impedir.
+ *
+ * Contra o acervo, 84 caracteres deixam passar inteira a lista de **2.455
+ * dos 2.717** concursos com cargo (90%): 227 cartões ganham o aviso "e mais
+ * N" e em 59 o próprio nome é cortado com reticências: a mediana da lista completa é 23
+ * caracteres e o p90 é 83. O corte existe para a cauda, e a cauda é real —
+ * o maior nome de cargo do acervo tem 290 caracteres sozinho, a maior lista
+ * junta dá 3.024, e um concurso tem 91 cargos.
+ */
+const ORCAMENTO_DE_CARGOS = 84;
+
+/** " · e mais 12": o corte se declarando, e o que ele custa em caracteres. */
+function avisoDeCorte(quantos: number): string {
+  return ` · e mais ${quantos}`;
+}
+
+/**
+ * Os cargos do cartão, que é o que a pessoa de fato digitou na busca.
+ *
+ * `titulo` não serve para isso: no acervo real ele é o cabeçalho do ato
+ * ("Agência Nacional de Saúde Suplementar — Edital nº 22/2026"), e não
+ * contém o nome do cargo. Sem esta linha, o cartão devolvido por uma busca
+ * por "professor" não mostra em lugar nenhum a palavra "professor".
+ *
+ * **O corte diz que cortou, e o texto cabe.** As duas coisas são a mesma
+ * regra: o resultado nunca passa de `ORCAMENTO_DE_CARGOS`, então o " · e
+ * mais 12" nunca é o pedaço que a tela corta. Sumir com 12 cargos em
+ * silêncio faria o cartão descrever um concurso menor do que ele é, e quem
+ * procura o 13º concluiria que ele não existe. O `line-clamp-3` da linha
+ * ficou como cinto de segurança, não como a regra — uma regra que depende de
+ * CSS para ser verdadeira não é uma regra.
+ *
+ * **Ausência é ausência.** 354 dos 3.071 concursos do acervo não têm cargo
+ * nenhum, e nesses a função devolve `informado: false` para a linha existir
+ * dizendo que não sabe. A linha é desenhada sempre, de propósito: uma linha
+ * que some quando falta dado não consegue mostrar que falta dado — é a mesma
+ * razão pela qual "quantas vagas" mora no bloco de números e não numa
+ * etiqueta.
+ *
+ * O parâmetro é `unknown` pelo motivo de `reservadas()` aqui em cima: o tipo
+ * `ConcursoResumo` é uma promessa sobre o JSON de outro processo, e um engine
+ * que não mande o campo faria `nomes.length` derrubar o cartão. Campo que não
+ * veio é ausência, e ausência é o caso que esta função já sabe tratar.
+ */
+export function cargosDoCartao(nomes: unknown): {
+  texto: string;
+  informado: boolean;
+} {
+  const lista = Array.isArray(nomes)
+    ? nomes.filter(
+        (nome): nome is string => typeof nome === "string" && nome.trim() !== "",
+      )
+    : [];
+  if (lista.length === 0) return { texto: "não informados", informado: false };
+
+  // Do maior número de nomes para o menor, parando no primeiro que caiba
+  // COM o seu próprio aviso. Contar para a frente não serve: quantos cabem
+  // depende do tamanho do aviso, e o tamanho do aviso depende de quantos
+  // ficaram de fora.
+  for (let quantos = lista.length; quantos >= 1; quantos--) {
+    const restantes = lista.length - quantos;
+    const texto =
+      lista.slice(0, quantos).join(" · ") +
+      (restantes > 0 ? avisoDeCorte(restantes) : "");
+    if (texto.length <= ORCAMENTO_DE_CARGOS) return { texto, informado: true };
+  }
+
+  // Nem o primeiro nome sozinho cabe — 228 nomes do acervo passam de 80
+  // caracteres e o maior tem 290. Aqui o nome é que cede, com reticências
+  // próprias: cortar o nome e manter o aviso diz as duas verdades ("este
+  // nome continua" e "há mais cargos"), enquanto deixar o nome inteiro
+  // empurraria o aviso para fora da tela e só diria a primeira.
+  const restantes = lista.length - 1;
+  const aviso = restantes > 0 ? avisoDeCorte(restantes) : "";
+  const espaco = ORCAMENTO_DE_CARGOS - aviso.length - 1;
+  return {
+    texto: `${lista[0].slice(0, espaco).trimEnd()}…${aviso}`,
+    informado: true,
+  };
 }
 
 /**

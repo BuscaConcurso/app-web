@@ -249,6 +249,9 @@ export default async function Estilo() {
             </Etiqueta>
           ))}
           <Etiqueta>Superior</Etiqueta>
+          <Etiqueta>21 vagas PcD</Etiqueta>
+          <Etiqueta>84 vagas para negros</Etiqueta>
+          <Etiqueta>Cadastro reserva</Etiqueta>
           <Etiqueta>Banca: Vunesp</Etiqueta>
           {TONS.map((tom) => (
             <Selo key={tom} sigla="TJSP" tom={tom} />

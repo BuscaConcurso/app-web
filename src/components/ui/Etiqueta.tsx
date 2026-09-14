@@ -30,7 +30,13 @@ export function Etiqueta({
     <span
       className={[
         "inline-flex items-center gap-1.5 rounded-[5px] px-2.5 py-1",
-        "text-xs font-semibold whitespace-nowrap",
+        // `max-w-full` é o que impede uma etiqueta sozinha de esticar a
+        // página. Medido a 375px, onde a fileira tem 319px úteis: 2 dos 15
+        // nomes de banca do acervo passam disso sozinhos (366px e 325px, com
+        // `whitespace-nowrap`), e os 2 cartões correspondentes davam scroll
+        // horizontal na busca. Uma fileira `flex-wrap` quebra em linhas, mas
+        // não quebra um item que se recusa a encolher.
+        "max-w-full text-xs font-semibold whitespace-nowrap",
         estilo.chip,
         className,
       ]
@@ -43,7 +49,14 @@ export function Etiqueta({
           className={`size-1.5 shrink-0 rounded-full ${estilo.ponto}`}
         />
       )}
-      {children}
+      {/*
+        O texto num filho próprio, com `min-w-0`: `truncate` sozinho não
+        encolhe item de flex, porque `min-width` de item de flex é `auto` e
+        vale o min-content. É exatamente a armadilha que já quebrou o mobile
+        deste projeto uma vez — e a razão de o corte ficar aqui dentro, e não
+        na fileira.
+      */}
+      <span className="min-w-0 truncate">{children}</span>
     </span>
   );
 }

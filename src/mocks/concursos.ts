@@ -27,6 +27,15 @@ interface Rascunho {
   status: ConcursoStatus;
   escolaridades: Escolaridade[];
   vagas?: number | null;
+  /**
+   * Nomes dos cargos, como o resumo do engine os publica. Vazio é um caso
+   * legítimo e está representado: 354 dos 3.071 concursos do acervo não têm
+   * cargo nenhum, e o cartão precisa mostrar essa ausência.
+   */
+  cargos?: string[];
+  /** A repartição legal do total, quando o ato a declarou. */
+  vagasPcd?: number | null;
+  vagasNegros?: number | null;
   cadastroReserva?: boolean;
   salarioAte?: number | null;
   taxa?: number | null;
@@ -43,12 +52,20 @@ const RASCUNHOS: Rascunho[] = [
   // Encerrando nesta semana. São estes que o design existe para destacar.
   {
     slug: "trt-2-analista-judiciario-2026",
+    cargos: [
+      "Analista judiciário",
+      "Técnico judiciário",
+    ],
     titulo: "Analista e técnico judiciário",
     orgao: "trt-2",
     banca: "vunesp",
     status: "inscricoes_abertas",
     escolaridades: ["superior", "medio"],
     vagas: 86,
+    // A repartição legal, como o acervo real a traz em 197 dos 3.071
+    // concursos: sempre um recorte do total, nunca uma soma a mais.
+    vagasPcd: 5,
+    vagasNegros: 17,
     salarioAte: 13994.78,
     taxa: 95,
     de: -32,
@@ -57,6 +74,9 @@ const RASCUNHOS: Rascunho[] = [
   },
   {
     slug: "pmmg-soldado-2026",
+    cargos: [
+      "Soldado de 1ª classe",
+    ],
     titulo: "Soldado da polícia militar",
     orgao: "pmmg",
     banca: "fgv",
@@ -85,12 +105,24 @@ const RASCUNHOS: Rascunho[] = [
   },
   {
     slug: "prefeitura-de-curitiba-professor-2026",
+    cargos: [
+      "Professor de docência 1",
+      "Professor de educação infantil",
+      "Profissional do magistério - anos iniciais",
+      "Pedagogo",
+      "Auxiliar de serviços escolares",
+    ],
     titulo: "Professor de docência 1",
     orgao: "prefeitura-de-curitiba",
     banca: "aocp",
     status: "inscricoes_abertas",
     escolaridades: ["superior", "medio_tecnico"],
     vagas: 420,
+    // O cartão mais carregado que o acervo produz: situação, escolaridade,
+    // duas reservas, cadastro de reserva e banca. São 8 concursos em 3.071
+    // com cinco etiquetas, e é a 375px que este caso precisa caber.
+    vagasPcd: 21,
+    vagasNegros: 84,
     cadastroReserva: true,
     salarioAte: 6127.3,
     taxa: 72,
@@ -102,6 +134,9 @@ const RASCUNHOS: Rascunho[] = [
   // Abertos com folga.
   {
     slug: "tjsp-escrevente-tecnico-judiciario-2026",
+    cargos: [
+      "Escrevente técnico judiciário",
+    ],
     titulo: "Escrevente técnico judiciário",
     orgao: "tjsp",
     banca: "vunesp",
@@ -539,14 +574,16 @@ function paraResumo(rascunho: Rascunho): ConcursoResumo {
     publicadoEm: rascunho.publicado == null ? null : dia(rascunho.publicado),
     previstoPara: rascunho.previstoPara ?? null,
     vagas: rascunho.vagas ?? null,
+    vagasPcd: rascunho.vagasPcd ?? null,
+    vagasNegros: rascunho.vagasNegros ?? null,
     cadastroReserva: rascunho.cadastroReserva ?? false,
     salarioAte: rascunho.salarioAte ?? null,
     taxaInscricao: rascunho.taxa ?? null,
     escolaridades: rascunho.escolaridades,
-    // Vazios de propósito: o mock existe para demonstrar o desenho, e o
-    // acervo de verdade é que preenche nome de cargo e cidade de vaga. No
-    // mock a cidade vem do órgão, que é onde o mock a tem.
-    nomesDeCargo: [],
+    // A cidade continua vazia de propósito — no mock ela vem do órgão. O
+    // nome do cargo não pode mais ficar vazio: ele é uma linha do cartão
+    // agora, e um mock sem cargo nenhum demonstraria só o estado de ausência.
+    nomesDeCargo: rascunho.cargos ?? [],
     localidades: [],
     editalUrl: rascunho.publicado == null ? null : `/editais/${rascunho.slug}.pdf`,
   };

@@ -144,7 +144,25 @@ export interface ConcursoResumo {
   publicadoEm: string | null;
   /** Ano estimado, para concursos ainda sem edital. */
   previstoPara: number | null;
+  /**
+   * O total de vagas, e **nulo quando o ato não informou** — 2.149 dos 3.071
+   * concursos do acervo (70%). Nunca zero: a agregação do engine não publica
+   * uma soma vazia como número, porque "não sei quantas vagas" e "zero
+   * vagas" são afirmações diferentes e só a segunda é uma afirmação do ato.
+   */
   vagas: number | null;
+  /**
+   * A repartição legal de `vagas`: quantas das vagas acima são reservadas a
+   * pessoas com deficiência e a candidatos negros. Nulas quando o ato não
+   * repartiu.
+   *
+   * São **recorte** do total, nunca soma a mais — no engine `vagas_total` é
+   * sempre `ampla + pcd + negros + outras`. Uma etiqueta de reserva sem um
+   * total ao lado não existe no acervo (0 casos em 3.071), e é por isso que
+   * ela pode ser lida como parte de um número que o cartão já mostra.
+   */
+  vagasPcd: number | null;
+  vagasNegros: number | null;
   cadastroReserva: boolean;
   /** Maior remuneração entre os cargos, em reais. */
   salarioAte: number | null;
