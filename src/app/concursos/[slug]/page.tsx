@@ -153,14 +153,6 @@ export default async function PaginaDoConcurso(
               <p className={`mt-1 text-sm ${estilo.apoio}`}>
                 {linhaDeContexto(concurso.orgao)}
               </p>
-              {/* O órgão é o que o Diário publica pior — nome que é caminho de
-                  hierarquia, esfera ausente, sigla que não existe. É onde a
-                  correção de quem lê vale mais. */}
-              <Avaliacao
-                className="mt-1 -ml-2"
-                alvo={{ slug: concurso.slug, bloco: "orgao" }}
-                oQue="o órgão"
-              />
             </div>
           </header>
 
@@ -219,14 +211,6 @@ export default async function PaginaDoConcurso(
                 : ""}
             </p>
           )}
-          {/* Também quando o cronograma está vazio: "não gostei" de uma
-              ausência é informação — é alguém dizendo que o ato tinha datas
-              que não foram lidas. */}
-          <Avaliacao
-            className="mt-2 -ml-2"
-            alvo={{ slug: concurso.slug, bloco: "cronograma" }}
-            oQue="o cronograma"
-          />
         </Secao>
 
         {/* Aqui, sim, o bloco inteiro pode não existir — e com ele o título.
@@ -236,11 +220,6 @@ export default async function PaginaDoConcurso(
         {concurso.cargos.length > 0 && (
           <Secao titulo={tituloDosCargos(concurso.cargos)}>
             <Cargos cargos={concurso.cargos} />
-            <Avaliacao
-              className="mt-2 -ml-2"
-              alvo={{ slug: concurso.slug, bloco: "cargos" }}
-              oQue="os cargos"
-            />
           </Secao>
         )}
 
@@ -249,9 +228,19 @@ export default async function PaginaDoConcurso(
             tem link para o ato que a produziu, logo abaixo. */}
         {temFaq(concurso.origens) && (
           <Secao {...cabecalhoDoFaq(concurso.origens)}>
-            <Faq slug={concurso.slug} origens={concurso.origens} />
+            <Faq origens={concurso.origens} />
           </Secao>
         )}
+
+        {/* A avaliação do concurso, aqui e em nenhum outro ponto da página:
+            um voto por concurso por pessoa, decisão do parceiro humano. O
+            porquê deste ponto e não do rodapé está medido no comentário do
+            componente — em resumo, é o fim da LEITURA. O que vem abaixo,
+            quando vem, é o ato como saiu no diário: a fonte para conferir,
+            não mais coisa nossa para avaliar. Pôr o controle depois dele o
+            empurraria para baixo da dobra em todos os concursos do acervo,
+            em vez de metade. */}
+        <Avaliacao slug={concurso.slug} />
 
         {concurso.origens.length > 0 && (
           <Secao

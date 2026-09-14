@@ -54,7 +54,7 @@ const DURACAO = 60 * 60 * 24 * 365;
  */
 const STATUS: Record<ResultadoDaAvaliacao | "pedido-invalido", number> = {
   gravada: 200,
-  // O pedido chegou torto: bloco que não existe, voto que não é sim nem não.
+  // O pedido chegou torto: sem slug, ou com voto que não é sim nem não.
   "pedido-invalido": 400,
   // Esta instância não tem serviço de avaliação (`BC_API_URL` ausente).
   "sem-api": 501,

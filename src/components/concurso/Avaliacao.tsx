@@ -1,12 +1,31 @@
 "use client";
 
 /**
- * Os dois botões de avaliação, no ponto do dado.
+ * Os dois botões de avaliação do concurso. Um par por página.
  *
- * Ficam **por item** — cada resposta do FAQ, os cargos, o cronograma, o órgão
- * — e não um formulário no rodapé, porque a reclamação só vira conserto se
- * chegar dizendo onde está o erro. "A página está errada" não conserta nada;
- * "a resposta de 'até quando' está errada, neste ato" conserta.
+ * **A granularidade é do concurso, e isso é decisão do parceiro humano** —
+ * "gostei/não gostei é só pro concurso". Ela reverte a anterior, dele
+ * também: até aqui havia um par de botões por item (cada resposta do FAQ, os
+ * cargos, o cronograma, o órgão), para a reclamação chegar dizendo onde
+ * estava o erro. Passou a valer um voto por concurso por pessoa, e quem diz
+ * onde é o comentário — por isso ele deixou de perguntar "o que está errado?"
+ * e passou a pedir a parte e o conserto (ver o texto do modal, abaixo).
+ *
+ * O que se perde está dito e não descoberto depois: sem o `bloco`, contar
+ * "quantos reclamaram do cronograma" exige alguém ler os comentários. O que
+ * se ganha é um voto por página — um denominador comparável entre concursos,
+ * que por item não existia, porque a página sem FAQ tinha menos botões que a
+ * com FAQ.
+ *
+ * **Onde ele fica foi medido, não escolhido por gosto** (400 concursos
+ * sorteados do acervo real, altura estimada dos blocos): no fim da página, o
+ * controle fica abaixo da dobra em **100%** dos concursos, e a mais de duas
+ * telas em 18%; no fim da LEITURA — depois dos cargos e do FAQ, antes do
+ * bloco dos atos publicados —, cai para 49% e 12,5%. São os mesmos ~330px de
+ * diferença em quase toda página, e eles são de apêndice: o bloco dos atos é
+ * o documento como saiu no diário, a evidência atrás da leitura, e o texto
+ * dele nem abre sem clique. A avaliação fecha o que o modelo produziu; o que
+ * vem depois é a fonte para conferir.
  *
  * **O "não gostei" é registrado no clique, não no envio do modal.** Quem
  * clica e fecha o modal sem escrever já deu a informação mais importante, e é
@@ -34,37 +53,37 @@
  * O que **não** mudou é o motivo de existir uma rota no meio em vez de o
  * navegador falar com o engine: `BC_API_URL` continua sem chegar ao cliente.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { Botao } from "@/components/ui/Botao";
 import {
   ESTADO_INICIAL,
   LIMITE_DO_COMENTARIO,
   formularioDoPedido,
   resultadoDaResposta,
-  type Alvo,
   type EstadoDaAvaliacao,
 } from "@/lib/avaliacao";
 
-const BOTAO =
-  "rounded-controle px-2 py-1 text-[12px] font-medium " +
-  "transition-colors hover:bg-rebaixada hover:text-tinta-900 " +
-  "disabled:cursor-not-allowed disabled:text-tinta-400";
 /**
  * O botão escolhido fica marcado. É o que a escolha do parceiro humano
  * compra: a marca aparece no clique, antes da resposta — e sai de novo se a
  * resposta disser que não gravou, porque botão marcado sobre clique perdido
  * é a mesma mentira que um "obrigado" sem registro.
+ *
+ * As duas variantes vêm de `ui/Botao` desde que o controle virou um por
+ * página: por item ele era um par de botõezinhos de 26px, uma anotação ao
+ * lado do dado, e um tamanho fora dos três do canvas se justificava. Um
+ * controle só, no fim da leitura, é um botão de verdade — e os dois estados
+ * já existem no sistema, com o mesmo cinza: `fantasma` sem marca,
+ * `secundario` marcado.
  */
-const MARCADO = "bg-rebaixada text-tinta-900";
-const NORMAL = "text-tinta-600";
+const MARCADO = "secundario";
+const NORMAL = "fantasma";
 
 export function Avaliacao({
-  alvo,
-  oQue,
+  slug,
   className,
 }: {
-  alvo: Alvo;
-  /** "esta resposta", "o cronograma" — entra no rótulo de acessibilidade. */
-  oQue: string;
+  slug: string;
   className?: string;
 }) {
   const [estado, setEstado] = useState<EstadoDaAvaliacao>(ESTADO_INICIAL);
@@ -73,6 +92,8 @@ export function Avaliacao({
   const [enviando, setEnviando] = useState(false);
   const modal = useRef<HTMLDialogElement>(null);
   const comentario = useRef<HTMLTextAreaElement>(null);
+  /** O rótulo do grupo de botões, que é a pergunta escrita ao lado deles. */
+  const pergunta = useId();
 
   useEffect(() => {
     if (estado.envio === 0) return;
@@ -101,7 +122,7 @@ export function Avaliacao({
     try {
       const resposta = await fetch("/api/avaliacao", {
         method: "POST",
-        body: formularioDoPedido(alvo, gostei, texto),
+        body: formularioDoPedido(slug, gostei, texto),
       });
       // A rota diz o que aconteceu no corpo, inclusive quando o status não é
       // 2xx. Corpo que não é JSON — um proxy no caminho, a rota fora do ar —
@@ -122,32 +143,57 @@ export function Avaliacao({
   }
 
   return (
-    <div className={`flex flex-wrap items-center gap-1 ${className ?? ""}`}>
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => avaliar(true)}
-          disabled={enviando}
-          aria-pressed={escolha === true}
-          aria-label={`Gostei de ${oQue}`}
-          className={`${BOTAO} ${escolha === true ? MARCADO : NORMAL}`}
-        >
-          Gostei
-        </button>
-        <button
-          type="button"
-          onClick={() => avaliar(false)}
-          disabled={enviando}
-          aria-pressed={escolha === false}
-          aria-label={`Não gostei de ${oQue}`}
-          className={`${BOTAO} ${escolha === false ? MARCADO : NORMAL}`}
-        >
-          Não gostei
-        </button>
+    // O bloco é próprio, com o mesmo fundo e a mesma sangria dos outros da
+    // pilha: por item a avaliação era um rodapezinho de seção, e agora ela é
+    // uma seção. A pergunta fica escrita porque dois botões soltos no fim de
+    // uma página não dizem sobre o que são.
+    <div className={`rounded-caixa bg-cartao px-6 py-5 sm:px-8 ${className ?? ""}`}>
+      <div
+        role="group"
+        aria-labelledby={pergunta}
+        className="flex flex-wrap items-center gap-x-3 gap-y-2"
+      >
+        <p id={pergunta} className="text-sm font-semibold text-tinta-900">
+          O que esta página diz sobre o concurso está certo?
+        </p>
+        <div className="flex items-center gap-1">
+          <Botao
+            type="button"
+            tamanho="sm"
+            variante={escolha === true ? MARCADO : NORMAL}
+            onClick={() => avaliar(true)}
+            disabled={enviando}
+            aria-pressed={escolha === true}
+          >
+            Gostei
+          </Botao>
+          <Botao
+            type="button"
+            tamanho="sm"
+            variante={escolha === false ? MARCADO : NORMAL}
+            onClick={() => avaliar(false)}
+            disabled={enviando}
+            aria-pressed={escolha === false}
+          >
+            Não gostei
+          </Botao>
+        </div>
+
+        <p aria-live="polite" className="text-[12px] text-tinta-500">
+          {recibo(estado.resultado, estado.gostei)}
+        </p>
       </div>
 
-      <p aria-live="polite" className="text-[12px] text-tinta-500">
-        {recibo(estado.resultado, estado.gostei)}
+      {/* O que se avalia é dito, porque muda o que a pessoa responde: não é
+          o concurso que é bom ou ruim, é a leitura que o modelo fez do ato.
+          Sem esta linha, "não gostei" pode querer dizer "não gostei do
+          salário", que não é conserto de nada.
+          E nada de "o ato está logo abaixo": há concurso no acervo sem
+          nenhuma origem gravada, e nele o bloco dos atos não existe. */}
+      <p className="mt-1 max-w-[74ch] text-[12px] leading-5 text-tinta-600">
+        Tudo o que está acima foi lido de um ato do diário oficial por um
+        modelo. O que você avalia é essa leitura — e é o “não gostei” que faz
+        alguém conferir.
       </p>
 
       <dialog
@@ -163,18 +209,29 @@ export function Avaliacao({
           }}
           className="flex flex-col gap-3"
         >
-          <h2 className="text-sm font-semibold">O que está errado?</h2>
+          {/* A pergunta mudou de forma junto com a granularidade. Ao lado de
+              um item, "o que está errado?" já vinha com o onde respondido
+              pelo botão em que a pessoa clicou. Ao lado do concurso inteiro
+              ela não vem — então o texto pede as duas coisas, na ordem em que
+              quem for consertar precisa delas: QUAL parte, e o que devia
+              estar no lugar. O exemplo no campo é a resposta inteira, com a
+              parte nomeada e o valor certo, porque a forma do exemplo é o que
+              a maioria vai copiar. */}
+          <h2 className="text-sm font-semibold">
+            Qual parte está errada, e o que devia estar no lugar?
+          </h2>
           <p className="text-[12px] leading-5 text-tinta-600">
-            O seu “não gostei” sobre {oQue} já foi registrado. Escrever o que
-            está errado é opcional — e é o que permite consertar em vez de só
-            contar.
+            O seu “não gostei” já foi registrado. Escrever é opcional — e é o
+            que permite consertar em vez de só contar. Diga de qual parte você
+            fala (o cronograma, os cargos, o órgão, uma resposta) e o que o ato
+            publicado diz: quem for corrigir precisa achar o erro no documento.
           </p>
           <textarea
             ref={comentario}
             name="comentario"
             rows={4}
             maxLength={LIMITE_DO_COMENTARIO}
-            placeholder="Ex.: a data de inscrição é de outro concurso."
+            placeholder="Ex.: no cronograma, a data de fim das inscrições é de outro concurso — no ato ela é 12/03."
             className="w-full rounded-controle bg-bloco px-3 py-2 text-[13px] leading-6 text-tinta-900 outline-none focus:ring-2 focus:ring-acao"
           />
           {/* O recibo de fora fica atrás do modal, então o comentário que não

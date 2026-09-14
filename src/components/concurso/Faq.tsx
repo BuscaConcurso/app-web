@@ -1,4 +1,3 @@
-import { Avaliacao } from "@/components/concurso/Avaliacao";
 import type { FaqPergunta, Origem, RespostaDoFaq } from "@/lib/dominio";
 import { ROTULO_PERGUNTA } from "@/lib/rotulos";
 
@@ -27,8 +26,8 @@ import { ROTULO_PERGUNTA } from "@/lib/rotulos";
  * repetido em 99,8% dos casos para resolver um empate que quase nunca existe.
  *
  * Quando ele existe, os dois trechos aparecem os dois, cada um com o link
- * para o seu ato e a sua avaliação: a divergência entre dois atos sobre a
- * mesma pergunta é informação, não duplicata a esconder.
+ * para o seu ato: a divergência entre dois atos sobre a mesma pergunta é
+ * informação, não duplicata a esconder.
  *
  * ## A pergunta sem resposta continua aparecendo, mas não como pergunta
  *
@@ -47,7 +46,7 @@ import { ROTULO_PERGUNTA } from "@/lib/rotulos";
  * prova, e é a mesma em todo concurso: quem já leu um FAQ sabe onde procurar
  * no seguinte.
  */
-export function Faq({ slug, origens }: { slug: string; origens: Origem[] }) {
+export function Faq({ origens }: { origens: Origem[] }) {
   const comFaq = origens.filter((origem) => (origem.faq ?? []).length > 0);
   if (comFaq.length === 0) return null;
 
@@ -115,37 +114,20 @@ export function Faq({ slug, origens }: { slug: string; origens: Origem[] }) {
               <p className="mt-1.5 max-w-[74ch] border-l-2 border-tinta-200 pl-3 text-[13px] leading-6 wrap-anywhere text-tinta-700">
                 {resposta.trecho}
               </p>
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                {/* O caminho de volta ao documento. Agora que o FAQ é um bloco
-                    separado do texto do ato, é este link que mantém a
-                    procedência a um clique: ele leva ao item do ato, onde o
-                    trecho aparece grifado dentro do documento. */}
-                <a
-                  href={`#ato-${origem.chave}`}
-                  className="text-[12px] text-tinta-600 underline underline-offset-4 hover:text-tinta-900"
-                >
-                  {varios && origem.titulo
-                    ? `ver em: ${origem.titulo}`
-                    : "ver no ato publicado"}
-                </a>
-                {/* Por resposta, e não por ato: a avaliação tem de chegar
-                    dizendo QUAL pergunta ficou errada, senão ela não aponta
-                    para nada que dê para consertar. */}
-                <Avaliacao
-                  className="-ml-2"
-                  alvo={{
-                    slug,
-                    bloco: "faq",
-                    pergunta: resposta.pergunta,
-                    ato: origem.chave,
-                  }}
-                  oQue={`esta resposta sobre ${ROTULO_PERGUNTA[
-                    resposta.pergunta
-                  ]
-                    .replace("?", "")
-                    .toLowerCase()}`}
-                />
-              </div>
+              {/* O caminho de volta ao documento. Agora que o FAQ é um bloco
+                  separado do texto do ato, é este link que mantém a
+                  procedência a um clique: ele leva ao item do ato, onde o
+                  trecho aparece grifado dentro do documento.
+                  Sozinho na linha desde que a avaliação saiu daqui — a caixa
+                  de flex existia para dividir a linha com ela. */}
+              <a
+                href={`#ato-${origem.chave}`}
+                className="mt-1 inline-block text-[12px] text-tinta-600 underline underline-offset-4 hover:text-tinta-900"
+              >
+                {varios && origem.titulo
+                  ? `ver em: ${origem.titulo}`
+                  : "ver no ato publicado"}
+              </a>
             </li>
           ))}
         </ul>

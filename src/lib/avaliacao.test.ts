@@ -23,7 +23,7 @@ function formulario(campos: Record<string, string>): FormData {
   return dados;
 }
 
-const CLIQUE = { slug: "trt-2-analista-2026", bloco: "cargos", gostei: "nao" };
+const CLIQUE = { slug: "trt-2-analista-2026", gostei: "nao" };
 
 describe("lerPedido", () => {
   it("um clique em 'não gostei' já é um pedido completo, sem comentário", () => {
@@ -34,9 +34,6 @@ describe("lerPedido", () => {
 
     expect(pedido).toEqual({
       slug: "trt-2-analista-2026",
-      bloco: "cargos",
-      pergunta: undefined,
-      ato: null,
       gostei: false,
       comentario: null,
     });
@@ -67,52 +64,46 @@ describe("lerPedido", () => {
     expect(enorme?.comentario).toHaveLength(LIMITE_DO_COMENTARIO);
   });
 
-  it("leva o ato, que é o que amarra a avaliação à procedência", () => {
-    const pedido = lerPedido(formulario({ ...CLIQUE, ato: "dou-2026-03-05-1" }));
+  it("o pedido é o concurso e o voto: item nenhum atravessa", () => {
+    // A granularidade nova, cobrada no caminho de entrada. `bloco`,
+    // `pergunta` e `ato` eram do recorte por item; uma aba aberta desde antes
+    // da mudança ainda os manda, e o que vale é o voto do concurso — não um
+    // 400 na cara de quem clicou.
+    const antiga = lerPedido(
+      formulario({
+        ...CLIQUE,
+        bloco: "faq",
+        pergunta: "ate_quando",
+        ato: "dou-2026-03-05-1",
+      }),
+    );
 
-    expect(pedido?.ato).toBe("dou-2026-03-05-1");
+    expect(antiga).toEqual({
+      slug: "trt-2-analista-2026",
+      gostei: false,
+      comentario: null,
+    });
   });
 
-  it("pergunta é do FAQ e de mais nada", () => {
-    // A mesma regra que o serviço devolve como 422 e o banco como `check`.
-    // Aqui ela evita a requisição inútil; ela não substitui nenhuma das duas.
-    expect(
-      lerPedido(formulario({ ...CLIQUE, pergunta: "quanto_custa" })),
-    ).toBeNull();
-    expect(lerPedido(formulario({ ...CLIQUE, bloco: "faq" }))).toBeNull();
-    expect(
-      lerPedido(formulario({ ...CLIQUE, bloco: "faq", pergunta: "quanto_custa" }))
-        ?.pergunta,
-    ).toBe("quanto_custa");
-  });
-
-  it("recusa o que não é bloco, pergunta ou voto", () => {
-    expect(lerPedido(formulario({ ...CLIQUE, bloco: "rodape" }))).toBeNull();
-    expect(
-      lerPedido(formulario({ ...CLIQUE, bloco: "faq", pergunta: "quem_paga" })),
-    ).toBeNull();
+  it("recusa o que não é slug nem voto", () => {
     expect(lerPedido(formulario({ ...CLIQUE, gostei: "talvez" }))).toBeNull();
-    expect(lerPedido(formulario({ slug: "x", bloco: "cargos" }))).toBeNull();
+    expect(lerPedido(formulario({ slug: "x" }))).toBeNull();
+    expect(lerPedido(formulario({ gostei: "sim" }))).toBeNull();
+    expect(lerPedido(formulario({ ...CLIQUE, slug: "   " }))).toBeNull();
   });
 });
 
 describe("formularioDoPedido", () => {
   it("o que o navegador manda é exatamente o que a rota consegue ler", () => {
     // As duas metades da mesma regra. Se um campo mudar de nome de um lado
-    // só, é aqui que aparece — e não em produção, como um `ato` que some e
-    // leva a procedência junto.
-    const alvo = {
+    // só, é aqui que aparece — e não em produção, como um campo que some e
+    // leva o voto junto.
+    expect(
+      lerPedido(
+        formularioDoPedido("trt-2-analista-2026", false, "a data está errada"),
+      ),
+    ).toEqual({
       slug: "trt-2-analista-2026",
-      bloco: "faq",
-      pergunta: "ate_quando",
-      ato: "dou-2026-03-05-1",
-    } as const;
-
-    expect(lerPedido(formularioDoPedido(alvo, false, "a data está errada"))).toEqual({
-      slug: "trt-2-analista-2026",
-      bloco: "faq",
-      pergunta: "ate_quando",
-      ato: "dou-2026-03-05-1",
       gostei: false,
       comentario: "a data está errada",
     });
@@ -121,18 +112,15 @@ describe("formularioDoPedido", () => {
   it("o clique sem comentário não manda campo de comentário nenhum", () => {
     // Campo vazio no corpo viraria "comentou e não disse nada" se `lerPedido`
     // um dia deixar de aparar. Não mandar é a versão que não depende disso.
-    const alvo = { slug: "trt-2-analista-2026", bloco: "cargos" } as const;
-
-    expect(formularioDoPedido(alvo, true).has("comentario")).toBe(false);
-    expect(formularioDoPedido(alvo, true, "  \n ").has("comentario")).toBe(false);
-    expect(lerPedido(formularioDoPedido(alvo, true))?.comentario).toBeNull();
+    expect(formularioDoPedido("x", true).has("comentario")).toBe(false);
+    expect(formularioDoPedido("x", true, "  \n ").has("comentario")).toBe(false);
+    expect(lerPedido(formularioDoPedido("x", true))?.comentario).toBeNull();
   });
 
-  it("alvo sem pergunta e sem ato não inventa os dois campos", () => {
-    const dados = formularioDoPedido({ slug: "x", bloco: "orgao" }, false);
+  it("o corpo tem o slug e o voto, e nada do recorte por item", () => {
+    const dados = formularioDoPedido("x", false);
 
-    expect(dados.has("pergunta")).toBe(false);
-    expect(dados.has("ato")).toBe(false);
+    expect([...dados.keys()].sort()).toEqual(["gostei", "slug"]);
     expect(dados.get("gostei")).toBe("nao");
   });
 });
@@ -172,9 +160,6 @@ describe("novoAvaliador", () => {
 
 const PEDIDO: Pedido = {
   slug: "trt-2-analista-2026",
-  bloco: "faq",
-  pergunta: "ate_quando",
-  ato: "dou-1",
   gostei: false,
   comentario: null,
 };
@@ -200,11 +185,13 @@ describe("registrarAvaliacao", () => {
     // vira 404 e ninguém descobre por quê.
     expect(chamadas[0][0]).toBe("http://127.0.0.1:8787/avaliacao");
     expect(chamadas[0][1].method).toBe("POST");
+    // O corpo EXATO, e não só os campos que interessam. O modelo do engine
+    // ignora campo desconhecido em silêncio (pydantic, `extra` no padrão),
+    // então um `bloco` ressuscitado aqui não quebraria nada e também não
+    // gravaria nada — o modo de falhar mais caro que existe. Igualdade do
+    // corpo inteiro é o que faz isso aparecer no teste em vez de no banco.
     expect(JSON.parse(chamadas[0][1].body as string)).toEqual({
       slug: "trt-2-analista-2026",
-      bloco: "faq",
-      pergunta: "ate_quando",
-      ato: "dou-1",
       gostei: false,
       comentario: null,
       avaliador: "token-de-navegador",

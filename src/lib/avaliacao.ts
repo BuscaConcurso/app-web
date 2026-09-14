@@ -1,5 +1,5 @@
 /**
- * Avaliação de item: "gostei" e "não gostei" no ponto do dado.
+ * Avaliação do concurso: "gostei" e "não gostei" da página inteira.
  *
  * Este arquivo é a parte testável — o que o clique vira, o que vai no corpo da
  * requisição, o que voltar da rota significa e o que fazer quando a API não
@@ -9,46 +9,24 @@
  * junta isto com o cookie; o componente
  * (`components/concurso/Avaliacao.tsx`) só desenha e faz o `fetch`.
  *
+ * **O pedido é o slug e o voto, e mais nada.** Ele já levou `bloco`,
+ * `pergunta` e `ato` — o recorte por item, que a granularidade nova reverteu.
+ * Quem diz onde está o erro agora é o comentário.
+ *
  * **`registrarAvaliacao` só roda no servidor** — é a única função daqui que lê
  * `BC_API_URL`. Ela é importada pela rota, nunca pelo componente: o endereço
  * da API do engine não pode aparecer em bundle de navegador (ver o comentário
  * da rota).
  *
  * **Por que o clique vai para o engine e não para um arquivo aqui**: o valor
- * da avaliação é poder cruzá-la com o acervo — qual ato, qual extração, qual
- * resposta do FAQ produziu o que alguém reclamou. Isso só existe do lado do
+ * da avaliação é poder cruzá-la com o acervo — qual ato, qual extração o
+ * modelo leu para produzir o que alguém reclamou. Isso só existe do lado do
  * banco, e é lá que a procedência é resolvida, no momento do clique.
  */
 import { unstable_rethrow } from "next/navigation";
-import type { FaqPergunta } from "./dominio";
 
-/** `create type avaliacao_bloco` no engine. Os blocos que a página mostra. */
-export const BLOCOS = ["faq", "cargos", "cronograma", "orgao", "ato"] as const;
-export type Bloco = (typeof BLOCOS)[number];
-
-/** As seis perguntas, como o engine as escreve. Cópia de `FaqPergunta`. */
-const PERGUNTAS: readonly string[] = [
-  "ate_quando",
-  "onde_inscrever",
-  "etapas_prova",
-  "como_inscrever",
-  "quem_pode",
-  "quanto_custa",
-];
-
-/**
- * O que foi avaliado. `pergunta` só no FAQ; `ato` é a chave da origem, e é
- * o que permite ao engine amarrar a avaliação ao documento e à extração — sem
- * ela, um concurso com dois atos fica sem procedência, que é honesto e pior.
- */
-export interface Alvo {
+export interface Pedido {
   slug: string;
-  bloco: Bloco;
-  pergunta?: FaqPergunta;
-  ato?: string | null;
-}
-
-export interface Pedido extends Alvo {
   gostei: boolean;
   /**
    * `null` é "não comentou", e é dado: quem clica em "não gostei" e fecha o
@@ -70,10 +48,15 @@ export const LIMITE_DO_COMENTARIO = 2000;
 /**
  * O formulário virando pedido, ou `null` quando ele não faz sentido.
  *
- * As mesmas regras do engine, de propósito repetidas: o serviço recusa
- * "cronograma / quanto_custa" com 422 e o banco recusa com `check`. Aqui a
- * checagem serve para o clique não virar requisição inútil — não para
- * substituir nenhuma das duas.
+ * Sobrou pouco a validar desde que o pedido é o slug e o voto: o recorte por
+ * item trazia um `bloco` e uma `pergunta` que tinham de combinar entre si, e
+ * essa regra era o grosso daqui. O que resta é o mínimo que impede o clique
+ * de virar requisição inútil — e continua não substituindo o 422 do serviço
+ * nem o `check` do banco.
+ *
+ * Campo a mais no corpo é ignorado, não recusado: um `bloco` de uma aba que
+ * ficou aberta desde antes da mudança vira um voto de concurso, que é o que
+ * ele quer dizer agora.
  */
 export function lerPedido(dados: FormData): Pedido | null {
   const texto = (campo: string): string | null => {
@@ -82,21 +65,14 @@ export function lerPedido(dados: FormData): Pedido | null {
   };
 
   const slug = texto("slug");
-  const bloco = texto("bloco");
-  const pergunta = texto("pergunta");
   const gostei = dados.get("gostei");
 
-  if (!slug || !bloco || !BLOCOS.includes(bloco as Bloco)) return null;
+  if (!slug) return null;
   if (gostei !== "sim" && gostei !== "nao") return null;
-  if (pergunta !== null && !PERGUNTAS.includes(pergunta)) return null;
-  if ((bloco === "faq") !== (pergunta !== null)) return null;
 
   const comentario = texto("comentario");
   return {
     slug,
-    bloco: bloco as Bloco,
-    pergunta: (pergunta as FaqPergunta) ?? undefined,
-    ato: texto("ato"),
     gostei: gostei === "sim",
     comentario:
       comentario === null ? null : comentario.slice(0, LIMITE_DO_COMENTARIO),
@@ -104,7 +80,7 @@ export function lerPedido(dados: FormData): Pedido | null {
 }
 
 /**
- * O caminho inverso de `lerPedido`: o alvo e o clique virando o corpo do
+ * O caminho inverso de `lerPedido`: o concurso e o clique virando o corpo do
  * `POST /api/avaliacao`.
  *
  * Mora aqui, e não dentro do componente, por dois motivos. O primeiro é que
@@ -118,15 +94,12 @@ export function lerPedido(dados: FormData): Pedido | null {
  * seria reescrever a validação inteira para não ganhar nada.
  */
 export function formularioDoPedido(
-  alvo: Alvo,
+  slug: string,
   gostei: boolean,
   comentario?: string | null,
 ): FormData {
   const dados = new FormData();
-  dados.set("slug", alvo.slug);
-  dados.set("bloco", alvo.bloco);
-  if (alvo.pergunta) dados.set("pergunta", alvo.pergunta);
-  if (alvo.ato) dados.set("ato", alvo.ato);
+  dados.set("slug", slug);
   dados.set("gostei", gostei ? "sim" : "nao");
   // Vazio é ausência de comentário, não comentário vazio: ver `Pedido`.
   if (comentario && comentario.trim() !== "") dados.set("comentario", comentario);
@@ -233,9 +206,6 @@ export async function registrarAvaliacao(
       cache: "no-store",
       body: JSON.stringify({
         slug: pedido.slug,
-        bloco: pedido.bloco,
-        pergunta: pedido.pergunta ?? null,
-        ato: pedido.ato ?? null,
         gostei: pedido.gostei,
         comentario: pedido.comentario,
         avaliador,
