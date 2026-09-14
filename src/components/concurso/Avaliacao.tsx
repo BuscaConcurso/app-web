@@ -198,7 +198,11 @@ export function Avaliacao({
 
       <dialog
         ref={modal}
-        className="m-auto w-[min(32rem,92vw)] rounded-caixa bg-cartao p-6 text-tinta-900 backdrop:bg-tinta-900/40"
+        /* `backdrop:bg-escura/40` e não `tinta-900`: os dois são #141715 no
+           tema claro, mas `tinta-900` é token de texto e inverte no escuro —
+           lá o véu virava um clarão branco sobre a página quase preta. É o
+           mesmo tom do fundo da gaveta, para as duas camadas concordarem. */
+        className="m-auto w-[min(32rem,92vw)] rounded-caixa bg-cartao p-6 text-tinta-900 backdrop:bg-escura/40"
       >
         <form
           onSubmit={(evento) => {
