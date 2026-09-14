@@ -15,9 +15,10 @@ import type {
   Orgao,
   Poder,
   Uf,
+  UltimoAto,
 } from "./dominio";
 import { UFS } from "./dominio";
-import { numero, quantidade } from "./formato";
+import { dataCurta, numero, quantidade } from "./formato";
 
 export const ROTULO_STATUS: Record<ConcursoStatus, string> = {
   previsto: "Previsto",
@@ -445,6 +446,78 @@ export function tituloSemOrgao(
   }
 
   return titulo;
+}
+
+/**
+ * As palavras que os títulos de ato do Diário escrevem em caixa alta e que
+ * não são sigla. Medido nos 4.578 títulos de `ultimoAto` do acervo em
+ * 2026-09-14: 18.821 ocorrências de palavra em caixa alta, e esta lista cobre
+ * 16.268 (86,4%). As 2.553 que sobram são quase todas sigla — DDP, PROGEP,
+ * IFAL, UFPI, DPU, GABGEP — e é por isso que a regra é uma lista do que
+ * baixar, e não do que manter: palavra que ninguém previu fica como o Diário
+ * escreveu, e sigla nenhuma vira "progep".
+ */
+const PALAVRAS_DO_ATO = new Set(
+  `DE DA DO DAS DOS E A O AS OS AO AOS EM NO NA NOS NAS COM PARA POR SEM Nº
+  EDITAL EDITAIS AVISO AVISOS PORTARIA PORTARIAS RESOLUÇÃO DELIBERAÇÃO
+  COMUNICADO EXTRATO ANEXO TERMO ATO CONJUNTO CONJUNTA NORMATIVA HOMOLOGAÇÃO
+  RETIFICAÇÃO CONVOCAÇÃO PRORROGAÇÃO ABERTURA RESULTADO FINAL PARCIAL
+  PRELIMINAR DEFINITIVO COMPLEMENTAR CHAMADA CHAMAMENTO CREDENCIAMENTO
+  CONTRATAÇÃO CONTRATO DISPENSA LICITAÇÃO ADJUDICAÇÃO CONCURSO CONCURSOS
+  PÚBLICO PÚBLICA PROCESSO SELETIVO SIMPLIFICADO SIMPLIFICADA SELEÇÃO
+  INSCRIÇÃO INSCRIÇÕES CANDIDATOS CANDIDATO PROVA PROVAS TÍTULOS PONTUAÇÃO
+  PONTOS AVALIAÇÃO ARGUIÇÃO MEMORIAL DIDÁTICA PROFESSOR PROFESSORES SUBSTITUTO
+  SUBSTITUTOS VISITANTE EFETIVO TÉCNICO TÉCNICOS ANALISTA MÉDICO POLICIAL CARGO
+  CARGOS CARREIRA QUADRO QUADROS NÍVEL SUPERIOR MÉDIO ÁREA ÁREAS VAGAS VAGA
+  AMPLA CONCORRÊNCIA RESERVA CONTEÚDO ITEM ITENS SUBITENS VALORES FORMAÇÃO
+  TECNOLOGIA REITORIA CAMPUS PESSOAS ESPECIALIZADA NOVA NOVO JANEIRO FEVEREIRO
+  MARÇO ABRIL MAIO JUNHO JULHO AGOSTO SETEMBRO OUTUBRO NOVEMBRO DEZEMBRO`.split(
+    /\s+/,
+  ),
+);
+
+/**
+ * O título do ato como a linha da home mostra: "EDITAL DE CONVOCAÇÃO Nº
+ * 11/2026" vira "Edital de convocação nº 11/2026".
+ *
+ * O canvas manda caixa alta só na sigla (topo deste arquivo), e 75% dos
+ * títulos de ato chegam inteiros em caixa alta. Só baixa a palavra que está
+ * INTEIRA em caixa alta E está em `PALAVRAS_DO_ATO`; todo o resto sai como o
+ * Diário escreveu. Por isso título já escrito normalmente, sigla, numeral
+ * romano e UF passam intactos, e "EDITAL IPHAN nº 4/2026", que o Diário
+ * publicou em caixa mista, vira "Edital IPHAN nº 4/2026".
+ */
+export function tituloDoAto(titulo: string): string {
+  let primeiraPalavra = true;
+  return titulo.replace(/\p{L}+/gu, (palavra) => {
+    const eraPrimeira = primeiraPalavra;
+    primeiraPalavra = false;
+    if (palavra !== palavra.toUpperCase() || !PALAVRAS_DO_ATO.has(palavra)) {
+      return palavra;
+    }
+    const minuscula = palavra.toLowerCase();
+    return eraPrimeira
+      ? minuscula.charAt(0).toUpperCase() + minuscula.slice(1)
+      : minuscula;
+  });
+}
+
+/**
+ * A linha do ato na faixa "Últimas atualizações": "14/09 · Edital IPHAN nº
+ * 10/2026".
+ *
+ * **Só a data quando o título do ato é o título do concurso.** O concurso que
+ * nasce de um ato só herda o título dele, e a linha repetia, logo abaixo, o
+ * texto do próprio cabeçalho — medido na home com o acervo real, no primeiro
+ * item da faixa. A comparação é a mesma de `tituloSemOrgao`: sem acento, sem
+ * caixa e sem pontuação, porque o Diário escreve "AVISO DE HOMOLOGAÇÃO" e o
+ * concurso guarda a mesma frase de outro jeito.
+ */
+export function textoDoAto(ato: UltimoAto, tituloDoConcurso: string): string {
+  const data = dataCurta(ato.data);
+  if (!ato.titulo?.trim()) return data;
+  if (achatar(ato.titulo).texto === achatar(tituloDoConcurso).texto) return data;
+  return `${data} · ${tituloDoAto(ato.titulo)}`;
 }
 
 /**

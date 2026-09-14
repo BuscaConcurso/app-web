@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Cartao, Selo } from "@/components/ui/Cartao";
 import { Etiqueta } from "@/components/ui/Etiqueta";
-import type { ConcursoResumo } from "@/lib/dominio";
+import type { ConcursoResumo, UltimoAto } from "@/lib/dominio";
 import { moeda, vagasTexto } from "@/lib/formato";
-import { ROTULO_ESCOLARIDADE, tituloSemOrgao } from "@/lib/rotulos";
+import { ROTULO_ESCOLARIDADE, textoDoAto, tituloSemOrgao } from "@/lib/rotulos";
 import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
 
 /**
@@ -33,11 +33,18 @@ export function LinhaConcurso({
   concurso,
   acao,
   hoje,
+  ato,
 }: {
   concurso: ConcursoResumo;
   /** O texto do botão muda com a faixa: "Abrir", "Avisar", "Ver". */
   acao?: string;
   hoje?: Date;
+  /**
+   * Só na faixa "Últimas atualizações": o motivo de o concurso estar ali. Vira
+   * uma linha com a data da edição e o título do ato, e o selo "Novo" quando
+   * é a primeira aparição do concurso no Diário.
+   */
+  ato?: UltimoAto;
 }) {
   const tom = tomDoConcurso(concurso, hoje);
   const estilo = ESTILO_DO_TOM[tom];
@@ -69,7 +76,18 @@ export function LinhaConcurso({
             {tituloSemOrgao(concurso.titulo, concurso.orgao)}
           </Link>
         </h3>
+        {ato && (
+          // `truncate` e o título inteiro no `title`: há ato com mais de cem
+          // caracteres de título, e a faixa foi desenhada para uma linha.
+          <p
+            className={`numero mt-1 truncate text-xs ${estilo.apoio}`}
+            title={textoDoAto(ato, concurso.titulo)}
+          >
+            {textoDoAto(ato, concurso.titulo)}
+          </p>
+        )}
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
+          {ato?.primeiro && <Etiqueta>Novo</Etiqueta>}
           <Etiqueta tom={tom} comPonto>
             {rotuloDeSituacao(concurso, hoje)}
           </Etiqueta>

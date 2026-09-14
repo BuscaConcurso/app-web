@@ -239,3 +239,34 @@ export function ordenar(
     return comparar(a.vagas, b.vagas, "desc");
   });
 }
+
+/**
+ * A faixa "Últimas atualizações" da home: os concursos cujo ato mais recente
+ * no Diário saiu por último, pela data da edição (`ultimoAto.data`).
+ *
+ * Quem não tem ato datado fica fora, com `ultimoAto` nulo ou **ausente**, que
+ * é como uma API anterior ao campo responde (ver o campo em `dominio.ts`).
+ * Fora, e não no fim: numa faixa de dez itens, "no fim" é sumir do mesmo
+ * jeito, e a data que faltasse viraria texto inválido na linha.
+ *
+ * A mesma edição desempata pelo slug. O Diário publica dezenas de atos por
+ * dia, e sem desempate a ordem entre eles seguiria a ordem do acervo, que é a
+ * do `id` no banco e não diz nada a quem lê.
+ */
+export function ultimasAtualizacoes(
+  itens: ConcursoResumo[],
+  limite = 6,
+): ConcursoResumo[] {
+  return itens
+    .flatMap((concurso) => {
+      const data = concurso.ultimoAto?.data;
+      return typeof data === "string" ? [{ concurso, data }] : [];
+    })
+    .sort((a, b) => {
+      // ISO curto compara como texto na mesma ordem que como data.
+      if (a.data !== b.data) return a.data < b.data ? 1 : -1;
+      return a.concurso.slug < b.concurso.slug ? -1 : 1;
+    })
+    .slice(0, limite)
+    .map(({ concurso }) => concurso);
+}

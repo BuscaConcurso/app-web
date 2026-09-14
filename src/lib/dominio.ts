@@ -190,6 +190,31 @@ export interface ConcursoResumo {
   localidades: string[];
   /** Link para o PDF do edital no diário ou no site da banca. */
   editalUrl: string | null;
+  /**
+   * O ato do Diário mais recente do concurso, pela data da edição em que saiu.
+   * É o que a faixa "Últimas atualizações" da home ordena. Nulo quando o
+   * concurso não tem nenhum ato com data conhecida — 72 dos 4.650 do acervo.
+   * A regra de qual ato é esse está em `ULTIMO_ATO`, no `api.py` do engine.
+   *
+   * **Opcional no tipo, e ausente vale o mesmo que nulo.** Um engine mais
+   * velho não manda o campo, e API e app sobem separados: o app pode chegar
+   * antes. Ler um campo novo como se ele sempre existisse já pôs "NaN vagas
+   * PcD" em 120 cartões deste app. Quem lê é `ultimasAtualizacoes`
+   * (`consulta.ts`), que trata os dois casos.
+   */
+  ultimoAto?: UltimoAto | null;
+}
+
+export interface UltimoAto {
+  /** `AAAA-MM-DD`: a data da edição do Diário em que o ato saiu. */
+  data: string;
+  /**
+   * Como o Diário publicou, quase sempre em caixa alta ("EDITAL Nº 11/2026").
+   * Vai para a tela por `tituloDoAto` (`rotulos.ts`).
+   */
+  titulo: string | null;
+  /** Esta é a primeira edição em que o concurso aparece: o selo "Novo". */
+  primeiro: boolean;
 }
 
 /** Como o cartão se pinta. O fundo é o sinal de situação. */

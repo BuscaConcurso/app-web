@@ -25,6 +25,7 @@ import {
   filtrar,
   ordenar,
   SITUACOES,
+  ultimasAtualizacoes,
   type Filtro,
   type Ordem,
   type Situacao,
@@ -314,12 +315,20 @@ export interface Destaques {
   encerrando: ConcursoResumo[];
   abertos: ConcursoResumo[];
   previstos: ConcursoResumo[];
+  /** Os de ato mais recente no Diário — ver `ultimasAtualizacoes`. */
+  atualizados: ConcursoResumo[];
   totalAbertos: number;
 }
 
 /**
- * As três faixas da home. `encerrando` sai da lista de abertos para que o
- * mesmo concurso não apareça duas vezes na mesma página.
+ * As faixas da home. `encerrando` sai da lista de abertos para que o mesmo
+ * concurso não apareça duas vezes na mesma página.
+ *
+ * `atualizados` NÃO sai das outras, e a diferença é o motivo: "encerrando" e
+ * "abertos" são dois recortes da mesma pergunta (o que dá para se inscrever),
+ * e repetir seria ruído. "Últimas atualizações" responde outra (o que saiu no
+ * Diário), e um concurso que fecha esta semana e acabou de ser retificado é
+ * notícia nas duas.
  */
 export async function obterDestaques(hoje: Date = new Date()): Promise<Destaques> {
   const todos = await acervo();
@@ -343,6 +352,7 @@ export async function obterDestaques(hoje: Date = new Date()): Promise<Destaques
       "vagas",
       hoje,
     ).slice(0, 4),
+    atualizados: ultimasAtualizacoes(todos, 6),
     totalAbertos: abertos.length,
   };
 }

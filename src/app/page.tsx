@@ -106,6 +106,26 @@ export default async function Home() {
         </ul>
       </Secao>
 
+      {destaques.atualizados.length > 0 && (
+        <Secao
+          titulo="Últimas atualizações"
+          apoio="Concursos com ato novo no Diário Oficial da União, do mais recente para o mais antigo."
+        >
+          <ul className="grid gap-2">
+            {destaques.atualizados.map((concurso) => (
+              <li key={concurso.slug}>
+                <LinhaConcurso
+                  concurso={concurso}
+                  hoje={hoje}
+                  acao="Ver"
+                  ato={concurso.ultimoAto ?? undefined}
+                />
+              </li>
+            ))}
+          </ul>
+        </Secao>
+      )}
+
       {destaques.previstos.length > 0 && (
         <Secao
           titulo="Previstos"

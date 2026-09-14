@@ -8,7 +8,9 @@ import {
   etiquetasDeVagas,
   linhaDeContexto,
   textoDeRodape,
+  textoDoAto,
   tituloComOrgao,
+  tituloDoAto,
   tituloSemOrgao,
 } from "./rotulos";
 
@@ -814,5 +816,76 @@ describe("acervoIncompletoEmPartes", () => {
     const torto = { ...HOJE, naFila: undefined as unknown as number };
 
     expect(acervoIncompletoEmPartes(torto)).toEqual([]);
+  });
+});
+
+/** Títulos tirados do acervo real, como o Diário os publicou. */
+describe("tituloDoAto", () => {
+  it("tira a caixa alta das palavras e deixa a primeira maiúscula", () => {
+    expect(
+      tituloDoAto("EDITAL DE PRORROGAÇÃO Nº 1, DE 10 DE SETEMBRO DE 2026"),
+    ).toBe("Edital de prorrogação nº 1, de 10 de setembro de 2026");
+  });
+
+  it("mantém a sigla, que não está no vocabulário", () => {
+    expect(tituloDoAto("EDITAL GABGEP Nº 78, DE 10 DE SETEMBRO DE 2026")).toBe(
+      "Edital GABGEP nº 78, de 10 de setembro de 2026",
+    );
+    expect(
+      tituloDoAto("EDITAL DE CHAMADA PÚBLICA - ESPECIALIZADA IPEA/PIPA Nº 29/2026"),
+    ).toBe("Edital de chamada pública - especializada IPEA/PIPA nº 29/2026");
+  });
+
+  it("título em caixa mista só perde a caixa alta das palavras do vocabulário", () => {
+    expect(tituloDoAto("EDITAL IPHAN nº 4/2026")).toBe("Edital IPHAN nº 4/2026");
+    expect(tituloDoAto("EDITAL de 10 de setembro de 2026")).toBe(
+      "Edital de 10 de setembro de 2026",
+    );
+  });
+
+  it("título que já vem escrito normalmente sai intacto", () => {
+    const titulo =
+      "33 Ciclos de Cuidado e Educomunicação: Fortalecimento da Atenção à Saúde";
+    expect(tituloDoAto(titulo)).toBe(titulo);
+  });
+
+  it("numeral romano e sigla de estado continuam em caixa alta", () => {
+    expect(tituloDoAto("PORTARIA Nº 3 - CAMPUS III - SP")).toBe(
+      "Portaria nº 3 - campus III - SP",
+    );
+  });
+});
+
+describe("textoDoAto", () => {
+  it("data da edição e título do ato", () => {
+    expect(
+      textoDoAto(
+        { data: "2026-09-14", titulo: "EDITAL IPHAN Nº 10/2026", primeiro: false },
+        "Instituto do Patrimônio Histórico e Artístico Nacional - Iphan — Edital nº 10/2026",
+      ),
+    ).toBe("14/09 · Edital IPHAN nº 10/2026");
+  });
+
+  it("só a data quando o título do ato é o próprio título do concurso", () => {
+    // Medido na home com o acervo real: o concurso nascido de um único ato
+    // herda o título dele, e a linha repetia o título logo abaixo de si.
+    const titulo =
+      "33 Ciclos de Cuidado e Educomunicação: Fortalecimento da Atenção à Saúde";
+    expect(
+      textoDoAto({ data: "2026-09-14", titulo, primeiro: true }, titulo),
+    ).toBe("14/09");
+    // A comparação ignora caixa, acento e pontuação, como `tituloSemOrgao`.
+    expect(
+      textoDoAto(
+        { data: "2026-09-14", titulo: "AVISO DE HOMOLOGAÇÃO", primeiro: true },
+        "Aviso de homologacao.",
+      ),
+    ).toBe("14/09");
+  });
+
+  it("só a data quando o ato não tem título", () => {
+    expect(
+      textoDoAto({ data: "2026-09-11", titulo: null, primeiro: false }, "Concurso"),
+    ).toBe("11/09");
   });
 });

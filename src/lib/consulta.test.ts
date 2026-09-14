@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoResumo, Escolaridade, Uf } from "./dominio";
-import { filtrar, normalizar, ordenar } from "./consulta";
+import { filtrar, normalizar, ordenar, ultimasAtualizacoes } from "./consulta";
 
 const HOJE = new Date(2026, 3, 10, 9, 0);
 
@@ -310,5 +310,63 @@ describe("ordenar", () => {
     ];
     ordenar(itens, "encerrando", HOJE);
     expect(itens.map((c) => c.slug)).toEqual(["maio", "abril"]);
+  });
+});
+
+describe("ultimasAtualizacoes", () => {
+  const ato = (data: string, primeiro = false) => ({
+    data,
+    titulo: "EDITAL Nº 1",
+    primeiro,
+  });
+
+  it("põe o ato de edição mais recente na frente", () => {
+    const itens = [
+      fixture({ slug: "agosto", ultimoAto: ato("2026-08-20") }),
+      fixture({ slug: "setembro", ultimoAto: ato("2026-09-14") }),
+      fixture({ slug: "junho", ultimoAto: ato("2026-06-02") }),
+    ];
+
+    expect(ultimasAtualizacoes(itens).map((c) => c.slug)).toEqual([
+      "setembro",
+      "agosto",
+      "junho",
+    ]);
+  });
+
+  it("deixa de fora quem não tem ato datado, seja nulo ou campo ausente", () => {
+    // `fixture` não põe `ultimoAto`: é exatamente como uma API anterior ao
+    // campo responde. Ausente não pode virar data inválida na tela, nem ir
+    // para a frente da faixa.
+    const daApiVelha = fixture({ slug: "api-velha" });
+    expect("ultimoAto" in daApiVelha).toBe(false);
+
+    const itens = [
+      daApiVelha,
+      fixture({ slug: "sem-ato", ultimoAto: null }),
+      fixture({ slug: "com-ato", ultimoAto: ato("2026-09-01") }),
+    ];
+
+    expect(ultimasAtualizacoes(itens).map((c) => c.slug)).toEqual(["com-ato"]);
+  });
+
+  it("corta no limite", () => {
+    const itens = ["01", "02", "03", "04"].map((dia) =>
+      fixture({ slug: `dia-${dia}`, ultimoAto: ato(`2026-09-${dia}`) }),
+    );
+
+    expect(ultimasAtualizacoes(itens, 2).map((c) => c.slug)).toEqual([
+      "dia-04",
+      "dia-03",
+    ]);
+  });
+
+  it("desempata a mesma edição pelo slug, para a faixa não trocar de ordem a cada carga", () => {
+    const itens = [
+      fixture({ slug: "b", ultimoAto: ato("2026-09-14") }),
+      fixture({ slug: "a", ultimoAto: ato("2026-09-14") }),
+    ];
+
+    expect(ultimasAtualizacoes(itens).map((c) => c.slug)).toEqual(["a", "b"]);
   });
 });

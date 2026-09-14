@@ -586,6 +586,18 @@ function paraResumo(rascunho: Rascunho): ConcursoResumo {
     nomesDeCargo: rascunho.cargos ?? [],
     localidades: [],
     editalUrl: rascunho.publicado == null ? null : `/editais/${rascunho.slug}.pdf`,
+    // O ato mais recente é o próprio edital, na caixa alta em que o Diário
+    // publica, para a faixa "Últimas atualizações" ser demonstrável sem o
+    // engine. "Novo" nos publicados há até um mês, para a faixa mostrar os dois
+    // casos do selo.
+    ultimoAto:
+      rascunho.publicado == null
+        ? null
+        : {
+            data: dia(rascunho.publicado),
+            titulo: "EDITAL DE ABERTURA Nº 1",
+            primeiro: rascunho.publicado >= -30,
+          },
   };
 }
 
