@@ -25,7 +25,13 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
         {cargos.map((cargo, indice) => (
           <li
             key={`${cargo.nome}-${cargo.codigo ?? indice}`}
-            className="rounded-caixa bg-bloco px-4 py-3.5"
+            // `rounded-lg` e não `rounded-caixa`, que é o raio de cartão.
+            // Desde que a seção virou um bloco próprio, o cargo é uma caixa
+            // dentro de outra, e duas caixas de 10px encaixadas leem como
+            // cartão dentro de cartão. O raio menor é o que `BlocoDeNumeros`
+            // já usa para o mesmo papel: `bg-bloco` é rebaixo, não cartão, e
+            // agora ele se parece com um.
+            className="rounded-lg bg-bloco px-4 py-3.5"
           >
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
               <h3 className="text-sm font-semibold text-tinta-900">

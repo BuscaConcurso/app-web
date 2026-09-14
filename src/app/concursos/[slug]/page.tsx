@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BlocoDeNumeros, Numero, Selo } from "@/components/ui/Cartao";
+import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
@@ -107,63 +107,87 @@ export default async function PaginaDoConcurso(
         </span>
       </nav>
 
-      <article className={`rounded-caixa p-6 sm:p-8 ${estilo.cartao}`}>
-        <header className="flex items-start gap-4">
-          <Selo sigla={concurso.orgao.sigla} tom={tom} />
-          <div className="min-w-0">
-            <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance">
-              {concurso.orgao.nome}
-            </h1>
-            <p className={`mt-1 text-sm ${estilo.apoio}`}>
-              {linhaDeContexto(concurso.orgao)}
-            </p>
-            {/* O órgão é o que o Diário publica pior — nome que é caminho de
-                hierarquia, esfera ausente, sigla que não existe. É onde a
-                correção de quem lê vale mais. */}
-            <Avaliacao
-              className="mt-1 -ml-2"
-              alvo={{ slug: concurso.slug, bloco: "orgao" }}
-              oQue="o órgão"
-            />
-          </div>
-        </header>
+      {/*
+        Uma pilha de blocos, e não seções empilhadas por margem dentro de um
+        cartão só. O que separa um bloco do outro é o mesmo degrau que separa
+        o cartão da busca da página: fundo do cartão sobre o cinza da página,
+        sem borda e sem sombra.
 
-        <p className="mt-5 text-lg font-semibold text-tinta-900">
-          {concurso.titulo}
-        </p>
+        **Só o primeiro bloco é pintado pelo tom.** O fundo colorido é o sinal
+        de situação, e a situação é um fato do concurso, não de cada seção:
+        repetir o salmão de "encerra em 3 dias" atrás do cronograma, dos
+        cargos e do ato afirmaria quatro vezes a mesma coisa e gastaria a
+        única cor forte da tela. Cinza por padrão, cor só onde informa.
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <Etiqueta tom={tom} comPonto>
-            {rotuloDeSituacao(concurso, hoje)}
-          </Etiqueta>
-          {concurso.escolaridades.map((escolaridade) => (
-            <Etiqueta key={escolaridade}>
-              {ROTULO_ESCOLARIDADE[escolaridade]}
+        Isso também acerta um desencontro que existia: `bg-bloco` é o rebaixo
+        de dentro do cartão branco, e dentro do cartão `encerrado` ele ficava
+        mais CLARO que o fundo, então a lista de cargos parecia levantada em
+        vez de rebaixada. Com cada seção no seu bloco branco, o rebaixo volta
+        a rebaixar.
+
+        A pilha não inventa um terceiro nível de superfície: continuam sendo
+        página < cartão < bloco, os mesmos três de `globals.css`. O que mudou
+        foi quantos cartões existem, não quantos degraus.
+      */}
+      <div className="flex flex-col gap-3">
+        <Cartao tom={tom} as="article" className="p-6 sm:p-8">
+          <header className="flex items-start gap-4">
+            <Selo sigla={concurso.orgao.sigla} tom={tom} />
+            <div className="min-w-0">
+              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance">
+                {concurso.orgao.nome}
+              </h1>
+              <p className={`mt-1 text-sm ${estilo.apoio}`}>
+                {linhaDeContexto(concurso.orgao)}
+              </p>
+              {/* O órgão é o que o Diário publica pior — nome que é caminho de
+                  hierarquia, esfera ausente, sigla que não existe. É onde a
+                  correção de quem lê vale mais. */}
+              <Avaliacao
+                className="mt-1 -ml-2"
+                alvo={{ slug: concurso.slug, bloco: "orgao" }}
+                oQue="o órgão"
+              />
+            </div>
+          </header>
+
+          <p className="mt-5 text-lg font-semibold text-tinta-900">
+            {concurso.titulo}
+          </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Etiqueta tom={tom} comPonto>
+              {rotuloDeSituacao(concurso, hoje)}
             </Etiqueta>
-          ))}
-          {concurso.banca && <Etiqueta>Banca: {concurso.banca.nome}</Etiqueta>}
-        </div>
+            {concurso.escolaridades.map((escolaridade) => (
+              <Etiqueta key={escolaridade}>
+                {ROTULO_ESCOLARIDADE[escolaridade]}
+              </Etiqueta>
+            ))}
+            {concurso.banca && <Etiqueta>Banca: {concurso.banca.nome}</Etiqueta>}
+          </div>
 
-        <BlocoDeNumeros className="mt-6 grid-cols-2 sm:grid-cols-4">
-          <Numero rotulo="Vagas">
-            {concurso.vagas === null ? "a definir" : numero(concurso.vagas)}
-          </Numero>
-          <Numero rotulo="Salário até">
-            {concurso.salarioAte === null
-              ? "a definir"
-              : moeda(concurso.salarioAte)}
-          </Numero>
-          <Numero rotulo="Taxa">
-            {concurso.taxaInscricao === null
-              ? "a definir"
-              : moedaExata(concurso.taxaInscricao)}
-          </Numero>
-          <Numero rotulo="Cadastro reserva">
-            {concurso.cadastroReserva ? "sim" : "não"}
-          </Numero>
-        </BlocoDeNumeros>
+          <BlocoDeNumeros className="mt-6 grid-cols-2 sm:grid-cols-4">
+            <Numero rotulo="Vagas">
+              {concurso.vagas === null ? "a definir" : numero(concurso.vagas)}
+            </Numero>
+            <Numero rotulo="Salário até">
+              {concurso.salarioAte === null
+                ? "a definir"
+                : moeda(concurso.salarioAte)}
+            </Numero>
+            <Numero rotulo="Taxa">
+              {concurso.taxaInscricao === null
+                ? "a definir"
+                : moedaExata(concurso.taxaInscricao)}
+            </Numero>
+            <Numero rotulo="Cadastro reserva">
+              {concurso.cadastroReserva ? "sim" : "não"}
+            </Numero>
+          </BlocoDeNumeros>
+        </Cartao>
 
-        <div className="mt-6">
+        <Cartao className="p-6 sm:p-8">
           {concurso.cronograma.length > 0 ? (
             <Cronograma eventos={concurso.cronograma} />
           ) : (
@@ -185,29 +209,31 @@ export default async function PaginaDoConcurso(
             alvo={{ slug: concurso.slug, bloco: "cronograma" }}
             oQue="o cronograma"
           />
-        </div>
+        </Cartao>
 
         {concurso.cargos.length > 0 && (
-          <div className="mt-7">
+          <Cartao className="p-6 sm:p-8">
             <Cargos cargos={concurso.cargos} />
             <Avaliacao
               className="mt-2 -ml-2"
               alvo={{ slug: concurso.slug, bloco: "cargos" }}
               oQue="os cargos"
             />
-          </div>
+          </Cartao>
         )}
 
         {concurso.origens.length > 0 && (
-          <div className="mt-7">
+          <Cartao className="p-6 sm:p-8">
             <AtosPublicados slug={concurso.slug} origens={concurso.origens} />
-          </div>
+          </Cartao>
         )}
-      </article>
 
-      <p className="mt-4 rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600">
-        {textoDeRodape(concurso)}
-      </p>
+        {/* O rodapé também é um bloco, com a mesma sangria lateral e menos
+            altura: é uma nota sobre a página, não uma seção dela. */}
+        <p className="rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600 sm:px-8">
+          {textoDeRodape(concurso)}
+        </p>
+      </div>
     </div>
   );
 }
