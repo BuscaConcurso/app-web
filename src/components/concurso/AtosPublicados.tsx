@@ -1,3 +1,4 @@
+import { Gaveta } from "@/components/ui/Revelador";
 import { destacar } from "@/lib/destaque";
 import type { Origem, RespostaDoFaq } from "@/lib/dominio";
 import { dataLonga, numero } from "@/lib/formato";
@@ -15,14 +16,23 @@ import { dataLonga, numero } from "@/lib/formato";
  * o edital completo com anexos e programa de provas fica no site da banca.
  * A seção diz isso em vez de deixar a pessoa supor.
  *
- * O texto abre num painel lateral, e **sem JavaScript**: o mecanismo é o
- * `<details>` nativo, e o painel é CSS sobre `[open]`. Isso importa mais do
- * que parece — o pedido de drawer reverteria a decisão de não depender de
- * script, e com ela o "ver o ato" do cronograma (uma âncora) deixaria de
- * funcionar para quem está sem script, e quem chegasse por link direto
- * encontraria um botão morto. Feito assim, nada disso acontece: a âncora
- * continua levando ao bloco do ato, o botão continua abrindo, e o texto
- * continua a um clique de distância com ou sem script.
+ * O texto abre numa gaveta, e **sem JavaScript**: o mecanismo continua sendo o
+ * `<details>` nativo. Isso importa mais do que parece — um drawer de
+ * biblioteca reverteria a decisão de não depender de script, e com ela o "ver
+ * o ato" do cronograma (uma âncora) deixaria de funcionar para quem está sem
+ * script, e quem chegasse por link direto encontraria um botão morto. Feito
+ * assim, nada disso acontece: a âncora continua levando ao bloco do ato, o
+ * botão continua abrindo, e o texto continua a um clique de distância com ou
+ * sem script.
+ *
+ * **O painel deixou de ser escrito aqui.** Ele é `ui/Revelador`, a gaveta do
+ * design system, e o que esta seção ganhou com a mudança é o que não estava
+ * resolvido enquanto o painel morava neste arquivo: animação nos dois
+ * sentidos, Escape, clique fora, o fundo que não rola por baixo, o foco que
+ * entra e volta ao gatilho, e `prefers-reduced-motion`. O porquê do mecanismo
+ * — e o que se perdeu ao não usar `<dialog>` — está medido no topo daquele
+ * arquivo. Nada disto muda o conteúdo: o que a gaveta mostra é o mesmo
+ * parágrafo, com os mesmos grifos.
  *
  * **Nenhum ato abre sozinho**, e isso mudou com o drawer. Antes o ato curto
  * vinha aberto (mediana de 1.623 caracteres, metade do acervo abaixo de
@@ -82,65 +92,40 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
           )}
 
           {origem.texto ? (
-            <details className="group/ato mt-2.5">
-              <summary
-                className={[
-                  // Fechado: um botão na linha do ato.
-                  "inline-flex cursor-pointer items-center gap-2 rounded-controle",
-                  "bg-rebaixada px-3 py-1.5 text-[12px] font-semibold text-tinta-800",
-                  "transition-colors hover:bg-tinta-200",
-                  // Aberto: a barra de topo do painel, que também é o que
-                  // fecha. Sem isto, o painel abriria e não teria como
-                  // fechar sem script — `<summary>` é o único elemento que
-                  // alterna um `<details>`.
-                  "group-open/ato:fixed group-open/ato:top-0 group-open/ato:right-0",
-                  "group-open/ato:z-[60] group-open/ato:w-[min(40rem,94vw)]",
-                  "group-open/ato:justify-between group-open/ato:rounded-none",
-                  "group-open/ato:border-b group-open/ato:border-tinta-200",
-                  "group-open/ato:bg-cartao group-open/ato:px-5 group-open/ato:py-3.5",
-                ].join(" ")}
-              >
-                <span>
-                  <span className="group-open/ato:hidden">Ler o ato publicado</span>
-                  <span className="hidden group-open/ato:inline">
-                    O ato publicado
-                  </span>
-                  {origem.caracteres !== null && (
-                    <span className="ml-1 font-normal text-tinta-600">
-                      · {numero(origem.caracteres)} caracteres
-                    </span>
-                  )}
-                </span>
-                <span className="hidden font-normal text-tinta-600 group-open/ato:inline">
-                  fechar
-                </span>
-              </summary>
-              {/* O painel. Sem corte no texto: o ato de 99 mil caracteres
-                  cabe inteiro aqui, rolando, sem virar uma página de um
-                  quilômetro. O texto do diário vem sem quebra de linha —
-                  zero em 9.274 documentos —, então é um parágrafo só. */}
-              <div className="fixed inset-y-0 right-0 z-50 w-[min(40rem,94vw)] overflow-y-auto border-l border-tinta-200 bg-cartao px-5 pt-16 pb-10 shadow-2xl">
-                <p className="max-w-[78ch] text-[13px] leading-6 text-tinta-800">
-                  {/* As respostas do FAQ marcadas onde elas estão. É o que a
-                      posição gravada junto do trecho paga: em vez de repetir
-                      a resposta fora de contexto, a página mostra a frase do
-                      ato que a produziu, dentro do documento. */}
-                  {destacar(origem.texto, faixasDoFaq(origem.faq ?? [])).map(
-                    (pedaco, indice) =>
-                      pedaco.destacado ? (
-                        <mark
-                          key={indice}
-                          className="rounded-[3px] bg-amarelo/40 text-tinta-900"
-                        >
-                          {pedaco.texto}
-                        </mark>
-                      ) : (
-                        <span key={indice}>{pedaco.texto}</span>
-                      ),
-                  )}
-                </p>
-              </div>
-            </details>
+            /* Sem corte no texto: o ato de 99 mil caracteres cabe inteiro na
+               gaveta, rolando, sem virar uma página de um quilômetro. O texto
+               do diário vem sem quebra de linha — zero em 9.274 documentos —,
+               então é um parágrafo só. */
+            <Gaveta
+              className="mt-2.5"
+              rotulo="Ler o ato publicado"
+              titulo="O ato publicado"
+              apoio={
+                origem.caracteres !== null ? (
+                  <>· {numero(origem.caracteres)} caracteres</>
+                ) : undefined
+              }
+            >
+              <p className="max-w-[78ch] text-[13px] leading-6 text-tinta-800">
+                {/* As respostas do FAQ marcadas onde elas estão. É o que a
+                    posição gravada junto do trecho paga: em vez de repetir a
+                    resposta fora de contexto, a página mostra a frase do ato
+                    que a produziu, dentro do documento. */}
+                {destacar(origem.texto, faixasDoFaq(origem.faq ?? [])).map(
+                  (pedaco, indice) =>
+                    pedaco.destacado ? (
+                      <mark
+                        key={indice}
+                        className="rounded-[3px] bg-amarelo/40 text-tinta-900"
+                      >
+                        {pedaco.texto}
+                      </mark>
+                    ) : (
+                      <span key={indice}>{pedaco.texto}</span>
+                    ),
+                )}
+              </p>
+            </Gaveta>
           ) : (
             <p className="mt-2 text-[12px] leading-5 text-tinta-600">
               O texto deste ato não está guardado.
