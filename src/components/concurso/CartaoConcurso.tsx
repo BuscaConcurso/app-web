@@ -34,15 +34,24 @@ import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
  * responder a uma pergunta que só quem filtrou por estado fez, e desenhá-la
  * nos 4.649 cartões por causa dela transformaria todo cartão numa lista de
  * estados. O porquê de cada número está em `estadoDoCartao`.
+ *
+ * `semOrgao` é para a página do órgão, e só ela passa. Lá o órgão é o `h1` da
+ * página, e repeti-lo em cada cartão o escreveria três vezes por cartão — o
+ * selo, o nome e o nome outra vez dentro do título. Medido a 375px na página
+ * da UFMG, que é a maior (209 concursos): o bloco do órgão ocupa 31,6px por
+ * cartão, 632px nos vinte de uma página. O que fica é a hierarquia que a
+ * página já promete — órgão no topo, título em cada cartão.
  */
 export function CartaoConcurso({
   concurso,
   hoje,
   ufDoFiltro,
+  semOrgao = false,
 }: {
   concurso: ConcursoResumo;
   hoje?: Date;
   ufDoFiltro?: Uf;
+  semOrgao?: boolean;
 }) {
   const tom = tomDoConcurso(concurso, hoje);
   const estilo = ESTILO_DO_TOM[tom];
@@ -60,26 +69,52 @@ export function CartaoConcurso({
 
   return (
     <Cartao tom={tom} as="article" className="flex flex-col gap-2.5 p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Selo sigla={concurso.orgao.sigla} tom={tom} />
-          <div className="min-w-0">
-            <h3 className="font-titulo text-[15px] leading-6 font-semibold tracking-tight">
-              <Link
-                href={`/concursos/${concurso.slug}`}
-                className="hover:underline hover:underline-offset-4"
-              >
-                {concurso.orgao.nome}
-              </Link>
-            </h3>
-            <p className={`truncate text-[12px] ${estilo.apoio}`}>
-              {linhaDeContexto(concurso.orgao)}
-            </p>
+      {/*
+        O órgão acima, o concurso abaixo — a mesma hierarquia da página de
+        detalhe, e a inversão do que o cartão fazia até aqui: o `h3` era o
+        nome do órgão e o título do concurso vinha embaixo, como parágrafo.
+        Quem lê uma lista de resultados está escolhendo entre concursos, não
+        entre órgãos, e dois editais do mesmo órgão davam dois cartões com o
+        mesmo cabeçalho.
+
+        O selo fica com o órgão, e não com o título, porque é a sigla DELE: o
+        quadrado e o nome ao lado são a mesma afirmação, e o título começa
+        abaixo dos dois, na largura inteira do cartão — que é onde ele cabe.
+      */}
+      {!semOrgao && (
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <Selo sigla={concurso.orgao.sigla} tom={tom} />
+            <div className="min-w-0">
+              {/* Sem `truncate`: o nome do órgão é o nível de cima da
+                  hierarquia e quebra em duas linhas quando precisa, como já
+                  fazia no `h3`. Cortá-lo agora que ele é a linha menor
+                  esconderia justamente o que a hierarquia acabou de prometer
+                  mostrar. */}
+              <p className="text-[13px] leading-5 font-medium text-tinta-800">
+                <Link
+                  href={`/orgaos/${concurso.orgao.slug}`}
+                  className="hover:underline hover:underline-offset-4"
+                >
+                  {concurso.orgao.nome}
+                </Link>
+              </p>
+              <p className={`truncate text-[12px] ${estilo.apoio}`}>
+                {linhaDeContexto(concurso.orgao)}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <p className="text-sm font-medium text-tinta-800">{concurso.titulo}</p>
+      <h3 className="font-titulo text-[15px] leading-6 font-semibold tracking-tight">
+        <Link
+          href={`/concursos/${concurso.slug}`}
+          className="hover:underline hover:underline-offset-4"
+        >
+          {concurso.titulo}
+        </Link>
+      </h3>
 
       {/*
         Os cargos, acima da fileira de etiquetas porque pesam mais que

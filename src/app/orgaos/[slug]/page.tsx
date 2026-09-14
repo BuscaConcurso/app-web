@@ -172,7 +172,10 @@ export default async function PaginaDoOrgao(
               // `min-width: auto`, e uma etiqueta que não encolhe estica a
               // lista e a página inteira.
               <li key={concurso.slug} className="min-w-0">
-                <CartaoConcurso concurso={concurso} hoje={hoje} />
+                {/* `semOrgao`: o órgão é o `h1` desta página. Repeti-lo em
+                    cada cartão o escreveria três vezes por cartão — selo,
+                    nome, e nome outra vez dentro do título. */}
+                <CartaoConcurso concurso={concurso} hoje={hoje} semOrgao />
               </li>
             ))}
           </ul>

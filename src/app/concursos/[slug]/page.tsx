@@ -24,6 +24,7 @@ import {
   textoDeRodape,
   tituloComOrgao,
 } from "@/lib/rotulos";
+import { nomeCurtoDoOrgao } from "@/lib/orgaos";
 import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
 import { urlAbsoluta } from "@/lib/site";
 
@@ -72,6 +73,10 @@ export default async function PaginaDoConcurso(
   const tom = tomDoConcurso(concurso, hoje);
   const estilo = ESTILO_DO_TOM[tom];
 
+  // Três degraus, e o do meio é o que passou a existir: Concursos > órgão >
+  // este concurso. A trilha estruturada é lida por buscador, então ela precisa
+  // dizer a mesma hierarquia que a tela mostra — e o nível do órgão só pode
+  // entrar aqui porque agora ele tem endereço.
   const trilha = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -85,7 +90,13 @@ export default async function PaginaDoConcurso(
       {
         "@type": "ListItem",
         position: 2,
-        name: tituloComOrgao(concurso.orgao.sigla, concurso.titulo),
+        name: concurso.orgao.nome,
+        item: urlAbsoluta(`/orgaos/${concurso.orgao.slug}`),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: concurso.titulo,
         item: urlAbsoluta(`/concursos/${concurso.slug}`),
       },
     ],
@@ -105,11 +116,17 @@ export default async function PaginaDoConcurso(
           Concursos
         </Link>
         <span aria-hidden="true"> / </span>
-        {/* Sem sigla, o nome do órgão — que no acervo do engine ainda é o
-            caminho de hierarquia do Diário, daí o corte em uma linha. */}
-        <span className="inline-block max-w-[40ch] truncate align-bottom">
-          {concurso.orgao.sigla ?? concurso.orgao.nome}
-        </span>
+        {/* O nível do órgão, agora um link: é a hierarquia pedida — órgão
+            acima, concurso abaixo — e ela só é hierarquia se o degrau de cima
+            for um lugar. A sigla quando existe, o nome quando não (36 órgãos
+            do acervo ainda têm por nome o caminho de hierarquia do Diário,
+            daí o corte em uma linha). */}
+        <Link
+          href={`/orgaos/${concurso.orgao.slug}`}
+          className="inline-block max-w-[40ch] truncate align-bottom underline underline-offset-4 hover:text-tinta-900"
+        >
+          {nomeCurtoDoOrgao(concurso.orgao)}
+        </Link>
       </nav>
 
       {/*
@@ -144,23 +161,49 @@ export default async function PaginaDoConcurso(
       */}
       <div className="flex flex-col gap-6">
         <Cartao tom={tom} as="article" className="p-6 sm:p-8">
-          <header className="flex items-start gap-4">
-            <Selo sigla={concurso.orgao.sigla} tom={tom} />
-            <div className="min-w-0">
-              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance">
-                {concurso.orgao.nome}
-              </h1>
-              <p className={`mt-1 text-sm ${estilo.apoio}`}>
-                {linhaDeContexto(concurso.orgao)}
-              </p>
+          {/*
+            A hierarquia pedida, na ordem em que ela se lê: o órgão acima, o
+            título do concurso como `h1`. Até aqui era o contrário — o `h1`
+            era `orgao.nome` e o título do concurso vinha abaixo, como
+            parágrafo —, e a página dizia que era sobre o órgão quando é sobre
+            um edital dele.
+
+            O nome do órgão leva à página dele, e não repete o `Selo`: o
+            quadrado é a sigla, `aria-hidden`, e esta linha é o nome por
+            extenso, que é o que um leitor de tela ouve.
+          */}
+          <header>
+            <div className="flex items-start gap-4">
+              <Selo sigla={concurso.orgao.sigla} tom={tom} />
+              <div className="min-w-0">
+                <p className="text-sm leading-5 font-medium text-tinta-800">
+                  <Link
+                    href={`/orgaos/${concurso.orgao.slug}`}
+                    className="hover:underline hover:underline-offset-4"
+                  >
+                    {concurso.orgao.nome}
+                  </Link>
+                </p>
+                <p className={`text-sm ${estilo.apoio}`}>
+                  {linhaDeContexto(concurso.orgao)}
+                </p>
+              </div>
             </div>
+            {/*
+              O `h1` abaixo do bloco do selo, e não recuado ao lado dele. O
+              selo é a sigla do ÓRGÃO, então ele e o nome ao lado são uma
+              afirmação só; o título começa embaixo, na largura inteira do
+              cartão. Medido a 375px no exemplo do parceiro: recuado o título
+              tem 251,8px e ocupa 4 linhas; na largura cheia tem 304,6px e
+              ocupa 3. É também a mesma forma do cartão da busca, o que faz a
+              página e o resultado que leva a ela lerem igual.
+            */}
+            <h1 className="mt-4 font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance">
+              {concurso.titulo}
+            </h1>
           </header>
 
-          <p className="mt-5 text-lg font-semibold text-tinta-900">
-            {concurso.titulo}
-          </p>
-
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <Etiqueta tom={tom} comPonto>
               {rotuloDeSituacao(concurso, hoje)}
             </Etiqueta>
