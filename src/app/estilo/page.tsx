@@ -7,6 +7,7 @@ import { Campo, Selecao } from "@/components/ui/Campo";
 import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
 import { Paginacao } from "@/components/ui/Paginacao";
+import { Secao } from "@/components/ui/Secao";
 import { listarConcursos } from "@/lib/concursos";
 import type { Tom } from "@/lib/dominio";
 
@@ -339,6 +340,29 @@ export default async function Estilo() {
         </Cartao>
       </Bloco>
 
+      <Bloco
+        titulo="Seção: o rótulo fora do bloco"
+        nota="4 do rótulo ao apoio · 8 do cabeçalho ao bloco · 24 entre seções"
+      >
+        <div className="flex flex-col gap-6">
+          <Secao
+            titulo="Cronograma"
+            apoio="Cada data com a procedência: de qual ato publicado ela foi lida."
+          >
+            <p className="text-sm text-tinta-600">
+              O conteúdo do bloco. O rótulo acima não mora aqui dentro: ele
+              nomeia o bloco de fora, e a distância curta até o cartão é o que
+              diz a qual dos dois blocos ele pertence.
+            </p>
+          </Secao>
+          <Secao titulo="Cargos (3)">
+            <p className="text-sm text-tinta-600">
+              Seção sem linha de apoio. O cabeçalho é só o rótulo.
+            </p>
+          </Secao>
+        </div>
+      </Bloco>
+
       <Bloco titulo="Espaço e separação">
         <Cartao className="flex flex-col gap-2 p-5 text-[12px] leading-5 text-tinta-600">
           <p>
@@ -346,7 +370,9 @@ export default async function Estilo() {
             <span className="numero text-tinta-900">
               4 8 12 16 20 24 32 40 48 64
             </span>
-            . Cartões se separam por 12, seções por 32.
+            . Cartões se separam por 12, seções por 32, e os blocos da página
+            de detalhe por 24 — que é o vão que cabe um rótulo de seção do
+            lado de fora sem ele grudar no bloco de cima.
           </p>
           <p>
             Nenhuma sombra e nenhuma borda em caixa. Dentro do cartão, um bloco
@@ -357,3 +383,4 @@ export default async function Estilo() {
     </div>
   );
 }
+

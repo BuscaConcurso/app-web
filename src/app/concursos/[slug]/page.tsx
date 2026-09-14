@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
-import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
+import { Etiqueta } from "@/components/ui/Etiqueta";
+import { Secao } from "@/components/ui/Secao";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
-import { Cargos } from "@/components/concurso/Cargos";
+import { Cargos, tituloDosCargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
 import { listarSlugs, obterDetalhe } from "@/lib/concursos";
 import {
@@ -128,8 +129,16 @@ export default async function PaginaDoConcurso(
         A pilha não inventa um terceiro nível de superfície: continuam sendo
         página < cartão < bloco, os mesmos três de `globals.css`. O que mudou
         foi quantos cartões existem, não quantos degraus.
+
+        **O rótulo de cada seção mora fora do seu bloco** (`Secao`), e é por
+        isso que o vão aqui dobrou de 12 para 24px: ele deixou de separar duas
+        caixas e passou a separar um assunto do título do assunto seguinte.
+        Dentro da `Secao`, o título fica a 8px do cartão que ele rotula — um
+        terço do vão de fora, que é o que faz o título pertencer ao bloco de
+        baixo em vez de flutuar entre os dois. Os dois blocos sem título (o do
+        órgão e a nota de rodapé) entram na mesma pilha e usam o mesmo vão.
       */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-6">
         <Cartao tom={tom} as="article" className="p-6 sm:p-8">
           <header className="flex items-start gap-4">
             <Selo sigla={concurso.orgao.sigla} tom={tom} />
@@ -187,19 +196,24 @@ export default async function PaginaDoConcurso(
           </BlocoDeNumeros>
         </Cartao>
 
-        <Cartao className="p-6 sm:p-8">
+        {/* O cronograma não some quando está vazio: 170 concursos do acervo
+            (3,7%) não têm data nenhuma lida, e nesses o bloco é o que diz que
+            ninguém achou data — some ele, e a página afirma por omissão que o
+            concurso não tem cronograma. O título fica com o bloco nos dois
+            casos, então não há título órfão. */}
+        <Secao
+          titulo="Cronograma"
+          apoio="Cada data com a procedência: de qual ato publicado ela foi lida."
+        >
           {concurso.cronograma.length > 0 ? (
             <Cronograma eventos={concurso.cronograma} />
           ) : (
-            <>
-              <Rotulo>Cronograma</Rotulo>
-              <p className="mt-1.5 text-sm text-tinta-600">
-                Nenhuma data foi lida do ato publicado até agora.
-                {concurso.previstoPara
-                  ? ` O concurso é de ${concurso.previstoPara}.`
-                  : ""}
-              </p>
-            </>
+            <p className="text-sm text-tinta-600">
+              Nenhuma data foi lida do ato publicado até agora.
+              {concurso.previstoPara
+                ? ` O concurso é de ${concurso.previstoPara}.`
+                : ""}
+            </p>
           )}
           {/* Também quando o cronograma está vazio: "não gostei" de uma
               ausência é informação — é alguém dizendo que o ato tinha datas
@@ -209,23 +223,34 @@ export default async function PaginaDoConcurso(
             alvo={{ slug: concurso.slug, bloco: "cronograma" }}
             oQue="o cronograma"
           />
-        </Cartao>
+        </Secao>
 
+        {/* Aqui, sim, o bloco inteiro pode não existir — e com ele o título.
+            Um "Cargos" sobre nada seria o título órfão que o cronograma vazio
+            não é: não há o que dizer sobre cargo que o ato não listou, e a
+            linha de rodapé da página já conta o que falta. */}
         {concurso.cargos.length > 0 && (
-          <Cartao className="p-6 sm:p-8">
+          <Secao titulo={tituloDosCargos(concurso.cargos)}>
             <Cargos cargos={concurso.cargos} />
             <Avaliacao
               className="mt-2 -ml-2"
               alvo={{ slug: concurso.slug, bloco: "cargos" }}
               oQue="os cargos"
             />
-          </Cartao>
+          </Secao>
         )}
 
         {concurso.origens.length > 0 && (
-          <Cartao className="p-6 sm:p-8">
+          <Secao
+            titulo={
+              concurso.origens.length === 1
+                ? "O ato publicado"
+                : "Os atos publicados"
+            }
+            apoio="O ato como saiu no diário oficial, na íntegra — que pode ser o extrato, não o edital completo. O edital com anexos e programa de provas fica no site da banca."
+          >
             <AtosPublicados slug={concurso.slug} origens={concurso.origens} />
-          </Cartao>
+          </Secao>
         )}
 
         {/* O rodapé também é um bloco, com a mesma sangria lateral e menos
