@@ -210,8 +210,17 @@ export default async function BuscaDeConcursos(
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em]">
+            {/* `min-w-0` para o `break-words` do `h1` ter efeito: item de flex
+                tem `min-width: auto`, e `overflow-wrap: break-word` não muda a
+                largura mínima intrínseca de um bloco — ela continua sendo a da
+                maior palavra. Sem os dois juntos o título não quebra, ele
+                estica a coluna. O título da busca é `q` quando há texto livre,
+                então ele é texto de URL: medido a 375px, `?q=` com o edital
+                "11/2026/SEGAP/COALEP/CGGP/DAGES-FUNAI" — que é título real do
+                acervo, do tipo que se cola na busca — dava 36px de rolagem
+                lateral. */}
+            <div className="min-w-0">
+              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] break-words">
                 {tituloDaBusca(consulta)}
               </h1>
               <p className="mt-1 text-[12px] text-tinta-600">
@@ -261,10 +270,13 @@ export default async function BuscaDeConcursos(
                   key={chip.chave}
                   href={chip.href}
                   aria-label={`Remover filtro ${chip.rotulo}`}
-                  className="inline-flex items-center gap-2 rounded-[5px] bg-acao px-2.5 py-1 text-xs font-semibold text-acao-texto hover:bg-acao-hover"
+                  className="inline-flex max-w-full items-center gap-2 rounded-[5px] bg-acao px-2.5 py-1 text-xs font-semibold text-acao-texto hover:bg-acao-hover"
                 >
-                  {chip.rotulo}
-                  <span aria-hidden="true" className="text-white/70">
+                  {/* O chip de `q` carrega texto de URL, do mesmo tamanho que
+                      o do `h1` acima: sem corte ele passava dos 375px sozinho.
+                      O rótulo inteiro continua no `aria-label` do link. */}
+                  <span className="min-w-0 truncate">{chip.rotulo}</span>
+                  <span aria-hidden="true" className="shrink-0 text-white/70">
                     ×
                   </span>
                 </Link>

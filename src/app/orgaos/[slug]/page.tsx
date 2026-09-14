@@ -115,7 +115,7 @@ export default async function PaginaDoOrgao(
           <div className="flex items-start gap-4">
             <Selo sigla={orgao.sigla} />
             <div className="min-w-0">
-              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance">
+              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance break-words">
                 {orgao.nome}
               </h1>
               <p className="mt-1 text-sm text-tinta-600">

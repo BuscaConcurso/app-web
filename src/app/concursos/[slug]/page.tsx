@@ -177,7 +177,7 @@ export default async function PaginaDoConcurso(
                 órgão logo acima é custo aceito, e é decisão dele.
                 Pode sair porque o órgão está duas vezes acima desta linha: na
                 trilha e no bloco do selo. */}
-            <h1 className="mt-4 font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance">
+            <h1 className="mt-4 font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance break-words">
               {concurso.titulo}
             </h1>
           </header>
