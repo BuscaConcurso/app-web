@@ -74,6 +74,21 @@ const SINAIS = [
 
 const TONS: Tom[] = ["aberto", "urgente", "previsto", "encerrado"];
 
+/**
+ * As siglas do selo, todas tiradas do acervo: as quatro larguras que ele
+ * produz (2, 4, 6 e 8 letras), com e sem hífen nas duas maiores, e a ausência
+ * no fim. "UNIPAMPA" é o pior caso de todos — oito letras sem um lugar por
+ * onde quebrar — e é ele que define o degrau de baixo da escada de corpo.
+ */
+const SIGLAS_DE_PROVA: (string | null)[] = [
+  "PF",
+  "TJSP",
+  "CRA-RJ",
+  "CEFET-MG",
+  "UNIPAMPA",
+  null,
+];
+
 export default async function Estilo() {
   const hoje = new Date();
   const { itens } = await listarConcursos({ porPagina: 6 }, hoje);
@@ -241,7 +256,7 @@ export default async function Estilo() {
         </Cartao>
       </Bloco>
 
-      <Bloco titulo="Etiquetas e selos" nota="Ponto de 6 px, cor só no ponto">
+      <Bloco titulo="Etiquetas" nota="Ponto de 6 px, cor só no ponto">
         <Cartao className="flex flex-wrap items-center gap-3 p-5">
           {TONS.map((tom) => (
             <Etiqueta key={tom} tom={tom} comPonto>
@@ -253,10 +268,47 @@ export default async function Estilo() {
           <Etiqueta>84 vagas para negros</Etiqueta>
           <Etiqueta>Cadastro reserva</Etiqueta>
           <Etiqueta>Banca: Vunesp</Etiqueta>
-          {TONS.map((tom) => (
-            <Selo key={tom} sigla="TJSP" tom={tom} />
-          ))}
         </Cartao>
+      </Bloco>
+
+      {/*
+        O selo, nos dois tamanhos e nos quatro tons, contra o fundo de cartão
+        de cada tom — que é o único lugar onde as cores dele significam alguma
+        coisa. Cada tom traz as quatro larguras de sigla que o acervo produz
+        (2, 4, 6 e 8 letras) e, na última coluna, a ausência.
+
+        A coluna "sem sigla" é a que existe para ser olhada: é o caso de 1.615
+        dos 4.649 cartões, e é ela que garante que a falta continue lendo como
+        falta e não como selo que não carregou. Repare que o traço fica na
+        mesma caixa da sigla — é o que mantém o título alinhado entre um
+        cartão e o seguinte.
+      */}
+      <Bloco titulo="Selo do órgão" nota="Sem sigla, sem quadrado: só o traço">
+        <div className="grid gap-2 sm:grid-cols-2">
+          {TONS.map((tom) => (
+            <Cartao key={tom} tom={tom} className="p-5">
+              <Rotulo>{tom}</Rotulo>
+              {(["md", "sm"] as const).map((tamanho) => (
+                <div
+                  key={tamanho}
+                  className="mt-3 flex flex-wrap items-center gap-3"
+                >
+                  <span className="numero w-6 text-[11px] text-tinta-500">
+                    {tamanho}
+                  </span>
+                  {SIGLAS_DE_PROVA.map((sigla) => (
+                    <Selo
+                      key={sigla ?? "sem"}
+                      sigla={sigla}
+                      tom={tom}
+                      tamanho={tamanho}
+                    />
+                  ))}
+                </div>
+              ))}
+            </Cartao>
+          ))}
+        </div>
       </Bloco>
 
       <Bloco titulo="Bloco de números" nota="Rebaixo dentro do cartão">
