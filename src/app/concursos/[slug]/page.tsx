@@ -99,9 +99,8 @@ export default async function PaginaDoConcurso(
       {
         "@type": "ListItem",
         position: 3,
-        // O recorte, e não o título inteiro: aqui o degrau 2 é o órgão, logo
-        // acima, então a trilha estruturada diz o mesmo que a tela diz — que
-        // é justamente o que uma trilha estruturada existe para fazer.
+        // O mesmo texto que o degrau visível, que é o que uma trilha
+        // estruturada existe para fazer: dizer ao buscador o que a tela diz.
         name: concurso.titulo,
         item: urlAbsoluta(`/concursos/${concurso.slug}`),
       },
@@ -117,7 +116,10 @@ export default async function PaginaDoConcurso(
         }}
       />
 
-      <nav aria-label="Trilha" className="mb-5 text-[12px] text-tinta-600">
+      <nav
+        aria-label="Trilha"
+        className="mb-5 flex min-w-0 flex-wrap items-baseline text-[12px] text-tinta-600"
+      >
         <Link href="/concursos" className="underline underline-offset-4 hover:text-tinta-900">
           Concursos
         </Link>
@@ -133,6 +135,28 @@ export default async function PaginaDoConcurso(
         >
           {nomeCurtoDoOrgao(concurso.orgao)}
         </Link>
+        <span aria-hidden="true"> / </span>
+        {/*
+          O degrau do concurso, que faltava: a trilha parava no órgão enquanto
+          a trilha ESTRUTURADA já declarava três degraus ao buscador. Uma das
+          duas estava mentindo sobre a outra, e o `BreadcrumbList` existe para
+          dizer ao robô o que a pessoa vê.
+
+          Não é link, porque é onde a pessoa já está — `aria-current="page"`
+          diz isso a quem navega por leitor de tela, e o degrau continua sendo
+          um degrau. E o título inteiro, como no `h1`: omitir o item corrente
+          é escolha defensável de trilha, mas não foi a escolha aqui — aqui
+          ele simplesmente não tinha sido escrito.
+
+          `truncate` com `min-w-0` no `<nav>`: a 375px o título mais longo do
+          acervo tem 195 caracteres, e sem isso a trilha empurra a página.
+        */}
+        <span
+          aria-current="page"
+          className="inline-block max-w-[40ch] truncate align-bottom text-tinta-900"
+        >
+          {concurso.titulo}
+        </span>
       </nav>
 
       {/*
