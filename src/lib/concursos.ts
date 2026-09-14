@@ -11,6 +11,7 @@
  * isso que a API tem uma rota só: uma rota por função duplicaria em Python o
  * que já está testado em `consulta.test.ts` e `concursos.test.ts`.
  */
+import { cache } from "react";
 import { unstable_rethrow } from "next/navigation";
 import type {
   Banca,
@@ -128,7 +129,21 @@ const ACERVO_DE_MOCK: RespostaDeAcervo = {
   origem: "mock",
 };
 
-async function carregar(): Promise<RespostaDeAcervo> {
+/**
+ * `cache` do React, e não só a memoização do `fetch` do Next.
+ *
+ * O `fetch` memorizado poupa a requisição, mas devolve uma resposta clonada a
+ * cada chamada: cada `await resposta.json()` **reanalisa os 3,6 MB do
+ * acervo**. Uma renderização da home chama esta função seis vezes (a faixa de
+ * origem no layout, os destaques, as facetas, o aviso, as dimensões e agora os
+ * cargos do rodapé), e as cinco últimas eram análise repetida de um texto
+ * idêntico. Medido no dev contra a API de verdade, medianas de 15: a home
+ * caiu de 722 ms para 585 ms e a busca de 823 ms para 702 ms.
+ *
+ * Fora de uma renderização — o sitemap, por exemplo — `cache` não memoriza
+ * nada e o comportamento é o de antes, uma análise por chamada.
+ */
+const carregar = cache(async (): Promise<RespostaDeAcervo> => {
   if (!URL_DA_API) return ACERVO_DE_MOCK;
   try {
     // `no-store` porque o acervo muda debaixo do app: o engine reprocessa
@@ -163,7 +178,7 @@ async function carregar(): Promise<RespostaDeAcervo> {
     );
     return { ...ACERVO_DE_MOCK, origem: "falha" };
   }
-}
+});
 
 /**
  * De onde veio o acervo que está na tela, para a tela poder dizer.
