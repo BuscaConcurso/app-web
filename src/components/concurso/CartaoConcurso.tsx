@@ -17,6 +17,7 @@ import {
   estadoDoCartao,
   etiquetasDeVagas,
   linhaDeContexto,
+  tituloSemOrgao,
 } from "@/lib/rotulos";
 import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
 
@@ -107,12 +108,19 @@ export function CartaoConcurso({
         </div>
       )}
 
+      {/*
+        O título sem o nome do órgão na frente — ver `tituloSemOrgao`. Aqui
+        ele pode sair porque o órgão está ao lado: no bloco acima, e no selo.
+        Na página do órgão (`semOrgao`) ele continua ao lado, como `h1` da
+        página e na trilha. Se algum dia o cartão for usado sem nenhuma das
+        duas coisas, este é o ponto que precisa voltar atrás.
+      */}
       <h3 className="font-titulo text-[15px] leading-6 font-semibold tracking-tight">
         <Link
           href={`/concursos/${concurso.slug}`}
           className="hover:underline hover:underline-offset-4"
         >
-          {concurso.titulo}
+          {tituloSemOrgao(concurso.titulo, concurso.orgao)}
         </Link>
       </h3>
 

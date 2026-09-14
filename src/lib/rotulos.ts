@@ -12,6 +12,7 @@ import type {
   Escolaridade,
   Esfera,
   EventoTipo,
+  Orgao,
   Poder,
   Uf,
 } from "./dominio";
@@ -356,6 +357,168 @@ export function cargosDoCartao(nomes: unknown): {
  */
 export function tituloComOrgao(sigla: string | null, titulo: string): string {
   return sigla ? `${sigla}: ${titulo}` : titulo;
+}
+
+/**
+ * O título do concurso sem o nome do órgão na frente — para os lugares onde o
+ * órgão **já está ao lado**, e só para eles.
+ *
+ * O acervo é escrito a partir do ato do diário, e o modelo que o escreve
+ * começa o título pelo órgão em **3.078 dos 4.649 concursos**. Com a
+ * hierarquia órgão > concurso na tela, isso põe o nome do órgão três vezes na
+ * mesma dobra: a trilha (ou o selo), a linha do órgão, e o título. No exemplo
+ * que originou este trabalho — `Conselho Regional de Administração do Rio de
+ * Janeiro (CRA-RJ) — Edital nº 1` sob `CRA-RJ` — são três.
+ *
+ * **Medido nos 4.649 títulos, renderizados a 375px em Chrome com a fonte e o
+ * CSS reais** (o `h1` do detalhe a 304,6px e 21px; o `h3` do cartão a 318,7px
+ * e 15px):
+ *
+ * | | título inteiro | com o recorte |
+ * |---|---|---|
+ * | `h1`, média de linhas | 2,91 | **1,66** |
+ * | `h1` em uma linha só | 186 (4%) | **2.558 (55%)** |
+ * | `h1` em quatro linhas ou mais | 1.107 (24%) | 185 (4%) |
+ * | `h3`, média de linhas | 2,08 | **1,32** |
+ * | títulos que encolhem | — | 2.872 (62%) |
+ *
+ * **A regra é lida do dado, e não é uma lista.** Ela tira o prefixo que é o
+ * nome ou a sigla **daquele** órgão — os dois campos do registro que veio
+ * junto com o concurso —, mais a sigla dele repetida logo em seguida, mais a
+ * pontuação de junção que sobrar. Nenhum nome de órgão, nenhuma sigla e
+ * nenhum formato de título está escrito aqui dentro: um órgão novo no acervo
+ * amanhã é tratado hoje. É a exigência permanente deste projeto, e é também o
+ * que faz a regra valer para os dois grupos:
+ *
+ * - **1.571 títulos não começam pelo nome do órgão** e saem intactos. O
+ *   acervo tem "PROGESP — Edital nº 106/2026-PROGESP" para a UFRN e
+ *   "AMAZUL - Amazônia Azul Tecnologias de Defesa S.A." para o Comando da
+ *   Marinha; cortar qualquer coisa deles seria adivinhação.
+ * - **251 títulos SÃO só o nome do órgão** ("Universidade Federal de Goiás",
+ *   "IFAP", "Conselho Federal de Economia (Cofecon)"). Nesses o recorte não
+ *   sobra nada, e o título inteiro volta: um `h1` vazio não aparece como
+ *   defeito, aparece como cartão estranho.
+ *
+ * **A comparação é sem acento, sem caixa e sem pontuação**, porque o ato e o
+ * cadastro do órgão discordam nessas três coisas o tempo todo ("Instituto
+ * Federal de Educação, Ciência e Tecnologia do Acre - Ifac" contra o nome
+ * cadastrado sem o "- Ifac"). O corte, porém, é feito **no texto original**:
+ * o que sobra é o que o ato escreveu, com acento e caixa, nunca a versão
+ * normalizada.
+ *
+ * **O casamento tem de terminar em fronteira de palavra.** Sem isso a sigla
+ * "IF" cortaria "IFSP - Câmpus Suzano" no meio e sobraria "SP - Câmpus
+ * Suzano", que é uma afirmação falsa sobre um campus.
+ *
+ * **Onde NÃO usar:** qualquer lugar em que o título aparece sozinho. O
+ * `<title>` da aba e o `og:title` passam por `tituloComOrgao`, que só prefixa
+ * a sigla nos 3.034 que a têm — nos outros 1.615 o título é tudo o que a
+ * pessoa recebe, e "Edital nº 1" sem dono não diz nada. E `textoBuscavel`
+ * (`consulta.ts`) varre o título **inteiro**, senão quem digita o nome do
+ * órgão deixa de achar os concursos dele.
+ */
+export function tituloSemOrgao(
+  titulo: string,
+  orgao: Pick<Orgao, "nome" | "sigla">,
+): string {
+  const alvos = [orgao.nome, orgao.sigla]
+    .filter((alvo): alvo is string => Boolean(alvo?.trim()))
+    // Do mais longo para o mais curto: com "Universidade Federal de São Paulo"
+    // e "UNIFESP" no mesmo título, cortar primeiro pela sigla deixaria o nome
+    // por extenso para trás.
+    .sort((a, b) => b.length - a.length);
+
+  const sigla = orgao.sigla?.trim() ? achatar(orgao.sigla).texto : "";
+  const doTitulo = achatar(titulo);
+
+  for (const alvo of alvos) {
+    const resto = semPrefixo(titulo, doTitulo, achatar(alvo).texto);
+    if (resto === null) continue;
+
+    // A sigla outra vez logo depois do nome — "(CRA-RJ)", "- IFAC", "– UFPE".
+    // É o mesmo corte, aplicado ao que sobrou, e continua vindo do registro do
+    // órgão e não de um formato reconhecido de fora.
+    const final = semPrefixo(resto, achatar(resto), sigla) ?? resto;
+
+    // Não sobrou nada: o título ERA o nome do órgão, e são 251 no acervo.
+    return final || titulo;
+  }
+
+  return titulo;
+}
+
+/**
+ * O texto sem acento, sem caixa e com toda pontuação virando um espaço só, e
+ * o mapa de volta para o original.
+ *
+ * `corteEm[i]` é o índice **no texto original** logo depois do i-ésimo
+ * caractere do texto achatado. É ele que permite comparar normalizado e
+ * cortar no original, que é a única forma de o que sobra continuar sendo o
+ * que o ato escreveu.
+ */
+const ACENTOS = /[\u0300-\u036f]/g;
+const ALFANUMERICO = /[a-z0-9]/;
+
+function achatar(texto: string): { texto: string; corteEm: number[] } {
+  let saida = "";
+  const corteEm: number[] = [];
+  let separadorPendente = false;
+
+  for (let i = 0; i < texto.length; i++) {
+    // Um caractere do original pode virar mais de um aqui (ligaduras), e por
+    // isso o mapa é preenchido por caractere de SAÍDA, não de entrada.
+    const limpo = texto[i].normalize("NFD").replace(ACENTOS, "").toLowerCase();
+    for (const letra of limpo) {
+      if (!ALFANUMERICO.test(letra)) {
+        separadorPendente = true;
+        continue;
+      }
+      // Um separador só vira espaço quando há texto dos dois lados: assim
+      // "(CRA-RJ)" e "CRA RJ" achatam para a mesma coisa, sem espaço solto na
+      // ponta que faria o prefixo deixar de casar.
+      if (separadorPendente && saida) {
+        saida += " ";
+        corteEm.push(i);
+      }
+      separadorPendente = false;
+      saida += letra;
+      corteEm.push(i + 1);
+    }
+  }
+
+  return { texto: saida, corteEm };
+}
+
+/**
+ * O que sobra de `original` depois de tirar `chave` da frente, ou `null`
+ * quando `chave` não é prefixo dele.
+ *
+ * O casamento precisa terminar em fronteira de palavra — ou o achatado acaba
+ * ali, ou o próximo caractere é o espaço que o achatamento pôs no lugar da
+ * pontuação. Sem essa condição a sigla "IF" cortaria "IFSP" no meio.
+ */
+function semPrefixo(
+  original: string,
+  achatado: { texto: string; corteEm: number[] },
+  chave: string,
+): string | null {
+  if (!chave || !achatado.texto.startsWith(chave)) return null;
+  if (achatado.texto.length > chave.length && achatado.texto[chave.length] !== " ") {
+    return null;
+  }
+  return semJuncao(original.slice(achatado.corteEm[chave.length - 1]));
+}
+
+/**
+ * Tira da frente a pontuação que só existia para juntar o que foi cortado ao
+ * que ficou: espaço, travessão, hífen, dois-pontos, vírgula, barra, ponto
+ * médio, e o parêntese ou colchete que fechava a sigla recém-retirada.
+ *
+ * É pontuação, não vocabulário: nenhum nome, sigla ou palavra entra nesta
+ * lista.
+ */
+function semJuncao(texto: string): string {
+  return texto.replace(/^[\s\-\u2010-\u2015:,/|\u00b7)\]]+/u, "").trim();
 }
 
 /**

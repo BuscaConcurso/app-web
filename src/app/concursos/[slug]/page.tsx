@@ -23,6 +23,7 @@ import {
   linhaDeContexto,
   textoDeRodape,
   tituloComOrgao,
+  tituloSemOrgao,
 } from "@/lib/rotulos";
 import { nomeCurtoDoOrgao } from "@/lib/orgaos";
 import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
@@ -48,6 +49,11 @@ export async function generateMetadata(
   if (!concurso) return { title: "Concurso não encontrado" };
 
   return {
+    // O título INTEIRO, e não o recorte de `tituloSemOrgao`: aqui ele viaja
+    // sozinho. `tituloComOrgao` prefixa a sigla, mas só 3.034 dos 4.649
+    // órgãos têm uma — nos outros 1.615 o título da aba, o `og:title` e o que
+    // vai no link compartilhado são o título e mais nada, e "Edital nº 1" sem
+    // dono não diz de quem é o concurso.
     title: tituloComOrgao(concurso.orgao.sigla, concurso.titulo),
     description:
       `${concurso.orgao.nome}. ` +
@@ -96,7 +102,10 @@ export default async function PaginaDoConcurso(
       {
         "@type": "ListItem",
         position: 3,
-        name: concurso.titulo,
+        // O recorte, e não o título inteiro: aqui o degrau 2 é o órgão, logo
+        // acima, então a trilha estruturada diz o mesmo que a tela diz — que
+        // é justamente o que uma trilha estruturada existe para fazer.
+        name: tituloSemOrgao(concurso.titulo, concurso.orgao),
         item: urlAbsoluta(`/concursos/${concurso.slug}`),
       },
     ],
@@ -198,8 +207,11 @@ export default async function PaginaDoConcurso(
               ocupa 3. É também a mesma forma do cartão da busca, o que faz a
               página e o resultado que leva a ela lerem igual.
             */}
+            {/* O título sem o nome do órgão na frente — ver `tituloSemOrgao`.
+                Pode sair porque o órgão está duas vezes acima desta linha: na
+                trilha e no bloco do selo. */}
             <h1 className="mt-4 font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance">
-              {concurso.titulo}
+              {tituloSemOrgao(concurso.titulo, concurso.orgao)}
             </h1>
           </header>
 

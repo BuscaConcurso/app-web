@@ -12,6 +12,7 @@ import {
   obterDestaques,
 } from "@/lib/concursos";
 import { dataLonga } from "@/lib/formato";
+import { tituloSemOrgao } from "@/lib/rotulos";
 import { DESCRICAO_SITE, NOME_SITE, urlAbsoluta } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -48,7 +49,13 @@ export default async function Home() {
         "@type": "ListItem",
         position: indice + 1,
         url: urlAbsoluta(`/concursos/${concurso.slug}`),
-        name: `${concurso.orgao.nome}: ${concurso.titulo}`,
+        // O órgão está colado no nome do item, então o título entra recortado
+        // — ver `tituloSemOrgao`. Sem o recorte, os itens desta lista saíam
+        // com o nome do órgão duas vezes na mesma string.
+        name: `${concurso.orgao.nome}: ${tituloSemOrgao(
+          concurso.titulo,
+          concurso.orgao,
+        )}`,
       }),
     ),
   };

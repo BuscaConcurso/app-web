@@ -9,6 +9,7 @@ import {
   linhaDeContexto,
   textoDeRodape,
   tituloComOrgao,
+  tituloSemOrgao,
 } from "./rotulos";
 
 describe("tituloComOrgao", () => {
@@ -32,6 +33,111 @@ describe("tituloComOrgao", () => {
  * anuláveis no tipo justamente por isso, e este teste fixa o que a tela faz
  * com a ausência.
  */
+describe("tituloSemOrgao", () => {
+  const CRA = { nome: "Conselho Regional de Administração do Rio de Janeiro", sigla: "CRA-RJ" };
+
+  it("tira o nome do órgão e a sigla repetida logo depois", () => {
+    // O exemplo que originou o trabalho. Sob a trilha "CRA-RJ" e a linha do
+    // órgão, o nome aparecia três vezes na mesma dobra.
+    expect(
+      tituloSemOrgao(
+        "Conselho Regional de Administração do Rio de Janeiro (CRA-RJ) — Edital nº 1",
+        CRA,
+      ),
+    ).toBe("Edital nº 1");
+  });
+
+  it("tira a sigla quando é ela que abre o título", () => {
+    expect(tituloSemOrgao("CRA-RJ — Edital nº 3/2026", CRA)).toBe(
+      "Edital nº 3/2026",
+    );
+  });
+
+  it("o que sobra é o texto do ato, com acento e caixa", () => {
+    // O casamento é normalizado; o corte é no original. Se o recorte
+    // devolvesse o texto achatado, a tela mostraria "edital no 9 2026".
+    expect(
+      tituloSemOrgao(
+        "Universidade Federal da Paraíba - Centro de Ciências Agrárias — Edital nº 9/2026",
+        { nome: "Universidade Federal da Paraíba", sigla: null },
+      ),
+    ).toBe("Centro de Ciências Agrárias — Edital nº 9/2026");
+  });
+
+  it("casa apesar de acento, caixa e pontuação diferentes no cadastro", () => {
+    // O ato e o cadastro do órgão discordam nessas três o tempo todo.
+    expect(
+      tituloSemOrgao("Prefeitura Municipal de Guimarânia — Edital nº 2", {
+        nome: "PREFEITURA MUNICIPAL DE GUIMARANIA",
+        sigla: null,
+      }),
+    ).toBe("Edital nº 2");
+  });
+
+  it("os 1.571 que não começam pelo órgão saem intactos", () => {
+    // "PROGESP" é um setor da UFRN, "AMAZUL" uma estatal ligada ao Comando da
+    // Marinha. Cortar qualquer coisa deles seria adivinhação.
+    const intacto = "PROGESP — Edital nº 106/2026-PROGESP";
+    expect(
+      tituloSemOrgao(intacto, {
+        nome: "Universidade Federal do Rio Grande do Norte",
+        sigla: "UFRN",
+      }),
+    ).toBe(intacto);
+  });
+
+  it("os 251 cujo título É o órgão voltam inteiros, nunca vazios", () => {
+    // Um título vazio não aparece como defeito, aparece como cartão estranho.
+    // São quatro formas do mesmo caso, todas presentes no acervo.
+    for (const [titulo, orgao] of [
+      ["Universidade Federal de Goiás", { nome: "Universidade Federal de Goiás", sigla: null }],
+      ["Universidade Federal de Pernambuco (UFPE)", { nome: "Universidade Federal de Pernambuco", sigla: "UFPE" }],
+      ["IFAP", { nome: "Instituto Federal de Educação, Ciência e Tecnologia do Amapá", sigla: "IFAP" }],
+      ["Conselho Regional de Biologia da 10ª Região (CRBio-10)", { nome: "Conselho Regional de Biologia da 10ª Região", sigla: "CRBio-10" }],
+    ] as const) {
+      expect(tituloSemOrgao(titulo, orgao), titulo).toBe(titulo);
+    }
+  });
+
+  it("não corta no meio de uma palavra", () => {
+    // Sem a fronteira de palavra, a sigla "IF" deixaria "SP - Câmpus Suzano",
+    // que é uma afirmação falsa sobre um campus.
+    expect(
+      tituloSemOrgao("IFSP - Câmpus Suzano — Edital nº 14/2026", {
+        nome: "Instituto Federal de Educação, Ciência e Tecnologia de São Paulo",
+        sigla: "IF",
+      }),
+    ).toBe("IFSP - Câmpus Suzano — Edital nº 14/2026");
+  });
+
+  it("prefere o nome por extenso à sigla quando os dois casam", () => {
+    // Cortar primeiro pela sigla deixaria o nome por extenso para trás.
+    expect(
+      tituloSemOrgao("UNIFESP Universidade Federal de São Paulo — Edital nº 1", {
+        nome: "UNIFESP Universidade Federal de São Paulo",
+        sigla: "UNIFESP",
+      }),
+    ).toBe("Edital nº 1");
+  });
+
+  it("sigla vazia, nula ou só espaço não corta nada", () => {
+    const titulo = "Edital nº 7";
+    expect(tituloSemOrgao(titulo, { nome: "Órgão Qualquer", sigla: "  " })).toBe(titulo);
+    expect(tituloSemOrgao(titulo, { nome: "Órgão Qualquer", sigla: null })).toBe(titulo);
+  });
+
+  it("a regra não conhece nenhum órgão: um inventado é tratado igual", () => {
+    // É a exigência permanente do projeto. Nada aqui é lista de casos: o que
+    // sai da frente é o nome e a sigla DAQUELE órgão, lidos do dado.
+    expect(
+      tituloSemOrgao("Instituto Que Não Existe (IQNE) — Edital nº 42", {
+        nome: "Instituto Que Não Existe",
+        sigla: "IQNE",
+      }),
+    ).toBe("Edital nº 42");
+  });
+});
+
 describe("linhaDeContexto", () => {
   it("órgão sem esfera e sem poder não vira separador vazio", () => {
     const linha = linhaDeContexto({
