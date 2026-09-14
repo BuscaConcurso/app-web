@@ -1,7 +1,13 @@
 import { Gaveta } from "@/components/ui/Revelador";
-import { destacar } from "@/lib/destaque";
-import type { Origem, RespostaDoFaq } from "@/lib/dominio";
+import {
+  ancoraDoTrecho,
+  destacar,
+  grifavel,
+  type Faixa,
+} from "@/lib/destaque";
+import type { Origem } from "@/lib/dominio";
 import { dataLonga, numero } from "@/lib/formato";
+import { partirEmParagrafos, type Paragrafo } from "@/lib/leitura";
 
 /**
  * Os atos publicados de onde tudo nesta página foi lido, com o texto inteiro.
@@ -31,8 +37,8 @@ import { dataLonga, numero } from "@/lib/formato";
  * sentidos, Escape, clique fora, o fundo que não rola por baixo, o foco que
  * entra e volta ao gatilho, e `prefers-reduced-motion`. O porquê do mecanismo
  * — e o que se perdeu ao não usar `<dialog>` — está medido no topo daquele
- * arquivo. Nada disto muda o conteúdo: o que a gaveta mostra é o mesmo
- * parágrafo, com os mesmos grifos.
+ * arquivo. Nada disto mudou o conteúdo: o que a gaveta mostra é o mesmo texto,
+ * com os mesmos grifos.
  *
  * **Nenhum ato abre sozinho**, e isso mudou com o drawer. Antes o ato curto
  * vinha aberto (mediana de 1.623 caracteres, metade do acervo abaixo de
@@ -45,9 +51,13 @@ import { dataLonga, numero } from "@/lib/formato";
  *
  * **O FAQ saiu daqui** e virou bloco próprio (`Faq.tsx`), acima deste. O que
  * ficou é o que ele deixou: o destaque das respostas dentro do texto, que
- * continua sendo feito aqui porque é aqui que o texto está — o link de cada
- * resposta aponta para o item do ato correspondente e o trecho aparece
- * grifado no documento.
+ * continua sendo feito aqui porque é aqui que o texto está — e agora o link
+ * de cada resposta aponta para **o trecho**, não mais para o ato inteiro.
+ *
+ * O `id` do `<li>` (`ato-{chave}`) continua onde estava, e é ele que o
+ * cronograma usa: quem vem de uma data sabe de qual ato ela saiu, e não de
+ * qual frase. As duas âncoras convivem, e é por isso que a do cronograma não
+ * precisou mudar.
  */
 
 export function AtosPublicados({ origens }: { origens: Origem[] }) {
@@ -92,40 +102,7 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
           )}
 
           {origem.texto ? (
-            /* Sem corte no texto: o ato de 99 mil caracteres cabe inteiro na
-               gaveta, rolando, sem virar uma página de um quilômetro. O texto
-               do diário vem sem quebra de linha — zero em 9.274 documentos —,
-               então é um parágrafo só. */
-            <Gaveta
-              className="mt-2.5"
-              rotulo="Ler o ato publicado"
-              titulo="O ato publicado"
-              apoio={
-                origem.caracteres !== null ? (
-                  <>· {numero(origem.caracteres)} caracteres</>
-                ) : undefined
-              }
-            >
-              <p className="max-w-[78ch] text-[13px] leading-6 text-tinta-800">
-                {/* As respostas do FAQ marcadas onde elas estão. É o que a
-                    posição gravada junto do trecho paga: em vez de repetir a
-                    resposta fora de contexto, a página mostra a frase do ato
-                    que a produziu, dentro do documento. */}
-                {destacar(origem.texto, faixasDoFaq(origem.faq ?? [])).map(
-                  (pedaco, indice) =>
-                    pedaco.destacado ? (
-                      <mark
-                        key={indice}
-                        className="rounded-[3px] bg-amarelo/40 text-tinta-900"
-                      >
-                        {pedaco.texto}
-                      </mark>
-                    ) : (
-                      <span key={indice}>{pedaco.texto}</span>
-                    ),
-                )}
-              </p>
-            </Gaveta>
+            <GavetaDoAto origem={origem} texto={origem.texto} />
           ) : (
             <p className="mt-2 text-[12px] leading-5 text-tinta-600">
               O texto deste ato não está guardado.
@@ -172,9 +149,129 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
 }
 
 
-/** As posições das respostas aceitas, para o destaque no texto. */
-function faixasDoFaq(respostas: RespostaDoFaq[]) {
-  return respostas
-    .filter((r) => r.inicioChar !== null && r.fimChar !== null)
-    .map((r) => ({ inicio: r.inicioChar as number, fim: r.fimChar as number }));
+/**
+ * A gaveta com o ato, em parágrafos e com os trechos endereçáveis.
+ *
+ * ## O ato deixou de ser um parágrafo só
+ *
+ * O texto do Diário chega sem uma única quebra de linha (zero em 420 atos
+ * medidos) e era renderizado como um `<p>`: ler o ato de 86 mil caracteres
+ * era percorrer uma parede. A estrutura está lá, como marcador — `3.2.1.`,
+ * `Art. 5º`, `II - `, `a)`, `ANEXO I` —, e `lib/leitura.ts` acha onde ela
+ * abre. **A regra, os dois lados medidos e o que ficou de fora estão lá**,
+ * junto do código que decide, e não aqui.
+ *
+ * O que importa deste lado: **o texto exibido não muda**. A partição cai
+ * entre dois caracteres que já existiam e os `<p>` somados dão o ato
+ * caractere por caractere — o que se confere no HTML renderizado, não aqui.
+ *
+ * ## E o grifo continua caindo no mesmo lugar
+ *
+ * As posições do FAQ são deslocamentos no texto original; cada parágrafo
+ * desconta o seu `inicio` antes de pintar (`faixasDoParagrafo`). O trecho que
+ * atravessa uma quebra vira duas marcas, uma em cada parágrafo, porque
+ * `<mark>` não pode cruzar `<p>`.
+ *
+ * ## Cada trecho ganhou endereço
+ *
+ * Antes, o link do FAQ levava ao `<li>` do ato com a gaveta fechada, e a
+ * pessoa procurava o grifo num parágrafo que podia ter 66 mil caracteres — o
+ * grifo existia e ninguém chegava nele. Agora cada marca carrega o `id` das
+ * respostas que a produziram, e o link do FAQ abre a gaveta no trecho. O
+ * porquê de a âncora bastar, sem script, está em `useAbrirNaAncora`.
+ */
+function GavetaDoAto({ origem, texto }: { origem: Origem; texto: string }) {
+  const faixas = faixasDoFaq(origem);
+
+  return (
+    /* Sem corte no texto: o ato de 99 mil caracteres cabe inteiro na gaveta,
+       rolando, sem virar uma página de um quilômetro. */
+    <Gaveta
+      className="mt-2.5"
+      rotulo="Ler o ato publicado"
+      titulo="O ato publicado"
+      ancoras={faixas.map((faixa) => faixa.ancora as string)}
+      apoio={
+        origem.caracteres !== null ? (
+          <>· {numero(origem.caracteres)} caracteres</>
+        ) : undefined
+      }
+    >
+      <div className="flex max-w-[78ch] flex-col gap-3">
+        {partirEmParagrafos(texto).map((paragrafo) => (
+          <p
+            key={paragrafo.inicio}
+            /* `wrap-anywhere` pelo mesmo motivo do trecho no FAQ: o ato traz
+               endereço de banca dentro do texto corrido, e a URL mais longa
+               do acervo tem 143 caracteres. É a quebra em qualquer ponto ou a
+               rolagem horizontal a 375px, onde o painel mede 352,5px. */
+            className="text-[13px] leading-6 wrap-anywhere text-tinta-800"
+          >
+            {destacar(paragrafo.texto, faixasDoParagrafo(faixas, paragrafo)).map(
+              (pedaco, indice) =>
+                pedaco.destacado ? (
+                  <mark
+                    key={indice}
+                    className="rounded-[3px] bg-amarelo/40 text-tinta-900"
+                  >
+                    {/* A âncora do trecho. É um elemento **vazio**, e é de
+                        propósito: um `<span>` sem conteúdo não acrescenta
+                        caractere nenhum ao ato, e uma marca só pode ter um
+                        `id` — enquanto três perguntas respondidas pela mesma
+                        frase viram uma marca só e precisam de três endereços
+                        apontando para cá. O `scroll-mt` é a barra de topo
+                        `fixed` da gaveta, medida em 44px, que sem folga
+                        cobriria justamente o começo do grifo. */}
+                    {pedaco.ancoras?.map((ancora) => (
+                      <span key={ancora} id={ancora} className="scroll-mt-16" />
+                    ))}
+                    {pedaco.texto}
+                  </mark>
+                ) : (
+                  <span key={indice}>{pedaco.texto}</span>
+                ),
+            )}
+          </p>
+        ))}
+      </div>
+    </Gaveta>
+  );
+}
+
+/**
+ * As posições das respostas aceitas, para o destaque no texto, cada uma com o
+ * `id` que o link do FAQ procura.
+ *
+ * O filtro é `grifavel` e não mais "tem posição": é a **mesma** régua que o
+ * FAQ usa para decidir se aponta para o trecho ou para o ato inteiro. Se as
+ * duas discordassem, o link do FAQ levaria a um `id` que não existe.
+ */
+function faixasDoFaq(origem: Origem): Faixa[] {
+  return (origem.faq ?? [])
+    .filter((r) => grifavel(origem.texto, r.inicioChar, r.fimChar))
+    .map((r) => ({
+      inicio: r.inicioChar as number,
+      fim: r.fimChar as number,
+      ancora: ancoraDoTrecho(origem.chave, r.pergunta),
+    }));
+}
+
+/**
+ * As mesmas faixas, medidas de dentro de um parágrafo.
+ *
+ * As posições do banco são deslocamentos no texto inteiro; partir o ato não
+ * pode mover o grifo, então cada parágrafo desconta o próprio `inicio`. O que
+ * sobra fora dele `destacar` descarta sozinho, por já clampear e exigir
+ * `fim > inicio` — inclusive a faixa que atravessa a quebra, que fica
+ * recortada dos dois lados e vira uma marca em cada parágrafo.
+ *
+ * A âncora é a única coisa que não se recorta: ela é o **começo** do trecho,
+ * e repeti-la na continuação poria o mesmo `id` duas vezes no documento.
+ */
+function faixasDoParagrafo(faixas: Faixa[], paragrafo: Paragrafo): Faixa[] {
+  return faixas.map((faixa) => ({
+    inicio: faixa.inicio - paragrafo.inicio,
+    fim: faixa.fim - paragrafo.inicio,
+    ancora: faixa.inicio >= paragrafo.inicio ? faixa.ancora : undefined,
+  }));
 }

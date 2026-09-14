@@ -176,8 +176,25 @@ function travarRolagem(): () => void {
   };
 }
 
+/** O fragmento chega percent-encoded quando tem acento, e um endereço torto
+ *  não pode derrubar a página. */
+function decodificar(fragmento: string): string {
+  try {
+    return decodeURIComponent(fragmento);
+  } catch {
+    return fragmento;
+  }
+}
+
 /** O miolo: o que as duas formas penduram no `<details>`. */
-function useRevelador({ modal }: { modal: boolean }) {
+function useRevelador({
+  modal,
+  ancoras,
+}: {
+  modal: boolean;
+  /** Só a gaveta usa; ver `Abrir no trecho que o endereço pediu`, abaixo. */
+  ancoras?: string[];
+}) {
   const raiz = useRef<HTMLDetailsElement>(null);
   const painel = useRef<HTMLDivElement>(null);
   const [aberto, setAberto] = useState(false);
@@ -292,6 +309,67 @@ function useRevelador({ modal }: { modal: boolean }) {
     };
   }, [aberto, fechar, modal]);
 
+  /**
+   * Abrir no trecho que o endereço pediu.
+   *
+   * ## O que o navegador já faz sozinho, e por isso quase não é script
+   *
+   * Medido no Chrome 152: navegar para um fragmento cujo alvo está **dentro**
+   * de um `<details>` fechado abre o `<details>` e rola até o alvo — no clique
+   * e também no carregamento direto da página com a âncora, que é o caso de
+   * quem recebeu o endereço de outra pessoa. Medido com a geometria daqui, que
+   * não é a trivial: com o alvo dentro do painel `fixed` e `overflow-y-auto`,
+   * quem rola é o painel (`scrollTop` 1444 com a janela em 0) e o
+   * `scroll-margin-top` do alvo é respeitado — a marca parou exatamente na
+   * folga pedida, 120px do topo, no teste.
+   *
+   * Então **a gaveta abre no trecho sem JavaScript nenhum**, e é isso que a
+   * decisão registrada no topo deste arquivo comprava: o `<details>` nativo.
+   * Com `<dialog>` + `showModal()` nada disto existiria.
+   *
+   * ## O que este efeito acrescenta, e o que ele não conserta
+   *
+   * Ele é rede para o motor que **não** expande: a regra é do HTML, mas nem
+   * todo navegador a implementa, e ali o link cairia no vazio. Por isso ele só
+   * age achando a gaveta fechada — se o navegador já abriu, ele já rolou, e um
+   * segundo `scrollIntoView` só brigaria com o primeiro.
+   *
+   * O que ele não conserta: sem script **e** num motor que não expande, o
+   * endereço não abre nada. Nesse canto sobra o que já havia — `ato-{chave}`,
+   * a âncora do cronograma, que leva ao bloco do ato com a gaveta fechada.
+   *
+   * A lista vem de quem chama porque daqui não dá para descobri-la: o
+   * navegador não renderiza o conteúdo de um `<details>` fechado, então
+   * `getElementById` do alvo devolve `null` justamente no caso que interessa.
+   */
+  // Uma string e não o array: `ancoras` é montado no render de quem chama e
+  // seria um objeto novo a cada vez, reatando o efeito sem nada ter mudado.
+  const listaDeAncoras = (ancoras ?? []).join(" ");
+  useEffect(() => {
+    if (listaDeAncoras === "") return;
+    const daqui = new Set(listaDeAncoras.split(" "));
+
+    const atender = () => {
+      const alvo = decodificar(window.location.hash.slice(1));
+      if (!daqui.has(alvo)) return;
+      const elemento = raiz.current;
+      // Aberta quer dizer que o navegador deu conta: ele abriu e rolou.
+      if (!elemento || elemento.open) return;
+      elemento.open = true;
+      // O conteúdo acabou de nascer; o alvo só tem caixa no quadro seguinte.
+      requestAnimationFrame(() => {
+        document.getElementById(alvo)?.scrollIntoView({
+          block: "start",
+          behavior: semMovimento() ? "auto" : "smooth",
+        });
+      });
+    };
+
+    atender();
+    window.addEventListener("hashchange", atender);
+    return () => window.removeEventListener("hashchange", atender);
+  }, [listaDeAncoras]);
+
   return {
     raiz,
     painel,
@@ -333,6 +411,7 @@ export function Gaveta({
   titulo,
   apoio,
   gatilho = GATILHO_PADRAO,
+  ancoras,
   children,
   className,
 }: {
@@ -344,11 +423,16 @@ export function Gaveta({
   apoio?: ReactNode;
   /** As classes da cara fechada, para quem precisa de outro botão. */
   gatilho?: string;
+  /**
+   * Os `id` que moram **dentro** desta gaveta e podem ser endereço de link.
+   * Ver `useAbrirNaAncora` para o que a lista compra e o que ela não compra.
+   */
+  ancoras?: string[];
   children: ReactNode;
   className?: string;
 }) {
   const { raiz, painel, aberto, aprimorado, fechar, aoClicarNoGatilho, aoAlternar } =
-    useRevelador({ modal: true });
+    useRevelador({ modal: true, ancoras });
   const modal = aprimorado && aberto;
 
   return (

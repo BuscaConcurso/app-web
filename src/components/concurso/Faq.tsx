@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { ancoraDoTrecho, grifavel } from "@/lib/destaque";
 import type { FaqPergunta, Origem, RespostaDoFaq } from "@/lib/dominio";
 import { partirEmEnderecos } from "@/lib/enderecos";
 import { ROTULO_PERGUNTA } from "@/lib/rotulos";
@@ -118,12 +119,24 @@ export function Faq({ origens }: { origens: Origem[] }) {
               </p>
               {/* O caminho de volta ao documento. Agora que o FAQ é um bloco
                   separado do texto do ato, é este link que mantém a
-                  procedência a um clique: ele leva ao item do ato, onde o
-                  trecho aparece grifado dentro do documento.
+                  procedência a um clique: ele abre a gaveta do ato **no
+                  trecho grifado**, e não mais no começo do documento.
                   Sozinho na linha desde que a avaliação saiu daqui — a caixa
-                  de flex existia para dividir a linha com ela. */}
+                  de flex existia para dividir a linha com ela.
+
+                  `grifavel` é a mesma régua que o bloco dos atos usa para
+                  decidir se pinta a marca. Quando a posição não casa com o
+                  texto — ou o texto do ato não está guardado — não há `id`
+                  para onde ir, e o link volta a apontar para o ato inteiro,
+                  que é onde ele apontava antes. Um link para o ato é pior que
+                  um link para o trecho; um link para um `id` inexistente não
+                  leva a lugar nenhum, e é calado. */}
               <a
-                href={`#ato-${origem.chave}`}
+                href={
+                  grifavel(origem.texto, resposta.inicioChar, resposta.fimChar)
+                    ? `#${ancoraDoTrecho(origem.chave, resposta.pergunta)}`
+                    : `#ato-${origem.chave}`
+                }
                 className="mt-1 inline-block text-[12px] text-tinta-600 underline underline-offset-4 hover:text-tinta-900"
               >
                 {varios && origem.titulo
