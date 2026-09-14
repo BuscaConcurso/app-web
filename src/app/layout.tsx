@@ -122,9 +122,22 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const origem = await origemDoAcervo();
 
   return (
+    // `suppressHydrationWarning` é o que faltava para o aviso "A tree hydrated
+    // but some attributes of the server rendered HTML didn't match" sumir. O
+    // script de tema logo abaixo escreve `data-tema` no `<html>` ANTES de o
+    // React hidratar — é o ponto dele, senão quem escolheu o escuro vê um
+    // lampejo claro —, e o servidor não tem como saber o que vai estar lá. A
+    // divergência é deliberada e acontece em toda carga.
+    //
+    // O prop vale só para os atributos deste elemento, um nível: não esconde
+    // divergência de nenhum filho. Antes deste conserto o mesmo aviso foi
+    // atribuído à barra de busca e tratado com `autoComplete="off"`, que é
+    // correto por outro motivo mas não era a causa — o log do `next dev`
+    // mostrou o diff apontando para `data-tema` no `<html>`.
     <html
       lang="pt-BR"
       className={`${literata.variable} ${archivo.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         {/* Antes da primeira pintura, senão quem escolheu o contrário do
