@@ -18,6 +18,15 @@ const NAVEGACAO = [
  * incluídos, e que funciona sem uma linha de JavaScript. Trocá-lo por um
  * botão com estado só faria sentido se o menu precisasse animar ou fechar
  * sozinho, e ele não precisa.
+ *
+ * O corte entre as duas formas do cabeçalho é `md`, e é um só. Ele estava em
+ * dois lugares diferentes: o menu sanduíche saía em `md` e a barra de ações
+ * entrava em `sm`, então entre 640 e 768 px apareciam as duas formas ao mesmo
+ * tempo — dois seletores de tema e dois pares de Entrar/Criar conta na mesma
+ * linha. Com um corte só, os botões de dentro do menu também deixam de
+ * precisar de marca própria: o `<details>` inteiro já some em `md`. Quem
+ * mexer aqui precisa mover a navegação e a barra de ações juntas, senão
+ * alguma faixa de largura volta a ficar com as duas formas ou com nenhuma.
  */
 export function Cabecalho() {
   return (
@@ -42,7 +51,7 @@ export function Cabecalho() {
           </ul>
         </nav>
 
-        <div className="ml-auto hidden items-center gap-2 sm:flex">
+        <div className="ml-auto hidden items-center gap-2 md:flex">
           <SeletorDeTema className="mr-1" />
           <BotaoLink href="/concursos" variante="fantasma" tamanho="sm">
             Entrar
@@ -88,7 +97,7 @@ export function Cabecalho() {
                 </span>
                 <SeletorDeTema />
               </li>
-              <li className="mt-1 flex gap-2 p-1 sm:hidden">
+              <li className="mt-1 flex gap-2 p-1">
                 <BotaoLink
                   href="/concursos"
                   variante="secundario"
