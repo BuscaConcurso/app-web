@@ -60,7 +60,12 @@ export function normalizar(texto: string): string {
     .trim();
 }
 
-function textoBuscavel(concurso: ConcursoResumo): string {
+/**
+ * O texto que a busca varre. Exportado porque `cargos.ts` mede, no acervo, o
+ * que cada link do rodapé devolveria — e medir contra outro texto que não
+ * este faria a contagem ao lado do link discordar da página que ele abre.
+ */
+export function textoBuscavel(concurso: ConcursoResumo): string {
   return normalizar(
     [
       concurso.titulo,
@@ -81,14 +86,31 @@ function textoBuscavel(concurso: ConcursoResumo): string {
   );
 }
 
+/** As palavras que o texto precisa conter para casar com uma busca. */
+export function termosDaBusca(q: string): string[] {
+  return normalizar(q).split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Todos os termos precisam aparecer. Quem digita "analista judiciario" quer
+ * as duas palavras, não a união de tudo que tem "analista".
+ *
+ * Recebe o texto já normalizado e os termos já separados, e não o concurso e
+ * a busca, porque quem mede dezenas de termos contra o acervo inteiro
+ * (`cargos.ts`) precisa pagar cada normalização uma vez só — eram 181 mil
+ * chamadas de `normalizar` e 50 ms a mais por página. Que a medição e o
+ * filtro entrem pela mesma porta é o que garante que o número ao lado do
+ * link seja o tamanho da lista que ele abre.
+ */
+export function casaComTermos(
+  textoNormalizado: string,
+  termos: string[],
+): boolean {
+  return termos.every((termo) => textoNormalizado.includes(termo));
+}
+
 function combinaComTermos(concurso: ConcursoResumo, q: string): boolean {
-  const alvo = textoBuscavel(concurso);
-  // Todos os termos precisam aparecer. Quem digita "analista judiciario"
-  // quer as duas palavras, não a união de tudo que tem "analista".
-  return normalizar(q)
-    .split(/\s+/)
-    .filter(Boolean)
-    .every((termo) => alvo.includes(termo));
+  return casaComTermos(textoBuscavel(concurso), termosDaBusca(q));
 }
 
 /** Lista vazia ou ausente não filtra nada. */

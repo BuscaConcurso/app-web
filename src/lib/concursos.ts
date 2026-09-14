@@ -28,6 +28,7 @@ import {
   type Ordem,
   type Situacao,
 } from "./consulta";
+import { medirCargos, urlDoCargo } from "./cargos";
 import { tomDoConcurso } from "./situacao";
 import { NOME_UF, ROTULO_ESCOLARIDADE } from "./rotulos";
 import { CONCURSOS } from "@/mocks/concursos";
@@ -47,6 +48,14 @@ export interface Pagina {
 }
 
 const POR_PAGINA = 20;
+
+/**
+ * Teto de quantos cargos o rodapé mostra, e hoje ele não corta nada: a regra
+ * de `cargos.ts` para sozinha em dez. É um limite de forma, medido na
+ * fileira do rodapé — dez rótulos ocupam 869px dos 1183 de uma linha a
+ * 1240px, e três linhas a 375px.
+ */
+const LIMITE_DE_CARGOS = 10;
 
 /**
  * Onde a API do engine está ouvindo, sem barra no fim. Suba com `bc api`, que
@@ -391,6 +400,37 @@ export async function facetas(hoje: Date = new Date()): Promise<{
       total,
     })),
   };
+}
+
+/**
+ * Os cargos que viram link no rodapé, medidos no acervo inteiro.
+ *
+ * Sobre o acervo inteiro, e não sobre os abertos como `facetas()` — e é por
+ * isso que esta lista **não serve para os blocos da home**, que contam
+ * "abertos agora". Hoje são 132 abertos em 4.649, e as duas contas foram
+ * feitas: a mesma regra medida só nos abertos tem piso 2 e deixa entrar
+ * "Alunos", "Curso", "Área" e "Júnior"; e os dez daqui, contados só entre os
+ * abertos, dariam 47, 4, 3, 3, 2, 2, 2, 1, 1 e **0** — um link do rodapé
+ * levando a busca vazia, que é justamente o que não pode acontecer. O rodapé
+ * está em toda página e é âncora permanente; lista que encolhe quando as
+ * inscrições fecham não serve a isso.
+ *
+ * A regra de agrupamento está em `cargos.ts`, com a medição que a sustenta.
+ * Aqui só entra o que é desta camada: de onde vem o acervo, e o corte de
+ * quantos links o rodapé mostra.
+ *
+ * Não custa requisição nova: dentro do mesmo render, o `fetch` do Next
+ * memoriza a chamada que o layout e a página já fizeram.
+ */
+export async function cargosEmDestaque(
+  limite = LIMITE_DE_CARGOS,
+): Promise<LinkDeFaceta[]> {
+  const { escolhidos } = medirCargos(await acervo());
+  return escolhidos.slice(0, limite).map((cargo) => ({
+    rotulo: cargo.rotulo,
+    href: urlDoCargo(cargo),
+    total: cargo.alcance,
+  }));
 }
 
 export interface OpcaoDeFaceta {
