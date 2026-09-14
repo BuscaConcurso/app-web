@@ -340,9 +340,12 @@ describe("acervo", () => {
     ]);
     expect(links.bancas.map((b) => b.rotulo)).toEqual(["Instituto Brasileiro"]);
     expect(contagens.bancas.map((b) => b.rotulo)).toEqual(["Instituto Brasileiro"]);
-    // Sem sigla, o termo de busca do link do órgão é o nome. `q=` vazio
-    // traria o acervo inteiro atrás de um link que promete um órgão.
-    expect(links.orgaos[0].href).toContain(encodeURIComponent("Ministério"));
+    // O link do órgão aponta para a página dele, pela chave que agrupa essa
+    // página — e não mais para `?q=<sigla ou nome>`, que respondia por
+    // aproximação sobre o texto buscável e trazia também quem só cita o órgão
+    // no título. O slug vem da rota, como o rótulo: nenhum órgão do engine
+    // está em `@/mocks/orgaos`.
+    expect(links.orgaos[0].href).toBe("/orgaos/orgao-do-engine");
   });
 });
 

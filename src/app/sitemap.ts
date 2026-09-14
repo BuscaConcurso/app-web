@@ -1,15 +1,25 @@
 import type { MetadataRoute } from "next";
-import { listarSlugs } from "@/lib/concursos";
+import { listarOrgaos, listarSlugs } from "@/lib/concursos";
 import { UFS, type Escolaridade } from "@/lib/dominio";
 import { urlAbsoluta } from "@/lib/site";
 
 /**
  * O mapa do site.
  *
- * Entram a home, a busca, as facetas finitas (estado e escolaridade) e cada
- * concurso. Não entram as buscas por texto livre, que são infinitas, nem
- * `/estilo`, que é ferramenta de trabalho e não conteúdo.
+ * Entram a home, a busca, as facetas finitas (estado e escolaridade), cada
+ * órgão com mais de um concurso e cada concurso. Não entram as buscas por
+ * texto livre, que são infinitas, nem `/estilo`, que é ferramenta de trabalho
+ * e não conteúdo.
+ *
+ * **Os órgãos de um concurso só ficam de fora**, e são 195 dos 466. A página
+ * deles é o cartão de um concurso que já está neste mesmo mapa com prioridade
+ * maior: pôr as duas URLs é oferecer duas entradas para o mesmo conteúdo. A
+ * página continua existindo, continua sendo seguida a partir da trilha do
+ * concurso e do rodapé da home, e entra aqui sozinha no dia do segundo
+ * concurso — dos 122 órgãos que tinham um só há 30 dias, 36 (30%) já têm dois
+ * ou mais. O corte é medido no acervo a cada geração, não escrito à mão.
  */
+const MINIMO_DE_CONCURSOS_NO_MAPA = 2;
 const ESCOLARIDADES_INDEXAVEIS: Escolaridade[] = [
   "fundamental",
   "medio",
@@ -20,6 +30,9 @@ const ESCOLARIDADES_INDEXAVEIS: Escolaridade[] = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const agora = new Date();
   const slugs = await listarSlugs();
+  const orgaos = (await listarOrgaos()).filter(
+    ({ concursos }) => concursos.length >= MINIMO_DE_CONCURSOS_NO_MAPA,
+  );
 
   return [
     {
@@ -45,6 +58,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: agora,
       changeFrequency: "daily" as const,
       priority: 0.6,
+    })),
+    // Entre a faceta e o concurso: um órgão é mais durável que uma busca por
+    // estado e menos específico que um edital, que é o que a pessoa procura.
+    ...orgaos.map(({ orgao }) => ({
+      url: urlAbsoluta(`/orgaos/${orgao.slug}`),
+      lastModified: agora,
+      changeFrequency: "weekly" as const,
+      priority: 0.75,
     })),
     ...slugs.map((slug) => ({
       url: urlAbsoluta(`/concursos/${slug}`),

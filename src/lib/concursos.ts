@@ -32,6 +32,7 @@ import {
 import { medirCargos, urlDoCargo } from "./cargos";
 import { tomDoConcurso } from "./situacao";
 import { NOME_UF, ROTULO_ESCOLARIDADE } from "./rotulos";
+import { acharOrgao, agruparPorOrgao, type OrgaoDoAcervo } from "./orgaos";
 import { CONCURSOS } from "@/mocks/concursos";
 
 export interface Consulta extends Filtro {
@@ -405,13 +406,15 @@ export async function facetas(hoje: Date = new Date()): Promise<{
     })),
     orgaos: maisFrequentes(porOrgao, 10).map(([slug, total]) => ({
       rotulo: orgaos.get(slug)!.nome,
-      // A sigla é o termo de busca porque é curta e casa com o texto
-      // buscável do cartão. Só 129 dos 1.946 órgãos do engine têm sigla, e
-      // sem ela o termo é o nome: `q=` vazio traria o acervo inteiro atrás de
-      // um link que promete um órgão.
-      href: `/concursos?q=${encodeURIComponent(
-        orgaos.get(slug)!.sigla || orgaos.get(slug)!.nome,
-      )}`,
+      // O endereço do próprio órgão, e não mais `?q=<sigla ou nome>`. A busca
+      // por texto respondia por aproximação: ela varre `textoBuscavel`, que
+      // inclui título, banca, cargo e cidade, então "IFPR" também trazia os
+      // concursos de quem só cita o IFPR no título, e um órgão sem sigla caía
+      // no nome inteiro — que casa com as unidades dele e com mais nada
+      // previsível. O link aqui promete "os concursos deste órgão", e agora é
+      // o slug do órgão que responde, que é a mesma chave que agrupa a
+      // página.
+      href: `/orgaos/${slug}`,
       total,
     })),
   };
@@ -579,4 +582,23 @@ export async function obterDetalhe(
 /** Todos os slugs, para prerenderizar as páginas de concurso. */
 export async function listarSlugs(): Promise<string[]> {
   return (await acervo()).map((concurso) => concurso.slug);
+}
+
+/**
+ * Um órgão e os concursos dele, ou `null` quando nenhum concurso do acervo o
+ * nomeia.
+ *
+ * Sai do mesmo `acervo()` que a busca lê, e é isso que garante que a página
+ * do órgão liste exatamente o que a busca lista. O porquê de não haver rota
+ * de órgão na API, com a medição, está no cabeçalho de `orgaos.ts`; em uma
+ * linha: dentro do mesmo render isto não custa requisição nenhuma, porque o
+ * `fetch` do Next memoriza a que `acervo()` já fez.
+ */
+export async function obterOrgao(slug: string): Promise<OrgaoDoAcervo | null> {
+  return acharOrgao(await acervo(), slug);
+}
+
+/** Todos os órgãos do acervo, do maior para o menor. Alimenta o sitemap. */
+export async function listarOrgaos(): Promise<OrgaoDoAcervo[]> {
+  return agruparPorOrgao(await acervo());
 }

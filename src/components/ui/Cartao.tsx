@@ -18,7 +18,7 @@ export function Cartao({
   tom?: Tom;
   children: ReactNode;
   className?: string;
-  as?: "div" | "article" | "li" | "section";
+  as?: "div" | "article" | "li" | "section" | "header";
 }) {
   return (
     <Tag
