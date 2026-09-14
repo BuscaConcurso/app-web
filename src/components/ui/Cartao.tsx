@@ -77,31 +77,32 @@ export function Numero({
  * O quadrado com a sigla do órgão. Faz o papel do logotipo que não temos:
  * o acervo tem 1.946 órgãos e nenhum arquivo de marca para eles.
  *
- * **Sem sigla o quadrado não é desenhado.** Ele existia mesmo vazio, e isso
- * durou semanas sem ninguém ver, porque quadrado colorido sem letra passa por
- * decoração: em 4.648 dos 4.649 cartões a tela pintava 38,72 por 38,72 de cor
- * que não diziam nada. A regra que recuperou a sigla do título mudou a conta —
- * 3.034 cartões têm sigla hoje —, mas 1.615 seguem sem, e nesses o quadrado
- * pintado seria um selo sem selo.
+ * **Sem sigla o selo fica sem conteúdo, e não vira outra coisa.** Decisão do
+ * parceiro humano: "quando não houver sigla, exiba square sem sigla ao invés
+ * de —".
  *
- * No lugar dele fica o mesmo espaço, vazio a não ser por um travessão no tom
- * de apoio do cartão. As três coisas que isso resolve, nesta ordem:
+ * Vale distinguir isto do defeito que este componente tinha até hoje de
+ * manhã, porque a forma na tela é parecida e a causa é oposta. Lá, o selo
+ * NORMAL desenhava uma sigla que não chegava: em 4.648 dos 4.649 cartões a
+ * tela pintava 38,72 por 38,72 de cor sem letra, indistinguível de um selo
+ * que funcionou, e isso durou semanas sem ninguém ver porque quadrado
+ * colorido sem letra passa por decoração. Aqui é um ramo próprio, que sabe
+ * que não há o que dizer.
  *
- * 1. **A ausência fica dita.** Espaço em branco ao lado de cartões com selo
- *    lê como imagem que não carregou; o travessão é a convenção de tabela
- *    para "não há valor", e é o mesmo gesto de "a definir" nas casas de
- *    número e de `cargosDoCartao` na linha de cargos — este projeto escreve a
- *    falta, não a esconde.
- * 2. **O alinhamento não se mexe.** A caixa continua `size-10`/`size-11`, e
+ * Duas coisas que a forma preserva:
+ *
+ * 1. **O alinhamento não se mexe.** A caixa continua `size-10`/`size-11`, e
  *    medido a 375px o título começa no mesmo x (77,42px) com e sem sigla.
  *    Colapsar a caixa puxaria o título para 28,16px e faria a lista dançar
  *    49,26px a cada cartão sem sigla — um em cada três.
- * 3. **Nada é afirmado.** Iniciais tiradas do nome inventariam uma sigla que
- *    ninguém publicou, e o parceiro humano ainda não decidiu coletar marca
- *    nenhuma. O nome do órgão está do lado, por extenso.
+ * 2. **Nada é afirmado.** Iniciais tiradas do nome inventariam uma sigla que
+ *    ninguém publicou. O nome do órgão está do lado, por extenso, e a linha
+ *    de contexto logo abaixo diz a esfera e o estado.
  *
- * O fundo pintado pelo tom sai junto com o quadrado, e não faz falta: a
- * situação já está no fundo do cartão inteiro e na etiqueta com ponto.
+ * O que se perde em relação ao travessão que esteve aqui por algumas horas: o
+ * travessão dizia "não há valor" na convenção de tabela, e o quadrado liso
+ * não diz nada — a ausência passa a ser lida pelo que falta, não por um
+ * símbolo. É a troca que o parceiro humano escolheu, vendo as duas.
  */
 export function Selo({
   sigla,
@@ -120,35 +121,30 @@ export function Selo({
   const lado = tamanho === "sm" ? "size-10" : "size-11";
   const base = "flex shrink-0 items-center justify-center text-center leading-none";
 
-  if (!letras) {
-    return (
-      <span
-        aria-hidden="true"
-        className={[
-          base,
-          lado,
-          // O mesmo corpo da sigla curta, para o traço ter o peso óptico da
-          // letra que ele substitui, e o mesmo cinza da linha de contexto
-          // logo abaixo: a falta pertence à camada de apoio, não à de
-          // afirmação.
-          tamanho === "sm" ? "text-[10px]" : "text-xs",
-          "font-semibold",
-          ESTILO_DO_TOM[tom].apoio,
-        ].join(" ")}
-      >
-        {/* Travessão, não hífen: é o traço de "sem valor" e não se confunde
-            com o hífen que parte "CRA-RJ" no selo do cartão vizinho. */}
-        —
-      </span>
-    );
-  }
-
   const fundo = {
     aberto: "bg-rebaixada text-tinta-800",
     urgente: "bg-urgente-chip text-vermelho-800",
     previsto: "bg-previsto-chip text-previsto-texto",
     encerrado: "bg-encerrado-chip text-tinta-600",
   }[tom];
+
+  if (!letras) {
+    // O quadrado sem nada dentro, decisão do parceiro humano: a coluna do
+    // selo mede o mesmo com e sem sigla (o `<h3>` começa em 77,42px nos dois
+    // grupos), e o que estava aqui antes era um travessão.
+    //
+    // Ele não é o quadrado vazio que este componente tinha antes das siglas
+    // existirem: aquele era o selo NORMAL desenhando uma sigla que não
+    // chegava, indistinguível de um que chegou. Este é a forma do selo sem a
+    // afirmação — mesma caixa, mesmo tom, sem conteúdo e sem alt.
+    return (
+      <span
+        aria-hidden="true"
+        className={[base, lado, "rounded-lg", fundo].join(" ")}
+      />
+    );
+  }
+
 
   /*
     A escada de corpo, que só passou a rodar hoje: até ontem a sigla chegava
