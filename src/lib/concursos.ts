@@ -65,8 +65,8 @@ interface RespostaDeAcervo {
   /** Quantos concursos o engine tem, com dado ou sem. */
   total: number;
   /**
-   * Quantos o engine tem e não mandou porque não têm cargo nem evento — 293
-   * de 4.942 na carga de 2026-09-14. A lista traz só quem tem dado, e esta
+   * Quantos o engine tem e não mandou porque não têm cargo nem evento — 189
+   * de 4.838 na carga de 2026-09-14. A lista traz só quem tem dado, e esta
    * contagem é o que impede a tela de fingir que o acervo tem só o que ela
    * lista. Sai por `avisoDoAcervo()`, aqui embaixo.
    */
@@ -77,9 +77,10 @@ interface RespostaDeAcervo {
    * classe `ForaDaLista` de `engine/src/buscaconcurso/api.py`.
    *
    * A repartição existe porque o número sozinho fazia a tela mentir: ela
-   * dizia que os 293 "entram na lista conforme forem lidos", e isso vale
-   * para os 104 da fila e para mais ninguém. `acervoIncompletoEmPartes()`
-   * (src/lib/rotulos.ts) é quem transforma estes três números em frase.
+   * dizia que os que estão fora "entram na lista conforme forem lidos", e
+   * hoje isso não vale para nenhum deles — a fila está vazia.
+   * `acervoIncompletoEmPartes()` (src/lib/rotulos.ts) é quem transforma
+   * estes três números em frase, e deixa de fora a parte que estiver zerada.
    *
    * Opcional no tipo porque um engine mais velho não manda o campo — é o
    * estado normal do mundo, API e app sobem separados. Quem lê valida.
@@ -203,7 +204,7 @@ async function acervo(): Promise<ConcursoResumo[]> {
  *
  * `null` quando não há nada a avisar — acervo completo, ou mock. A lista traz
  * só quem tem cargo ou evento, e sem este aviso uma página que mostra 4.649
- * concursos afirmaria, por omissão, que o acervo tem 4.649.
+ * concursos afirmaria, por omissão, que o acervo tem 4.649 — tem 4.838.
  *
  * **O aviso carrega a repartição, não só o total.** Um número só descreve
  * quatro mil e tantos concursos como se fossem uma coisa, e eles não são:

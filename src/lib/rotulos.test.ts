@@ -444,14 +444,31 @@ describe("cargosDoCartao", () => {
 /**
  * A frase do acervo incompleto, que é a que já mentiu.
  *
- * Os números destes testes são a medição de 2026-09-14 no banco do engine:
- * 4.942 concursos no acervo, 4.649 na lista, 293 fora — 104 na fila, 138 de atos que
- * não abrem concurso, 51 de lacuna nossa. Não são números de exemplo; são a
- * carga que fez a frase antiga ser falsa, e é por isso que estão aqui.
+ * Os números são a medição de 2026-09-14 no banco do engine, depois da
+ * remoção da fonte IBADE: 4.838 concursos, 4.649 na lista, 189 fora — 138 de
+ * atos que não abrem concurso, 51 de lacuna nossa, e **zero na fila**. Não
+ * são números de exemplo; são a carga que fez a frase antiga ser falsa.
+ *
+ * A fila zerada é o caso principal destes testes, e não uma borda: é o
+ * estado de hoje, e é o estado em que a frase mais facilmente fica torta —
+ * ou escreve "0 esperam na fila de leitura", ou some com a parcela de um
+ * jeito que quebra a soma.
  */
 const HOJE = {
-  semDado: 293,
-  naFila: 104,
+  semDado: 189,
+  naFila: 0,
+  naoAbreConcurso: 138,
+  lacuna: 51,
+};
+
+/**
+ * A mesma carga depois do `tick` da manhã, que enfileira o Diário do dia.
+ * 59 é a média medida de concursos por dia de Diário ingerido com sucesso
+ * (5.000 concursos em 85 dias), não um número escolhido para o teste.
+ */
+const AMANHA = {
+  semDado: 248,
+  naFila: 59,
   naoAbreConcurso: 138,
   lacuna: 51,
 };
@@ -465,10 +482,66 @@ function frase(aviso: Parameters<typeof acervoIncompletoEmPartes>[0]): string {
 }
 
 describe("acervoIncompletoEmPartes", () => {
-  it("reparte os 293 da carga real em três, na ordem que tira o leitor da espera", () => {
-    expect(acervoIncompletoEmPartes(HOJE).map((p) => p.quantos)).toEqual([
-      138, 104, 51,
-    ]);
+  it("com a fila vazia, a repartição de hoje tem duas partes", () => {
+    // O estado real de 2026-09-14. A parte da fila não é escrita porque não
+    // tem conteúdo — e as duas que sobram continuam somando os 189.
+    const partes = acervoIncompletoEmPartes(HOJE);
+
+    expect(partes.map((p) => p.quantos)).toEqual([138, 51]);
+    expect(partes.reduce((soma, p) => soma + p.quantos, 0)).toBe(HOJE.semDado);
+  });
+
+  it("fila vazia não vira “0 esperam na fila de leitura” na tela", () => {
+    // O defeito que uma lista de tamanho fixo produziria. A oração some
+    // inteira; o que sai é uma parcela de valor zero, não um número zero.
+    const texto = frase(HOJE);
+
+    expect(texto).not.toContain("0 ");
+    expect(texto).not.toContain("fila");
+    expect(texto).not.toContain("entram quando");
+    expect(texto).not.toContain("conforme forem lidos");
+  });
+
+  it("a parte da fila volta sozinha quando o tick enfileira o Diário do dia", () => {
+    // A categoria não pode sair do CÓDIGO por estar zerada hoje: amanhã de
+    // manhã ela tem conteúdo de novo, e ninguém vai editar texto para isso.
+    const partes = acervoIncompletoEmPartes(AMANHA);
+
+    expect(partes.map((p) => p.quantos)).toEqual([138, 59, 51]);
+    expect(partes[1].texto).toContain("esperam na fila de leitura");
+    expect(partes.reduce((soma, p) => soma + p.quantos, 0)).toBe(
+      AMANHA.semDado,
+    );
+  });
+
+  it("qualquer parte pode zerar sem quebrar a soma nem a ordem", () => {
+    // As três, uma a uma. A ordem das que sobram não muda, e a soma fecha em
+    // todos os casos — é a invariante que a frase inteira apoia.
+    const casos = [
+      { ...AMANHA, naoAbreConcurso: 0, semDado: 110 },
+      { ...AMANHA, naFila: 0, semDado: 189 },
+      { ...AMANHA, lacuna: 0, semDado: 197 },
+    ];
+
+    for (const caso of casos) {
+      const partes = acervoIncompletoEmPartes(caso);
+      expect(partes.every((p) => p.quantos > 0)).toBe(true);
+      expect(partes.reduce((soma, p) => soma + p.quantos, 0)).toBe(
+        caso.semDado,
+      );
+      expect([...partes].sort((a, b) => b.quantos - a.quantos)).not.toEqual([]);
+    }
+  });
+
+  it("duas partes zeradas deixam uma só, e ela ainda soma o total", () => {
+    // O estado para o qual o acervo caminha: fila vazia e lacuna zerada
+    // deixam de pé só os atos que nunca viram concurso.
+    const partes = acervoIncompletoEmPartes({
+      semDado: 138, naFila: 0, naoAbreConcurso: 138, lacuna: 0,
+    });
+
+    expect(partes).toHaveLength(1);
+    expect(partes[0].quantos).toBe(138);
   });
 
   it("diz que 138 nunca entram, e por quê", () => {
@@ -478,7 +551,6 @@ describe("acervoIncompletoEmPartes", () => {
 
     expect(naoAbre.quantos).toBe(138);
     expect(naoAbre.texto).toContain("não vão entrar: são retificações");
-    expect(naoAbre.texto).toContain("retificação");
     // E diz o que a retificação FAZ, porque "não é concurso" sozinho soa como
     // dado descartado: ela atualiza um concurso que está na lista.
     expect(naoAbre.texto).toContain("atualiza um concurso que já está aqui");
@@ -486,88 +558,83 @@ describe("acervoIncompletoEmPartes", () => {
 
   it("a promessa de entrada automática é feita sobre a fila, e só sobre ela", () => {
     // ESTE é o teste que a frase antiga reprovava. Ela dizia "Eles entram na
-    // lista conforme forem lidos" sobre os 293 inteiros, com zero na fila no
-    // dia da medição. A promessa agora tem dono e tamanho: 104.
-    const [, fila] = acervoIncompletoEmPartes(HOJE);
+    // lista conforme forem lidos" sobre o total inteiro — com zero na fila no
+    // dia da medição. A promessa agora tem dono e tamanho.
+    const prometem = acervoIncompletoEmPartes(AMANHA).filter((parte) =>
+      /entra(m)? quando/.test(parte.texto),
+    );
 
-    expect(fila.quantos).toBe(104);
-    expect(fila.texto).toContain("na fila de leitura");
-    expect(fila.texto).toContain("entram quando forem lidos");
-  });
-
-  it("com a fila vazia, a frase inteira não promete entrada nenhuma", () => {
-    // O dia em que o worker está parado: 0 na fila. Nenhuma oração da frase
-    // pode sugerir que o número anda sozinho — era exatamente a situação
-    // medida quando a frase antiga foi escrita.
-    const parada = { ...HOJE, naFila: 0, lacuna: 155 };
-
-    const texto = frase(parada);
-
-    expect(texto).not.toContain("fila");
-    expect(texto).not.toContain("entram quando");
-    expect(texto).not.toContain("conforme forem lidos");
-    expect(texto).toContain("155 são lacuna nossa");
+    expect(prometem).toHaveLength(1);
+    expect(prometem[0].quantos).toBe(59);
+    expect(prometem[0].quantos).toBeLessThan(AMANHA.semDado);
   });
 
   it("a lacuna é confessada como lacuna, não maquiada", () => {
     // Os 51 são falha nossa: deveriam estar na lista. Uma frase que só
-    // dissesse "138 não são concurso e 104 estão na fila" fingiria que está
-    // tudo certo, que é o outro jeito de mentir aqui.
-    const [, , nossa] = acervoIncompletoEmPartes(HOJE);
+    // dissesse "138 não são concurso" fingiria que está tudo certo, que é o
+    // outro jeito de mentir aqui.
+    const [, nossa] = acervoIncompletoEmPartes(HOJE);
 
     expect(nossa.quantos).toBe(51);
     expect(nossa.texto).toContain("lacuna nossa");
     expect(nossa.texto).toContain("só entram se for refeita");
   });
 
-  it("categoria zerada não vira oração", () => {
-    // Uma oração "0 estão na fila de leitura" gastaria uma linha da tela
-    // para não dizer nada.
-    const partes = acervoIncompletoEmPartes({
-      semDado: 138, naFila: 0, naoAbreConcurso: 138, lacuna: 0,
-    });
-
-    expect(partes).toHaveLength(1);
-    expect(partes[0].quantos).toBe(138);
-  });
-
   it("no singular, os verbos concordam", () => {
-    // Três concursos, um em cada categoria. "1 estão na fila" apareceria na
+    // Três concursos, um em cada categoria. "1 esperam na fila" apareceria na
     // tela do candidato no dia em que a fila esvaziasse até o último.
     const texto = frase({
       semDado: 3, naFila: 1, naoAbreConcurso: 1, lacuna: 1,
     });
 
     expect(texto).toContain("1 não vai entrar: é uma retificação");
-    expect(texto).toContain("1 está na fila de leitura e entra quando for lido");
+    expect(texto).toContain("1 espera na fila de leitura: entra quando for lido");
     expect(texto).toContain("1 é lacuna nossa");
     expect(texto).toContain("só entra se for refeita");
   });
 
+  it("cada parte lê certo também colada na abertura, sem número", () => {
+    // É como o componente escreve a parte única que cobre o total: "...estão
+    // fora desta lista, e não vão entrar: ...". Por isso todo texto começa
+    // por locução verbal, e nenhum começa por "e".
+    for (const aviso of [HOJE, AMANHA]) {
+      for (const parte of acervoIncompletoEmPartes(aviso)) {
+        expect(parte.texto).toMatch(/^(não vão|não vai|esperam|espera|são|é) /);
+        expect(parte.texto.startsWith("e ")).toBe(false);
+      }
+    }
+  });
+
   it("engine velho, sem a repartição, não vira frase repartida", () => {
-    // API e app sobem separados, e o app novo pode chegar primeiro. Aí os
-    // três campos chegam zerados por `avisoDoAcervo()`, a soma não fecha, e a
-    // tela cai na frase curta em vez de anunciar "0 estão na fila" — ou, pior,
-    // de chutar que os 293 estão todos na fila.
+    // API e app sobem separados, e o app novo chega antes do engine novo com
+    // frequência. Aí os três campos chegam zerados por `avisoDoAcervo()`, a
+    // soma não fecha, e a tela cai na frase curta — em vez de chutar que os
+    // 189 estão todos na fila.
+    //
+    // É o caso que a fila zerada de hoje torna sutil: `naFila: 0` sozinho é
+    // um zero VERDADEIRO e a soma fecha; três zeros não somam 189 e não
+    // fecham. É a soma que separa os dois.
     expect(
       acervoIncompletoEmPartes({
-        semDado: 293, naFila: 0, naoAbreConcurso: 0, lacuna: 0,
+        semDado: 189, naFila: 0, naoAbreConcurso: 0, lacuna: 0,
       }),
     ).toEqual([]);
+    // E o zero verdadeiro de hoje continua passando.
+    expect(acervoIncompletoEmPartes(HOJE)).toHaveLength(2);
   });
 
   it("soma que não fecha é repartição descartada, não repartição publicada", () => {
     // O caso do contrato que mudou de um lado só: a API passa a ter uma quarta
     // categoria e o app ainda soma três. Publicar a repartição incompleta
-    // diria "138 + 104 + 10 de 293" e deixaria 41 concursos sem explicação
-    // nenhuma, no meio de uma frase que se apresenta como completa.
+    // deixaria concursos sem explicação nenhuma, no meio de uma frase que se
+    // apresenta como completa.
     expect(acervoIncompletoEmPartes({ ...HOJE, lacuna: 10 })).toEqual([]);
   });
 
   it("campo que chegou undefined também descarta a repartição", () => {
     // `AvisoDoAcervo` é uma promessa sobre o JSON de outro processo, e o tipo
     // não a cumpre sozinho: sem esta guarda, `naFila` ausente viraria
-    // "NaN estão na fila de leitura" na tela — o mesmo acidente que
+    // "NaN esperam na fila de leitura" na tela — o mesmo acidente que
     // `quantidade()` existe para impedir no cartão.
     const torto = { ...HOJE, naFila: undefined as unknown as number };
 

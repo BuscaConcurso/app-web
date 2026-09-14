@@ -400,17 +400,26 @@ export interface ParteDoAcervoIncompleto {
  * concursos do acervo ainda não foram lidos: o diário oficial publicou o
  * ato, e o cargo, as vagas e o cronograma ainda não foram extraídos do
  * documento. Eles entram na lista conforme forem lidos."* Medido no banco em
- * 2026-09-14, dos 293 concursos fora da lista:
+ * 2026-09-14, depois da remoção da fonte IBADE, são **189** os concursos
+ * fora da lista, todos do Diário — 138 de atos que não abrem concurso e 51
+ * de lacuna nossa. As três afirmações:
  *
- * - *"ainda não foram lidos"* era falso para 138. Foram lidos, deu certo, e
- *   não há o que extrair — o ato é retificação, anexo, complementar ou
- *   "outro".
- * - *"o cargo ... ainda não foi extraído"* sugeria, para esses mesmos 138,
- *   um trabalho pendente que não existe. Uma retificação de prazo não tem
- *   cargo para extrair: ela atualiza um concurso que já está na lista.
- * - *"entram na lista conforme forem lidos"* valia para 104 — os que estão
- *   na fila — e para mais ninguém. Os 138 nunca entram, e os 51 restantes só
- *   entram se a leitura for refeita.
+ * - *"ainda não foram lidos"* é falso para 138. Foram lidos, deu certo, e
+ *   não há o que extrair — o ato é retificação (37), anexo (13),
+ *   complementar (2) ou "outro" (86).
+ * - *"o cargo ... ainda não foi extraído"* sugere, para esses mesmos 138, um
+ *   trabalho pendente que não existe. Uma retificação de prazo não tem cargo
+ *   para extrair: ela atualiza um concurso que já está na lista.
+ * - *"entram na lista conforme forem lidos"* não vale para **nenhum** dos
+ *   189 hoje: a fila de leitura está vazia. Os 138 nunca entram; os 51 só
+ *   entram se a leitura for refeita (29 de ato de abertura que não rendeu
+ *   cargo nem cronograma, 17 de leitura que falhou, 5 de documento que
+ *   ninguém baixou).
+ *
+ * **A medição anterior desta mesma função dizia 293, com 104 na fila.** Os
+ * 104 eram a fonte IBADE inteira, removida em 2026-09-14 por não sustentar
+ * nenhum concurso do acervo. Eles não entraram na lista: deixaram de
+ * existir. É a razão de nada aqui depender de a fila ter conteúdo.
  *
  * **Três partes, e não quatro nem uma.** Quatro seria a repartição do banco
  * (fila, ato que não abre concurso, leitura que falhou, abertura que não
@@ -420,33 +429,58 @@ export interface ParteDoAcervoIncompleto {
  * informação que mude o que o leitor faz. Uma parte só seria voltar ao
  * número sozinho, que é de onde as três mentiras vieram.
  *
- * **Quantas cabem, medido na tela e não estimado.** O parágrafo renderizado
- * em Chrome com a fonte do app (Archivo 13px/21,12px, que é o que
- * `text-sm leading-6` produz aqui), nas quatro larguras reais em que ele
- * aparece — a home a 1240px, a coluna de resultados da busca a 1240px e a
- * 1024px (ela divide a faixa com os 288px da coluna de filtros), e o
- * telefone a 375px:
+ * **Quantas cabem, medido na tela e não estimado.** O parágrafo como ele
+ * sai deste arquivo, renderizado em Chrome com o CSS e a fonte reais do app
+ * (Archivo 13px/21,12px, que é o que `text-sm leading-6` produz aqui), nas
+ * quatro larguras em que ele de fato aparece — a home a 1240px, a coluna de
+ * resultados da busca a 1240px e a 1024px (ela divide a faixa com os 288px
+ * da coluna de filtros), e o telefone a 375px:
  *
- * | largura útil | a frase antiga | 1 parte | 2 partes | **3 partes** |
- * |---|---|---|---|---|
- * | 1150px (home) | 2 linhas | 1 | 2 | **2** |
- * | 842px (busca, 1240) | 2 | 1 | 2 | **3** |
- * | 626px (busca, 1024) | 2 | 1 | 3 | **4** |
- * | 301px (telefone) | 5 | 3 | 6 | **8** |
+ * | largura útil | a frase antiga | **hoje: 2 partes** | amanhã: 3 partes | 1 parte¹ | sem repartição |
+ * |---|---|---|---|---|---|
+ * | 1150px (home) | 2 linhas | **2** | 2 | 2 | 1 |
+ * | 842px (busca, 1240) | 2 | **3** | 3 | 2 | 2 |
+ * | 626px (busca, 1024) | 2 | **4** | 4 | 2 | 2 |
+ * | 301px (telefone) | 5 | **7** | 8 | 5 | 4 |
  *
- * Na home as três partes custam as mesmas duas linhas que a frase falsa
- * custava. No telefone custam três linhas a mais, e é aí que a decisão
- * aperta: 8 linhas num bloco cinza de rodapé é muito. Foi por essa medição
- * que a primeira parte perdeu o final ", em vez de criar outro" — tirar 23
- * caracteres tirou uma linha inteira da home. Duas partes economizariam mais
- * duas linhas no telefone, e a parte que sairia seria justamente a da fila:
- * a tela perderia a única promessa verdadeira que ela tem para fazer, ou
- * juntaria a fila com a lacuna e voltaria a mentir, pelo outro lado.
+ * ¹ A coluna "1 parte" é o ramo sem número repetido (ver abaixo): tirar o
+ * segundo "138" economiza uma linha na busca a 1024px.
+ *
+ * A coluna "amanhã" é medida com 59 na fila, que é a média de concursos por
+ * dia de Diário ingerido com sucesso (5.000 concursos em 85 dias, medido no
+ * banco) — o tamanho que a fila tem quando o `tick` da manhã roda, não um
+ * número inventado para a tabela.
+ *
+ * **O número de partes não é escolhido: é quantas têm conteúdo.** Hoje são
+ * duas, porque a fila está vazia, e a frase honesta saiu mais curta que a
+ * falsa no telefone (7 contra 5 é pior, mas 7 contra as 8 de três partes é o
+ * que a fila vazia devolve). Amanhã de manhã o `tick` enfileira o Diário do
+ * dia e a terceira volta sozinha, sem ninguém editar texto. Foi a medição
+ * que fez a primeira parte perder o final ", em vez de criar outro": tirar
+ * 23 caracteres tirou uma linha inteira da home.
+ *
+ * O que NÃO se faz é apagar a categoria da fila do código porque ela está
+ * zerada hoje. Ela é a única promessa de entrada automática que a tela pode
+ * fazer, e some e volta sozinha conforme o motor anda.
  *
  * A ordem é fixa e não é a ordem de tamanho: primeiro o que nunca vai
  * entrar, porque é isso que tira o leitor da espera; depois a fila, que é a
  * única promessa que se pode fazer; por último a lacuna, que é nossa e é a
  * parte que não dá para maquiar.
+ *
+ * **Parte zerada não vira oração**, e é por isso que a frase se dobra sem
+ * ficar torta: some a oração inteira, não o número dela. "0 esperam na fila
+ * de leitura" gastaria uma linha da tela para não dizer nada, e é
+ * exatamente o defeito que a fila vazia de hoje produziria se a lista fosse
+ * de tamanho fixo. As partes que sobram continuam somando `semDado` — o que
+ * sai é uma parcela de valor zero.
+ *
+ * **Cada texto começa por locução verbal** ("não vão entrar", "esperam na
+ * fila", "são lacuna nossa") de propósito: assim ele lê certo depois do
+ * número ("138 não vão entrar: ...") e também colado na abertura, sem
+ * número, quando é a única parte e cobre o total ("...estão fora desta
+ * lista, e não vão entrar: ..."). O componente escolhe entre as duas
+ * posições; os textos servem às duas.
  *
  * **Devolve lista vazia quando a repartição não fecha** — engine mais velho
  * que não manda `foraDaLista`, ou soma que não bate com `semDado`. Aí a tela
@@ -480,11 +514,15 @@ export function acervoIncompletoEmPartes(aviso: {
     },
     {
       quantos: fila,
-      // A única promessa de entrada automática que sobra, e ela é do tamanho
-      // certo: 104, não 293. Um teste em rotulos.test.ts quebra se esta
-      // oração voltar a ser escrita sobre o total.
+      // A única promessa de entrada automática que a tela pode fazer, e ela
+      // vale só para quem está mesmo na fila. Um teste em rotulos.test.ts
+      // quebra se esta oração voltar a ser escrita sobre o total.
+      //
+      // Dois-pontos e não "e": a oração precisa ler bem também colada em
+      // "...estão fora desta lista, e", que é como ela sai quando é a única
+      // parte. Com "e" viravam dois "e" seguidos.
       texto:
-        `${fila === 1 ? "está" : "estão"} na fila de leitura e` +
+        `${fila === 1 ? "espera" : "esperam"} na fila de leitura:` +
         ` ${fila === 1 ? "entra" : "entram"} quando` +
         ` ${fila === 1 ? "for lido" : "forem lidos"}.`,
     },

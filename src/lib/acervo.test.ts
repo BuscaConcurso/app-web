@@ -172,16 +172,17 @@ describe("acervo", () => {
     // concurso.
     //
     // A repartição vem junto porque o número sozinho fazia a tela mentir:
-    // ela dizia que os 293 "entram na lista conforme forem lidos", e isso só
-    // vale para os 104 da fila. Números da carga real de 2026-09-14.
+    // ela dizia que os que estão fora "entram na lista conforme forem
+    // lidos", e hoje isso não vale para nenhum deles. Números da carga real
+    // de 2026-09-14, depois da remoção da fonte IBADE.
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () =>
       respostaCom({
         concursos: [UM_CONCURSO],
-        total: 4942,
-        semDado: 293,
+        total: 4838,
+        semDado: 189,
         foraDaLista: {
-          total: 293, naFila: 104, naoAbreConcurso: 138, lacuna: 51,
+          total: 189, naFila: 0, naoAbreConcurso: 138, lacuna: 51,
         },
       }),
     ));
@@ -189,9 +190,9 @@ describe("acervo", () => {
     const { avisoDoAcervo, listarConcursos } = await carregar();
 
     expect(await avisoDoAcervo()).toEqual({
-      semDado: 293,
-      total: 4942,
-      naFila: 104,
+      semDado: 189,
+      total: 4838,
+      naFila: 0,
       naoAbreConcurso: 138,
       lacuna: 51,
     });
@@ -203,35 +204,64 @@ describe("acervo", () => {
     // frequência. O que NÃO se pode fazer aqui é preencher `naFila: semDado`
     // para a frase ficar bonita: seria refazer, do lado do front, a promessa
     // de entrada automática que este trabalho existe para desfazer. Três
-    // zeros não somam 293, `acervoIncompletoEmPartes` descarta a repartição,
+    // zeros não somam 189, `acervoIncompletoEmPartes` descarta a repartição,
     // e a tela usa a frase curta.
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () =>
-      respostaCom({ concursos: [UM_CONCURSO], total: 4942, semDado: 293 }),
+      respostaCom({ concursos: [UM_CONCURSO], total: 4838, semDado: 189 }),
     ));
 
     const { avisoDoAcervo } = await carregar();
 
     expect(await avisoDoAcervo()).toEqual({
-      semDado: 293, total: 4942, naFila: 0, naoAbreConcurso: 0, lacuna: 0,
+      semDado: 189, total: 4838, naFila: 0, naoAbreConcurso: 0, lacuna: 0,
     });
+  });
+
+  it("a fila vazia de hoje atravessa a fronteira como zero, não como ausência", async () => {
+    // O caso que o estado de 2026-09-14 tornou o principal: `naFila: 0` é um
+    // zero VERDADEIRO — a fonte IBADE saiu e com ela os 104 jobs que havia —,
+    // não um campo que faltou. A diferença aparece na soma: 0 + 138 + 51
+    // fecha os 189, então a repartição vale e a frase sai com duas orações.
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () =>
+      respostaCom({
+        concursos: [UM_CONCURSO],
+        total: 4838,
+        semDado: 189,
+        foraDaLista: {
+          total: 189, naFila: 0, naoAbreConcurso: 138, lacuna: 51,
+        },
+      }),
+    ));
+
+    const { avisoDoAcervo } = await carregar();
+    const { acervoIncompletoEmPartes } = await import("./rotulos");
+    const aviso = (await avisoDoAcervo())!;
+    const partes = acervoIncompletoEmPartes(aviso);
+
+    expect(aviso.naFila).toBe(0);
+    expect(partes.map((parte) => parte.quantos)).toEqual([138, 51]);
+    // Nenhuma oração de zero, e a soma continua fechando o total.
+    expect(partes.every((parte) => parte.quantos > 0)).toBe(true);
+    expect(partes.reduce((soma, parte) => soma + parte.quantos, 0)).toBe(189);
+    expect(partes.map((parte) => parte.texto).join(" ")).not.toContain("fila");
   });
 
   it("a frase da tela nunca promete entrada automática sobre o total", async () => {
     // O teste que a frase antiga reprovava, montado ponta a ponta: a resposta
     // da API atravessa `avisoDoAcervo()` e chega em
-    // `acervoIncompletoEmPartes()` como a tela a recebe. No dia medido, a
-    // fila tem 104 e os outros 189 não entram por leitura nenhuma — 138
-    // porque o ato não abre concurso, 51 porque a leitura precisa ser
-    // refeita. Nenhuma oração da frase pode falar de leitura sobre os 293.
+    // `acervoIncompletoEmPartes()` como a tela a recebe. Medido com a carga
+    // do dia seguinte, quando o `tick` já enfileirou o Diário: a promessa
+    // existe, e cobre só os 59 da fila.
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () =>
       respostaCom({
         concursos: [UM_CONCURSO],
-        total: 4942,
-        semDado: 293,
+        total: 4897,
+        semDado: 248,
         foraDaLista: {
-          total: 293, naFila: 104, naoAbreConcurso: 138, lacuna: 51,
+          total: 248, naFila: 59, naoAbreConcurso: 138, lacuna: 51,
         },
       }),
     ));
@@ -245,10 +275,10 @@ describe("acervo", () => {
       /entra(m)? quando/.test(parte.texto),
     );
     expect(prometem).toHaveLength(1);
-    expect(prometem[0].quantos).toBe(104);
+    expect(prometem[0].quantos).toBe(59);
     expect(prometem[0].quantos).toBeLessThan(aviso.semDado);
     // E o que a promessa NÃO cobre continua na frase, dito por inteiro.
-    expect(partes.reduce((soma, parte) => soma + parte.quantos, 0)).toBe(293);
+    expect(partes.reduce((soma, parte) => soma + parte.quantos, 0)).toBe(248);
   });
 
   it("acervo sem buraco não vira aviso", async () => {
