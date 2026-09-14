@@ -5,40 +5,31 @@ import { Menu } from "@/components/ui/Revelador";
 import { SeletorDeTema } from "./SeletorDeTema";
 
 /**
- * Só entra aqui o que existe.
+ * O gatilho do menu.
  *
- * Havia mais três itens — "Meus alertas", "Notícias" e "Planos" —, e os três
- * apontavam para `/concursos` com um filtro diferente, porque a feature não
- * existe. Um menu que promete alerta e entrega uma busca filtrada é a mesma
- * falha que este projeto passou o dia consertando do lado do dado: afirmar o
- * que não se tem. Custa mais que um link morto, porque quem clicou uma vez
- * aprende a não clicar de novo.
- *
- * Quando alguma delas existir, volta — com o endereço dela, não com um
- * filtro fingindo ser ela.
- */
-const NAVEGACAO = [{ rotulo: "Concursos", href: "/concursos" }];
-
-/**
- * O gatilho do menu da conta.
+ * Era uma silhueta de pessoa, e virou o traço de menu a pedido do parceiro
+ * humano. A troca fecha um problema que a silhueta tinha: **avatar é, por
+ * convenção, o sinal de que existe uma conta**, e não existe autenticação
+ * neste produto — "Entrar" e "Criar conta" apontam os dois para `/concursos`.
+ * O símbolo prometia com mais força que os dois links que ele substituiu. O
+ * traço de menu não promete nada: diz que há coisas ali dentro, que é
+ * exatamente o que há.
  *
  * Traço e não preenchimento, como os três ícones do seletor de tema, para não
  * abrir uma segunda família de desenho num cabeçalho que tem um símbolo só.
  */
-function Avatar() {
+function IconeDeMenu() {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 20 20"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.8"
       strokeLinecap="round"
-      strokeLinejoin="round"
       className="size-5"
     >
-      <circle cx="10" cy="7" r="3.1" />
-      <path d="M3.9 16.5a6.4 6.4 0 0 1 12.2 0" />
+      <path d="M3 6h14M3 10h14M3 14h14" />
     </svg>
   );
 }
@@ -46,18 +37,25 @@ function Avatar() {
 /**
  * Cabeçalho.
  *
- * **Entrar, criar conta e tema saíram da barra e viraram um menu de avatar**,
- * a pedido do parceiro humano. Os três estavam escritos duas vezes — na barra
- * do desktop e, repetidos, dentro do menu sanduíche do celular —, e agora
- * estão num lugar só, que aparece nas duas larguras. O sanduíche fica com o
- * que é dele: a navegação.
+ * **Um menu só, com entrar, criar conta e tema dentro.** Os três estavam
+ * escritos duas vezes — na barra do desktop e, repetidos, dentro do menu
+ * sanduíche do celular —, e agora estão num lugar só, que aparece nas duas
+ * larguras.
  *
- * O rótulo do gatilho é "Entrar, criar conta e tema" e não "conta" ou "perfil"
- * porque é o que há dentro. Quem não vê o desenho ouve a lista, não uma
- * promessa: não existe autenticação neste produto, e "Entrar" e "Criar conta"
- * apontam os dois para `/concursos`.
+ * **A navegação saiu inteira**, a pedido do parceiro humano, e com ela o menu
+ * sanduíche que existia só para carregá-la. Eram quatro itens; três foram
+ * removidos antes por prometerem feature que não existe ("Meus alertas",
+ * "Notícias", "Planos" apontavam para `/concursos` com filtros diferentes), e
+ * o último, "Concursos", saiu agora. O logotipo continua levando à home, e a
+ * busca é o corpo da própria home — um link de topo para `/concursos` ao lado
+ * dele era um segundo caminho para o mesmo lugar.
  *
- * **Os dois menus são `ui/Revelador`**, e não `<details>` escritos aqui. Era
+ * O rótulo do gatilho é "Entrar, criar conta e tema" e não "conta", "perfil"
+ * ou "menu" porque é o que há dentro. Quem não vê o desenho ouve a lista, não
+ * uma promessa: não existe autenticação neste produto, e "Entrar" e "Criar
+ * conta" apontam os dois para `/concursos`.
+ *
+ * **O menu é `ui/Revelador`**, e não `<details>` escritos aqui. Era
  * `<details>` cru até esta linha, e funcionava: abre e fecha sem JavaScript,
  * com teclado e leitor de tela incluídos. O que ele não fazia era fechar com
  * Escape, fechar com clique fora, devolver o foco ao gatilho e animar — e
@@ -80,62 +78,14 @@ export function Cabecalho() {
           <Logo tamanho={26} />
         </Link>
 
-        <nav aria-label="Principal" className="hidden md:block">
-          <ul className="flex items-center gap-6">
-            {NAVEGACAO.map((item) => (
-              <li key={item.rotulo}>
-                <Link
-                  href={item.href}
-                  className="text-sm font-medium text-tinta-600 hover:text-tinta-900"
-                >
-                  {item.rotulo}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
         <div className="ml-auto flex items-center gap-2">
-          {/* A navegação do celular. Some em `md`, onde ela já está na barra. */}
-          <Menu
-            className="md:hidden"
-            rotulo="Abrir menu"
-            gatilhoClassName="size-10 justify-center rounded-controle bg-rebaixada text-tinta-900 transition-colors hover:bg-tinta-200"
-            painelClassName="w-56"
-            gatilho={
-              <svg aria-hidden="true" viewBox="0 0 20 20" className="size-5">
-                <path
-                  d="M3 6h14M3 10h14M3 14h14"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-            }
-          >
-            <nav aria-label="Principal">
-              <ul className="flex flex-col">
-                {NAVEGACAO.map((item) => (
-                  <li key={item.rotulo}>
-                    <Link
-                      href={item.href}
-                      className="block rounded-controle px-3 py-2 text-sm font-medium text-tinta-800 hover:bg-rebaixada"
-                    >
-                      {item.rotulo}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </Menu>
-
           {/* A conta e o tema, nas duas larguras. A ordem de dentro é a mesma
               que a barra do desktop tinha: tema, entrar, criar conta. */}
           <Menu
             rotulo="Entrar, criar conta e tema"
-            gatilhoClassName="size-10 justify-center rounded-full bg-rebaixada text-tinta-800 transition-colors hover:bg-tinta-200"
+            gatilhoClassName="size-10 justify-center rounded-controle bg-rebaixada text-tinta-800 transition-colors hover:bg-tinta-200"
             painelClassName="w-56"
-            gatilho={<Avatar />}
+            gatilho={<IconeDeMenu />}
           >
             <div className="flex items-center justify-between p-2">
               <span className="text-[13px] font-medium text-tinta-600">
