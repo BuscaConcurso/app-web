@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BlocoDeNumeros, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
+import { Avaliacao } from "@/components/concurso/Avaliacao";
 import { Cargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
 import { listarSlugs, obterDetalhe } from "@/lib/concursos";
@@ -116,6 +117,14 @@ export default async function PaginaDoConcurso(
             <p className={`mt-1 text-sm ${estilo.apoio}`}>
               {linhaDeContexto(concurso.orgao)}
             </p>
+            {/* O órgão é o que o Diário publica pior — nome que é caminho de
+                hierarquia, esfera ausente, sigla que não existe. É onde a
+                correção de quem lê vale mais. */}
+            <Avaliacao
+              className="mt-1 -ml-2"
+              alvo={{ slug: concurso.slug, bloco: "orgao" }}
+              oQue="o órgão"
+            />
           </div>
         </header>
 
@@ -168,17 +177,30 @@ export default async function PaginaDoConcurso(
               </p>
             </>
           )}
+          {/* Também quando o cronograma está vazio: "não gostei" de uma
+              ausência é informação — é alguém dizendo que o ato tinha datas
+              que não foram lidas. */}
+          <Avaliacao
+            className="mt-2 -ml-2"
+            alvo={{ slug: concurso.slug, bloco: "cronograma" }}
+            oQue="o cronograma"
+          />
         </div>
 
         {concurso.cargos.length > 0 && (
           <div className="mt-7">
             <Cargos cargos={concurso.cargos} />
+            <Avaliacao
+              className="mt-2 -ml-2"
+              alvo={{ slug: concurso.slug, bloco: "cargos" }}
+              oQue="os cargos"
+            />
           </div>
         )}
 
         {concurso.origens.length > 0 && (
           <div className="mt-7">
-            <AtosPublicados origens={concurso.origens} />
+            <AtosPublicados slug={concurso.slug} origens={concurso.origens} />
           </div>
         )}
       </article>

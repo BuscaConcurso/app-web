@@ -1,3 +1,4 @@
+import { Avaliacao } from "@/components/concurso/Avaliacao";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { destacar } from "@/lib/destaque";
 import type { Origem, RespostaDoFaq } from "@/lib/dominio";
@@ -36,7 +37,13 @@ import { ROTULO_PERGUNTA } from "@/lib/rotulos";
  * primeira coisa a ler.
  */
 
-export function AtosPublicados({ origens }: { origens: Origem[] }) {
+export function AtosPublicados({
+  slug,
+  origens,
+}: {
+  slug: string;
+  origens: Origem[];
+}) {
   return (
     <section>
       <Rotulo>
@@ -92,7 +99,7 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                 não suposto: a instância que eu tinha no ar era de antes do
                 campo existir, e o detalhe deixou de abrir. */}
             {(origem.faq ?? []).length > 0 && (
-              <Faq respostas={origem.faq ?? []} />
+              <Faq slug={slug} ato={origem.chave} respostas={origem.faq ?? []} />
             )}
 
             {origem.texto ? (
@@ -216,7 +223,17 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
  * 120). "Não informado" para as duas esconderia a segunda, que é a única que
  * aponta defeito.
  */
-function Faq({ respostas }: { respostas: RespostaDoFaq[] }) {
+function Faq({
+  slug,
+  ato,
+  respostas,
+}: {
+  slug: string;
+  /** A chave da origem: é o que amarra a avaliação a este ato, e não a outro
+      do mesmo concurso. */
+  ato: string;
+  respostas: RespostaDoFaq[];
+}) {
   const respondidas = respostas.filter((r) => r.situacao === "respondida");
   const ausentes = respostas.filter((r) => r.situacao === "nao_respondida");
   const descartadas = respostas.filter((r) => r.situacao === "descartada");
@@ -237,6 +254,21 @@ function Faq({ respostas }: { respostas: RespostaDoFaq[] }) {
               <dd className="mt-0.5 max-w-[74ch] border-l-2 border-tinta-200 pl-3 text-[13px] leading-6 text-tinta-700">
                 {resposta.trecho}
               </dd>
+              {/* Por resposta, e não por ato: a avaliação tem de chegar
+                  dizendo QUAL pergunta ficou errada, senão ela não aponta
+                  para nada que dê para consertar. */}
+              <Avaliacao
+                className="mt-0.5 pl-1"
+                alvo={{
+                  slug,
+                  bloco: "faq",
+                  pergunta: resposta.pergunta,
+                  ato,
+                }}
+                oQue={`esta resposta sobre ${ROTULO_PERGUNTA[
+                  resposta.pergunta
+                ].replace("?", "").toLowerCase()}`}
+              />
             </div>
           ))}
         </dl>
