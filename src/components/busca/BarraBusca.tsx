@@ -157,9 +157,27 @@ export function BarraBusca({
     lembrarUf((valor as Uf) || null);
   };
 
+  // `navigator.geolocation` EXISTE em contexto inseguro — o que não existe é
+  // a permissão. O navegador só libera a API em HTTPS ou em `localhost`; por
+  // `http://192.168.x.x`, que é como se valida do celular na rede local, ele
+  // recusa, e a recusa chega no mesmo `PERMISSION_DENIED` de quem clicou em
+  // "bloquear".
+  //
+  // Sem esta linha o botão aparecia, o clique falhava e a tela dizia "sem
+  // acesso à localização" — culpando a pessoa por uma regra do endereço.
+  //
+  // **E o botão some calado, sem explicar.** Decisão do parceiro humano: não
+  // exibir o motivo na interface. Quem abre pelo IP da rede local é quem está
+  // desenvolvendo, e para essa pessoa a explicação está aqui, no código, que
+  // é onde ela resolve. Para quem visita o site publicado em HTTPS a condição
+  // nunca é falsa, então uma frase sobre HTTPS seria ruído permanente para
+  // explicar um caso que ela nunca vive.
+  const contextoSeguro = !hidratado || window.isSecureContext;
+
   const podeDetectar =
     hidratado &&
     "geolocation" in navigator &&
+    contextoSeguro &&
     !escolhida &&
     estado !== "detectando" &&
     // Pedir a localização de alguém para preencher um filtro que não filtra
