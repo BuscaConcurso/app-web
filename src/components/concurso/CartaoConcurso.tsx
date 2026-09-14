@@ -17,7 +17,6 @@ import {
   estadoDoCartao,
   etiquetasDeVagas,
   linhaDeContexto,
-  tituloSemOrgao,
 } from "@/lib/rotulos";
 import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
 
@@ -109,18 +108,23 @@ export function CartaoConcurso({
       )}
 
       {/*
-        O título sem o nome do órgão na frente — ver `tituloSemOrgao`. Aqui
-        ele pode sair porque o órgão está ao lado: no bloco acima, e no selo.
-        Na página do órgão (`semOrgao`) ele continua ao lado, como `h1` da
-        página e na trilha. Se algum dia o cartão for usado sem nenhuma das
-        duas coisas, este é o ponto que precisa voltar atrás.
+        O título INTEIRO, que é o que o parceiro humano pediu: "o título da
+        página e dos cards precisa ser o título do concurso".
+
+        Houve aqui um recorte que tirava da frente o nome do órgão. Ele media
+        bem em altura e era ruim de ler: na primeira página da busca, cinco
+        dos vinte cartões ficavam com doze caracteres ou menos — "INCQS",
+        "Transpetro", "Edital nº 1" —, e três cartões seguidos de concursos
+        DIFERENTES diziam "Transpetro". Cartão que não distingue um concurso
+        do outro é o mesmo defeito que a linha de cargos e a de estado vieram
+        consertar, por outro caminho.
       */}
       <h3 className="font-titulo text-[15px] leading-6 font-semibold tracking-tight">
         <Link
           href={`/concursos/${concurso.slug}`}
           className="hover:underline hover:underline-offset-4"
         >
-          {tituloSemOrgao(concurso.titulo, concurso.orgao)}
+          {concurso.titulo}
         </Link>
       </h3>
 
