@@ -220,17 +220,19 @@ function Painel({
   consulta,
   contagens,
   prefixo,
-  moldura = true,
+  emGaveta = false,
 }: {
   consulta: ConsultaDaUrl;
   contagens: ContagensDeFaceta;
   prefixo: string;
   /**
-   * O cartão em volta. Na coluna do desktop ele é o que separa o painel da
-   * página cinza; dentro da gaveta, que já é um cartão de ponta a ponta, ele
-   * seria branco sobre branco com uma sangria a mais.
+   * Duas coisas que a gaveta já faz, e que o painel não deve repetir dentro
+   * dela: o cartão em volta — ela já é um cartão de ponta a ponta, e o de
+   * dentro ficaria branco sobre branco com uma sangria a mais — e o título,
+   * que é o que a barra de topo da gaveta diz. Sem isto a tela mostrava
+   * "Filtros" duas vezes, a 40px de distância.
    */
-  moldura?: boolean;
+  emGaveta?: boolean;
 }) {
   const ativos = quantosFiltros(consulta);
 
@@ -238,13 +240,22 @@ function Painel({
     <div className="flex flex-col gap-2">
       <div
         className={
-          moldura
-            ? "flex flex-col gap-5 rounded-caixa bg-cartao p-4"
-            : "flex flex-col gap-5"
+          emGaveta
+            ? "flex flex-col gap-5"
+            : "flex flex-col gap-5 rounded-caixa bg-cartao p-4"
         }
       >
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold">Filtros</p>
+        <div
+          className={
+            // Sem o título, sobra só o "Limpar", que vai para a direita do
+            // mesmo jeito — e a fileira inteira some quando não há o que
+            // limpar, em vez de deixar uma linha vazia no topo da gaveta.
+            emGaveta
+              ? `flex items-center justify-end ${ativos > 0 ? "" : "hidden"}`
+              : "flex items-center justify-between"
+          }
+        >
+          {!emGaveta && <p className="text-sm font-semibold">Filtros</p>}
           {ativos > 0 && (
             <Link
               href={urlDaBusca(consulta, {
@@ -344,6 +355,9 @@ export function ColunaFiltros({
         className="lg:hidden"
         titulo="Filtros"
         gatilho="h-10 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 transition-colors hover:bg-tinta-200"
+        apoio={
+          ativos > 0 ? <span className="numero">· {ativos}</span> : undefined
+        }
         rotulo={
           <span className="inline-flex items-center gap-2">
             <svg aria-hidden="true" viewBox="0 0 18 18" className="size-4">
@@ -355,9 +369,6 @@ export function ColunaFiltros({
               />
             </svg>
             Filtros
-            {ativos > 0 && (
-              <span className="numero text-tinta-600">· {ativos}</span>
-            )}
           </span>
         }
       >
@@ -365,7 +376,7 @@ export function ColunaFiltros({
           consulta={consulta}
           contagens={contagens}
           prefixo="celular"
-          moldura={false}
+          emGaveta
         />
       </Gaveta>
 
