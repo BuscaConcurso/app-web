@@ -323,22 +323,20 @@ export function ColunaFiltros({
         </div>
       </details>
 
-      {/* No desktop a coluna acompanha a rolagem. Ancora pelo topo, e não pelo
-          rodapé: a restrição de `bottom` só impede o elemento de descer além
-          de uma linha perto da base da janela, e quem rola para baixo faz o
-          painel subir, o que nunca viola essa linha. Com `bottom` sozinho a
-          coluna some junto com a página; é o `top` que prende na descida.
+      {/* A coluna rola com a página, e não acompanha a rolagem.
 
-          **Sem rolagem própria**, por decisão do parceiro humano. Havia aqui
-          um teto de altura com `overflow-y-auto`, para a tela baixa em que o
-          painel não cabe inteiro. O preço era uma barra de rolagem dentro da
-          página, e duas áreas roláveis lado a lado confundem: a roda do mouse
-          faz uma coisa sobre a coluna e outra a dois centímetros dali.
+          Ela já foi `sticky` com rolagem própria, e as duas coisas saíram em
+          sequência, por decisão do parceiro humano. A rolagem própria saiu
+          primeiro: eram duas áreas roláveis lado a lado, e a roda do mouse
+          fazia uma coisa sobre a coluna e outra a dois centímetros dali.
 
-          Sem o teto, numa tela onde o painel não cabe, a coluna grudada
-          simplesmente passa do fim da janela e o que sobra é alcançado
-          rolando a página — que é o gesto que a pessoa já ia fazer. */}
-      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:sticky lg:top-4 lg:flex">
+          Tirada a rolagem, o `sticky` perdeu a metade que o sustentava. Numa
+          tela onde o painel não cabe inteiro, coluna grudada sem rolagem
+          própria prende o começo do painel na tela e esconde o fim para
+          sempre: o filtro que ficou embaixo é inalcançável, porque rolar a
+          página não move a coluna. Estático, a coluna sobe junto e o fim do
+          painel chega. */}
+      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:flex">
         <Painel consulta={consulta} contagens={contagens} prefixo="coluna" />
         <CartaoDeAlerta total={total} />
       </aside>
