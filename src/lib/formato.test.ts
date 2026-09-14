@@ -3,6 +3,7 @@ import {
   dataCurta,
   dataLonga,
   diasAte,
+  hojeEmSaoPaulo,
   moeda,
   moedaExata,
   paraDataLocal,
@@ -120,5 +121,19 @@ describe("quantidade", () => {
     expect(quantidade("12")).toBeNull();
     expect(quantidade("")).toBeNull();
     expect(quantidade({})).toBeNull();
+  });
+});
+
+describe("hojeEmSaoPaulo", () => {
+  it("devolve a data civil brasileira, não a do fuso do processo", () => {
+    // 15/09 às 02h em UTC ainda é dia 14 em Brasília: é a janela de três
+    // horas em que um servidor em UTC daria o dia seguinte.
+    expect(hojeEmSaoPaulo(new Date("2026-09-15T02:00:00Z"))).toBe("2026-09-14");
+    expect(hojeEmSaoPaulo(new Date("2026-09-15T03:00:00Z"))).toBe("2026-09-15");
+  });
+
+  it("sai no mesmo formato das datas do domínio", () => {
+    expect(hojeEmSaoPaulo(new Date("2026-01-05T12:00:00Z"))).toBe("2026-01-05");
+    expect(hojeEmSaoPaulo(new Date("2026-12-31T23:00:00Z"))).toBe("2026-12-31");
   });
 });

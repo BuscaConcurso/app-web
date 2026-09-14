@@ -8,8 +8,10 @@ import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
 import { Paginacao } from "@/components/ui/Paginacao";
 import { Secao } from "@/components/ui/Secao";
+import { Cronograma } from "@/components/concurso/Cronograma";
 import { listarConcursos } from "@/lib/concursos";
-import type { Tom } from "@/lib/dominio";
+import type { EventoDoCronograma, EventoTipo, Tom } from "@/lib/dominio";
+import { hojeEmSaoPaulo } from "@/lib/formato";
 
 /**
  * Vitrine do design system.
@@ -92,6 +94,7 @@ const SIGLAS_DE_PROVA: (string | null)[] = [
 
 export default async function Estilo() {
   const hoje = new Date();
+  const hojeCivil = hojeEmSaoPaulo(hoje);
   const { itens } = await listarConcursos({ porPagina: 6 }, hoje);
   const urgente = itens.find((c) => c.inscricoesAte) ?? itens[0];
 
@@ -363,6 +366,15 @@ export default async function Estilo() {
         </div>
       </Bloco>
 
+      <Bloco
+        titulo="Linha do tempo"
+        nota="ordinal · ponto cheio é passado, vazado é futuro"
+      >
+        <Secao titulo="Cronograma" apoio="Passado, hoje, futuro e sem data.">
+          <Cronograma eventos={EVENTOS_DE_EXEMPLO(hojeCivil)} hoje={hojeCivil} />
+        </Secao>
+      </Bloco>
+
       <Bloco titulo="Espaço e separação">
         <Cartao className="flex flex-col gap-2 p-5 text-[12px] leading-5 text-tinta-600">
           <p>
@@ -384,3 +396,47 @@ export default async function Estilo() {
   );
 }
 
+/**
+ * O cronograma de exemplo, montado em volta de hoje.
+ *
+ * Aqui o dado é inventado de propósito, e é o único lugar da vitrine em que
+ * isso acontece: as quatro fases do ponto (passado, hoje, futuro, sem data) e
+ * a marca do degrau só aparecem juntas num concurso que não existe. Datas
+ * relativas a hoje, senão a vitrine envelhece e para de mostrar o que
+ * promete.
+ */
+function EVENTOS_DE_EXEMPLO(hoje: string): EventoDoCronograma[] {
+  const mais = (dias: number) => {
+    const [ano, mes, dia] = hoje.split("-").map(Number);
+    const data = new Date(Date.UTC(ano, mes - 1, dia + dias));
+    return data.toISOString().slice(0, 10);
+  };
+  const evento = (
+    tipo: EventoTipo,
+    inicio: string | null,
+    fim: string | null = null,
+    evidencia: string | null = null,
+  ): EventoDoCronograma => ({
+    tipo,
+    ato: null,
+    inicio,
+    fim,
+    hora: null,
+    localidades: [],
+    observacao: null,
+    evidencia,
+  });
+
+  return [
+    evento(
+      "publicacao_edital",
+      mais(-40),
+      null,
+      "Edital nº 003/2026, publicado no D.O.U.",
+    ),
+    evento("inicio_inscricao", mais(-12)),
+    evento("fim_inscricao", mais(9)),
+    evento("prova_objetiva", mais(46), null, "As provas serão aplicadas em"),
+    evento("resultado_final", null),
+  ];
+}

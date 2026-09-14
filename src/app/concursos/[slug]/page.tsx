@@ -11,6 +11,7 @@ import { Cronograma } from "@/components/concurso/Cronograma";
 import { listarSlugs, obterDetalhe } from "@/lib/concursos";
 import {
   dataLonga,
+  hojeEmSaoPaulo,
   moeda,
   moedaExata,
   numero,
@@ -65,6 +66,8 @@ export default async function PaginaDoConcurso(
   if (!concurso) notFound();
 
   const hoje = new Date();
+  // A data civil brasileira, para a linha do tempo: ver `hojeEmSaoPaulo`.
+  const hojeCivil = hojeEmSaoPaulo(hoje);
   const tom = tomDoConcurso(concurso, hoje);
   const estilo = ESTILO_DO_TOM[tom];
 
@@ -206,7 +209,7 @@ export default async function PaginaDoConcurso(
           apoio="Cada data com a procedência: de qual ato publicado ela foi lida."
         >
           {concurso.cronograma.length > 0 ? (
-            <Cronograma eventos={concurso.cronograma} />
+            <Cronograma eventos={concurso.cronograma} hoje={hojeCivil} />
           ) : (
             <p className="text-sm text-tinta-600">
               Nenhuma data foi lida do ato publicado até agora.

@@ -45,6 +45,35 @@ export function dataPorExtenso(iso: string): string {
 }
 
 /**
+ * Hoje, como data civil brasileira, em `AAAA-MM-DD`.
+ *
+ * **Não use `new Date()` direto para comparar com data de edital.** Prazo de
+ * inscrição é data civil do Brasil, e o relógio de quem renderiza não é: um
+ * servidor em UTC vira o dia às 21h de Brasília, e das 21h à meia-noite a
+ * página diria que encerrou ontem o que encerra hoje. É o defeito de três
+ * horas que este projeto já teve — três horas por dia em que a tela mentia.
+ *
+ * Devolve string e não `Date` de propósito: toda data do domínio já é
+ * `AAAA-MM-DD`, e nesse formato a comparação lexicográfica É a comparação
+ * cronológica. Sem aritmética de milissegundo, sem horário de verão, sem
+ * fuso do processo.
+ */
+const FUSO_CIVIL = "America/Sao_Paulo";
+
+const ISO_EM_SAO_PAULO = new Intl.DateTimeFormat("en-CA", {
+  timeZone: FUSO_CIVIL,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+export function hojeEmSaoPaulo(agora: Date = new Date()): string {
+  // `en-CA` é o locale que formata como `AAAA-MM-DD`, que é exatamente a
+  // forma das datas do domínio.
+  return ISO_EM_SAO_PAULO.format(agora);
+}
+
+/**
  * Dias de calendário entre hoje e a data. Negativo quando já passou, zero
  * quando é hoje.
  */
