@@ -377,6 +377,30 @@ export function Gaveta({
         </span>
       </summary>
 
+      {/*
+        O lugar que o gatilho deixou.
+
+        Aberta, a barra sai do fluxo (`fixed`), e sem isto a página atrás subia
+        a altura do botão — medido a 375px na busca, 35px, com o primeiro
+        resultado saltando de y=390 para y=355 no quadro em que a gaveta abre.
+        O salto acontece enquanto o fundo ainda está clareando, então ele é
+        visível. Este irmão só existe quando a gaveta está aberta, porque o
+        navegador não renderiza o conteúdo de um `<details>` fechado, e ele tem
+        o mesmo desenho e o mesmo conteúdo do gatilho para ocupar exatamente a
+        mesma caixa. `invisible` e não `hidden`: é a caixa que interessa.
+      */}
+      <span
+        aria-hidden="true"
+        className={[SUMARIO, "invisible inline-flex items-center gap-2", gatilho].join(
+          " ",
+        )}
+      >
+        <span className="min-w-0">
+          {rotulo}
+          {apoio && <span className="ml-1 font-normal">{apoio}</span>}
+        </span>
+      </span>
+
       {/* O fundo. Escurece o que ficou `inert` — deixar a página acesa e
           inalcançável seria dizer com a forma o contrário do que o mecanismo
           faz. É o mesmo tom do modal da avaliação, para as duas camadas da
