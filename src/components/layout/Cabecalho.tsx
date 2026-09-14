@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/marca/Logo";
 import { BotaoLink } from "@/components/ui/Botao";
-import { Menu } from "@/components/ui/Revelador";
+import { Gaveta } from "@/components/ui/Revelador";
 import { SeletorDeTema } from "./SeletorDeTema";
 
 /**
@@ -63,6 +63,25 @@ function IconeDeMenu() {
  * `components/ui/`. O `<details>` continua sendo o mecanismo por baixo, então
  * o menu continua abrindo sem script.
  *
+ * **E é `Gaveta`, não `Menu`**, a pedido do parceiro humano. As duas formas
+ * dividem o mesmo miolo, então a troca não custou comportamento nenhum: o que
+ * mudou é o contrato. `Menu` não é modal de propósito — não trava a rolagem
+ * nem apaga o resto da página —, e `Gaveta` é as duas coisas. Para um painel
+ * que carrega entrar, criar conta e o tema, e que a pessoa abre para escolher
+ * uma coisa, a modalidade é o que faz a escolha ser a única coisa na tela.
+ *
+ * A gaveta entra pela direita, que é onde o gatilho está — uma segunda direção
+ * dobraria as regras de movimento em `globals.css` para não mudar nada do que
+ * a pessoa vê. E vai na largura `estreita`: medido, o conteúdo daqui pede
+ * 197px, e numa gaveta de 40rem estes três itens ficariam perdidos.
+ *
+ * **A barra de topo diz "Entrar, criar conta e tema"** — a mesma frase que já
+ * era o rótulo do gatilho, e não "Menu". "Menu" descreve o desenho, e o
+ * parceiro humano já recusou esse tipo de nome quando o avatar saiu: quem lê
+ * (ou ouve) tem de receber a lista do que há dentro, não o nome da caixa.
+ * Como a frase serve às duas caras, ela vai em `titulo` e em `nome`, e o
+ * diálogo e o botão passam a se chamar a mesma coisa.
+ *
  * O corte entre as duas formas do cabeçalho é `md`, e é um só. Ele estava em
  * dois lugares diferentes: o menu sanduíche saía em `md` e a barra de ações
  * entrava em `sm`, então entre 640 e 768 px apareciam as duas formas ao mesmo
@@ -81,19 +100,24 @@ export function Cabecalho() {
         <div className="ml-auto flex items-center gap-2">
           {/* A conta e o tema, nas duas larguras. A ordem de dentro é a mesma
               que a barra do desktop tinha: tema, entrar, criar conta. */}
-          <Menu
-            rotulo="Entrar, criar conta e tema"
-            gatilhoClassName="size-10 justify-center rounded-controle bg-rebaixada text-tinta-800 transition-colors hover:bg-tinta-200"
-            painelClassName="w-56"
-            gatilho={<IconeDeMenu />}
+          <Gaveta
+            rotulo={<IconeDeMenu />}
+            titulo="Entrar, criar conta e tema"
+            nome="Entrar, criar conta e tema"
+            largura="estreita"
+            gatilho="size-10 justify-center rounded-controle bg-rebaixada text-tinta-800 transition-colors hover:bg-tinta-200"
           >
-            <div className="flex items-center justify-between p-2">
+            <div className="flex items-center justify-between">
               <span className="text-[13px] font-medium text-tinta-600">
                 Tema
               </span>
+              {/* O seletor fica dentro de um diálogo com foco preso agora.
+                  Conferido: Tab circula entre os três botões e a barra de
+                  topo, e trocar o tema não fecha a gaveta — quem fecha por
+                  clique fora é o `pointerdown`, e este clique é dentro. */}
               <SeletorDeTema />
             </div>
-            <div className="mt-1 flex gap-2 p-1">
+            <div className="mt-4 flex gap-2">
               <BotaoLink
                 href="/concursos"
                 variante="secundario"
@@ -111,7 +135,7 @@ export function Cabecalho() {
                 Criar conta
               </BotaoLink>
             </div>
-          </Menu>
+          </Gaveta>
         </div>
       </div>
     </header>

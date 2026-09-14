@@ -386,10 +386,36 @@ function useRevelador({
 const SUMARIO = "cursor-pointer list-none [&::-webkit-details-marker]:hidden";
 
 /**
- * A largura do painel da gaveta. A 375px ela dá 352,5px e sobram 22,5px de
- * página do lado — o bastante para a pessoa ver que há algo atrás.
+ * As duas larguras da gaveta.
+ *
+ * **Por extenso, e em pares.** O Tailwind lê o texto deste arquivo: classe
+ * que só existe depois de interpolada não é gerada. Por isso a largura não
+ * pode ser uma string montada nem um valor vindo de quem chama — ela é uma
+ * escolha entre nomes, e cada nome carrega as duas classes literais que
+ * precisam casar: a do painel e a da barra de topo, que é `fixed` e se alinha
+ * com ele.
+ *
+ * `larga` é a do documento: o ato publicado e os filtros do celular. A 375px
+ * dá 352,5px e sobram 22,5px de página do lado — o bastante para a pessoa ver
+ * que há algo atrás.
+ *
+ * `estreita` é a da lista curta, e nasceu com o menu do cabeçalho. Medido: o
+ * conteúdo dele — a linha do tema e os dois botões — pede 197px de largura
+ * mínima, e numa gaveta de 40rem ele ficaria com três itens perdidos no meio
+ * de 640px. A 375px `estreita` dá 304px e deixa 71px de página à mostra.
  */
-const LARGURA = "w-[min(40rem,94vw)]";
+const LARGURA = {
+  larga: {
+    painel: "w-[min(40rem,94vw)]",
+    barra: "group-open:w-[min(40rem,94vw)]",
+  },
+  estreita: {
+    painel: "w-[min(19rem,84vw)]",
+    barra: "group-open:w-[min(19rem,84vw)]",
+  },
+} as const;
+
+export type LarguraDaGaveta = keyof typeof LARGURA;
 
 /** O gatilho fechado da gaveta, quando quem chama não manda outro. */
 const GATILHO_PADRAO =
@@ -405,12 +431,36 @@ const GATILHO_PADRAO =
  * o único que alterna um `<details>` sem script: um botão de fechar desenhado
  * dentro do painel deixaria quem está sem JavaScript com a gaveta aberta e sem
  * saída, já que o painel cobre o gatilho.
+ *
+ * **Sempre pela direita.** Não há propriedade de lado, e não é esquecimento:
+ * os três consumidores têm o gatilho à direita da tela, e uma segunda direção
+ * dobraria as `@keyframes` de `globals.css` — que são o que o revelador existe
+ * para não escrever duas vezes — sem mudar nada do que a pessoa vê.
+ *
+ * ## Dois tipos de gatilho, e por isso duas propriedades
+ *
+ * A gaveta nasceu com um consumidor de gatilho **de texto** (o ato publicado:
+ * "Ler o ato publicado"; os filtros: "Filtros") e ganhou um de gatilho **de
+ * ícone** (o menu do cabeçalho, um traço e nada mais). Os dois casos são
+ * opostos em duas coisas, e é o que `nome` e `largura` resolvem:
+ *
+ * - **o nome do botão.** Com texto ele sai do próprio conteúdo, e um
+ *   `aria-label` só trocaria um nome bom por outro. Com ícone não há de onde
+ *   sair, e sem `nome` o botão ficaria mudo.
+ * - **a largura.** Um documento pede 40rem; uma lista de três itens, não.
+ *
+ * A alternativa era um terceiro componente, e ela não se sustenta: o pedido do
+ * parceiro humano que trouxe o cabeçalho para cá foi justamente *"menu precisa
+ * ser um drawer"*. O que muda entre os dois é o gatilho e a medida, não o
+ * comportamento — e comportamento é o que este arquivo guarda.
  */
 export function Gaveta({
   rotulo,
   titulo,
+  nome,
   apoio,
   gatilho = GATILHO_PADRAO,
+  largura = "larga",
   ancoras,
   children,
   className,
@@ -419,10 +469,26 @@ export function Gaveta({
   rotulo: ReactNode;
   /** A cara aberta: o título na barra de topo, e o nome do diálogo. */
   titulo: string;
+  /**
+   * O nome acessível do gatilho, para quando `rotulo` **não é texto**.
+   *
+   * Existe porque a gaveta ganhou um segundo tipo de consumidor. No ato
+   * publicado o gatilho é a frase "Ler o ato publicado", e o nome do botão sai
+   * dela sozinho — pôr um `aria-label` ali só **trocaria** um nome bom por
+   * outro. No cabeçalho o gatilho é um traço de menu e nada mais: sem isto o
+   * botão que abre a gaveta não teria nome nenhum.
+   *
+   * Vale nas duas caras, e é de propósito: aberta, a barra de topo é o mesmo
+   * elemento, e quem a usa põe aqui o mesmo que põe em `titulo` — o nome do
+   * diálogo e o do botão dizendo a mesma coisa é o que se quer.
+   */
+  nome?: string;
   /** O que acompanha o rótulo nas duas caras, quando existe. */
   apoio?: ReactNode;
   /** As classes da cara fechada, para quem precisa de outro botão. */
   gatilho?: string;
+  /** Ver `LARGURA`: `larga` é a do documento, `estreita` a da lista curta. */
+  largura?: LarguraDaGaveta;
   /**
    * Os `id` que moram **dentro** desta gaveta e podem ser endereço de link.
    * Ver `useAbrirNaAncora` para o que a lista compra e o que ela não compra.
@@ -451,16 +517,17 @@ export function Gaveta({
       className={["group", className].filter(Boolean).join(" ")}
     >
       <summary
+        aria-label={nome}
         onClick={aoClicarNoGatilho}
         className={[
           SUMARIO,
           "inline-flex items-center gap-2",
           gatilho,
-          // Aberta: a barra de topo do painel. As classes vão por extenso, e
-          // não montadas a partir de `LARGURA`: o Tailwind lê o texto do
-          // arquivo, e classe que só existe depois de interpolada não é gerada.
+          // Aberta: a barra de topo do painel. A largura vem de `LARGURA`, que
+          // guarda as classes por extenso — o Tailwind lê o texto do arquivo,
+          // e classe montada por interpolação não é gerada.
           "group-open:fixed group-open:top-0 group-open:right-0 group-open:z-[60]",
-          "group-open:w-[min(40rem,94vw)]",
+          LARGURA[largura].barra,
           "group-open:h-auto group-open:justify-between group-open:rounded-none",
           "group-open:border-b group-open:border-tinta-200 group-open:bg-cartao",
           "group-open:px-5 group-open:py-3.5 group-open:text-[12px]",
@@ -468,7 +535,16 @@ export function Gaveta({
           "group-open:hover:bg-cartao",
         ].join(" ")}
       >
-        <span className="min-w-0">
+        {/*
+          `aria-hidden` só quando há `nome`, e é a mesma regra do ícone de
+          fechar: um botão tem um nome, não dois. Medido na árvore do Chrome
+          152 antes desta linha, com o `aria-label` do cabeçalho por cima do
+          texto da barra: `DisclosureTriangle "Entrar, criar conta e tema"
+          description="Entrar, criar conta e tema"` — o nome vinha do rótulo e
+          o conteúdo virava *descrição*, então o leitor de tela dizia a mesma
+          frase duas vezes. Sem `nome`, nada muda: quem manda é o texto.
+        */}
+        <span aria-hidden={nome ? true : undefined} className="min-w-0">
           <span className="group-open:hidden">{rotulo}</span>
           <span className="hidden group-open:inline">{titulo}</span>
           {apoio && (
@@ -562,7 +638,7 @@ export function Gaveta({
         tabIndex={-1}
         className={[
           "revelador-painel fixed inset-y-0 right-0 z-50",
-          LARGURA,
+          LARGURA[largura].painel,
           "overflow-y-auto overscroll-contain border-l border-tinta-200",
           "bg-cartao px-5 pt-16 pb-10 outline-none",
         ].join(" ")}
@@ -581,6 +657,14 @@ export function Gaveta({
  * não é um: a pessoa abriu para escolher um item ou desistir, e os dois
  * caminhos são curtos. Escape, clique fora e foco de volta ao gatilho valem
  * aqui igual; `inert` e travamento de rolagem, não.
+ *
+ * **Hoje o único lugar que o usa é a vitrine `/estilo`.** O menu do cabeçalho,
+ * que era o consumidor de produto, virou `Gaveta` a pedido do parceiro humano.
+ * O argumento acima continua de pé — é ele que decide a próxima vez que
+ * alguém for revelar algo curto ancorado no gatilho —, mas fica registrado que
+ * a forma está sem uso real. Se a próxima revelação curta também vier a ser
+ * gaveta, a pergunta a fazer é se esta forma ainda vale a manutenção, e a
+ * resposta muda `estilo/page.tsx`, que é quem a mostra.
  */
 export function Menu({
   rotulo,
