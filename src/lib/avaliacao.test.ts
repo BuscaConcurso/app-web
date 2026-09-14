@@ -1,17 +1,20 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   LIMITE_DO_COMENTARIO,
+  formularioDoPedido,
   lerPedido,
   novoAvaliador,
   registrarAvaliacao,
+  resultadoDaResposta,
   type Pedido,
 } from "./avaliacao";
 
 /**
- * O que é testável sem navegador: o formulário virando pedido e o pedido
- * virando requisição. O componente em si (`components/concurso/Avaliacao.tsx`)
- * continua sem rede de testes — a suíte é Node, sem DOM, e é a quinta vez que
- * isto aparece no relatório.
+ * O que é testável sem navegador: o clique virando corpo de requisição, o
+ * corpo virando pedido, o pedido virando requisição ao engine e a resposta da
+ * rota virando frase na tela. O componente em si
+ * (`components/concurso/Avaliacao.tsx`) continua sem rede de testes — a suíte
+ * é Node, sem DOM, e é a quinta vez que isto aparece no relatório.
  */
 
 function formulario(campos: Record<string, string>): FormData {
@@ -90,6 +93,69 @@ describe("lerPedido", () => {
     ).toBeNull();
     expect(lerPedido(formulario({ ...CLIQUE, gostei: "talvez" }))).toBeNull();
     expect(lerPedido(formulario({ slug: "x", bloco: "cargos" }))).toBeNull();
+  });
+});
+
+describe("formularioDoPedido", () => {
+  it("o que o navegador manda é exatamente o que a rota consegue ler", () => {
+    // As duas metades da mesma regra. Se um campo mudar de nome de um lado
+    // só, é aqui que aparece — e não em produção, como um `ato` que some e
+    // leva a procedência junto.
+    const alvo = {
+      slug: "trt-2-analista-2026",
+      bloco: "faq",
+      pergunta: "ate_quando",
+      ato: "dou-2026-03-05-1",
+    } as const;
+
+    expect(lerPedido(formularioDoPedido(alvo, false, "a data está errada"))).toEqual({
+      slug: "trt-2-analista-2026",
+      bloco: "faq",
+      pergunta: "ate_quando",
+      ato: "dou-2026-03-05-1",
+      gostei: false,
+      comentario: "a data está errada",
+    });
+  });
+
+  it("o clique sem comentário não manda campo de comentário nenhum", () => {
+    // Campo vazio no corpo viraria "comentou e não disse nada" se `lerPedido`
+    // um dia deixar de aparar. Não mandar é a versão que não depende disso.
+    const alvo = { slug: "trt-2-analista-2026", bloco: "cargos" } as const;
+
+    expect(formularioDoPedido(alvo, true).has("comentario")).toBe(false);
+    expect(formularioDoPedido(alvo, true, "  \n ").has("comentario")).toBe(false);
+    expect(lerPedido(formularioDoPedido(alvo, true))?.comentario).toBeNull();
+  });
+
+  it("alvo sem pergunta e sem ato não inventa os dois campos", () => {
+    const dados = formularioDoPedido({ slug: "x", bloco: "orgao" }, false);
+
+    expect(dados.has("pergunta")).toBe(false);
+    expect(dados.has("ato")).toBe(false);
+    expect(dados.get("gostei")).toBe("nao");
+  });
+});
+
+describe("resultadoDaResposta", () => {
+  it("o que a rota afirma é o que a tela diz", () => {
+    expect(resultadoDaResposta({ resultado: "gravada" })).toBe("gravada");
+    expect(resultadoDaResposta({ resultado: "sem-api" })).toBe("sem-api");
+    expect(resultadoDaResposta({ resultado: "pedido-invalido" })).toBe(
+      "pedido-invalido",
+    );
+  });
+
+  it("resposta que não se entende é falha, nunca 'gravada'", () => {
+    // O modo de errar que importa é dizer "obrigado" para quem não teve o
+    // clique registrado. Corpo vazio, HTML de proxy, JSON de outro formato:
+    // tudo isso é "não deu", e a pessoa pode tentar de novo.
+    expect(resultadoDaResposta(null)).toBe("falhou");
+    expect(resultadoDaResposta(undefined)).toBe("falhou");
+    expect(resultadoDaResposta({})).toBe("falhou");
+    expect(resultadoDaResposta("<html>502</html>")).toBe("falhou");
+    expect(resultadoDaResposta({ resultado: "ok" })).toBe("falhou");
+    expect(resultadoDaResposta({ resultado: true })).toBe("falhou");
   });
 });
 

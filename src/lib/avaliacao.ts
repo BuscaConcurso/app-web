@@ -1,10 +1,18 @@
 /**
  * Avaliação de item: "gostei" e "não gostei" no ponto do dado.
  *
- * Este arquivo é a parte testável — o que o formulário virou, o que vai no
- * corpo da requisição e o que fazer quando a API não responde. A Server Action
- * (`acoes/avaliar.ts`) só junta isso com o cookie e com o `revalidate`; o
- * componente (`components/concurso/Avaliacao.tsx`) só desenha.
+ * Este arquivo é a parte testável — o que o clique vira, o que vai no corpo da
+ * requisição, o que voltar da rota significa e o que fazer quando a API não
+ * responde. Ele não tem diretiva nenhuma (`"use server"`, `"use client"`) de
+ * propósito: os dois lados o importam, e é o que permite testá-lo em Node, sem
+ * servidor e sem navegador. O Route Handler (`app/api/avaliacao/route.ts`) só
+ * junta isto com o cookie; o componente
+ * (`components/concurso/Avaliacao.tsx`) só desenha e faz o `fetch`.
+ *
+ * **`registrarAvaliacao` só roda no servidor** — é a única função daqui que lê
+ * `BC_API_URL`. Ela é importada pela rota, nunca pelo componente: o endereço
+ * da API do engine não pode aparecer em bundle de navegador (ver o comentário
+ * da rota).
  *
  * **Por que o clique vai para o engine e não para um arquivo aqui**: o valor
  * da avaliação é poder cruzá-la com o acervo — qual ato, qual extração, qual
@@ -96,6 +104,36 @@ export function lerPedido(dados: FormData): Pedido | null {
 }
 
 /**
+ * O caminho inverso de `lerPedido`: o alvo e o clique virando o corpo do
+ * `POST /api/avaliacao`.
+ *
+ * Mora aqui, e não dentro do componente, por dois motivos. O primeiro é que
+ * ele e `lerPedido` são as duas metades da mesma regra, e uma metade que muda
+ * sem a outra é um campo que some sem ninguém perceber — `avaliacao.test.ts`
+ * fecha o círculo mandando uma pela outra. O segundo é que o componente não
+ * precisa saber nomes de campo para desenhar dois botões.
+ *
+ * Continua sendo `FormData` mesmo agora que quem envia é `fetch`, e não um
+ * `<form>`: é o que `lerPedido` já lê e o que já tem teste. Trocar por JSON
+ * seria reescrever a validação inteira para não ganhar nada.
+ */
+export function formularioDoPedido(
+  alvo: Alvo,
+  gostei: boolean,
+  comentario?: string | null,
+): FormData {
+  const dados = new FormData();
+  dados.set("slug", alvo.slug);
+  dados.set("bloco", alvo.bloco);
+  if (alvo.pergunta) dados.set("pergunta", alvo.pergunta);
+  if (alvo.ato) dados.set("ato", alvo.ato);
+  dados.set("gostei", gostei ? "sim" : "nao");
+  // Vazio é ausência de comentário, não comentário vazio: ver `Pedido`.
+  if (comentario && comentario.trim() !== "") dados.set("comentario", comentario);
+  return dados;
+}
+
+/**
  * O token anônimo de navegador. Não é usuário e não vira um: o serviço não
  * tem autenticação, e inventar login para receber um "não gostei" seria
  * cobrar caro por uma opinião.
@@ -111,6 +149,32 @@ export function novoAvaliador(): string {
 
 /** O que aconteceu com o clique, para a tela poder dizer. */
 export type ResultadoDaAvaliacao = "gravada" | "sem-api" | "falhou";
+
+/** Tudo o que a rota pode responder, incluindo o pedido que nem foi mandado. */
+const RESULTADOS: readonly string[] = [
+  "gravada",
+  "sem-api",
+  "falhou",
+  "pedido-invalido",
+];
+
+/**
+ * O que a resposta de `POST /api/avaliacao` diz que aconteceu.
+ *
+ * Qualquer coisa que não seja um dos quatro resultados conhecidos é
+ * `"falhou"` — corpo vazio, HTML de erro de um proxy no caminho, JSON de outro
+ * formato. **Nunca `"gravada"` por omissão**: o modo de errar que importa aqui
+ * é dizer "obrigado" para quem não teve o clique registrado, e o jeito de não
+ * errar assim é exigir que a rota afirme.
+ */
+export function resultadoDaResposta(
+  corpo: unknown,
+): EstadoDaAvaliacao["resultado"] {
+  const resultado = (corpo as { resultado?: unknown } | null)?.resultado;
+  return typeof resultado === "string" && RESULTADOS.includes(resultado)
+    ? (resultado as EstadoDaAvaliacao["resultado"])
+    : "falhou";
+}
 
 
 /** O que aconteceu com o último clique, do jeito que a tela precisa saber. */
