@@ -125,8 +125,14 @@
   --radius-controle: 6px;
 }
 
-/* A escala de espaço do Tailwind já é múltipla de 4, que é a do canvas.
- * Cartões se separam por 12, seções por 32. */
+/* A escala de espaço deste projeto NÃO é a do Tailwind. `--spacing` está em
+ * 0,22rem acima, então cada degrau vale 3,52px e não 4 — `size-11` dá 38,72px,
+ * `px-0.5` dá 1,76px e `px-1` dá 3,52px. Nenhum degrau cai em 2px, e é por
+ * isso que o separador da trilha usa valor arbitrário.
+ *
+ * O comentário anterior dizia "múltipla de 4, que é a do canvas" e listava
+ * cartões por 12 e seções por 32 — três linhas abaixo da própria declaração
+ * que o contradizia. Quem media pelo comentário errava por 12%. */
 
 /**
  * Tema escuro.
