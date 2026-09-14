@@ -229,7 +229,7 @@ export default async function PaginaDoConcurso(
             {concurso.banca && <Etiqueta>Banca: {concurso.banca.nome}</Etiqueta>}
           </div>
 
-          <BlocoDeNumeros className="mt-6 grid-cols-2 sm:grid-cols-4">
+          <BlocoDeNumeros tom={tom} className="mt-6 grid-cols-2 sm:grid-cols-4">
             <Numero rotulo="Vagas">
               {concurso.vagas === null ? "a definir" : numero(concurso.vagas)}
             </Numero>

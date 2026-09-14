@@ -207,7 +207,7 @@ export function CartaoConcurso({
         {concurso.banca && <Etiqueta>Banca: {concurso.banca.nome}</Etiqueta>}
       </div>
 
-      <BlocoDeNumeros className="grid-cols-2 sm:grid-cols-4">
+      <BlocoDeNumeros tom={tom} className="grid-cols-2 sm:grid-cols-4">
         {/*
           Só o número, ou a ausência dele. O cadastro de reserva saiu daqui e
           virou etiqueta: "CR" é jargão de edital e estava numa casa de

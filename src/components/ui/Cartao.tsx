@@ -36,18 +36,31 @@ export function Cartao({
 /**
  * O bloco rebaixado de dentro do cartão, que agrupa os números para que
  * vagas, salário e prazo leiam como uma tabela e não como frases soltas.
+ *
+ * **O rebaixo é do tom do cartão, não cinza fixo.** O `bg-bloco` cinza é o
+ * rebaixo do cartão BRANCO; dentro do cartão urgente ou do previsto ele é uma
+ * mancha de outra família, e no encerrado chegava a ficar mais CLARO que o
+ * fundo — a lista parecia levantada em vez de rebaixada. Cada tom rebaixa com
+ * o seu próprio `chip`, que é o tom já usado pela etiqueta de situação do
+ * mesmo cartão.
+ *
+ * `tom` é opcional e cai em `aberto`, que devolve o cinza de sempre: quem
+ * usa o bloco fora de um cartão colorido (a vitrine, por exemplo) não muda.
  */
 export function BlocoDeNumeros({
   children,
   className,
+  tom = "aberto",
 }: {
   children: ReactNode;
   className?: string;
+  tom?: Tom;
 }) {
   return (
     <dl
       className={[
-        "grid gap-2 rounded-lg bg-bloco px-3 py-2.5",
+        "grid gap-2 rounded-lg px-3 py-2.5",
+        ESTILO_DO_TOM[tom].bloco,
         className ?? "grid-cols-3",
       ].join(" ")}
     >
