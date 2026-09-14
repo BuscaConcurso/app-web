@@ -17,13 +17,24 @@ import { ROTULO_PERGUNTA } from "@/lib/rotulos";
  * o edital completo com anexos e programa de provas fica no site da banca.
  * A seção diz isso em vez de deixar a pessoa supor.
  *
- * O `<details>` abre sozinho no ato curto e fica fechado no longo. O corte
- * saiu da distribuição real, por concurso do acervo: mediana de 1.623
- * caracteres, p90 de 13.961, e 25 dos 325 passando de 20 mil. Com o corte em
- * 3 mil, mais da metade dos concursos mostra o ato inteiro sem clique, e o
- * ato de 99 mil caracteres não empurra o resto da página para fora da tela.
+ * O texto abre num painel lateral, e **sem JavaScript**: o mecanismo é o
+ * `<details>` nativo, e o painel é CSS sobre `[open]`. Isso importa mais do
+ * que parece — o pedido de drawer reverteria a decisão de não depender de
+ * script, e com ela o "ver o ato" do cronograma (uma âncora) deixaria de
+ * funcionar para quem está sem script, e quem chegasse por link direto
+ * encontraria um botão morto. Feito assim, nada disso acontece: a âncora
+ * continua levando ao bloco do ato, o botão continua abrindo, e o texto
+ * continua a um clique de distância com ou sem script.
+ *
+ * **Nenhum ato abre sozinho**, e isso mudou com o drawer. Antes o ato curto
+ * vinha aberto (mediana de 1.623 caracteres, metade do acervo abaixo de
+ * 1.700), porque mostrar era barato. Um painel que se abre sozinho por cima
+ * da página não é barato: ele cobre o cronograma e os cargos que a pessoa
+ * veio ler. E a uniformidade passou a valer mais que o clique economizado
+ * porque o bloco do ato deixou de ser só o texto — ele tem o FAQ, o endereço
+ * e a procedência antes dele, e o texto virou a evidência atrás disso, não a
+ * primeira coisa a ler.
  */
-const ABRE_SOZINHO_ATE = 3000;
 
 export function AtosPublicados({ origens }: { origens: Origem[] }) {
   return (
@@ -32,9 +43,9 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
         {origens.length === 1 ? "O ato publicado" : "Os atos publicados"}
       </Rotulo>
       <p className="mt-1 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
-        O texto abaixo é o ato como saiu no diário oficial, na íntegra — que
-        pode ser o extrato, não o edital completo. O edital com anexos e
-        programa de provas fica no site da banca.
+        O ato como saiu no diário oficial, na íntegra — que pode ser o
+        extrato, não o edital completo. O edital com anexos e programa de
+        provas fica no site da banca.
       </p>
 
       <ul className="mt-3 flex flex-col gap-4">
@@ -85,23 +96,44 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
             )}
 
             {origem.texto ? (
-              <details
-                open={(origem.caracteres ?? 0) <= ABRE_SOZINHO_ATE}
-                className="mt-2 rounded-caixa bg-bloco px-4 py-3"
-              >
-                <summary className="cursor-pointer text-[12px] font-semibold text-tinta-800">
-                  Ler o ato publicado
-                  {origem.caracteres !== null && (
-                    <span className="ml-1 font-normal text-tinta-600">
-                      · {numero(origem.caracteres)} caracteres
+              <details className="group/ato mt-2.5">
+                <summary
+                  className={[
+                    // Fechado: um botão na linha do ato.
+                    "inline-flex cursor-pointer items-center gap-2 rounded-controle",
+                    "bg-rebaixada px-3 py-1.5 text-[12px] font-semibold text-tinta-800",
+                    "transition-colors hover:bg-tinta-200",
+                    // Aberto: a barra de topo do painel, que também é o que
+                    // fecha. Sem isto, o painel abriria e não teria como
+                    // fechar sem script — `<summary>` é o único elemento que
+                    // alterna um `<details>`.
+                    "group-open/ato:fixed group-open/ato:top-0 group-open/ato:right-0",
+                    "group-open/ato:z-[60] group-open/ato:w-[min(40rem,94vw)]",
+                    "group-open/ato:justify-between group-open/ato:rounded-none",
+                    "group-open/ato:border-b group-open/ato:border-tinta-200",
+                    "group-open/ato:bg-cartao group-open/ato:px-5 group-open/ato:py-3.5",
+                  ].join(" ")}
+                >
+                  <span>
+                    <span className="group-open/ato:hidden">Ler o ato publicado</span>
+                    <span className="hidden group-open/ato:inline">
+                      O ato publicado
                     </span>
-                  )}
+                    {origem.caracteres !== null && (
+                      <span className="ml-1 font-normal text-tinta-600">
+                        · {numero(origem.caracteres)} caracteres
+                      </span>
+                    )}
+                  </span>
+                  <span className="hidden font-normal text-tinta-600 group-open/ato:inline">
+                    fechar
+                  </span>
                 </summary>
-                {/* Caixa com rolagem, e não corte no texto: o ato de 99 mil
-                    caracteres cabe inteiro aqui sem virar uma página de um
+                {/* O painel. Sem corte no texto: o ato de 99 mil caracteres
+                    cabe inteiro aqui, rolando, sem virar uma página de um
                     quilômetro. O texto do diário vem sem quebra de linha —
                     zero em 9.274 documentos —, então é um parágrafo só. */}
-                <div className="mt-2 max-h-[28rem] overflow-y-auto">
+                <div className="fixed inset-y-0 right-0 z-50 w-[min(40rem,94vw)] overflow-y-auto border-l border-tinta-200 bg-cartao px-5 pt-16 pb-10 shadow-2xl">
                   <p className="max-w-[78ch] text-[13px] leading-6 text-tinta-800">
                     {/* As respostas do FAQ marcadas onde elas estão. É o que a
                         posição gravada junto do trecho paga: em vez de repetir
