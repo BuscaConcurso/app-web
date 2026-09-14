@@ -12,6 +12,11 @@ import { Sugestoes, useSugestoes } from "@/components/ui/Sugestoes";
 import { UFS, type Uf } from "@/lib/dominio";
 import { ufDeCoordenada, type Contornos } from "@/lib/localizacao";
 import { numero } from "@/lib/formato";
+import {
+  escolheuManualmente,
+  liberarDeteccao,
+  marcarEscolhaManual,
+} from "@/lib/localizacaoManual";
 import { NOME_UF } from "@/lib/rotulos";
 import {
   assinarTermosBuscados,
@@ -38,10 +43,14 @@ import {
  *   1. Nunca dispara busca sozinha. Preenche o seletor e avisa, e a pessoa
  *      decide. Localização que submete busca por conta própria tira o usuário
  *      de onde ele estava.
- *   2. Nunca pede permissão sem gesto. No primeiro acesso aparece um botão, e
- *      o prompt do navegador só sobe se a pessoa clicar nele. A exceção é
- *      quem já concedeu antes, caso em que a Permissions API permite resolver
- *      em silêncio, sem prompt.
+ *   2. Pede a localização ao carregar, mas só enquanto a pessoa não decidiu.
+ *      Decisão do parceiro humano: a busca começa pedindo. Não pede quando o
+ *      estado já veio pela URL ou pela memória, quando a permissão já foi
+ *      negada, em contexto inseguro, ou **quando a pessoa já escolheu o estado
+ *      à mão** — inclusive "Todo o Brasil" — e ainda não voltou a usar o botão
+ *      de localização (ver `localizacaoManual`). Esta regra dizia "nunca pede
+ *      permissão sem gesto", e deixou de ser verdade quando o pedido
+ *      automático entrou.
  *   3. A coordenada não sai da máquina. Os contornos dos estados vêm do nosso
  *      próprio servidor e a conta acontece no navegador. O arquivo só é
  *      baixado depois da permissão, então quem recusa não paga por ele.
@@ -257,6 +266,9 @@ export function BarraBusca({
   useEffect(() => {
     if (jaPediu.current) return;
     if (uf || lembrada) return;
+    // A pessoa já escolheu o estado à mão — inclusive "Todo o Brasil", que
+    // deixa `lembrada` vazia — e ainda não voltou a pedir a localização.
+    if (escolheuManualmente()) return;
     if (!window.isSecureContext || !("geolocation" in navigator)) return;
     if (dimensoes !== undefined && dimensoes.comUf === 0) return;
 
@@ -277,6 +289,9 @@ export function BarraBusca({
   }, [uf, lembrada, detectar, dimensoes]);
 
   const trocar = (valor: string) => {
+    // Qualquer escolha à mão desliga o pedido automático ao carregar, até o
+    // botão de localização ser usado de novo. Ver `localizacaoManual`.
+    marcarEscolhaManual();
     setManual(valor);
     setDetectada(false);
     setEstado("ocioso");
@@ -452,7 +467,10 @@ export function BarraBusca({
         {podeDetectar && (
           <button
             type="button"
-            onClick={detectar}
+            onClick={() => {
+              liberarDeteccao();
+              void detectar();
+            }}
             className="inline-flex items-center gap-1.5 font-medium text-tinta-600 underline underline-offset-[3px] hover:text-link"
           >
             <svg
