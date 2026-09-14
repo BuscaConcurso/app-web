@@ -3,12 +3,20 @@ import { Logo } from "@/components/marca/Logo";
 import { BotaoLink } from "@/components/ui/Botao";
 import { SeletorDeTema } from "./SeletorDeTema";
 
-const NAVEGACAO = [
-  { rotulo: "Concursos", href: "/concursos" },
-  { rotulo: "Meus alertas", href: "/concursos?situacao=abertas" },
-  { rotulo: "Notícias", href: "/concursos?ordem=recentes" },
-  { rotulo: "Planos", href: "/concursos" },
-];
+/**
+ * Só entra aqui o que existe.
+ *
+ * Havia mais três itens — "Meus alertas", "Notícias" e "Planos" —, e os três
+ * apontavam para `/concursos` com um filtro diferente, porque a feature não
+ * existe. Um menu que promete alerta e entrega uma busca filtrada é a mesma
+ * falha que este projeto passou o dia consertando do lado do dado: afirmar o
+ * que não se tem. Custa mais que um link morto, porque quem clicou uma vez
+ * aprende a não clicar de novo.
+ *
+ * Quando alguma delas existir, volta — com o endereço dela, não com um
+ * filtro fingindo ser ela.
+ */
+const NAVEGACAO = [{ rotulo: "Concursos", href: "/concursos" }];
 
 /**
  * Cabeçalho.
