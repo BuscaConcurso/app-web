@@ -391,9 +391,43 @@ export function Gaveta({
             <span className="ml-1 font-normal text-tinta-600">{apoio}</span>
           )}
         </span>
-        <span className="hidden font-normal text-tinta-600 group-open:inline">
-          fechar
-        </span>
+        {/*
+          O fechar.
+
+          É um ícone, e **não** um botão: o botão é o `<summary>` inteiro, que
+          é a barra de topo — medida a 375px, 353px de largura por 44px de
+          altura. O ícone tem 14px e mora no canto direito dela, mas **não é
+          ele que fecha**: o `<svg>` é filho do `<summary>`, e o clique em
+          qualquer ponto da barra continua fechando. Medido: `elementFromPoint`
+          a 8px da borda esquerda da barra devolve o `<summary>`, e o clique
+          ali fecha. Vale também sem JavaScript, porque é o `<summary>` que
+          alterna o `<details>` — um botão de fechar de verdade, desenhado
+          dentro do painel, é exatamente o que este arquivo já recusou.
+
+          `aria-hidden` porque ele é decoração. O nome acessível deste botão é
+          o conteúdo de texto dele; medido na árvore do Chrome 152 com a gaveta
+          aberta: `dialog "O ato publicado" modal` por fora e, dentro,
+          `DisclosureTriangle "O ato publicado· 32.513 caracteres" expandable
+          expanded`. É o `expanded` que diz que ativar fecha. Um
+          `aria-label="Fechar"` aqui **trocaria** o nome do botão e ele
+          deixaria de dizer o que revela; um `sr-only` com a palavra devolveria
+          ao leitor de tela exatamente o texto que o pedido mandou tirar da
+          tela — e ainda entraria na seleção de quem copia. Nem um nem outro:
+          só o ícone, calado.
+
+          Traço e não preenchimento, como todo ícone deste projeto.
+        */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          className="hidden size-4 shrink-0 text-tinta-600 group-open:block"
+        >
+          <path d="m4.5 4.5 7 7M11.5 4.5l-7 7" />
+        </svg>
       </summary>
 
       {/*
