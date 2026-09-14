@@ -329,10 +329,16 @@ export function ColunaFiltros({
           painel subir, o que nunca viola essa linha. Com `bottom` sozinho a
           coluna some junto com a página; é o `top` que prende na descida.
 
-          O teto de altura com rolagem própria cobre a tela baixa, onde o
-          painel não caberia inteiro, e o `overscroll-contain` evita que rolar
-          até o fim da coluna continue rolando a página atrás dela. */}
-      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:sticky lg:top-4 lg:flex lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:overscroll-contain">
+          **Sem rolagem própria**, por decisão do parceiro humano. Havia aqui
+          um teto de altura com `overflow-y-auto`, para a tela baixa em que o
+          painel não cabe inteiro. O preço era uma barra de rolagem dentro da
+          página, e duas áreas roláveis lado a lado confundem: a roda do mouse
+          faz uma coisa sobre a coluna e outra a dois centímetros dali.
+
+          Sem o teto, numa tela onde o painel não cabe, a coluna grudada
+          simplesmente passa do fim da janela e o que sobra é alcançado
+          rolando a página — que é o gesto que a pessoa já ia fazer. */}
+      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:sticky lg:top-4 lg:flex">
         <Painel consulta={consulta} contagens={contagens} prefixo="coluna" />
         <CartaoDeAlerta total={total} />
       </aside>
