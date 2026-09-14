@@ -7,6 +7,7 @@ import { Campo, Selecao } from "@/components/ui/Campo";
 import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta, Rotulo } from "@/components/ui/Etiqueta";
 import { Paginacao } from "@/components/ui/Paginacao";
+import { Gaveta, Menu } from "@/components/ui/Revelador";
 import { Secao } from "@/components/ui/Secao";
 import { Cronograma } from "@/components/concurso/Cronograma";
 import { listarConcursos } from "@/lib/concursos";
@@ -340,6 +341,61 @@ export default async function Estilo() {
       <Bloco titulo="Paginação">
         <Cartao className="p-5">
           <Paginacao pagina={3} paginas={32} hrefDe={() => "/estilo"} />
+        </Cartao>
+      </Bloco>
+
+      {/*
+        O revelador, que é o lugar onde todo painel que abre e fecha mora. As
+        duas formas ficam lado a lado de propósito: é aqui que dá para ver, num
+        gesto, que a gaveta é modal e o menu não — a gaveta escurece o fundo,
+        trava a rolagem e prende o foco; o menu deixa a página viva atrás dele.
+
+        O que conferir no navegador, porque a suíte é Node sem DOM: abrir e
+        fechar animam nos dois sentidos; Escape fecha; clique fora fecha; a
+        página não rola por trás da gaveta; o foco entra ao abrir e volta ao
+        gatilho ao fechar; e, com "reduzir movimento" ligado no sistema, os dois
+        aparecem e somem sem percorrer caminho nenhum.
+      */}
+      <Bloco
+        titulo="Revelador"
+        nota="gaveta é modal · menu não é · os dois abrem sem script"
+      >
+        <Cartao className="flex flex-wrap items-center gap-3 p-5">
+          <Gaveta
+            rotulo="Abrir a gaveta"
+            titulo="A gaveta"
+            apoio={<>· 352,5px a 375px</>}
+          >
+            <p className="max-w-[74ch] text-[13px] leading-6 text-tinta-800">
+              O painel entra pela direita e cobre 94vw, o que a 375px deixa
+              22,5px de página à mostra — o bastante para se ver que há algo
+              atrás sem que a faixa vire um alvo de toque por engano. A barra
+              de cima é o mesmo <code>&lt;summary&gt;</code> que abriu, porque
+              ele é o único elemento que fecha um <code>&lt;details&gt;</code>{" "}
+              sem JavaScript; um botão desenhado aqui dentro deixaria quem está
+              sem script com a gaveta aberta e sem saída.
+            </p>
+            <p className="mt-4 max-w-[74ch] text-[13px] leading-6 text-tinta-600">
+              O conteúdo rola por dentro, e enquanto a gaveta está aberta ela é
+              a única área rolável da tela.
+            </p>
+          </Gaveta>
+
+          <Menu
+            rotulo="Abrir o menu de exemplo"
+            gatilho={
+              <span className="flex h-8 items-center rounded-controle bg-rebaixada px-3 text-[12px] font-semibold text-tinta-800 transition-colors hover:bg-tinta-200">
+                Abrir o menu
+              </span>
+            }
+            painelClassName="w-56"
+          >
+            <p className="px-3 py-2 text-[13px] leading-5 text-tinta-600">
+              Cai do gatilho, ancorado nele. Não trava a rolagem e não apaga o
+              resto da página: quem abriu vai escolher um item ou desistir, e
+              os dois caminhos são curtos.
+            </p>
+          </Menu>
         </Cartao>
       </Bloco>
 
