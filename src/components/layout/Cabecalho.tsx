@@ -93,7 +93,11 @@ export function Cabecalho() {
   return (
     <header className="bg-cartao">
       <div className="mx-auto flex max-w-[1240px] items-center gap-x-8 px-4 py-2.5 sm:px-6">
-        <Link href="/" aria-label="BuscaConcurso, página inicial">
+        <Link
+          href="/"
+          aria-label="BuscaConcurso, página inicial"
+          className="flex items-center"
+        >
           <Logo tamanho={26} />
         </Link>
 
@@ -122,7 +126,6 @@ export function Cabecalho() {
                 href="/concursos"
                 variante="secundario"
                 tamanho="sm"
-                className="flex-1"
               >
                 Entrar
               </BotaoLink>
@@ -130,7 +133,6 @@ export function Cabecalho() {
                 href="/concursos"
                 variante="primario"
                 tamanho="sm"
-                className="flex-1"
               >
                 Criar conta
               </BotaoLink>
