@@ -8,6 +8,7 @@ import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
 import { Cargos, tituloDosCargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
+import { Faq, cabecalhoDoFaq, temFaq } from "@/components/concurso/Faq";
 import { listarSlugs, obterDetalhe } from "@/lib/concursos";
 import {
   dataLonga,
@@ -243,6 +244,15 @@ export default async function PaginaDoConcurso(
           </Secao>
         )}
 
+        {/* O FAQ antes do texto do ato, e não depois: ele é a leitura do
+            documento, e o documento é a evidência atrás dela. Cada resposta
+            tem link para o ato que a produziu, logo abaixo. */}
+        {temFaq(concurso.origens) && (
+          <Secao {...cabecalhoDoFaq(concurso.origens)}>
+            <Faq slug={concurso.slug} origens={concurso.origens} />
+          </Secao>
+        )}
+
         {concurso.origens.length > 0 && (
           <Secao
             titulo={
@@ -252,7 +262,7 @@ export default async function PaginaDoConcurso(
             }
             apoio="O ato como saiu no diário oficial, na íntegra — que pode ser o extrato, não o edital completo. O edital com anexos e programa de provas fica no site da banca."
           >
-            <AtosPublicados slug={concurso.slug} origens={concurso.origens} />
+            <AtosPublicados origens={concurso.origens} />
           </Secao>
         )}
 
