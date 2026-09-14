@@ -64,6 +64,35 @@ import {
 } from "@/lib/avaliacao";
 
 /**
+ * Os dois polegares, a pedido do parceiro humano.
+ *
+ * Traço e não preenchimento, como todo ícone deste projeto, e desenhados um
+ * como o espelho vertical do outro para que o par leia como par.
+ *
+ * **O rótulo continua visível ao lado.** Polegar sozinho é ambíguo, e estes
+ * dois botões gravam um voto que alimenta a correção do acervo: quem clica
+ * por engano polui a única medida de qualidade que o produto tem. O ícone
+ * entra na frente do texto, não no lugar dele.
+ */
+function Polegar({ paraCima }: { paraCima: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`size-4 shrink-0 ${paraCima ? "" : "-scale-y-100"}`}
+    >
+      <path d="M4.6 13.8V7.1m0 0 2.6-4.9a1.6 1.6 0 0 1 2.9 1.3L9.3 6.2h3.1a1.5 1.5 0 0 1 1.5 1.8l-.8 4.3a1.6 1.6 0 0 1-1.6 1.3H6.1a1.5 1.5 0 0 1-1.5-1.5Z" />
+      <path d="M4.6 7.1H3.2a1 1 0 0 0-1 1v4.7a1 1 0 0 0 1 1h1.4" />
+    </svg>
+  );
+}
+
+/**
  * O botão escolhido fica marcado. É o que a escolha do parceiro humano
  * compra: a marca aparece no clique, antes da resposta — e sai de novo se a
  * resposta disser que não gravou, porque botão marcado sobre clique perdido
@@ -165,6 +194,7 @@ export function Avaliacao({
             disabled={enviando}
             aria-pressed={escolha === true}
           >
+            <Polegar paraCima />
             Gostei
           </Botao>
           <Botao
@@ -175,6 +205,7 @@ export function Avaliacao({
             disabled={enviando}
             aria-pressed={escolha === false}
           >
+            <Polegar paraCima={false} />
             Não gostei
           </Botao>
         </div>
