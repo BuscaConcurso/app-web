@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Cartao, Selo } from "@/components/ui/Cartao";
 import { Paginacao } from "@/components/ui/Paginacao";
+import { Trilha, type Degrau } from "@/components/ui/Trilha";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
 import { avisoDoAcervo, obterOrgao } from "@/lib/concursos";
@@ -10,7 +10,6 @@ import { ordenar } from "@/lib/consulta";
 import { nomeCurtoDoOrgao, resumoDoOrgao } from "@/lib/orgaos";
 import { numero } from "@/lib/formato";
 import { linhaDeContexto } from "@/lib/rotulos";
-import { urlAbsoluta } from "@/lib/site";
 
 /**
  * A página do órgão: o nível acima do concurso.
@@ -95,49 +94,21 @@ export default async function PaginaDoOrgao(
   const pagina = Math.min(paginaPedida((await props.searchParams).pagina), paginas);
   const itens = ordenados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
 
-  const trilha = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Concursos",
-        item: urlAbsoluta("/concursos"),
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: orgao.nome,
-        item: urlAbsoluta(`/orgaos/${orgao.slug}`),
-      },
-    ],
-  };
+  // Dois degraus: Concursos > este órgão. A mesma lista desenha a tela e o
+  // `BreadcrumbList` — ver `Trilha` para o defeito que essa regra guarda.
+  //
+  // O degrau leva `nomeCurtoDoOrgao`, e agora o dado estruturado leva também.
+  // Antes ele mandava `orgao.nome` por extenso enquanto a tela mostrava a
+  // sigla, que é a mesma classe de divergência de origem, só que dentro de um
+  // degrau em vez de entre dois. O nome por extenso é o `h1` logo abaixo.
+  const trilha: Degrau[] = [
+    { nome: "Concursos", href: "/concursos" },
+    { nome: nomeCurtoDoOrgao(orgao), href: `/orgaos/${orgao.slug}` },
+  ];
 
   return (
     <div className="mx-auto max-w-[880px] px-4 py-5 sm:px-6">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(trilha).replace(/</g, "\\u003c"),
-        }}
-      />
-
-      <nav aria-label="Trilha" className="mb-5 text-[12px] text-tinta-600">
-        <Link
-          href="/concursos"
-          className="underline underline-offset-4 hover:text-tinta-900"
-        >
-          Concursos
-        </Link>
-        <span aria-hidden="true"> / </span>
-        {/* O nível atual, e por isso não é link. É também onde a sigla
-            aparece como texto de verdade: o `Selo` é `aria-hidden`, então sem
-            esta linha a sigla não existiria para quem ouve a página. */}
-        <span aria-current="page" className="text-tinta-900">
-          {nomeCurtoDoOrgao(orgao)}
-        </span>
-      </nav>
+      <Trilha degraus={trilha} />
 
       <div className="flex flex-col gap-6">
         <Cartao as="header" className="p-6 sm:p-8">

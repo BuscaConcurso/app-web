@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta } from "@/components/ui/Etiqueta";
 import { Secao } from "@/components/ui/Secao";
+import { Trilha, type Degrau } from "@/components/ui/Trilha";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
 import { Cargos, tituloDosCargos } from "@/components/concurso/Cargos";
@@ -26,7 +27,6 @@ import {
 } from "@/lib/rotulos";
 import { nomeCurtoDoOrgao } from "@/lib/orgaos";
 import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
-import { urlAbsoluta } from "@/lib/site";
 
 /**
  * Página do concurso, versão reduzida.
@@ -77,87 +77,28 @@ export default async function PaginaDoConcurso(
   const estilo = ESTILO_DO_TOM[tom];
 
   // Três degraus, e o do meio é o que passou a existir: Concursos > órgão >
-  // este concurso. A trilha estruturada é lida por buscador, então ela precisa
-  // dizer a mesma hierarquia que a tela mostra — e o nível do órgão só pode
-  // entrar aqui porque agora ele tem endereço.
-  const trilha = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Concursos",
-        item: urlAbsoluta("/concursos"),
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: concurso.orgao.nome,
-        item: urlAbsoluta(`/orgaos/${concurso.orgao.slug}`),
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        // O mesmo texto que o degrau visível, que é o que uma trilha
-        // estruturada existe para fazer: dizer ao buscador o que a tela diz.
-        name: concurso.titulo,
-        item: urlAbsoluta(`/concursos/${concurso.slug}`),
-      },
-    ],
-  };
+  // este concurso. É uma lista só, e `Trilha` desenha a tela e emite o
+  // `BreadcrumbList` a partir dela — ver o componente para o defeito que essa
+  // regra guarda. O nível do órgão só pode entrar aqui porque agora ele tem
+  // endereço.
+  //
+  // O degrau do órgão leva `nomeCurtoDoOrgao` — a sigla quando existe, o nome
+  // quando não (36 órgãos do acervo ainda têm por nome o caminho de hierarquia
+  // do Diário). Agora o dado estruturado diz o mesmo, que é o que ele existe
+  // para fazer; antes ele mandava `orgao.nome` por extenso enquanto a tela
+  // mostrava a sigla. O nome por extenso continua na página, no bloco do selo.
+  const trilha: Degrau[] = [
+    { nome: "Concursos", href: "/concursos" },
+    {
+      nome: nomeCurtoDoOrgao(concurso.orgao),
+      href: `/orgaos/${concurso.orgao.slug}`,
+    },
+    { nome: concurso.titulo, href: `/concursos/${concurso.slug}` },
+  ];
 
   return (
     <div className="mx-auto max-w-[880px] px-4 py-5 sm:px-6">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(trilha).replace(/</g, "\\u003c"),
-        }}
-      />
-
-      <nav
-        aria-label="Trilha"
-        className="mb-5 flex min-w-0 flex-wrap items-baseline text-[12px] text-tinta-600"
-      >
-        <Link href="/concursos" className="underline underline-offset-4 hover:text-tinta-900">
-          Concursos
-        </Link>
-        <span aria-hidden="true"> / </span>
-        {/* O nível do órgão, agora um link: é a hierarquia pedida — órgão
-            acima, concurso abaixo — e ela só é hierarquia se o degrau de cima
-            for um lugar. A sigla quando existe, o nome quando não (36 órgãos
-            do acervo ainda têm por nome o caminho de hierarquia do Diário,
-            daí o corte em uma linha). */}
-        <Link
-          href={`/orgaos/${concurso.orgao.slug}`}
-          className="inline-block max-w-[40ch] truncate align-bottom underline underline-offset-4 hover:text-tinta-900"
-        >
-          {nomeCurtoDoOrgao(concurso.orgao)}
-        </Link>
-        <span aria-hidden="true"> / </span>
-        {/*
-          O degrau do concurso, que faltava: a trilha parava no órgão enquanto
-          a trilha ESTRUTURADA já declarava três degraus ao buscador. Uma das
-          duas estava mentindo sobre a outra, e o `BreadcrumbList` existe para
-          dizer ao robô o que a pessoa vê.
-
-          Não é link, porque é onde a pessoa já está — `aria-current="page"`
-          diz isso a quem navega por leitor de tela, e o degrau continua sendo
-          um degrau. E o título inteiro, como no `h1`: omitir o item corrente
-          é escolha defensável de trilha, mas não foi a escolha aqui — aqui
-          ele simplesmente não tinha sido escrito.
-
-          `truncate` com `min-w-0` no `<nav>`: a 375px o título mais longo do
-          acervo tem 195 caracteres, e sem isso a trilha empurra a página.
-        */}
-        <span
-          aria-current="page"
-          className="inline-block max-w-[40ch] truncate align-bottom text-tinta-900"
-        >
-          {concurso.titulo}
-        </span>
-      </nav>
+      <Trilha degraus={trilha} />
 
       {/*
         Uma pilha de blocos, e não seções empilhadas por margem dentro de um
