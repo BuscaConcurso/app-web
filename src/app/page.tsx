@@ -5,6 +5,7 @@ import { AcervoIncompleto, BlocoAlerta } from "@/components/home/BlocoAlerta";
 import { BlocosSeo } from "@/components/home/BlocosSeo";
 import { Hero } from "@/components/home/Hero";
 import { Secao } from "@/components/home/Secao";
+import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import {
   avisoDoAcervo,
   dimensoesDoAcervo,
@@ -62,12 +63,7 @@ export default async function Home() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(listaEstruturada).replace(/</g, "\\u003c"),
-        }}
-      />
+      <DadosEstruturados dados={listaEstruturada} />
 
       <Hero
         totalAbertos={destaques.totalAbertos}

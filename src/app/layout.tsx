@@ -4,6 +4,7 @@ import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
 import { Cabecalho } from "@/components/layout/Cabecalho";
 import { Rodape } from "@/components/layout/Rodape";
+import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import { origemDoAcervo } from "@/lib/concursos";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 import { SCRIPT_DO_TEMA } from "@/lib/tema";
@@ -133,12 +134,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_DO_TEMA }} />
       </head>
       <body className="flex min-h-full flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(dadosEstruturados).replace(/</g, "\\u003c"),
-          }}
-        />
+        <DadosEstruturados dados={dadosEstruturados} />
         <AvisoDeOrigem origem={origem} />
         <Cabecalho />
         <main className="flex-1">{children}</main>
