@@ -1,4 +1,6 @@
+import { Fragment } from "react";
 import type { FaqPergunta, Origem, RespostaDoFaq } from "@/lib/dominio";
+import { partirEmEnderecos } from "@/lib/enderecos";
 import { ROTULO_PERGUNTA } from "@/lib/rotulos";
 
 /**
@@ -112,7 +114,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
                   numa URL e é a única alternativa a esconder o endereço, que
                   é justamente a resposta. */}
               <p className="mt-1.5 max-w-[74ch] border-l-2 border-tinta-200 pl-3 text-[13px] leading-6 wrap-anywhere text-tinta-700">
-                {resposta.trecho}
+                <TrechoComEnderecos texto={resposta.trecho ?? ""} />
               </p>
               {/* O caminho de volta ao documento. Agora que o FAQ é um bloco
                   separado do texto do ato, é este link que mantém a
@@ -164,6 +166,74 @@ export function Faq({ origens }: { origens: Origem[] }) {
             : `${descartadas} respostas foram descartadas`}{" "}
           por não conferir com o texto do ato, palavra por palavra.
         </p>
+      )}
+    </>
+  );
+}
+
+/**
+ * O trecho do ato com os endereços clicáveis.
+ *
+ * ## O texto sai idêntico ao do ato
+ *
+ * Não há um caractere a mais nem a menos do que `partirEmEnderecos` recebeu:
+ * ela devolve pedaços cuja soma é a entrada, e aqui cada pedaço vira ou texto
+ * ou o conteúdo de um `<a>`. Isso é exigência e não capricho — a citação é o
+ * produto, e `inicioChar`/`fimChar` grifam esse mesmo trecho dentro do texto
+ * do ato, no bloco de baixo. Um caractere de diferença e o grifo marca outra
+ * frase.
+ *
+ * É também por isso que **não há aviso de "abre em nova aba" escondido aqui
+ * dentro**: um `<span>` de leitor de tela não aparece na tela, mas entra na
+ * seleção e vai junto quando alguém copia a resposta — e uma citação literal
+ * que chega ao Ctrl+V com palavra nossa no meio deixa de ser literal. O preço
+ * é sabido: quem usa leitor de tela depende do navegador para anunciar a aba
+ * nova.
+ *
+ * ## Nós de React, nunca `dangerouslySetInnerHTML`
+ *
+ * O trecho é texto do Diário lido por um modelo e chega como string. Montar
+ * HTML com ele seria deixar o conteúdo de terceiro escrever marcação na nossa
+ * página — injeção pela porta da frente. Aqui o texto nunca é marcação: é
+ * filho de elemento React, que escapa tudo. O acervo já mostrou entidade crua
+ * (`&amp;lt;`) chegando na tela; com `innerHTML` aquilo teria sido tag, não
+ * texto. **Se alguém "simplificar" isto para `dangerouslySetInnerHTML`, o
+ * buraco volta.**
+ *
+ * ## `rel` e aba nova
+ *
+ * `nofollow` porque nada aqui é recomendação nossa: é o endereço que o ato
+ * citou e que nós nunca visitamos — a mesma ressalva que o link do edital
+ * citado carrega por escrito. `noopener` porque com `target="_blank"` a
+ * página aberta ganharia `window.opener` sobre a nossa, e `noreferrer` para
+ * não contar ao site da banca de qual concurso o clique saiu.
+ *
+ * Abre em aba nova de propósito: a página do concurso é de pesquisa, com a
+ * rolagem e o resto do FAQ no lugar, e o destino é site de terceiro que pode
+ * ter mudado desde o ato — trocar a página por um 404 de banca custa mais do
+ * que uma aba a mais.
+ */
+function TrechoComEnderecos({ texto }: { texto: string }) {
+  return (
+    <>
+      {partirEmEnderecos(texto).map((pedaco, indice) =>
+        pedaco.href === null ? (
+          <Fragment key={indice}>{pedaco.texto}</Fragment>
+        ) : (
+          <a
+            key={indice}
+            href={pedaco.href}
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            // Sem `break-all` próprio: o `wrap-anywhere` do parágrafo é
+            // herdado e já quebra a URL longa dentro do link. A mais longa do
+            // acervo tem 143 caracteres e é de "onde se inscrever", que é
+            // justamente a resposta que ninguém pode deixar de ler.
+            className="text-link underline underline-offset-2 hover:text-link-hover"
+          >
+            {pedaco.texto}
+          </a>
+        ),
       )}
     </>
   );
