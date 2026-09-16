@@ -3,10 +3,12 @@ import {
   dataCurta,
   dataLonga,
   diasAte,
+  hojeEmSaoPaulo,
   moeda,
   moedaExata,
   paraDataLocal,
   prazoRelativo,
+  quantidade,
   vagasTexto,
 } from "./formato";
 
@@ -91,5 +93,47 @@ describe("vagasTexto", () => {
 
   it("soma as duas informações quando as duas existem", () => {
     expect(vagasTexto(420, true)).toBe("420 vagas e cadastro reserva");
+  });
+});
+
+describe("quantidade", () => {
+  it("deixa passar número, inclusive zero", () => {
+    expect(quantidade(0)).toBe(0);
+    expect(quantidade(8)).toBe(8);
+    expect(quantidade(-3)).toBe(-3);
+  });
+
+  it("campo que não veio é ausência, não 'NaN'", () => {
+    // O caso real: o app subiu antes do engine, `vagasPcd` chegou
+    // `undefined`, e `Intl.NumberFormat().format(undefined)` devolve a string
+    // "NaN" — a busca anunciou "NaN vagas PcD" em cartões de verdade.
+    expect(quantidade(undefined)).toBeNull();
+    expect(quantidade(null)).toBeNull();
+    expect(quantidade(NaN)).toBeNull();
+    expect(quantidade(Infinity)).toBeNull();
+    expect(quantidade(-Infinity)).toBeNull();
+  });
+
+  it("string que parece número também é ausência", () => {
+    // Number("12") daria 12 e pareceria conserto. Não é: um engine que manda
+    // "12" onde o contrato diz número está errado, e a tela adivinhar o que
+    // ele quis dizer é como a tela acabou inventando a reserva de vagas.
+    expect(quantidade("12")).toBeNull();
+    expect(quantidade("")).toBeNull();
+    expect(quantidade({})).toBeNull();
+  });
+});
+
+describe("hojeEmSaoPaulo", () => {
+  it("devolve a data civil brasileira, não a do fuso do processo", () => {
+    // 15/09 às 02h em UTC ainda é dia 14 em Brasília: é a janela de três
+    // horas em que um servidor em UTC daria o dia seguinte.
+    expect(hojeEmSaoPaulo(new Date("2026-09-15T02:00:00Z"))).toBe("2026-09-14");
+    expect(hojeEmSaoPaulo(new Date("2026-09-15T03:00:00Z"))).toBe("2026-09-15");
+  });
+
+  it("sai no mesmo formato das datas do domínio", () => {
+    expect(hojeEmSaoPaulo(new Date("2026-01-05T12:00:00Z"))).toBe("2026-01-05");
+    expect(hojeEmSaoPaulo(new Date("2026-12-31T23:00:00Z"))).toBe("2026-12-31");
   });
 });

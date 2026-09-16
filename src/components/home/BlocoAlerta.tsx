@@ -1,4 +1,93 @@
+import { Fragment } from "react";
+import type { AvisoDoAcervo } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
+import { acervoIncompletoEmPartes } from "@/lib/rotulos";
+
+/**
+ * O que a lista não está mostrando, dito em voz baixa.
+ *
+ * A lista traz só os concursos que já têm cargo ou evento extraído. Os outros
+ * existem no acervo e não aparecem — em 2026-09-14 são 189 de 4.838 —, e uma
+ * tela que mostra 4.649 concursos sem dizer isso afirma, por omissão, que o
+ * acervo tem 4.649.
+ *
+ * **Este parágrafo já mentiu, e é bom saber como.** Ele dizia que os que
+ * estão fora "ainda não foram lidos" e que "entram na lista conforme forem
+ * lidos". Nada disso descrevia o banco: 138 tinham sido lidos, com sucesso,
+ * e o ato era retificação ou anexo — não há cargo para extrair de uma
+ * retificação de prazo, e esses 138 nunca virariam linha da lista. O número
+ * não estava errado; a frase em volta dele é que descrevia uma realidade que
+ * não existe, e um leitor que a levasse a sério ficaria esperando o número
+ * virar zero. Era o mesmo erro que o produto recusa do lado do dado —
+ * afirmar o que o ato não disse — cometido do lado da tela.
+ *
+ * O conserto foi a API passar a publicar a repartição (`foraDaLista`) e a
+ * frase passar a ser montada a partir dela, em `acervoIncompletoEmPartes()`.
+ * A regra de produto não mudou: a lista traz só concurso com dado, e a
+ * contagem do resto aparece como aviso. O que mudou é o aviso dizer o que
+ * essa contagem é.
+ *
+ * **Hoje a frase tem duas orações, e amanhã pode ter três.** A fila de
+ * leitura está vazia desde a remoção da fonte IBADE, então a oração da fila
+ * não é escrita — some a oração inteira, não vira "0 esperam na fila". O
+ * `tick` da manhã enfileira o Diário do dia e ela volta sozinha. Nada aqui
+ * precisa mudar para isso acontecer, e é esse o teste que importa.
+ *
+ * Cinza e não amarelo de propósito. O amarelo desta página é um só, o do
+ * `BlocoAlerta` logo abaixo; dois amarelos e nenhum dos dois chama.
+ */
+export function AcervoIncompleto({ aviso }: { aviso: AvisoDoAcervo }) {
+  const partes = acervoIncompletoEmPartes(aviso);
+  return (
+    <p className="rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600">
+      Outros{" "}
+      <strong className="numero font-medium text-tinta-900">
+        {numero(aviso.semDado)}
+      </strong>{" "}
+      dos {numero(aviso.total)} concursos do acervo estão fora desta lista
+      {/*
+        Sem a repartição — engine mais velho, ou soma que não fecha —, a frase
+        conta o total e para por aí. Ela não promete entrada automática nem
+        finge que está tudo certo; é menos do que a tela sabe dizer num dia
+        bom, e é tudo o que ela pode afirmar num dia ruim.
+      */}
+      {partes.length === 0 ? (
+        <>
+          : não temos cargo nem cronograma deles. Nem todos vão entrar — parte
+          dos atos é retificação ou anexo, que não abre concurso.
+        </>
+      ) : partes.length === 1 && partes[0].quantos === aviso.semDado ? (
+        /*
+          Uma parte só, e ela cobre o total: repetir o número faria a frase
+          gaguejar ("Outros 138 ... estão fora desta lista. 138 não vão
+          entrar"). O número já foi dito; aqui entra só a explicação, presa à
+          abertura. Cada texto de parte começa por locução verbal justamente
+          para caber nas duas posições — ver `acervoIncompletoEmPartes`.
+
+          É o estado para o qual o acervo caminha: fila vazia e lacuna zerada
+          deixam de pé só os atos que nunca viram concurso.
+        */
+        <>, e {partes[0].texto}</>
+      ) : (
+        <>
+          {/* O ponto que fecha a abertura. Ele mora aqui e não no texto da
+              abertura porque o ramo de cima continua a mesma oração com
+              dois-pontos; cada parte já traz o seu. */}
+          .
+          {partes.map((parte) => (
+            <Fragment key={parte.texto}>
+              {" "}
+              <strong className="numero font-medium text-tinta-900">
+                {numero(parte.quantos)}
+              </strong>{" "}
+              {parte.texto}
+            </Fragment>
+          ))}
+        </>
+      )}
+    </p>
+  );
+}
 
 /**
  * A chamada única da tela.

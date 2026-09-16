@@ -45,6 +45,35 @@ export function dataPorExtenso(iso: string): string {
 }
 
 /**
+ * Hoje, como data civil brasileira, em `AAAA-MM-DD`.
+ *
+ * **Não use `new Date()` direto para comparar com data de edital.** Prazo de
+ * inscrição é data civil do Brasil, e o relógio de quem renderiza não é: um
+ * servidor em UTC vira o dia às 21h de Brasília, e das 21h à meia-noite a
+ * página diria que encerrou ontem o que encerra hoje. É o defeito de três
+ * horas que este projeto já teve — três horas por dia em que a tela mentia.
+ *
+ * Devolve string e não `Date` de propósito: toda data do domínio já é
+ * `AAAA-MM-DD`, e nesse formato a comparação lexicográfica É a comparação
+ * cronológica. Sem aritmética de milissegundo, sem horário de verão, sem
+ * fuso do processo.
+ */
+const FUSO_CIVIL = "America/Sao_Paulo";
+
+const ISO_EM_SAO_PAULO = new Intl.DateTimeFormat("en-CA", {
+  timeZone: FUSO_CIVIL,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+export function hojeEmSaoPaulo(agora: Date = new Date()): string {
+  // `en-CA` é o locale que formata como `AAAA-MM-DD`, que é exatamente a
+  // forma das datas do domínio.
+  return ISO_EM_SAO_PAULO.format(agora);
+}
+
+/**
  * Dias de calendário entre hoje e a data. Negativo quando já passou, zero
  * quando é hoje.
  */
@@ -92,6 +121,27 @@ export function moedaExata(valor: number): string {
 
 export function numero(valor: number): string {
   return new Intl.NumberFormat("pt-BR").format(valor);
+}
+
+/**
+ * A quantidade, se for mesmo uma quantidade; `null` em qualquer outro caso.
+ *
+ * Existe porque o tipo `ConcursoResumo` é uma promessa sobre o JSON de outro
+ * processo, e o JSON não a cumpre sozinho: `acervo()` faz `await
+ * resposta.json()` e anota o resultado com o tipo, sem conferir campo nenhum.
+ * Um engine mais velho — que é o estado normal do mundo, porque API e app
+ * sobem separados e a versão do app pode chegar antes — simplesmente não
+ * manda o campo, ele chega `undefined`, e `Intl.NumberFormat().format(
+ * undefined)` devolve a string **"NaN"**.
+ *
+ * Foi o que aconteceu: a busca mostrou "NaN vagas PcD" em cartões reais. O
+ * erro não é cosmético. A tela afirmou uma reserva de vagas a partir de um
+ * campo que não existia, num produto cujo contrato inteiro é não afirmar o
+ * que o ato não disse. Campo que não veio é ausência de dado, e ausência de
+ * dado não vira texto com valor dentro — vira nada.
+ */
+export function quantidade(valor: unknown): number | null {
+  return typeof valor === "number" && Number.isFinite(valor) ? valor : null;
 }
 
 /**

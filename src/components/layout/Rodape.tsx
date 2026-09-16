@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/marca/Logo";
+import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
 import { Rotulo } from "@/components/ui/Etiqueta";
+import { cargosEmDestaque } from "@/lib/concursos";
 import { NOME_UF } from "@/lib/rotulos";
 import type { Uf } from "@/lib/dominio";
 
@@ -26,7 +28,27 @@ const COLUNAS = [
   },
 ];
 
-export function Rodape() {
+/**
+ * `async` por causa dos cargos, que saem de uma medição do acervo — ver
+ * `cargosEmDestaque()` e, atrás dela, `src/lib/cargos.ts`.
+ *
+ * Eles não são uma quinta coluna, e a razão foi medida a 1240px. Com quatro
+ * colunas cada uma tem 269px; com cinco, 206px. Os dez rótulos vão de 38px
+ * ("Agente") a 155px ("Assistente em Administração"), então todos caberiam
+ * em 206px — empilhados, dez linhas, contra as cinco da coluna mais alta que
+ * o rodapé tem hoje. Deitados numa fileira de largura inteira eles somam
+ * 869px com os vãos, dentro dos 1183 da linha, e viram uma linha só. A 375px
+ * a fileira quebra em três linhas e 111px, com `scrollWidth` igual a
+ * `clientWidth` — nenhuma rolagem lateral.
+ *
+ * E sem número ao lado, ao contrário dos blocos da home: o resto do rodapé —
+ * "Inscrições abertas", "São Paulo" — também não tem, e uma contagem só aqui
+ * faria parecer que os outros links valem menos. O número está do outro lado
+ * do link, no topo da busca.
+ */
+export async function Rodape() {
+  const cargos = await cargosEmDestaque();
+
   return (
     <footer className="mt-16 bg-rodape text-rodape-texto">
       <div className="mx-auto grid max-w-[1240px] gap-10 px-4 py-8 sm:px-6 md:grid-cols-4">
@@ -71,15 +93,66 @@ export function Rodape() {
             ))}
           </ul>
         </nav>
+
+        {cargos.length > 0 && (
+          <nav aria-label="Concursos por cargo" className="md:col-span-4">
+            <Rotulo className="text-rodape-tenue">Por cargo</Rotulo>
+            {/* `flex-wrap` e `min-w-0` no item: rótulo de cargo pode ser
+                comprido, e item de flex nasce com `min-width: auto`, que o
+                proíbe de encolher abaixo do conteúdo. É a mesma armadilha
+                que já deu 204px de rolagem lateral na coluna "por órgão" da
+                home. */}
+            <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+              {cargos.map((cargo) => (
+                <li key={cargo.href} className="min-w-0">
+                  <Link
+                    href={cargo.href}
+                    className="text-[12px] text-rodape-suave hover:text-rodape-texto"
+                  >
+                    {cargo.rotulo}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
       </div>
 
       {/* Degrau de superfície no lugar de uma linha: o canvas não usa borda. */}
       <div className="bg-rodape-faixa">
-        <p className="mx-auto max-w-[1240px] px-4 py-5 text-xs text-rodape-tenue sm:px-6">
-          BuscaConcurso não organiza concursos. Confira sempre o edital
-          original no diário oficial ou no site da banca antes de se
-          inscrever.
-        </p>
+        <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
+          <p className="text-xs text-rodape-tenue">
+            BuscaConcurso não organiza concursos. Confira sempre o edital
+            original no diário oficial ou no site da banca antes de se
+            inscrever.
+          </p>
+
+          {/* Quem responde pelo site. Os dados são os do cadastro público do
+              CNPJ na Receita Federal (situação ativa em 14/09/2026); mudou o
+              endereço lá, muda aqui. */}
+          <div className="mt-4">
+            <a
+              href="https://gvtechlab.com.br/"
+              className="inline-flex items-center gap-2 text-[12px] font-semibold text-rodape-suave hover:text-rodape-texto"
+            >
+              <LogoGvTechLab tamanho={20} />
+              Desenvolvido por GV Tech Lab
+            </a>
+            <address className="mt-2 text-xs leading-5 not-italic text-rodape-tenue">
+              GV TECH LAB LTDA · CNPJ 50.810.346/0001-23
+              <br />
+              Av. Brig. Faria Lima, 1811, Sala 1119 · Jardim Paulistano · São
+              Paulo/SP · CEP 01452-001
+              <br />
+              <a
+                href="mailto:contato@gvtechlab.com.br"
+                className="hover:text-rodape-texto"
+              >
+                contato@gvtechlab.com.br
+              </a>
+            </address>
+          </div>
+        </div>
       </div>
     </footer>
   );

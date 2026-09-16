@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import { LinhaConcurso } from "@/components/concurso/LinhaConcurso";
-import { BlocoAlerta } from "@/components/home/BlocoAlerta";
+import { AcervoIncompleto, BlocoAlerta } from "@/components/home/BlocoAlerta";
 import { BlocosSeo } from "@/components/home/BlocosSeo";
 import { Hero } from "@/components/home/Hero";
 import { Secao } from "@/components/home/Secao";
-import { facetas, obterDestaques } from "@/lib/concursos";
+import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
+import {
+  avisoDoAcervo,
+  dimensoesDoAcervo,
+  facetas,
+  obterDestaques,
+} from "@/lib/concursos";
 import { dataLonga } from "@/lib/formato";
+import { tituloSemOrgao } from "@/lib/rotulos";
 import { DESCRICAO_SITE, NOME_SITE, urlAbsoluta } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -25,6 +32,8 @@ export default async function Home() {
   const hoje = new Date();
   const destaques = await obterDestaques(hoje);
   const { ufs, bancas, orgaos } = await facetas(hoje);
+  const aviso = await avisoDoAcervo();
+  const dimensoes = await dimensoesDoAcervo();
 
   /**
    * ItemList sobre os concursos em destaque. Descreve para o buscador que
@@ -41,23 +50,25 @@ export default async function Home() {
         "@type": "ListItem",
         position: indice + 1,
         url: urlAbsoluta(`/concursos/${concurso.slug}`),
-        name: `${concurso.orgao.nome}: ${concurso.titulo}`,
+        // O órgão está colado no nome do item, então o título entra recortado
+        // — ver `tituloSemOrgao`. Sem o recorte, os itens desta lista saíam
+        // com o nome do órgão duas vezes na mesma string.
+        name: `${concurso.orgao.nome}: ${tituloSemOrgao(
+          concurso.titulo,
+          concurso.orgao,
+        )}`,
       }),
     ),
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(listaEstruturada).replace(/</g, "\\u003c"),
-        }}
-      />
+      <DadosEstruturados dados={listaEstruturada} />
 
       <Hero
         totalAbertos={destaques.totalAbertos}
         atualizadoEm={dataLonga(isoDeHoje(hoje))}
+        dimensoes={dimensoes}
       />
 
       {destaques.encerrando.length > 0 && (
@@ -85,12 +96,35 @@ export default async function Home() {
       >
         <ul className="grid gap-2 lg:grid-cols-2">
           {destaques.abertos.map((concurso) => (
-            <li key={concurso.slug}>
+            // `min-w-0` pelo mesmo motivo da lista da busca: item de grid não
+            // encolhe abaixo do min-content sem isto, e o mesmo cartão está
+            // aqui.
+            <li key={concurso.slug} className="min-w-0">
               <CartaoConcurso concurso={concurso} hoje={hoje} />
             </li>
           ))}
         </ul>
       </Secao>
+
+      {destaques.atualizados.length > 0 && (
+        <Secao
+          titulo="Últimas atualizações"
+          apoio="Concursos com ato novo no Diário Oficial da União, do mais recente para o mais antigo."
+        >
+          <ul className="grid gap-2">
+            {destaques.atualizados.map((concurso) => (
+              <li key={concurso.slug}>
+                <LinhaConcurso
+                  concurso={concurso}
+                  hoje={hoje}
+                  acao="Ver"
+                  ato={concurso.ultimoAto ?? undefined}
+                />
+              </li>
+            ))}
+          </ul>
+        </Secao>
+      )}
 
       {destaques.previstos.length > 0 && (
         <Secao
@@ -107,6 +141,12 @@ export default async function Home() {
             ))}
           </ul>
         </Secao>
+      )}
+
+      {aviso && (
+        <section className="mx-auto max-w-[1240px] px-4 pb-5 sm:px-6">
+          <AcervoIncompleto aviso={aviso} />
+        </section>
       )}
 
       <BlocoAlerta totalAbertos={destaques.totalAbertos} />

@@ -9,6 +9,13 @@ import type { LinkDeFaceta } from "@/lib/concursos";
  * É o que distribui autoridade da home, que ranqueia por termo genérico,
  * para as combinações de filtro, que ranqueiam por cauda longa. Um menu com
  * JavaScript no lugar disto teria a mesma aparência e nenhum dos efeitos.
+ *
+ * **O rótulo saiu de dentro do cartão**, como nas seções do detalhe e pelo
+ * mesmo motivo — com o bloco desenhado, o rótulo dentro dele disputava com a
+ * primeira linha da lista. Aqui ele não usa `Secao` porque o invólucro é um
+ * `<nav>` com nome acessível e o título é um `h3` sob o `h2` da faixa, e não
+ * um `<section>` com `h2`; o que se repete é a distância, 8px do rótulo ao
+ * bloco contra os 8px de vão entre as colunas da grade.
  */
 function Coluna({
   titulo,
@@ -18,16 +25,34 @@ function Coluna({
   links: LinkDeFaceta[];
 }) {
   return (
-    <nav aria-label={titulo} className="rounded-caixa bg-cartao p-4">
-      <Rotulo>{titulo}</Rotulo>
-      <ul className="mt-3 flex flex-col">
+    <nav aria-label={titulo}>
+      <Rotulo as="h3" className="mb-2">
+        {titulo}
+      </Rotulo>
+      <ul className="flex flex-col rounded-caixa bg-cartao p-4">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
               className="flex items-baseline justify-between gap-3 rounded-controle px-2 py-1.5 text-sm text-tinta-800 transition-colors hover:bg-rebaixada"
             >
-              <span className="truncate">{link.rotulo}</span>
+              {/* `min-w-0` é o que conserta a rolagem horizontal no celular,
+                  e `truncate` era a causa. Item de flex nasce com
+                  `min-width: auto`, que o proíbe de encolher abaixo do
+                  conteúdo; com `white-space: nowrap` junto (que é o que
+                  `truncate` liga), a largura mínima do item vira a linha
+                  INTEIRA. Um nome de órgão de 190 caracteres esticava a
+                  coluna, a grade inteira ia junto, e o documento ganhava
+                  204 px de rolagem lateral — medido em Chrome a 400 px:
+                  `scrollWidth 689` contra `clientWidth 485`, e 485 contra
+                  485 depois.
+
+                  E quebra de linha em vez de reticências porque cortar
+                  esconderia o que distingue dois órgãos congelados pela
+                  resolução, que só diferem no fim do caminho
+                  (".../Campus X"). Trocar rolagem por ambiguidade seria
+                  piorar. */}
+              <span className="min-w-0 break-words">{link.rotulo}</span>
               <span className="numero shrink-0 text-xs text-tinta-500">
                 {link.total}
               </span>
@@ -58,7 +83,14 @@ export function BlocosSeo({
         concursos estão com inscrição aberta agora em cada um.
       </p>
 
-      <div className="mt-3 grid gap-2 md:grid-cols-3">
+      {/* `gap-y-6` contra os `gap-x-2`: empilhadas no celular, as colunas
+          ficam uma embaixo da outra e o rótulo de cada uma mora fora do seu
+          cartão. Com o vão de 7px dos dois lados — o mesmo do `mb-2` do
+          rótulo —, o "POR ÓRGÃO" ficava exatamente no meio do caminho entre o
+          cartão de cima e o seu, sem pertencer a nenhum dos dois. 21px em
+          cima contra 7 embaixo desfaz o empate; lado a lado, a partir de
+          `md`, o vão vertical não separa nada e o horizontal continua 7. */}
+      <div className="mt-5 grid gap-x-2 gap-y-6 md:grid-cols-3">
         <Coluna titulo="Por estado" links={ufs} />
         <Coluna titulo="Por órgão" links={orgaos} />
         <Coluna titulo="Por banca" links={bancas} />

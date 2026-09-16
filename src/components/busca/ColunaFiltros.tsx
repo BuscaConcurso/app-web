@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Rotulo } from "@/components/ui/Etiqueta";
+import { Gaveta } from "@/components/ui/Revelador";
 import type { ContagensDeFaceta, OpcaoDeFaceta } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
 import {
@@ -219,18 +220,42 @@ function Painel({
   consulta,
   contagens,
   prefixo,
+  emGaveta = false,
 }: {
   consulta: ConsultaDaUrl;
   contagens: ContagensDeFaceta;
   prefixo: string;
+  /**
+   * Duas coisas que a gaveta já faz, e que o painel não deve repetir dentro
+   * dela: o cartão em volta — ela já é um cartão de ponta a ponta, e o de
+   * dentro ficaria branco sobre branco com uma sangria a mais — e o título,
+   * que é o que a barra de topo da gaveta diz. Sem isto a tela mostrava
+   * "Filtros" duas vezes, a 40px de distância.
+   */
+  emGaveta?: boolean;
 }) {
   const ativos = quantosFiltros(consulta);
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-5 rounded-caixa bg-cartao p-4">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold">Filtros</p>
+      <div
+        className={
+          emGaveta
+            ? "flex flex-col gap-5"
+            : "flex flex-col gap-5 rounded-caixa bg-cartao p-4"
+        }
+      >
+        <div
+          className={
+            // Sem o título, sobra só o "Limpar", que vai para a direita do
+            // mesmo jeito — e a fileira inteira some quando não há o que
+            // limpar, em vez de deixar uma linha vazia no topo da gaveta.
+            emGaveta
+              ? `flex items-center justify-end ${ativos > 0 ? "" : "hidden"}`
+              : "flex items-center justify-between"
+          }
+        >
+          {!emGaveta && <p className="text-sm font-semibold">Filtros</p>}
           {ativos > 0 && (
             <Link
               href={urlDaBusca(consulta, {
@@ -301,38 +326,74 @@ export function ColunaFiltros({
 
   return (
     <>
-      {/* Celular: mesmo painel dentro de um `details`, que abre e fecha sem
-          script, igual ao menu do cabeçalho. O conteúdo é duplicado no DOM
-          porque não há como forçar um `details` a ficar aberto por CSS, e o
-          painel é leve. */}
-      <details className="lg:hidden">
-        <summary className="flex h-10 w-fit cursor-pointer list-none items-center gap-2 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 hover:bg-tinta-200 [&::-webkit-details-marker]:hidden">
-          <svg aria-hidden="true" viewBox="0 0 18 18" className="size-4">
-            <path
-              d="M2 4.5h14M4.5 9h9M7 13.5h4"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-            />
-          </svg>
-          Filtros
-          {ativos > 0 && <span className="numero text-tinta-600">· {ativos}</span>}
-        </summary>
-        <div className="mt-3">
-          <Painel consulta={consulta} contagens={contagens} prefixo="celular" />
-        </div>
-      </details>
+      {/*
+        Celular: o mesmo painel, agora numa gaveta de `ui/Revelador`. O
+        conteúdo é duplicado no DOM porque não há como forçar um `details` a
+        ficar aberto por CSS, e o painel é leve.
 
-      {/* No desktop a coluna acompanha a rolagem. Ancora pelo topo, e não pelo
-          rodapé: a restrição de `bottom` só impede o elemento de descer além
-          de uma linha perto da base da janela, e quem rola para baixo faz o
-          painel subir, o que nunca viola essa linha. Com `bottom` sozinho a
-          coluna some junto com a página; é o `top` que prende na descida.
+        **Virou gaveta, e a razão é medida.** Ele era um `details` que expandia
+        no fluxo, e a 375px isso custava o seguinte: o painel tem 945,4px de
+        altura — 27 opções em quatro grupos, mais os dois campos de salário —
+        numa janela de 812px. Ele não cabe na tela de jeito nenhum, então ou
+        rola por dentro ou empurra a página. Empurrando, o primeiro resultado
+        ia de y=390 para y=1346: com os filtros abertos, nenhum resultado
+        sobrava na tela, e era preciso rolar 534px além do fim do painel para
+        ver um. A contagem ao lado de cada opção é a única resposta que a
+        pessoa tem enquanto filtra, e o que ela conta estava fora da tela.
 
-          O teto de altura com rolagem própria cobre a tela baixa, onde o
-          painel não caberia inteiro, e o `overscroll-contain` evita que rolar
-          até o fim da coluna continue rolando a página atrás dela. */}
-      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:sticky lg:top-4 lg:flex lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:overscroll-contain">
+        Como gaveta, os resultados continuam onde estavam, atrás; fechar os
+        mostra de novo sem rolar nada.
+
+        Isto não contradiz a decisão de não dar rolagem própria a esta coluna
+        (ver o comentário do `aside`, abaixo): lá o problema eram duas áreas
+        roláveis lado a lado, com a roda do mouse fazendo uma coisa sobre a
+        coluna e outra a dois centímetros dali. A gaveta é modal e trava a
+        rolagem do fundo, então enquanto ela está aberta existe uma área
+        rolável só na tela — que é o mesmo princípio, e não o contrário dele.
+      */}
+      <Gaveta
+        className="lg:hidden"
+        titulo="Filtros"
+        gatilho="h-10 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 transition-colors hover:bg-tinta-200"
+        apoio={
+          ativos > 0 ? <span className="numero">· {ativos}</span> : undefined
+        }
+        rotulo={
+          <span className="inline-flex items-center gap-2">
+            <svg aria-hidden="true" viewBox="0 0 18 18" className="size-4">
+              <path
+                d="M2 4.5h14M4.5 9h9M7 13.5h4"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+              />
+            </svg>
+            Filtros
+          </span>
+        }
+      >
+        <Painel
+          consulta={consulta}
+          contagens={contagens}
+          prefixo="celular"
+          emGaveta
+        />
+      </Gaveta>
+
+      {/* A coluna rola com a página, e não acompanha a rolagem.
+
+          Ela já foi `sticky` com rolagem própria, e as duas coisas saíram em
+          sequência, por decisão do parceiro humano. A rolagem própria saiu
+          primeiro: eram duas áreas roláveis lado a lado, e a roda do mouse
+          fazia uma coisa sobre a coluna e outra a dois centímetros dali.
+
+          Tirada a rolagem, o `sticky` perdeu a metade que o sustentava. Numa
+          tela onde o painel não cabe inteiro, coluna grudada sem rolagem
+          própria prende o começo do painel na tela e esconde o fim para
+          sempre: o filtro que ficou embaixo é inalcançável, porque rolar a
+          página não move a coluna. Estático, a coluna sobe junto e o fim do
+          painel chega. */}
+      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:flex">
         <Painel consulta={consulta} contagens={contagens} prefixo="coluna" />
         <CartaoDeAlerta total={total} />
       </aside>

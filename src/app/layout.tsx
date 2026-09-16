@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { Archivo, Literata } from "next/font/google";
 import "./globals.css";
+import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
 import { Cabecalho } from "@/components/layout/Cabecalho";
 import { Rodape } from "@/components/layout/Rodape";
+import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
+import { origemDoAcervo } from "@/lib/concursos";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 import { SCRIPT_DO_TEMA } from "@/lib/tema";
+import { SessionProvider } from "@/lib/auth/session";
 
 /**
  * Literata em título e Archivo em todo o resto, número incluído.
@@ -106,11 +110,35 @@ const dadosEstruturados = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * `async` por causa de uma linha só: a faixa que diz de onde o acervo veio.
+ *
+ * Ela fica no layout, e não em cada página, porque é o único lugar onde
+ * nenhuma página nova pode esquecer de mostrá-la — e a coisa que ela avisa, o
+ * mock se passando por acervo, é justamente a que ninguém nota quando falta.
+ * Não custa requisição: o `fetch` do Next memoriza a chamada que a página já
+ * faz no mesmo render, e sem `BC_API_URL` não há requisição nenhuma.
+ */
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const origem = await origemDoAcervo();
+
   return (
+    // `suppressHydrationWarning` é o que faltava para o aviso "A tree hydrated
+    // but some attributes of the server rendered HTML didn't match" sumir. O
+    // script de tema logo abaixo escreve `data-tema` no `<html>` ANTES de o
+    // React hidratar — é o ponto dele, senão quem escolheu o escuro vê um
+    // lampejo claro —, e o servidor não tem como saber o que vai estar lá. A
+    // divergência é deliberada e acontece em toda carga.
+    //
+    // O prop vale só para os atributos deste elemento, um nível: não esconde
+    // divergência de nenhum filho. Antes deste conserto o mesmo aviso foi
+    // atribuído à barra de busca e tratado com `autoComplete="off"`, que é
+    // correto por outro motivo mas não era a causa — o log do `next dev`
+    // mostrou o diff apontando para `data-tema` no `<html>`.
     <html
       lang="pt-BR"
       className={`${literata.variable} ${archivo.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         {/* Antes da primeira pintura, senão quem escolheu o contrário do
@@ -120,15 +148,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_DO_TEMA }} />
       </head>
       <body className="flex min-h-full flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(dadosEstruturados).replace(/</g, "\\u003c"),
-          }}
-        />
-        <Cabecalho />
-        <main className="flex-1">{children}</main>
-        <Rodape />
+        <SessionProvider>
+          <DadosEstruturados dados={dadosEstruturados} />
+          <AvisoDeOrigem origem={origem} />
+          <Cabecalho />
+          <main className="flex-1">{children}</main>
+          <Rodape />
+        </SessionProvider>
       </body>
     </html>
   );

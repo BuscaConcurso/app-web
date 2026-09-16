@@ -125,8 +125,14 @@
   --radius-controle: 6px;
 }
 
-/* A escala de espaço do Tailwind já é múltipla de 4, que é a do canvas.
- * Cartões se separam por 12, seções por 32. */
+/* A escala de espaço deste projeto NÃO é a do Tailwind. `--spacing` está em
+ * 0,22rem acima, então cada degrau vale 3,52px e não 4 — `size-11` dá 38,72px,
+ * `px-0.5` dá 1,76px e `px-1` dá 3,52px. Nenhum degrau cai em 2px, e é por
+ * isso que o separador da trilha usa valor arbitrário.
+ *
+ * O comentário anterior dizia "múltipla de 4, que é a do canvas" e listava
+ * cartões por 12 e seções por 32 — três linhas abaixo da própria declaração
+ * que o contradizia. Quem media pelo comentário errava por 12%. */
 
 /**
  * Tema escuro.
@@ -284,6 +290,27 @@ body {
   outline-offset: 2px;
 }
 
+/**
+ * A saída declarada do anel global: quem marca `data-sem-anel` abre mão dele
+ * porque **outro elemento desenha o foco por ele**. Não é permissão para
+ * apagar o sinal de foco; é permissão para mudá-lo de dono, e quem usar tem
+ * de dizer no código quem passou a desenhar.
+ *
+ * Hoje há um: o campo da barra de busca, cujo anel passou para a cápsula
+ * inteira (ver `BarraBusca.tsx`). Em campo de texto o `:focus-visible`
+ * dispara também no clique do mouse, então o anel aparecia toda vez que
+ * alguém clicava para digitar.
+ *
+ * Precisa estar aqui, fora de camada, e não numa classe utilitária: medido no
+ * Chrome 152, `outline-none` do Tailwind **não** apaga a regra acima, porque
+ * utilitário mora em `@layer utilities` e regra sem camada ganha de regra em
+ * camada, por mais específica que a segunda seja. O `outline-none` estava no
+ * campo desde sempre e o anel continuava lá.
+ */
+[data-sem-anel]:focus-visible {
+  outline: none;
+}
+
 /* Número de vaga, salário e prazo.
  *
  * Sem família própria: é o Archivo da interface, só com as figuras de largura
@@ -359,5 +386,119 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .aurora::before {
     animation: none;
+  }
+}
+
+/**
+ * O revelador: a mecânica de abrir e fechar da gaveta e do menu.
+ *
+ * O componente está em `src/components/ui/Revelador.tsx`, e a regra de onde
+ * ele mora está escrita lá. Aqui fica só o movimento, e ele fica aqui por um
+ * motivo: o mecanismo depende de uma propriedade registrada com `@property`,
+ * que não existe como utilitário, e de `@keyframes` que as duas formas
+ * precisam compartilhar. Espalhar isso em classe utilitária daria a mesma
+ * animação escrita duas vezes, que é justamente o que o revelador existe para
+ * impedir.
+ *
+ * **Por que animação e não transição.** O painel vive dentro de um
+ * `<details>`, e o `<details>` é o que faz a gaveta abrir sem JavaScript. O
+ * navegador só renderiza o conteúdo de um `<details>` aberto, então uma
+ * transição com `@starting-style` anima a ENTRADA e não a saída: medido no
+ * Chrome 152, o painel entra de 94,7% a 0 em 240ms e, ao fechar, some no mesmo
+ * quadro — `translate` já lê `none` 20ms depois. Já uma `@keyframes` disparada
+ * pelo seletor recomeça toda vez que ele passa a casar, e o atributo
+ * `data-fechando` (posto pelo componente, que segura o `open` até o
+ * `animationend`) dá a saída pelo mesmo caminho. Medido: 0% aos 20ms e 85,2%
+ * aos 140ms, com `animationend` disparando.
+ *
+ * Sem JavaScript o `[open]` entra e sai na hora: a entrada anima, a saída não,
+ * e a gaveta continua abrindo e fechando. É o degrau que a decisão do
+ * `<details>` compra.
+ *
+ * `--revelar` vai de 1 (fora) a 0 (no lugar). Precisa de `@property` porque
+ * variável sem tipo declarado não interpola — o mesmo motivo de `--aurora-giro`
+ * logo acima. `inherits: true` porque quem lê o valor são os filhos: a barra
+ * de topo (o `<summary>`), o painel e o fundo se movem juntos a partir de um
+ * número só.
+ */
+@property --revelar {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@keyframes revelador-entrar {
+  from {
+    --revelar: 1;
+  }
+  to {
+    --revelar: 0;
+  }
+}
+
+@keyframes revelador-sair {
+  from {
+    --revelar: 0;
+  }
+  to {
+    --revelar: 1;
+  }
+}
+
+/* A curva é a de painel que desliza: sai rápido e assenta devagar. A saída é
+ * mais curta que a entrada (180 contra 240ms) porque fechar é confirmação de
+ * um gesto que a pessoa já deu, e esperar por ela é o que faz uma interface
+ * parecer lenta. */
+[data-revelador][open] {
+  animation: revelador-entrar 240ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+[data-revelador][data-fechando] {
+  animation: revelador-sair 180ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* A gaveta entra pela direita. O `<summary>` aberto é a barra de topo do
+ * painel — e é o único elemento que fecha um `<details>` sem script —, então
+ * ele desliza junto, a partir do mesmo número. */
+[data-revelador="gaveta"][open] > summary,
+[data-revelador="gaveta"][open] > .revelador-painel {
+  translate: calc(var(--revelar) * 100%) 0;
+}
+
+/* O menu cai do gatilho: menos deslocamento e um pouco de escala, porque a
+ * distância que ele percorre é a altura dele, não a largura da tela. */
+[data-revelador="menu"][open] > .revelador-painel {
+  translate: 0 calc(var(--revelar) * -6px);
+  scale: calc(1 - var(--revelar) * 0.02);
+  opacity: calc(1 - var(--revelar));
+}
+
+[data-revelador] > .revelador-fundo {
+  opacity: calc(1 - var(--revelar));
+}
+
+/**
+ * Animação que a pessoa pediu para não ver não roda.
+ *
+ * Desligar a `@keyframes` sozinho deixaria `--revelar` no valor inicial, 1, e
+ * o painel ficaria parado fora da tela — aberto e invisível. Por isso cada
+ * propriedade que o número governa é reposta aqui, no estado final.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-revelador][open],
+  [data-revelador][data-fechando] {
+    animation: none;
+  }
+
+  [data-revelador="gaveta"][open] > summary,
+  [data-revelador="gaveta"][open] > .revelador-painel,
+  [data-revelador="menu"][open] > .revelador-painel {
+    translate: none;
+    scale: none;
+    opacity: 1;
+  }
+
+  [data-revelador] > .revelador-fundo {
+    opacity: 1;
   }
 }

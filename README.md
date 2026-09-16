@@ -3,17 +3,49 @@
 Front do buscador de concursos públicos. Next.js 16 com App Router, React 19,
 TypeScript e Tailwind v4.
 
-Ainda não há API: os dados vêm de um mock tipado com a forma das tabelas do
-`engine`. Toda leitura passa por `src/lib/concursos.ts`, que hoje devolve o
-mock e amanhã fará `fetch`. Nenhum componente importa mock direto, então a
-entrada da API muda um arquivo só.
+Toda leitura passa por `src/lib/concursos.ts`. Com `BC_API_URL` definida, ele
+lê o acervo da API Nest (`../api`); sem ela, ou quando a API não responde, lê o
+mock tipado com a forma das tabelas do `engine` e avisa no log. Nenhum
+componente importa mock direto, e a entrada da API mudou um arquivo só.
+
+Filtro, ordenação, paginação e contagem de faceta continuam rodando aqui,
+sobre o array que `acervo()` devolve, servido por `GET /v1/acervo`.
 
 ## Como rodar
 
 ```bash
 pnpm install
-pnpm dev          # http://localhost:3000
+pnpm dev          # http://localhost:3000, com o mock
 ```
+
+Com o acervo de verdade, suba a API Nest seguindo o [README da API](../api/README.md)
+e configure a raiz com o prefixo `/v1`:
+
+```bash
+BC_API_URL=http://127.0.0.1:8788/v1 pnpm dev
+```
+
+O navegador chama a mesma API diretamente para autenticação. Configure também
+o endereço público, sem o prefixo `/v1`:
+
+```bash
+NEXT_PUBLIC_BC_API_URL=http://127.0.0.1:8788
+```
+
+Para persistir a configuração local, copie `.env.example` para `.env.local`.
+A API Nest usa o acervo compartilhado com o engine. A leitura de detalhe passa
+por `GET /v1/concursos/:slug`, e a avaliação por
+`POST /v1/concursos/:slug/avaliacao`, com `gostei`, `comentario` e `avaliador`
+no JSON. O navegador continua enviando FormData para `/api/avaliacao`; o
+Route Handler mantém o cookie do avaliador e chama a API pelo servidor.
+O diagnóstico do acervo está em `http://127.0.0.1:8788/v1/diagnostico`.
+
+`sigla`, `esfera` e `poder` do órgão são anuláveis em `dominio.ts` porque o
+acervo não os tem: o selo do cartão fica sem letra e a linha de contexto mostra
+só o que existe. É o tipo descrevendo o dado, não a tela.
+
+`BC_API_URL` definida torna as rotas dinâmicas (`fetch` com `no-store`, para
+o acervo não congelar no build). Sem ela, o build segue estático como antes.
 
 ## Como verificar
 
@@ -33,6 +65,12 @@ fora do sitemap.
 | `/` | Landing de busca: hero, faixa de urgência, abertos, previstos, alerta e links internos |
 | `/concursos` | Busca reduzida. A query string é a fonte da verdade |
 | `/concursos/[slug]` | Resumo do concurso |
+| `/entrar` | Login com senha, Google ou LinkedIn |
+| `/cadastrar` | Criação de conta |
+| `/verificar-email` | Confirmação do e-mail pelo token do link |
+| `/esqueci-a-senha` | Pedido de recuperação de senha |
+| `/redefinir-senha` | Redefinição pelo token do link |
+| `/conta` | Perfil, senha, e-mail, provedores e sessões |
 | `/estilo` | Vitrine do design system |
 
 Quase tudo é Server Component. A barra de busca é um `<form method="get">`
@@ -117,6 +155,16 @@ que faz os concursos que fecham nesta semana saltarem de uma lista cinza.
 
 `NEXT_PUBLIC_URL_SITE` define a origem usada em canônico, sitemap e JSON-LD.
 Sem ela, o padrão é o domínio de produção.
+
+`BC_API_URL` é a raiz da API Nest, com o prefixo `/v1` e sem barra no fim
+(por exemplo `http://127.0.0.1:8788/v1`). Ela fica apenas no servidor.
+Ausente, o acervo é o mock. A suíte de testes ignora a variável de propósito (ver `vitest.config.mts`): teste de
+filtro precisa de acervo conhecido e de nenhuma rede.
+
+`NEXT_PUBLIC_BC_API_URL` é a origem da API usada no navegador pelo fluxo de
+autenticação. A sessão mantém o access token apenas em memória e recebe o
+refresh token em cookie `HttpOnly`; por isso a API precisa permitir a origem
+do app em `CORS_ALLOWED_ORIGINS` e aceitar credenciais.
 
 O desenho e as decisões estão em
 `docs/superpowers/specs/2026-09-11-home-e-design-system-design.md`.

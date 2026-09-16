@@ -3,8 +3,15 @@ import Link from "next/link";
 import { ColunaFiltros } from "@/components/busca/ColunaFiltros";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import { BarraBusca } from "@/components/busca/BarraBusca";
+import { RegistroDaBusca } from "@/components/busca/RegistroDaBusca";
 import { Paginacao } from "@/components/ui/Paginacao";
-import { contagensDeFaceta, listarConcursos } from "@/lib/concursos";
+import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
+import {
+  avisoDoAcervo,
+  contagensDeFaceta,
+  dimensoesDoAcervo,
+  listarConcursos,
+} from "@/lib/concursos";
 import { ORDENS, SITUACOES } from "@/lib/consulta";
 import { moeda, numero } from "@/lib/formato";
 import {
@@ -13,7 +20,12 @@ import {
   urlSemValor,
   type ConsultaDaUrl,
 } from "@/lib/parametros";
-import { NOME_UF, ROTULO_ESCOLARIDADE, ROTULO_ESFERA } from "@/lib/rotulos";
+import {
+  NOME_UF,
+  ROTULO_ESCOLARIDADE,
+  ROTULO_ESFERA,
+  avisoDeFiltroSemDado,
+} from "@/lib/rotulos";
 import { BANCAS } from "@/mocks/bancas";
 
 /**
@@ -181,11 +193,32 @@ export default async function BuscaDeConcursos(
   };
   const resultado = await listarConcursos({ ...filtro, ordem, pagina }, hoje);
   const contagens = await contagensDeFaceta(filtro, hoje);
+  const aviso = await avisoDoAcervo();
+  const dimensoes = await dimensoesDoAcervo();
+  const semDado = avisoDeFiltroSemDado(consulta, dimensoes);
   const chips = chipsAtivos(consulta);
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
-      <BarraBusca q={q} uf={uf} compacta />
+      <BarraBusca q={q} uf={uf} compacta dimensoes={dimensoes} />
+
+      {/*
+        Não desenha nada: só grava o termo na memória do navegador quando a
+        busca deu resultado. Mora aqui, e não dentro da `BarraBusca`, porque
+        quem sabe o desfecho é esta página — a barra recebe `q` por prop e
+        aparece também na home e na vitrine, onde ninguém tem esse número.
+
+        `filtrada` sai de `chips`, que é a mesma lista de filtros ativos que a
+        tela desenha logo abaixo: sem uma segunda contagem para divergir da
+        primeira. Ela existe porque zero com filtro não é culpa do termo —
+        "analista" no Acre devolve zero por causa do Acre, e esquecer o termo
+        aí seria punir o inocente.
+      */}
+      <RegistroDaBusca
+        termo={q}
+        resultados={resultado.total}
+        filtrada={chips.length > 0}
+      />
 
       <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-start">
         <ColunaFiltros
@@ -196,8 +229,17 @@ export default async function BuscaDeConcursos(
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em]">
+            {/* `min-w-0` para o `break-words` do `h1` ter efeito: item de flex
+                tem `min-width: auto`, e `overflow-wrap: break-word` não muda a
+                largura mínima intrínseca de um bloco — ela continua sendo a da
+                maior palavra. Sem os dois juntos o título não quebra, ele
+                estica a coluna. O título da busca é `q` quando há texto livre,
+                então ele é texto de URL: medido a 375px, `?q=` com o edital
+                "11/2026/SEGAP/COALEP/CGGP/DAGES-FUNAI" — que é título real do
+                acervo, do tipo que se cola na busca — dava 36px de rolagem
+                lateral. */}
+            <div className="min-w-0">
+              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] break-words">
                 {tituloDaBusca(consulta)}
               </h1>
               <p className="mt-1 text-[12px] text-tinta-600">
@@ -208,6 +250,14 @@ export default async function BuscaDeConcursos(
                   ? "concurso encontrado"
                   : "concursos encontrados"}
               </p>
+              {/* Zero resultados por falta de dado nosso não é zero
+                  resultados. Quem marcou "Espírito Santo" e recebeu uma lista
+                  vazia conclui que não há concurso no estado dele. */}
+              {semDado && (
+                <p className="mt-1.5 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
+                  {semDado}
+                </p>
+              )}
             </div>
 
             <nav
@@ -239,10 +289,13 @@ export default async function BuscaDeConcursos(
                   key={chip.chave}
                   href={chip.href}
                   aria-label={`Remover filtro ${chip.rotulo}`}
-                  className="inline-flex items-center gap-2 rounded-[5px] bg-acao px-2.5 py-1 text-xs font-semibold text-acao-texto hover:bg-acao-hover"
+                  className="inline-flex max-w-full items-center gap-2 rounded-[5px] bg-acao px-2.5 py-1 text-xs font-semibold text-acao-texto hover:bg-acao-hover"
                 >
-                  {chip.rotulo}
-                  <span aria-hidden="true" className="text-white/70">
+                  {/* O chip de `q` carrega texto de URL, do mesmo tamanho que
+                      o do `h1` acima: sem corte ele passava dos 375px sozinho.
+                      O rótulo inteiro continua no `aria-label` do link. */}
+                  <span className="min-w-0 truncate">{chip.rotulo}</span>
+                  <span aria-hidden="true" className="shrink-0 text-white/70">
                     ×
                   </span>
                 </Link>
@@ -276,8 +329,21 @@ export default async function BuscaDeConcursos(
           ) : (
             <ul className="mt-4 grid gap-2 xl:grid-cols-2">
               {resultado.itens.map((concurso) => (
-                <li key={concurso.slug}>
-                  <CartaoConcurso concurso={concurso} hoje={hoje} />
+                // `min-w-0`: item de grid tem `min-width: auto`, que vale o
+                // min-content do conteúdo — então uma etiqueta que se recusa
+                // a encolher (`whitespace-nowrap`) estica a célula, a lista e
+                // a página. Medido a 375px: 2 dos 15 nomes de banca do acervo
+                // passam dos 319px úteis da fileira e davam scroll horizontal
+                // na busca. O corte é da `Etiqueta`; aqui é só a licença para
+                // encolher.
+                <li key={concurso.slug} className="min-w-0">
+                  {/* `ufDoFiltro` só aqui: é a busca que faz a pergunta
+                      "por que este veio", e é só ela que tem a resposta. */}
+                  <CartaoConcurso
+                    concurso={concurso}
+                    hoje={hoje}
+                    ufDoFiltro={uf}
+                  />
                 </li>
               ))}
             </ul>
@@ -292,6 +358,16 @@ export default async function BuscaDeConcursos(
                   urlDaBusca(consulta, { pagina: numeroDaPagina })
                 }
               />
+            </div>
+          )}
+
+          {/* Aqui a contagem de resultados aparece escrita, e é aqui que o
+              silêncio sobre o resto do acervo mais engana: "12 concursos
+              encontrados" sobre um acervo de 4.838, dos quais 189 estão fora
+              da lista por motivos diferentes entre si. */}
+          {aviso && (
+            <div className="mt-6">
+              <AcervoIncompleto aviso={aviso} />
             </div>
           )}
         </div>

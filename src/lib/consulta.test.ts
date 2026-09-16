@@ -1,13 +1,22 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoResumo, Escolaridade, Uf } from "./dominio";
-import { filtrar, normalizar, ordenar } from "./consulta";
+import { filtrar, normalizar, ordenar, ultimasAtualizacoes } from "./consulta";
 
 const HOJE = new Date(2026, 3, 10, 9, 0);
 
 let contador = 0;
 
+/**
+ * `ufs` acompanha `uf` quando quem chama não disser o contrário, que é a
+ * invariante do banco: `concurso.uf` é coluna gerada a partir de `ufs`, a UF
+ * quando é uma só e nula quando são várias. Fixture em que as duas
+ * discordassem testaria um estado que o banco não produz.
+ */
 function fixture(parcial: Partial<ConcursoResumo> = {}): ConcursoResumo {
   contador += 1;
+  const ufs =
+    parcial.ufs ??
+    (parcial.uf !== undefined ? ([parcial.uf].filter(Boolean) as Uf[]) : undefined);
   return {
     slug: `concurso-${contador}`,
     titulo: "Analista judiciário",
@@ -24,17 +33,23 @@ function fixture(parcial: Partial<ConcursoResumo> = {}): ConcursoResumo {
     },
     banca: { slug: "vunesp", nome: "Vunesp" },
     uf: "SP",
+    ufs: ["SP"] as Uf[],
     inscricoesDe: "2026-03-01",
     inscricoesAte: "2026-05-01",
     publicadoEm: "2026-02-20",
     previstoPara: null,
     vagas: 100,
+    vagasPcd: null,
+    vagasNegros: null,
     cadastroReserva: false,
     salarioAte: 10000,
     taxaInscricao: 90,
     escolaridades: ["superior"],
+    nomesDeCargo: [],
+    localidades: [],
     editalUrl: null,
     ...parcial,
+    ...(ufs === undefined ? {} : { ufs }),
   };
 }
 
@@ -60,6 +75,88 @@ describe("filtrar", () => {
     const itens = [fixture()];
     expect(filtrar(itens, { q: "tjsp" }, HOJE)).toHaveLength(1);
     expect(filtrar(itens, { q: "vunesp" }, HOJE)).toHaveLength(1);
+  });
+
+  it("busca pelo nome do cargo, que não está no título", () => {
+    // É como o acervo do engine é: o título é o cabeçalho do ato publicado
+    // ("Universidade Federal de Pelotas — Edital nº 10/2026") e a palavra que
+    // o candidato digita está no cargo. Nenhum dos 181 títulos do acervo tem
+    // "professor"; 105 dos 181 têm um cargo de professor.
+    const itens = [
+      fixture({
+        titulo: "Universidade Federal de Pelotas — Edital nº 10/2026",
+        nomesDeCargo: ["Professor Visitante Indígena"],
+      }),
+      fixture({ titulo: "Edital nº 2/2026", nomesDeCargo: ["Auditor fiscal"] }),
+    ];
+
+    expect(filtrar(itens, { q: "professor" }, HOJE)).toHaveLength(1);
+    expect(filtrar(itens, { q: "professor visitante" }, HOJE)).toHaveLength(1);
+    expect(filtrar(itens, { q: "auditor" }, HOJE)).toHaveLength(1);
+  });
+
+  it("busca pela cidade da vaga, que não está no órgão", () => {
+    // `orgao.municipio` é nulo nos 1.332 órgãos do acervo; a cidade está na
+    // vaga, escrita pelo ato. E sem acento, como qualquer busca daqui.
+    const itens = [
+      fixture({
+        orgao: { ...fixture().orgao, municipio: null, uf: null },
+        localidades: ["Goiânia"],
+      }),
+      fixture({
+        orgao: { ...fixture().orgao, municipio: null, uf: null },
+        localidades: ["Coxim"],
+      }),
+    ];
+
+    expect(filtrar(itens, { q: "goiania" }, HOJE)).toHaveLength(1);
+    expect(filtrar(itens, { q: "coxim" }, HOJE)).toHaveLength(1);
+  });
+
+  it("concurso de um servidor antigo, sem os campos novos, não derruba a busca", () => {
+    // Um `bc api` de versão anterior não manda `nomesDeCargo` nem
+    // `localidades`. A lista inteira em branco por causa disso seria caro
+    // demais para o que custa a guarda.
+    const antigo = fixture();
+    delete (antigo as Partial<ConcursoResumo>).nomesDeCargo;
+    delete (antigo as Partial<ConcursoResumo>).localidades;
+
+    expect(filtrar([antigo], { q: "analista" }, HOJE)).toHaveLength(1);
+  });
+
+  it("acha o concurso multiestadual em cada um dos seus estados", () => {
+    // São 7 no acervo, e o do IBGE tem vaga em 23 estados. `uf` é nula neles
+    // por desenho — é o cartão que não pode afirmar um estado só —, e um
+    // filtro que olhasse `uf` os deixaria fora de todo estado.
+    const nacional = fixture({
+      titulo: "Censo",
+      uf: null,
+      ufs: ["ES", "SP", "BA"],
+    });
+    const paulista = fixture({ uf: "SP" });
+
+    expect(filtrar([nacional, paulista], { uf: "ES" }, HOJE)).toHaveLength(1);
+    expect(filtrar([nacional, paulista], { uf: "BA" }, HOJE)).toHaveLength(1);
+    expect(filtrar([nacional, paulista], { uf: "SP" }, HOJE)).toHaveLength(2);
+    expect(filtrar([nacional, paulista], { uf: "RJ" }, HOJE)).toHaveLength(0);
+  });
+
+  it("concurso sem estado nenhum continua fora do filtro de estado", () => {
+    const semEstado = fixture({ uf: null, ufs: [] });
+
+    expect(filtrar([semEstado], { uf: "SP" }, HOJE)).toHaveLength(0);
+    // E aparece quando ninguém filtra por estado: ausência não é exclusão.
+    expect(filtrar([semEstado], {}, HOJE)).toHaveLength(1);
+  });
+
+  it("servidor antigo, sem `ufs`, não derruba o filtro de estado", () => {
+    const antigo = fixture({ uf: "SP" });
+    delete (antigo as Partial<ConcursoResumo>).ufs;
+
+    // Sem `ufs`, ele não casa nenhum estado — mas a lista não quebra, e a
+    // busca por texto continua achando.
+    expect(filtrar([antigo], { uf: "SP" }, HOJE)).toHaveLength(0);
+    expect(filtrar([antigo], { q: "analista" }, HOJE)).toHaveLength(1);
   });
 
   it("combina estado com escolaridade", () => {
@@ -213,5 +310,63 @@ describe("ordenar", () => {
     ];
     ordenar(itens, "encerrando", HOJE);
     expect(itens.map((c) => c.slug)).toEqual(["maio", "abril"]);
+  });
+});
+
+describe("ultimasAtualizacoes", () => {
+  const ato = (data: string, primeiro = false) => ({
+    data,
+    titulo: "EDITAL Nº 1",
+    primeiro,
+  });
+
+  it("põe o ato de edição mais recente na frente", () => {
+    const itens = [
+      fixture({ slug: "agosto", ultimoAto: ato("2026-08-20") }),
+      fixture({ slug: "setembro", ultimoAto: ato("2026-09-14") }),
+      fixture({ slug: "junho", ultimoAto: ato("2026-06-02") }),
+    ];
+
+    expect(ultimasAtualizacoes(itens).map((c) => c.slug)).toEqual([
+      "setembro",
+      "agosto",
+      "junho",
+    ]);
+  });
+
+  it("deixa de fora quem não tem ato datado, seja nulo ou campo ausente", () => {
+    // `fixture` não põe `ultimoAto`: é exatamente como uma API anterior ao
+    // campo responde. Ausente não pode virar data inválida na tela, nem ir
+    // para a frente da faixa.
+    const daApiVelha = fixture({ slug: "api-velha" });
+    expect("ultimoAto" in daApiVelha).toBe(false);
+
+    const itens = [
+      daApiVelha,
+      fixture({ slug: "sem-ato", ultimoAto: null }),
+      fixture({ slug: "com-ato", ultimoAto: ato("2026-09-01") }),
+    ];
+
+    expect(ultimasAtualizacoes(itens).map((c) => c.slug)).toEqual(["com-ato"]);
+  });
+
+  it("corta no limite", () => {
+    const itens = ["01", "02", "03", "04"].map((dia) =>
+      fixture({ slug: `dia-${dia}`, ultimoAto: ato(`2026-09-${dia}`) }),
+    );
+
+    expect(ultimasAtualizacoes(itens, 2).map((c) => c.slug)).toEqual([
+      "dia-04",
+      "dia-03",
+    ]);
+  });
+
+  it("desempata a mesma edição pelo slug, para a faixa não trocar de ordem a cada carga", () => {
+    const itens = [
+      fixture({ slug: "b", ultimoAto: ato("2026-09-14") }),
+      fixture({ slug: "a", ultimoAto: ato("2026-09-14") }),
+    ];
+
+    expect(ultimasAtualizacoes(itens).map((c) => c.slug)).toEqual(["a", "b"]);
   });
 });

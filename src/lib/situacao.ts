@@ -72,30 +72,34 @@ export function rotuloDeSituacao(
 /** As classes de fundo e de ponto por tom, para o cartão e a etiqueta. */
 export const ESTILO_DO_TOM: Record<
   Tom,
-  { cartao: string; chip: string; ponto: string; apoio: string }
+  { cartao: string; chip: string; ponto: string; apoio: string; bloco: string }
 > = {
   aberto: {
     cartao: "bg-cartao",
     chip: "bg-tinta-100 text-tinta-800",
     ponto: "bg-verde-500",
     apoio: "text-tinta-600",
+    bloco: "bg-bloco",
   },
   urgente: {
     cartao: "bg-urgente",
     chip: "bg-urgente-chip text-vermelho-800",
     ponto: "bg-vermelho",
     apoio: "text-urgente-apoio",
+    bloco: "bg-urgente-chip",
   },
   previsto: {
     cartao: "bg-previsto",
     chip: "bg-previsto-chip text-previsto-texto",
     ponto: "bg-ocre",
     apoio: "text-previsto-apoio",
+    bloco: "bg-previsto-chip",
   },
   encerrado: {
     cartao: "bg-encerrado",
     chip: "bg-encerrado-chip text-tinta-600",
     ponto: "bg-tinta-400",
     apoio: "text-tinta-600",
+    bloco: "bg-encerrado-chip",
   },
 };
