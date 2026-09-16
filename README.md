@@ -25,6 +25,13 @@ e configure a raiz com o prefixo `/v1`:
 BC_API_URL=http://127.0.0.1:8788/v1 pnpm dev
 ```
 
+O navegador chama a mesma API diretamente para autenticação. Configure também
+o endereço público, sem o prefixo `/v1`:
+
+```bash
+NEXT_PUBLIC_BC_API_URL=http://127.0.0.1:8788
+```
+
 Para persistir a configuração local, copie `.env.example` para `.env.local`.
 A API Nest usa o acervo compartilhado com o engine. A leitura de detalhe passa
 por `GET /v1/concursos/:slug`, e a avaliação por
@@ -58,6 +65,12 @@ fora do sitemap.
 | `/` | Landing de busca: hero, faixa de urgência, abertos, previstos, alerta e links internos |
 | `/concursos` | Busca reduzida. A query string é a fonte da verdade |
 | `/concursos/[slug]` | Resumo do concurso |
+| `/entrar` | Login com senha, Google ou LinkedIn |
+| `/cadastrar` | Criação de conta |
+| `/verificar-email` | Confirmação do e-mail pelo token do link |
+| `/esqueci-a-senha` | Pedido de recuperação de senha |
+| `/redefinir-senha` | Redefinição pelo token do link |
+| `/conta` | Perfil, senha, e-mail, provedores e sessões |
 | `/estilo` | Vitrine do design system |
 
 Quase tudo é Server Component. A barra de busca é um `<form method="get">`
@@ -147,6 +160,11 @@ Sem ela, o padrão é o domínio de produção.
 (por exemplo `http://127.0.0.1:8788/v1`). Ela fica apenas no servidor.
 Ausente, o acervo é o mock. A suíte de testes ignora a variável de propósito (ver `vitest.config.mts`): teste de
 filtro precisa de acervo conhecido e de nenhuma rede.
+
+`NEXT_PUBLIC_BC_API_URL` é a origem da API usada no navegador pelo fluxo de
+autenticação. A sessão mantém o access token apenas em memória e recebe o
+refresh token em cookie `HttpOnly`; por isso a API precisa permitir a origem
+do app em `CORS_ALLOWED_ORIGINS` e aceitar credenciais.
 
 O desenho e as decisões estão em
 `docs/superpowers/specs/2026-09-11-home-e-design-system-design.md`.

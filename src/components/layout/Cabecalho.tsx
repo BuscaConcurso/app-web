@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/marca/Logo";
-import { BotaoLink } from "@/components/ui/Botao";
-import { Gaveta } from "@/components/ui/Revelador";
-import { SeletorDeTema } from "./SeletorDeTema";
+import { MenuConta } from "./MenuConta";
 
 /**
  * O gatilho do menu.
@@ -18,22 +16,6 @@ import { SeletorDeTema } from "./SeletorDeTema";
  * Traço e não preenchimento, como os três ícones do seletor de tema, para não
  * abrir uma segunda família de desenho num cabeçalho que tem um símbolo só.
  */
-function IconeDeMenu() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      className="size-5"
-    >
-      <path d="M3 6h14M3 10h14M3 14h14" />
-    </svg>
-  );
-}
-
 /**
  * Cabeçalho.
  *
@@ -104,40 +86,7 @@ export function Cabecalho() {
         <div className="ml-auto flex items-center gap-2">
           {/* A conta e o tema, nas duas larguras. A ordem de dentro é a mesma
               que a barra do desktop tinha: tema, entrar, criar conta. */}
-          <Gaveta
-            rotulo={<IconeDeMenu />}
-            titulo="Entrar, criar conta e tema"
-            nome="Entrar, criar conta e tema"
-            largura="estreita"
-            gatilho="size-10 justify-center rounded-controle bg-rebaixada text-tinta-800 transition-colors hover:bg-tinta-200"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-tinta-600">
-                Tema
-              </span>
-              {/* O seletor fica dentro de um diálogo com foco preso agora.
-                  Conferido: Tab circula entre os três botões e a barra de
-                  topo, e trocar o tema não fecha a gaveta — quem fecha por
-                  clique fora é o `pointerdown`, e este clique é dentro. */}
-              <SeletorDeTema />
-            </div>
-            <div className="mt-4 flex gap-2">
-              <BotaoLink
-                href="/concursos"
-                variante="secundario"
-                tamanho="sm"
-              >
-                Entrar
-              </BotaoLink>
-              <BotaoLink
-                href="/concursos"
-                variante="primario"
-                tamanho="sm"
-              >
-                Criar conta
-              </BotaoLink>
-            </div>
-          </Gaveta>
+          <MenuConta />
         </div>
       </div>
     </header>

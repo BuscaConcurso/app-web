@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   // aviso que só aparece no terminal de quem subiu o servidor.
   //
   // Vale só em desenvolvimento: `next build`/`next start` ignoram esta opção.
-  allowedDevOrigins: ["192.168.15.100"],
+  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.15.100"],
 };
 
 export default nextConfig;
