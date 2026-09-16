@@ -1,15 +1,15 @@
 /**
  * A única porta de entrada de dados do front.
  *
- * Lê a API do engine quando `BC_API_URL` está definida, e o mock quando não
+ * Lê a API Nest quando `BC_API_URL` está definida, e o mock quando não
  * está ou quando a API não responde. As funções já eram assíncronas por isso:
  * a troca aconteceu aqui dentro e nenhum componente mudou, porque nenhum
  * componente importa mock direto.
  *
  * Tudo o que o buscador faz — filtro, ordenação, paginação, contagem de
  * faceta — continua rodando aqui, sobre o array que `acervo()` devolve. É por
- * isso que a API tem uma rota só: uma rota por função duplicaria em Python o
- * que já está testado em `consulta.test.ts` e `concursos.test.ts`.
+ * isso que a listagem usa `/acervo`, sem duplicar na API as consultas já
+ * testadas em `consulta.test.ts` e `concursos.test.ts`.
  */
 import { cache } from "react";
 import { unstable_rethrow } from "next/navigation";
@@ -61,9 +61,8 @@ const POR_PAGINA = 20;
 const LIMITE_DE_CARGOS = 10;
 
 /**
- * Onde a API do engine está ouvindo, sem barra no fim. Suba com `bc api`, que
- * amarra em `127.0.0.1:8787` — o serviço não tem autenticação, e é por isso
- * que ele só atende o laço local.
+ * Raiz da API Nest, incluindo o prefixo `/v1` e sem barra no fim.
+ * No desenvolvimento local: `http://127.0.0.1:8788/v1`.
  *
  * Variável ausente é "usar o mock", não erro: o design do front foi feito
  * contra o mock e continua demonstrável sem o engine no ar. É também o que
@@ -556,7 +555,7 @@ export async function obterDetalhe(
   if (URL_DA_API) {
     try {
       const resposta = await fetch(
-        `${URL_DA_API}/concurso/${encodeURIComponent(slug)}`,
+        `${URL_DA_API}/concursos/${encodeURIComponent(slug)}`,
         { cache: "no-store" },
       );
       // 404 é resposta, não falha: o slug não existe, e quem chamou mostra a
@@ -571,7 +570,7 @@ export async function obterDetalhe(
     } catch (erro) {
       unstable_rethrow(erro);
       console.warn(
-        `[concursos] ${URL_DA_API}/concurso/${slug} falhou (${
+        `[concursos] ${URL_DA_API}/concursos/${slug} falhou (${
           erro instanceof Error ? erro.message : erro
         }); usando o mock.`,
       );

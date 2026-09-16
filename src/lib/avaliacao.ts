@@ -172,8 +172,8 @@ export const ESTADO_INICIAL: EstadoDaAvaliacao = {
 };
 
 /**
- * Onde a API do engine está ouvindo. Lida a cada chamada, e não uma vez no
- * carregamento do módulo como em `concursos.ts`: é o que permite ao teste
+ * Onde a API Nest está ouvindo, incluindo o prefixo `/v1`. Lida a cada
+ * chamada, e não uma vez no carregamento do módulo como em `concursos.ts`: é o que permite ao teste
  * exercitar os dois lados — instância sem serviço de avaliação e instância
  * com ele — sem subir servidor nenhum.
  *
@@ -186,7 +186,7 @@ function urlDaApi(): string | undefined {
 }
 
 /**
- * Manda o clique para o engine.
+ * Manda o clique para a API Nest.
  *
  * Nunca levanta: um "não gostei" que derruba a página do concurso seria a
  * pior resposta possível a alguém dizendo que a página está errada. Falha
@@ -199,13 +199,13 @@ export async function registrarAvaliacao(
 ): Promise<ResultadoDaAvaliacao> {
   const api = urlDaApi();
   if (!api) return "sem-api";
+  const endpoint = `${api}/concursos/${encodeURIComponent(pedido.slug)}/avaliacao`;
   try {
-    const resposta = await fetch(`${api}/avaliacao`, {
+    const resposta = await fetch(endpoint, {
       method: "POST",
       headers: { "content-type": "application/json" },
       cache: "no-store",
       body: JSON.stringify({
-        slug: pedido.slug,
         gostei: pedido.gostei,
         comentario: pedido.comentario,
         avaliador,
@@ -221,7 +221,7 @@ export async function registrarAvaliacao(
     // estático, e engoli-lo aqui faria o Next renderizar coisa errada.
     unstable_rethrow(erro);
     console.warn(
-      `[avaliacao] ${api}/avaliacao falhou (${
+      `[avaliacao] ${endpoint} falhou (${
         erro instanceof Error ? erro.message : erro
       }).`,
     );

@@ -172,7 +172,7 @@ describe("registrarAvaliacao", () => {
 
   it("manda o pedido para a API com o token de quem clicou", async () => {
     const chamadas: [string, RequestInit][] = [];
-    vi.stubEnv("BC_API_URL", "http://127.0.0.1:8787/");
+    vi.stubEnv("BC_API_URL", "http://127.0.0.1:8788/v1/");
     vi.stubGlobal("fetch", async (url: string, opcoes: RequestInit) => {
       chamadas.push([url, opcoes]);
       return new Response("{}", { status: 200 });
@@ -183,19 +183,30 @@ describe("registrarAvaliacao", () => {
     expect(resultado).toBe("gravada");
     // A barra do fim some, como em `concursos.ts`: endereço com duas barras
     // vira 404 e ninguém descobre por quê.
-    expect(chamadas[0][0]).toBe("http://127.0.0.1:8787/avaliacao");
+    expect(chamadas[0][0]).toBe(
+      "http://127.0.0.1:8788/v1/concursos/trt-2-analista-2026/avaliacao",
+    );
     expect(chamadas[0][1].method).toBe("POST");
-    // O corpo EXATO, e não só os campos que interessam. O modelo do engine
-    // ignora campo desconhecido em silêncio (pydantic, `extra` no padrão),
-    // então um `bloco` ressuscitado aqui não quebraria nada e também não
-    // gravaria nada — o modo de falhar mais caro que existe. Igualdade do
-    // corpo inteiro é o que faz isso aparecer no teste em vez de no banco.
+    // O slug vai no caminho; o contrato aceita apenas os dados da avaliação.
     expect(JSON.parse(chamadas[0][1].body as string)).toEqual({
-      slug: "trt-2-analista-2026",
       gostei: false,
       comentario: null,
       avaliador: "token-de-navegador",
     });
+  });
+
+  it("codifica o slug como um único segmento do caminho", async () => {
+    vi.stubEnv("BC_API_URL", "http://127.0.0.1:8788/v1");
+    const rede = vi.fn(async () => new Response("{}", { status: 201 }));
+    vi.stubGlobal("fetch", rede);
+
+    expect(
+      await registrarAvaliacao({ ...PEDIDO, slug: "órgão/teste" }, "avaliador-teste"),
+    ).toBe("gravada");
+    expect(rede).toHaveBeenCalledWith(
+      "http://127.0.0.1:8788/v1/concursos/%C3%B3rg%C3%A3o%2Fteste/avaliacao",
+      expect.objectContaining({ method: "POST", cache: "no-store" }),
+    );
   });
 
   it("sem API configurada, diz que não gravou em vez de fingir", async () => {
@@ -211,7 +222,7 @@ describe("registrarAvaliacao", () => {
   });
 
   it("API que recusa não derruba a página de quem clicou", async () => {
-    vi.stubEnv("BC_API_URL", "http://127.0.0.1:8787");
+    vi.stubEnv("BC_API_URL", "http://127.0.0.1:8788/v1");
     vi.stubGlobal("fetch", async () => new Response("nope", { status: 503 }));
 
     expect(await registrarAvaliacao(PEDIDO, "token-de-navegador")).toBe("falhou");
@@ -220,7 +231,7 @@ describe("registrarAvaliacao", () => {
   it("API fora do ar também não derruba", async () => {
     // O pior desfecho possível seria a página do concurso morrer justamente
     // quando alguém clica dizendo que ela está errada.
-    vi.stubEnv("BC_API_URL", "http://127.0.0.1:8787");
+    vi.stubEnv("BC_API_URL", "http://127.0.0.1:8788/v1");
     vi.stubGlobal("fetch", async () => {
       throw new TypeError("fetch failed");
     });

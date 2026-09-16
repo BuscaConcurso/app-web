@@ -4,12 +4,12 @@ Front do buscador de concursos públicos. Next.js 16 com App Router, React 19,
 TypeScript e Tailwind v4.
 
 Toda leitura passa por `src/lib/concursos.ts`. Com `BC_API_URL` definida, ele
-lê o acervo da API do `engine`; sem ela, ou quando a API não responde, lê o
+lê o acervo da API Nest (`../api`); sem ela, ou quando a API não responde, lê o
 mock tipado com a forma das tabelas do `engine` e avisa no log. Nenhum
 componente importa mock direto, e a entrada da API mudou um arquivo só.
 
 Filtro, ordenação, paginação e contagem de faceta continuam rodando aqui,
-sobre o array que `acervo()` devolve — é por isso que a API tem uma rota só.
+sobre o array que `acervo()` devolve, servido por `GET /v1/acervo`.
 
 ## Como rodar
 
@@ -18,19 +18,20 @@ pnpm install
 pnpm dev          # http://localhost:3000, com o mock
 ```
 
-Com o acervo de verdade, no repositório `engine` ao lado:
+Com o acervo de verdade, suba a API Nest seguindo o [README da API](../api/README.md)
+e configure a raiz com o prefixo `/v1`:
 
 ```bash
-cd ../engine && bc api          # sobe em 127.0.0.1:8787, só leitura
-cd ../app-web && BC_API_URL=http://127.0.0.1:8787 pnpm dev
+BC_API_URL=http://127.0.0.1:8788/v1 pnpm dev
 ```
 
-O acervo do engine ainda está quase todo vazio: dos 9.311 concursos, 2 têm
-cargo ou evento e é só isso que a lista mostra. Os outros aparecem como aviso
-na home e na busca (`avisoDoAcervo()` em `src/lib/concursos.ts`), porque uma
-tela que mostra dois concursos sem dizer isso afirma, por omissão, que o
-acervo tem dois. `curl -s http://127.0.0.1:8787/diagnostico` diz o que falta,
-campo por campo.
+Para persistir a configuração local, copie `.env.example` para `.env.local`.
+A API Nest usa o acervo compartilhado com o engine. A leitura de detalhe passa
+por `GET /v1/concursos/:slug`, e a avaliação por
+`POST /v1/concursos/:slug/avaliacao`, com `gostei`, `comentario` e `avaliador`
+no JSON. O navegador continua enviando FormData para `/api/avaliacao`; o
+Route Handler mantém o cookie do avaliador e chama a API pelo servidor.
+O diagnóstico do acervo está em `http://127.0.0.1:8788/v1/diagnostico`.
 
 `sigla`, `esfera` e `poder` do órgão são anuláveis em `dominio.ts` porque o
 acervo não os tem: o selo do cartão fica sem letra e a linha de contexto mostra
@@ -142,9 +143,9 @@ que faz os concursos que fecham nesta semana saltarem de uma lista cinza.
 `NEXT_PUBLIC_URL_SITE` define a origem usada em canônico, sitemap e JSON-LD.
 Sem ela, o padrão é o domínio de produção.
 
-`BC_API_URL` é a raiz da API de leitura do engine, sem barra no fim (por
-exemplo `http://127.0.0.1:8787`). Ausente, o acervo é o mock. A suíte de
-testes ignora a variável de propósito (ver `vitest.config.mts`): teste de
+`BC_API_URL` é a raiz da API Nest, com o prefixo `/v1` e sem barra no fim
+(por exemplo `http://127.0.0.1:8788/v1`). Ela fica apenas no servidor.
+Ausente, o acervo é o mock. A suíte de testes ignora a variável de propósito (ver `vitest.config.mts`): teste de
 filtro precisa de acervo conhecido e de nenhuma rede.
 
 O desenho e as decisões estão em

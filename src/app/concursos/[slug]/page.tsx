@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta } from "@/components/ui/Etiqueta";
 import { Secao } from "@/components/ui/Secao";
@@ -69,6 +69,9 @@ export default async function PaginaDoConcurso(
   const { slug } = await props.params;
   const concurso = await obterDetalhe(slug);
   if (!concurso) notFound();
+  if (concurso.slug !== slug) {
+    permanentRedirect(`/concursos/${encodeURIComponent(concurso.slug)}`);
+  }
 
   const hoje = new Date();
   // A data civil brasileira, para a linha do tempo: ver `hojeEmSaoPaulo`.

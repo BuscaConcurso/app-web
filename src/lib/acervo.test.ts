@@ -402,7 +402,7 @@ describe("obterDetalhe", () => {
     const { obterDetalhe } = await carregar();
     const detalhe = await obterDetalhe("so-este");
 
-    expect(rede).toHaveBeenCalledWith(`${API}/concurso/so-este`, {
+    expect(rede).toHaveBeenCalledWith(`${API}/concursos/so-este`, {
       cache: "no-store",
     });
     expect(detalhe!.cronograma[0].evidencia).toContain("18 de maio");
