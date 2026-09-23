@@ -63,7 +63,8 @@ fora do sitemap.
 `docker build --build-arg NEXT_PUBLIC_BC_API_URL=https://api.buscaconcurso.com.br -t bc-web .`
 gera a imagem de produção (`output: "standalone"`). `BC_API_URL` chega em
 runtime; `NEXT_PUBLIC_BC_API_URL` fica gravada no bundle, então trocar o
-domínio da API exige novo build.
+domínio da API exige novo build. `NEXT_PUBLIC_GTM_ID` também entra no build
+(`--build-arg`); vazio ou fora do formato `GTM-XXXXXXX` não carrega o GTM.
 
 ## O que existe
 
