@@ -75,3 +75,35 @@ export function LinkDaConsulta({
     />
   );
 }
+
+/**
+ * O formulário GET de uma consulta (a faixa de salário), com a mesma regra
+ * do link: em `/busca/<slug>`, enviar para o mesmo caminho vira
+ * `history.pushState` com a query que o navegador montaria, campo vazio
+ * incluído, e a lista se refaz sem rede. Fora dali, e sem JavaScript, é o
+ * `<form method="get">` de sempre.
+ */
+export function FormularioDaConsulta({
+  action,
+  onSubmit,
+  ...resto
+}: Omit<ComponentProps<"form">, "action" | "method"> & { action: string }) {
+  const noNavegador = useContext(ConsultaNoNavegador);
+
+  function aoEnviar(evento: Parameters<NonNullable<ComponentProps<"form">["onSubmit"]>>[0]) {
+    onSubmit?.(evento);
+    if (!noNavegador || evento.defaultPrevented) return;
+    const destino = new URL(action, window.location.href);
+    if (destino.origin !== window.location.origin) return;
+    if (destino.pathname !== window.location.pathname) return;
+    evento.preventDefault();
+    const campos = new URLSearchParams();
+    for (const [nome, valor] of new FormData(evento.currentTarget)) {
+      if (typeof valor === "string") campos.append(nome, valor);
+    }
+    const query = campos.toString();
+    window.history.pushState(null, "", query ? `${destino.pathname}?${query}` : destino.pathname);
+  }
+
+  return <form action={action} method="get" onSubmit={aoEnviar} {...resto} />;
+}

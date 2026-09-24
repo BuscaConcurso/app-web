@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ColunaFiltros } from "@/components/busca/ColunaFiltros";
+import { LinkDaConsulta } from "@/components/busca/LinkDaConsulta";
 import { RegistroDaBusca } from "@/components/busca/RegistroDaBusca";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
@@ -60,15 +61,15 @@ export function ListaDeResultados({
         página, onde ninguém tem esse número.
 
         `filtrada` sai de `chips`, que é a mesma lista de filtros ativos que a
-        tela desenha logo abaixo: sem uma segunda contagem para divergir da
-        primeira. Ela existe porque zero com filtro não é culpa do termo:
+        tela desenha logo abaixo, sem o chip do termo (`soOTermo`): sem uma
+        segunda contagem para divergir da primeira. Ela existe porque zero com filtro não é culpa do termo:
         "analista" no Acre devolve zero por causa do Acre, e esquecer o termo
         aí seria punir o inocente.
       */}
       <RegistroDaBusca
         termo={consulta.q}
         resultados={resultado.total}
-        filtrada={chips.length > 0}
+        filtrada={!soOTermo}
       />
 
       <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-start">
@@ -117,7 +118,7 @@ export function ListaDeResultados({
             >
               <span className="text-[12px] text-tinta-500">Ordenar por</span>
               {(Object.keys(ORDENS) as (keyof typeof ORDENS)[]).map((chave) => (
-                <Link
+                <LinkDaConsulta
                   key={chave}
                   href={urlDaBusca(consulta, { ordem: chave, pagina: 1 })}
                   aria-current={chave === consulta.ordem ? "true" : undefined}
@@ -128,7 +129,7 @@ export function ListaDeResultados({
                   }`}
                 >
                   {ORDENS[chave]}
-                </Link>
+                </LinkDaConsulta>
               ))}
             </nav>
           </div>
@@ -136,7 +137,7 @@ export function ListaDeResultados({
           {chips.length > 0 && (
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {chips.map((chip) => (
-                <Link
+                <LinkDaConsulta
                   key={chip.chave}
                   href={chip.href}
                   aria-label={`Remover filtro ${chip.rotulo}`}
@@ -149,14 +150,14 @@ export function ListaDeResultados({
                   <span aria-hidden="true" className="shrink-0 text-white/70">
                     ×
                   </span>
-                </Link>
+                </LinkDaConsulta>
               ))}
-              <Link
+              <LinkDaConsulta
                 href={urlSemFiltros(consulta)}
                 className="px-2 text-xs font-medium text-tinta-600 underline underline-offset-4 hover:text-tinta-900"
               >
                 Limpar filtros
-              </Link>
+              </LinkDaConsulta>
             </div>
           )}
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { Gaveta } from "@/components/ui/Revelador";
-import { LinkDaConsulta } from "./LinkDaConsulta";
+import { FormularioDaConsulta, LinkDaConsulta } from "./LinkDaConsulta";
 import type { ContagensDeFaceta, OpcaoDeFaceta } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
 import {
@@ -179,7 +179,7 @@ function FaixaDeSalario({
     "focus:bg-cartao focus:ring-2 focus:ring-acao numero";
 
   return (
-    <form action={caminhoDaBusca(consulta.q)} method="get" className="flex flex-col gap-2.5">
+    <FormularioDaConsulta action={caminhoDaBusca(consulta.q)} className="flex flex-col gap-2.5">
       <CamposOcultos consulta={consulta} />
       <Rotulo>Salário</Rotulo>
       <div className="flex items-center gap-2">
@@ -215,7 +215,7 @@ function FaixaDeSalario({
       >
         Aplicar faixa
       </button>
-    </form>
+    </FormularioDaConsulta>
   );
 }
 
