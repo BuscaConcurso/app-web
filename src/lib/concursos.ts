@@ -657,10 +657,16 @@ export async function contagensDeFaceta(
  * que precisa de cronograma, cargo, vaga e remuneração — carregar isso para
  * os 181 concursos só para mostrar um seria pagar a lista inteira por página.
  *
- * Sem API, ou com a API fora do ar, cai no mock: o resumo que o mock tem, com
- * cronograma, cargos e origens vazios. A página trata vazio, então ela
- * continua demonstrável sem o engine no ar — e não inventa um cronograma que
- * o mock não tem.
+ * **Com `BC_API_URL` definida, não há mock** (a mesma regra de `carregar`,
+ * R3). 404 da API é resposta: o slug não existe e a página mostra não
+ * encontrado. Qualquer outra falha (rede, 5xx, resposta sem concurso, mais de
+ * `TEMPO_MAXIMO_DA_LEITURA_MS`) lança, e a página de erro aparece. Cair no
+ * mock aqui fazia todo slug real que o mock não tem virar 404 com `noindex`
+ * enquanto a API estivesse fora: o Google aprendia que o concurso sumiu.
+ *
+ * Sem `BC_API_URL` (desenvolvimento e testes), o mock: o resumo que ele tem,
+ * com cronograma, cargos e origens vazios. A página trata vazio, e não
+ * inventa um cronograma que o mock não tem.
  */
 export async function obterDetalhe(
   slug: string,
@@ -669,7 +675,10 @@ export async function obterDetalhe(
     try {
       const resposta = await fetch(
         `${URL_DA_API}/concursos/${encodeURIComponent(slug)}`,
-        { cache: "no-store" },
+        {
+          cache: "no-store",
+          signal: AbortSignal.timeout(TEMPO_MAXIMO_DA_LEITURA_MS),
+        },
       );
       // 404 é resposta, não falha: o slug não existe, e quem chamou mostra a
       // página de não encontrado em vez do mock.
@@ -683,11 +692,12 @@ export async function obterDetalhe(
       return normalizarDetalhe(corpo);
     } catch (erro) {
       unstable_rethrow(erro);
-      console.warn(
+      console.error(
         `[concursos] ${URL_DA_API}/concursos/${slug} falhou (${
           erro instanceof Error ? erro.message : erro
-        }); usando o mock.`,
+        }); a página de erro responde.`,
       );
+      throw erro;
     }
   }
   const resumo = CONCURSOS.find((concurso) => concurso.slug === slug);

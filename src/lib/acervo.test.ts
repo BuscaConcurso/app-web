@@ -455,6 +455,7 @@ describe("obterDetalhe", () => {
 
     expect(rede).toHaveBeenCalledWith(`${API}/concursos/so-este`, {
       cache: "no-store",
+      signal: expect.any(AbortSignal),
     });
     expect(detalhe!.cronograma[0].evidencia).toContain("18 de maio");
     expect(detalhe!.cargos[0].nome).toBe("Professor Visitante");
@@ -474,21 +475,54 @@ describe("obterDetalhe", () => {
     expect(avisos).toEqual([]);
   });
 
-  it("API fora do ar cai no resumo do mock, sem inventar detalhe", async () => {
+  // R3/R9: com BC_API_URL, falha não é mock. Um slug real que o mock não tem
+  // viraria 404 com noindex durante a queda; lançando, a página de erro
+  // responde e o 404 fica só para o slug que a API diz não existir.
+  it("API fora do ar lança, e não cai no mock", async () => {
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () => {
       throw new Error("ECONNREFUSED");
     }));
 
     const { obterDetalhe } = await carregar();
-    const detalhe = await obterDetalhe("trt-2-analista-judiciario-2026");
 
-    expect(detalhe!.titulo).toBe("Analista e técnico judiciário");
-    // Cronograma vazio, não um cronograma inventado a partir das datas do
-    // resumo: o mock não tem evento nenhum, e a página sabe dizer isso.
-    expect(detalhe!.cronograma).toEqual([]);
-    expect(detalhe!.cargos).toEqual([]);
-    expect(avisos.join()).toContain("usando o mock");
+    // Slug que existe no mock: antes, a queda o servia com dado de mentira.
+    await expect(obterDetalhe("trt-2-analista-judiciario-2026")).rejects.toThrow(
+      "ECONNREFUSED",
+    );
+    // Slug real que o mock não tem: antes, virava 404.
+    await expect(obterDetalhe("so-este")).rejects.toThrow("ECONNREFUSED");
+    expect(erros.join()).toContain("a página de erro responde");
+    expect(avisos.join()).not.toContain("mock");
+  });
+
+  it("5xx da API lança", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ detail: "x" }, 503)));
+
+    const { obterDetalhe } = await carregar();
+
+    await expect(obterDetalhe("so-este")).rejects.toThrow("a API respondeu 503");
+  });
+
+  it("tempo esgotado lança", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new DOMException("The operation was aborted due to timeout", "TimeoutError");
+    }));
+
+    const { obterDetalhe } = await carregar();
+
+    await expect(obterDetalhe("so-este")).rejects.toThrow(/timeout/);
+  });
+
+  it("resposta sem concurso lança", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ outra: "coisa" })));
+
+    const { obterDetalhe } = await carregar();
+
+    await expect(obterDetalhe("so-este")).rejects.toThrow("a resposta não tem um concurso");
   });
 
   it("sem BC_API_URL não toca a rede e devolve o resumo do mock", async () => {
