@@ -18,7 +18,7 @@ import { describe, expect, it } from "vitest";
  *
  * O caractere vai escapado para este arquivo não precisar se excluir.
  */
-const TRAVESSAO = "—";
+const TRAVESSAO = "\u2014";
 const RAIZ = join(process.cwd(), "src");
 
 const TEXTO = new Set<ts.SyntaxKind>([

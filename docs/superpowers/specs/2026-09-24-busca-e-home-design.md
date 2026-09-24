@@ -110,10 +110,10 @@ Data: 2026-09-24
 - Reescrever o design system.
 
 ### Sem travessão
-- Pedido do usuário: nenhum texto visível do site usa o travessão "—". Todas
+- Pedido do usuário: nenhum texto visível do site usa o travessão (U+2014). Todas
   as ocorrências em texto de interface (JSX, metadata, títulos, mensagens,
   mocks exibidos) são reescritas com vírgula, dois-pontos, parênteses ou
-  ponto. Um teste Vitest varre `src/` e falha se encontrar "—" fora de
+  ponto. Um teste Vitest varre `src/` e falha se encontrar o travessão (U+2014) fora de
   comentários.
 
 ### Páginas 404 e de erro
