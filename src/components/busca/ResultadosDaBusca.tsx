@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { ConsultaNoNavegadorProvider } from "./LinkDaConsulta";
 import { ListaDeResultados } from "./ListaDeResultados";
 import { aplicarConsulta } from "@/lib/buscaLocal";
 import type { AvisoDoAcervo, DimensoesDoAcervo } from "@/lib/concursos";
@@ -36,16 +37,22 @@ export function ResultadosDaBusca({
   const [hoje] = useState(() => new Date());
   const consulta = lerConsulta({ ...parametros, q: termoDoSlug(dados.slug) });
   const { resultado, contagens } = aplicarConsulta(dados.itens, consulta, hoje);
+  // O provedor liga os links de filtro, chip, ordenação e página ao
+  // `history.pushState` (ver `LinkDaConsulta`): a lista inteira já está aqui,
+  // e buscar de novo o payload do termo só para trocar a query seria rede à
+  // toa.
   return (
-    <ListaDeResultados
-      consulta={consulta}
-      titulo={dados.titulo}
-      resultado={resultado}
-      contagens={contagens}
-      aviso={dados.aviso}
-      dimensoes={dados.dimensoes}
-      hoje={hoje}
-    />
+    <ConsultaNoNavegadorProvider>
+      <ListaDeResultados
+        consulta={consulta}
+        titulo={dados.titulo}
+        resultado={resultado}
+        contagens={contagens}
+        aviso={dados.aviso}
+        dimensoes={dados.dimensoes}
+        hoje={hoje}
+      />
+    </ConsultaNoNavegadorProvider>
   );
 }
 

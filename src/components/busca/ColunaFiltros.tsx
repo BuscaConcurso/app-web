@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { Gaveta } from "@/components/ui/Revelador";
+import { LinkDaConsulta } from "./LinkDaConsulta";
 import type { ContagensDeFaceta, OpcaoDeFaceta } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
 import {
@@ -74,7 +75,7 @@ function Grupo({
           const marcado = marcados.includes(opcao.valor);
           return (
             <li key={opcao.valor}>
-              <Link
+              <LinkDaConsulta
                 href={urlAlternando(consulta, dimensao, opcao.valor)}
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcado ? "remover filtro" : "filtrar"
@@ -88,7 +89,7 @@ function Grupo({
                 <span className="numero ml-auto text-xs text-tinta-500">
                   {numero(opcao.total)}
                 </span>
-              </Link>
+              </LinkDaConsulta>
             </li>
           );
         })}
@@ -112,7 +113,7 @@ function GrupoDeBancas({
           const marcada = consulta.bancas.includes(opcao.valor);
           return (
             <li key={opcao.valor}>
-              <Link
+              <LinkDaConsulta
                 href={urlAlternando(consulta, "bancas", opcao.valor)}
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcada ? "remover filtro" : "filtrar"
@@ -124,7 +125,7 @@ function GrupoDeBancas({
                 }`}
               >
                 {opcao.rotulo}
-              </Link>
+              </LinkDaConsulta>
             </li>
           );
         })}
@@ -259,7 +260,7 @@ function Painel({
         >
           {!emGaveta && <p className="text-sm font-semibold">Filtros</p>}
           {ativos > 0 && (
-            <Link
+            <LinkDaConsulta
               href={urlDaBusca(consulta, {
                 escolaridades: [],
                 situacoes: [],
@@ -273,7 +274,7 @@ function Painel({
               className="text-[12px] font-semibold text-tinta-900 underline underline-offset-[3px] hover:text-link"
             >
               Limpar
-            </Link>
+            </LinkDaConsulta>
           )}
         </div>
 
