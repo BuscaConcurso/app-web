@@ -53,7 +53,7 @@ export function AcervoIncompleto({ aviso }: { aviso: AvisoDoAcervo }) {
       */}
       {partes.length === 0 ? (
         <>
-          : não temos cargo nem cronograma deles. Nem todos vão entrar — parte
+          : não temos cargo nem cronograma deles. Nem todos vão entrar: parte
           dos atos é retificação ou anexo, que não abre concurso.
         </>
       ) : partes.length === 1 && partes[0].quantos === aviso.semDado ? (

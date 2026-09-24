@@ -53,7 +53,7 @@ export async function generateMetadata(
   return {
     title: sigla ? `${orgao.nome} (${sigla})` : orgao.nome,
     description:
-      `Concursos públicos ${sigla ? `do ${sigla} — ` : "do "}${orgao.nome}. ` +
+      `Concursos públicos ${sigla ? `do ${sigla}, ` : "do "}${orgao.nome}. ` +
       `${resumoDoOrgao(concursos.length)} Vagas, salário, taxa e prazo de ` +
       "inscrição de cada edital, com o link para o documento original.",
     alternates: { canonical: `/orgaos/${orgao.slug}` },

@@ -134,7 +134,7 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
               </a>
               <span className="text-tinta-600">
                 {" "}
-                — endereço informado pelo ato, que não conferimos.
+                (endereço informado pelo ato, que não conferimos).
               </span>
             </p>
           )}

@@ -274,7 +274,7 @@ export default async function PaginaDoConcurso(
                 ? "O ato publicado"
                 : "Os atos publicados"
             }
-            apoio="O ato como saiu no diário oficial, na íntegra — que pode ser o extrato, não o edital completo. O edital com anexos e programa de provas fica no site da banca."
+            apoio="O ato como saiu no diário oficial, na íntegra. Pode ser o extrato, não o edital completo: o edital com anexos e programa de provas fica no site da banca."
           >
             <AtosPublicados origens={concurso.origens} />
           </Secao>

@@ -171,7 +171,7 @@ function faixa(base: number | null, total: number | null): string {
  * com cadastro de reserva não é o mesmo que nenhuma vaga.
  */
 function descreverVaga(vaga: Vaga): string {
-  const onde = [vaga.localidade, vaga.uf].filter(Boolean).join(" — ");
+  const onde = [vaga.localidade, vaga.uf].filter(Boolean).join(", ");
   // "ampla concorrência: 8", e não "8 ampla concorrência": com uma vaga só,
   // a segunda forma vira "1 outras reservas". O dois-pontos atravessa
   // singular e plural sem precisar concordar com nada.
