@@ -70,7 +70,9 @@ import {
  * ## A forma: uma linha só, em qualquer largura
  *
  * No cabeçalho a barra não pode empilhar: campo, seletor e botão ficam na
- * mesma linha também no celular, com 36px de altura. Abaixo de `sm` a lupa
+ * mesma linha também no celular, com 44px de altura, o alvo de toque
+ * recomendado (o usuário pediu um cabeçalho um pouco mais alto por conta da
+ * busca). Abaixo de `sm` a lupa
  * da esquerda sai e o botão vira só a lupa, que é o que deixa o campo com
  * espaço para o texto. Na home a cápsula leva o `.aurora`, o anel verde que
  * gira; fora dela é `bg-rebaixada` e parada, para não competir com o
@@ -385,7 +387,7 @@ export function BarraBusca({
             naHome ? "aurora bg-cartao" : "bg-rebaixada"
           }`}
         >
-          <div className="flex min-w-0 flex-1 items-center gap-2 pr-1 pl-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2 pr-0.5 pl-3.5">
             <Lupa className="hidden size-4 shrink-0 text-tinta-500 sm:block" />
             <label htmlFor={idCampo} className="sr-only">
               Cargo, órgão ou banca
@@ -412,7 +414,7 @@ export function BarraBusca({
               placeholder="Cargo, órgão ou banca"
               /* Quem desenha o foco deste campo é a cápsula, logo acima. */
               data-sem-anel=""
-              className="h-9 w-full min-w-0 bg-transparent text-sm text-tinta-900 placeholder:text-tinta-500"
+              className="h-11 w-full min-w-0 bg-transparent text-sm text-tinta-900 sm:text-[15px] placeholder:text-tinta-500"
               {...campo}
             />
           </div>
@@ -429,7 +431,7 @@ export function BarraBusca({
               onChange={(evento) => trocar(evento.target.value)}
               disabled={semEstado}
               aria-describedby={semEstado ? idMotivo : undefined}
-              className={`h-9 w-[7.5rem] appearance-none truncate rounded-full pr-7 pl-3 text-[13px] font-medium sm:w-[11rem] ${
+              className={`h-11 w-[7.5rem] appearance-none truncate rounded-full pr-7 pl-3 text-[13px] font-medium sm:w-[11rem] ${
                 naHome ? "bg-rebaixada" : "bg-cartao"
               } ${
                 semEstado
@@ -463,9 +465,9 @@ export function BarraBusca({
           <button
             type="submit"
             aria-label="Buscar"
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-acao text-sm font-semibold text-acao-texto transition-colors hover:bg-acao-hover sm:w-auto sm:px-5"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-acao text-sm font-semibold text-acao-texto transition-colors hover:bg-acao-hover sm:w-auto sm:px-6"
           >
-            <Lupa className="size-4 sm:hidden" />
+            <Lupa className="size-[18px] sm:hidden" />
             <span aria-hidden="true" className="hidden sm:inline">
               Buscar
             </span>
