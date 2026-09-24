@@ -6,6 +6,7 @@ import {
   dimensoesDoAcervo,
   listarConcursos,
 } from "@/lib/concursos";
+import { hojeCivilEmSaoPaulo } from "@/lib/formato";
 import {
   filtroDaConsulta,
   lerConsulta,
@@ -78,7 +79,8 @@ function quantasDimensoes(consulta: ConsultaDaUrl): number {
 export default async function BuscaDeConcursos(
   props: PageProps<"/concursos">,
 ) {
-  const hoje = new Date();
+  // Data civil de São Paulo, a mesma de /busca: ver `hojeCivilEmSaoPaulo`.
+  const hoje = hojeCivilEmSaoPaulo();
   const consulta = lerConsulta(await props.searchParams);
   const filtro = filtroDaConsulta(consulta);
   const [resultado, contagens, aviso, dimensoes] = await Promise.all([

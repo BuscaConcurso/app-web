@@ -8,6 +8,7 @@ import { aplicarConsulta } from "@/lib/buscaLocal";
 import type { AvisoDoAcervo, DimensoesDoAcervo } from "@/lib/concursos";
 import type { ConcursoResumo } from "@/lib/dominio";
 import { termoDoSlug } from "@/lib/enderecoDaBusca";
+import { hojeCivilEmSaoPaulo } from "@/lib/formato";
 import { lerConsulta, parametrosDaUrl, type Parametros } from "@/lib/parametros";
 
 export interface DadosDaBusca {
@@ -26,15 +27,16 @@ export interface DadosDaBusca {
  * que é exatamente o canônico, e é isso que o buscador lê. No navegador a
  * versão que lê a URL toma o lugar dela.
  *
- * `hoje` num `useState` com inicializador, e não `new Date()` solto no
- * render: a regra de pureza do React trata relógio no corpo do componente
- * como efeito colateral.
+ * `hoje` num `useState` com inicializador, e não o relógio solto no render:
+ * a regra de pureza do React trata relógio no corpo do componente como efeito
+ * colateral. É a data civil de São Paulo, e não a do fuso do navegador, para
+ * "abertas" e "encerrando" darem o mesmo que /concursos no servidor.
  */
 export function ResultadosDaBusca({
   parametros,
   ...dados
 }: DadosDaBusca & { parametros: Parametros }) {
-  const [hoje] = useState(() => new Date());
+  const [hoje] = useState(() => hojeCivilEmSaoPaulo());
   const consulta = lerConsulta({ ...parametros, q: termoDoSlug(dados.slug) });
   const { resultado, contagens } = aplicarConsulta(dados.itens, consulta, hoje);
   // O provedor liga os links de filtro, chip, ordenação e página ao
