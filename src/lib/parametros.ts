@@ -11,7 +11,8 @@
  * escreveria na mão.
  */
 import { UFS, type Escolaridade, type Esfera, type Uf } from "./dominio";
-import { ORDENS, SITUACOES, type Ordem, type Situacao } from "./consulta";
+import { ORDENS, SITUACOES, type Filtro, type Ordem, type Situacao } from "./consulta";
+import { slugDaBusca } from "./enderecoDaBusca";
 import { ROTULO_ESCOLARIDADE, ROTULO_ESFERA } from "./rotulos";
 import { BANCAS } from "@/mocks/bancas";
 
@@ -106,6 +107,26 @@ export function lerConsulta(parametros: Parametros): ConsultaDaUrl {
   };
 }
 
+/** A consulta sem nada: listagem geral, ordenação padrão, primeira página. */
+export const CONSULTA_VAZIA: ConsultaDaUrl = {
+  escolaridades: [],
+  situacoes: [],
+  bancas: [],
+  esferas: [],
+  ordem: "encerrando",
+  pagina: 1,
+};
+
+/**
+ * Onde a busca mora: `/busca/<slug>` quando há o que buscar, `/concursos`
+ * quando não há. É também o `action` dos formulários que editam só uma parte
+ * da consulta (a faixa de salário): o termo viaja no caminho, não num campo.
+ */
+export function caminhoDaBusca(q?: string): string {
+  const slug = q ? slugDaBusca(q) : "";
+  return slug ? `/busca/${slug}` : "/concursos";
+}
+
 /**
  * Monta o endereço da busca a partir de uma consulta, aplicando as
  * alterações pedidas.
@@ -120,7 +141,6 @@ export function urlDaBusca(
   const final = { ...consulta, ...alteracoes };
   const busca = new URLSearchParams();
 
-  if (final.q) busca.set("q", final.q);
   if (final.uf) busca.set("uf", final.uf);
 
   for (const [dimensao, parametro] of Object.entries(PARAMETRO_DA_DIMENSAO)) {
@@ -134,8 +154,55 @@ export function urlDaBusca(
   if (final.ordem !== "encerrando") busca.set("ordem", final.ordem);
   if (final.pagina > 1) busca.set("pagina", String(final.pagina));
 
+  // O termo vai no caminho, e não na query: `/busca/<slug>` é o endereço
+  // que o buscador indexa, e a query fica só para os recortes dele.
+  const caminho = caminhoDaBusca(final.q);
   const texto = busca.toString();
-  return texto ? `/concursos?${texto}` : "/concursos";
+  return texto ? `${caminho}?${texto}` : caminho;
+}
+
+/** "Limpar filtros": fica o termo e a ordenação, sai todo recorte. */
+export function urlSemFiltros(consulta: ConsultaDaUrl): string {
+  return urlDaBusca(consulta, {
+    uf: undefined,
+    escolaridades: [],
+    situacoes: [],
+    bancas: [],
+    esferas: [],
+    salarioMin: undefined,
+    salarioMax: undefined,
+    pagina: 1,
+  });
+}
+
+/**
+ * Para onde a barra do cabeçalho navega. `uf` chega do `<select>` como texto
+ * de formulário, e o que não é estado não entra.
+ */
+export function destinoDoFormulario(q: string, uf: string): string {
+  return urlDaBusca(CONSULTA_VAZIA, {
+    q: q.trim() || undefined,
+    uf: (UFS as readonly string[]).includes(uf) ? (uf as Uf) : undefined,
+  });
+}
+
+/** O que `filtrar` recebe: a consulta sem ordenação nem página. */
+export function filtroDaConsulta(consulta: ConsultaDaUrl): Filtro {
+  const { q, uf, escolaridades, situacoes, bancas, esferas, salarioMin, salarioMax } = consulta;
+  return { q, uf, escolaridades, situacoes, bancas, esferas, salarioMin, salarioMax };
+}
+
+/**
+ * `useSearchParams` na forma que `lerConsulta` lê. Repetido vira lista,
+ * único continua texto, que é o que o `searchParams` do servidor entrega.
+ */
+export function parametrosDaUrl(busca: URLSearchParams): Parametros {
+  const parametros: Parametros = {};
+  for (const chave of new Set(busca.keys())) {
+    const valores = busca.getAll(chave);
+    parametros[chave] = valores.length === 1 ? valores[0] : valores;
+  }
+  return parametros;
 }
 
 /**

@@ -5,6 +5,7 @@ import type { ContagensDeFaceta, OpcaoDeFaceta } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
 import {
   PARAMETRO_DA_DIMENSAO,
+  caminhoDaBusca,
   quantosFiltros,
   urlAlternando,
   urlDaBusca,
@@ -138,7 +139,8 @@ function GrupoDeBancas({
  */
 function CamposOcultos({ consulta }: { consulta: ConsultaDaUrl }) {
   const ocultos: { nome: string; valor: string }[] = [];
-  if (consulta.q) ocultos.push({ nome: "q", valor: consulta.q });
+  // O termo não viaja como campo: ele está no caminho (`caminhoDaBusca`), e
+  // um `q` aqui faria o `proxy.ts` redirecionar o envio.
   if (consulta.uf) ocultos.push({ nome: "uf", valor: consulta.uf });
   if (consulta.ordem !== "encerrando") {
     ocultos.push({ nome: "ordem", valor: consulta.ordem });
@@ -176,7 +178,7 @@ function FaixaDeSalario({
     "focus:bg-cartao focus:ring-2 focus:ring-acao numero";
 
   return (
-    <form action="/concursos" method="get" className="flex flex-col gap-2.5">
+    <form action={caminhoDaBusca(consulta.q)} method="get" className="flex flex-col gap-2.5">
       <CamposOcultos consulta={consulta} />
       <Rotulo>Salário</Rotulo>
       <div className="flex items-center gap-2">

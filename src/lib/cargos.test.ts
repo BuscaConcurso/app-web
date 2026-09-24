@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { medirCargos, urlDoCargo } from "./cargos";
 import { filtrar } from "./consulta";
+import { slugDaBusca, termoDoSlug } from "./enderecoDaBusca";
 import type { ConcursoResumo } from "./dominio";
 
 let contador = 0;
@@ -187,11 +188,9 @@ describe("medirCargos", () => {
     const { escolhidos } = medirCargos(acervo);
     expect(escolhidos.length).toBeGreaterThan(0);
     for (const cargo of escolhidos) {
-      expect(filtrar(acervo, { q: cargo.termo })).toHaveLength(cargo.alcance);
+      expect(filtrar(acervo, { q: termoDoSlug(slugDaBusca(cargo.termo)) })).toHaveLength(cargo.alcance);
+      expect(urlDoCargo(cargo)).toBe(`/busca/${slugDaBusca(cargo.termo)}`);
       expect(cargo.alcance).toBeGreaterThan(0);
-      expect(urlDoCargo(cargo)).toBe(
-        `/concursos?q=${encodeURIComponent(cargo.termo)}`,
-      );
     }
   });
 

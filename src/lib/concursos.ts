@@ -30,7 +30,7 @@ import {
   type Ordem,
   type Situacao,
 } from "./consulta";
-import { medirCargos, urlDoCargo } from "./cargos";
+import { medirCargos, urlDoCargo, type CargoMedido } from "./cargos";
 import { tomDoConcurso } from "./situacao";
 import { NOME_UF, ROTULO_ESCOLARIDADE } from "./rotulos";
 import { acharOrgao, agruparPorOrgao, type OrgaoDoAcervo } from "./orgaos";
@@ -449,10 +449,23 @@ export async function facetas(hoje: Date = new Date()): Promise<{
  * Não custa requisição nova: dentro do mesmo render, o `fetch` do Next
  * memoriza a chamada que o layout e a página já fizeram.
  */
+const medirCargosDoAcervo = cache(
+  async (): Promise<CargoMedido[]> => medirCargos(await acervo()).escolhidos,
+);
+
+/**
+ * Os cargos que a medição escolheu, todos. Uma medição por render: o rodapé,
+ * o título da busca e o sitemap perguntam a mesma coisa, e `medirCargos`
+ * varre o acervo inteiro.
+ */
+export async function cargosEscolhidos(): Promise<CargoMedido[]> {
+  return medirCargosDoAcervo();
+}
+
 export async function cargosEmDestaque(
   limite = LIMITE_DE_CARGOS,
 ): Promise<LinkDeFaceta[]> {
-  const { escolhidos } = medirCargos(await acervo());
+  const escolhidos = await cargosEscolhidos();
   return escolhidos.slice(0, limite).map((cargo) => ({
     rotulo: cargo.rotulo,
     href: urlDoCargo(cargo),

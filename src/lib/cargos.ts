@@ -56,6 +56,7 @@ import {
   termosDaBusca,
   textoBuscavel,
 } from "./consulta";
+import { slugDaBusca } from "./enderecoDaBusca";
 import { ROTULO_ESCOLARIDADE } from "./rotulos";
 
 /** Quanto do acervo o link precisa devolver para valer uma linha. */
@@ -92,11 +93,11 @@ function palavrasDe(normalizado: string): string[] {
 }
 
 export interface CargoMedido {
-  /** Normalizado, e é o que vai no `?q=` — o mesmo que a busca compara. */
+  /** Normalizado, e é o que vira o slug de `/busca/<slug>` — o mesmo que a busca compara. */
   termo: string;
   /** Como o ato escreveu, na grafia mais frequente do acervo. */
   rotulo: string;
-  /** Quantos concursos `/concursos?q=<termo>` devolve. Nunca zero. */
+  /** Quantos concursos `/busca/<slug>` devolve. Nunca zero. */
   alcance: number;
   /** Quantos têm um cargo com este termo na cabeça do nome. */
   familia: number;
@@ -241,13 +242,12 @@ export function medirCargos(acervo: ConcursoResumo[]): CargosDoAcervo {
 }
 
 /**
- * O termo que a busca recebe. Sai normalizado porque é assim que ele foi
- * medido: `?q=medico` e `?q=Médico` devolvem a mesma lista (a busca normaliza
- * os dois lados), e um endereço só para uma lista só é o que o buscador
- * precisa ver.
+ * O endereço do cargo é a busca pelo termo, no caminho. O termo já sai
+ * normalizado da medição e nunca é vazio (é feito de palavras `[a-z0-9]+`),
+ * então todo cargo tem slug.
  */
 export function urlDoCargo(cargo: CargoMedido): string {
-  return `/concursos?q=${encodeURIComponent(cargo.termo)}`;
+  return `/busca/${slugDaBusca(cargo.termo)}`;
 }
 
 /** Só para a suíte: o piso e a fidelidade, sem repetir os números no teste. */

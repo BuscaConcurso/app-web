@@ -10,8 +10,8 @@ import { numero } from "@/lib/formato";
 const ATALHOS = [
   { rotulo: "Nível superior", href: "/concursos?escolaridade=superior" },
   { rotulo: "Nível médio", href: "/concursos?escolaridade=medio" },
-  { rotulo: "Tribunais", href: "/concursos?q=tribunal" },
-  { rotulo: "Polícia", href: "/concursos?q=policia" },
+  { rotulo: "Tribunais", href: "/busca/tribunal" },
+  { rotulo: "Polícia", href: "/busca/policia" },
 ];
 
 /**
