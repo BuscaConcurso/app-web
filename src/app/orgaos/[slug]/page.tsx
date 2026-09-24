@@ -113,7 +113,7 @@ export default async function PaginaDoOrgao(
       <div className="flex flex-col gap-6">
         <Cartao as="header" className="p-6 sm:p-8">
           <div className="flex items-start gap-4">
-            <Selo sigla={orgao.sigla} />
+            <Selo sigla={orgao.sigla} logoUrl={orgao.logoUrl} />
             <div className="min-w-0">
               <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance break-words">
                 {orgao.nome}

@@ -174,6 +174,12 @@ const SIGLAS_DE_PROVA: (string | null)[] = [
   null,
 ];
 
+// Um logo que carrega e um que quebra: o segundo tem que mostrar a sigla.
+const LOGOS_DE_PROVA: { logoUrl: string; sigla: string | null }[] = [
+  { logoUrl: "/icone-32.png", sigla: "BC" },
+  { logoUrl: "/nao-existe.webp", sigla: "QUEBRA" },
+];
+
 export default async function Estilo() {
   const hoje = new Date();
   const hojeCivil = hojeEmSaoPaulo(hoje);
@@ -445,6 +451,15 @@ export default async function Estilo() {
                     <Selo
                       key={sigla ?? "sem"}
                       sigla={sigla}
+                      tom={tom}
+                      tamanho={tamanho}
+                    />
+                  ))}
+                  {LOGOS_DE_PROVA.map(({ logoUrl, sigla }) => (
+                    <Selo
+                      key={logoUrl}
+                      sigla={sigla}
+                      logoUrl={logoUrl}
                       tom={tom}
                       tamanho={tamanho}
                     />

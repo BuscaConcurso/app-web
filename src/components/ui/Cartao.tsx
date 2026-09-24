@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { ESTILO_DO_TOM } from "@/lib/situacao";
 import type { Tom } from "@/lib/dominio";
+import { faceDoSelo } from "@/lib/selo";
+import { SeloComLogo } from "./SeloComLogo";
 
 /**
  * Cartão.
@@ -87,12 +89,47 @@ export function Numero({
 }
 
 /**
- * O quadrado com a sigla do órgão. Faz o papel do logotipo que não temos:
- * o acervo tem 1.946 órgãos e nenhum arquivo de marca para eles.
+ * O selo do órgão: o logo oficial quando há um revisado, senão a sigla,
+ * senão a caixa lisa. As três faces medem o mesmo (`size-10`/`size-11`), e o
+ * título ao lado começa no mesmo x em qualquer uma.
+ */
+export function Selo({
+  sigla,
+  logoUrl = null,
+  tom = "aberto",
+  tamanho = "md",
+}: {
+  sigla: string | null;
+  logoUrl?: string | null;
+  tom?: Tom;
+  tamanho?: "sm" | "md";
+}) {
+  const face = faceDoSelo({ logoUrl, sigla });
+  if (face.tipo !== "logo") {
+    const letras = face.tipo === "sigla" ? face.letras : "";
+    return <SeloSemLogo letras={letras} tom={tom} tamanho={tamanho} />;
+  }
+  // Se a imagem quebrar, aparece a sigla que existir.
+  const alternativa = (
+    <SeloSemLogo letras={sigla?.trim() ?? ""} tom={tom} tamanho={tamanho} />
+  );
+  return (
+    <SeloComLogo
+      url={face.url}
+      lado={tamanho === "sm" ? "size-10" : "size-11"}
+      alternativa={alternativa}
+    />
+  );
+}
+
+/**
+ * O quadrado com a sigla do órgão, desenhado quando não há logo revisado (ou
+ * quando a imagem do logo falha). Ainda faz o papel do logotipo que falta:
+ * nem todo órgão do acervo tem um arquivo de marca aprovado.
  *
  * **Sem sigla o selo fica sem conteúdo, e não vira outra coisa.** Decisão do
  * parceiro humano: "quando não houver sigla, exiba square sem sigla ao invés
- * de —".
+ * de travessão".
  *
  * Vale distinguir isto do defeito que este componente tinha até hoje de
  * manhã, porque a forma na tela é parecida e a causa é oposta. Lá, o selo
@@ -107,30 +144,25 @@ export function Numero({
  * 1. **O alinhamento não se mexe.** A caixa continua `size-10`/`size-11`, e
  *    medido a 375px o título começa no mesmo x (77,42px) com e sem sigla.
  *    Colapsar a caixa puxaria o título para 28,16px e faria a lista dançar
- *    49,26px a cada cartão sem sigla — um em cada três.
+ *    49,26px a cada cartão sem sigla, um em cada três.
  * 2. **Nada é afirmado.** Iniciais tiradas do nome inventariam uma sigla que
  *    ninguém publicou. O nome do órgão está do lado, por extenso, e a linha
  *    de contexto logo abaixo diz a esfera e o estado.
  *
  * O que se perde em relação ao travessão que esteve aqui por algumas horas: o
  * travessão dizia "não há valor" na convenção de tabela, e o quadrado liso
- * não diz nada — a ausência passa a ser lida pelo que falta, não por um
+ * não diz nada: a ausência passa a ser lida pelo que falta, não por um
  * símbolo. É a troca que o parceiro humano escolheu, vendo as duas.
  */
-export function Selo({
-  sigla,
+function SeloSemLogo({
+  letras,
   tom = "aberto",
   tamanho = "md",
 }: {
-  sigla: string | null;
+  letras: string;
   tom?: Tom;
   tamanho?: "sm" | "md";
 }) {
-  // A API manda `null` nos 1.615 sem sigla, mas quem preenche é outro
-  // processo: string vazia ou só espaço chegaria como sigla e desenharia de
-  // novo o quadrado vazio que este componente acabou de parar de desenhar.
-  const letras = sigla?.trim() ?? "";
-
   const lado = tamanho === "sm" ? "size-10" : "size-11";
   const base = "flex shrink-0 items-center justify-center text-center leading-none";
 
@@ -149,7 +181,7 @@ export function Selo({
     // Ele não é o quadrado vazio que este componente tinha antes das siglas
     // existirem: aquele era o selo NORMAL desenhando uma sigla que não
     // chegava, indistinguível de um que chegou. Este é a forma do selo sem a
-    // afirmação — mesma caixa, mesmo tom, sem conteúdo e sem alt.
+    // afirmação: mesma caixa, mesmo tom, sem conteúdo e sem alt.
     return (
       <span
         aria-hidden="true"
@@ -163,8 +195,8 @@ export function Selo({
     A escada de corpo, que só passou a rodar hoje: até ontem a sigla chegava
     em 1 dos 4.649 cartões e nenhum degrau abaixo do primeiro tinha sido
     medido. Medidos agora, contra as 118 siglas distintas do acervo (de 2 a 8
-    letras) e contra os dois tamanhos de caixa — 31,68px úteis no `md` e
-    28,15px no `sm`, já descontado o `px-1`:
+    letras) e contra os dois tamanhos de caixa (31,68px úteis no `md` e
+    28,15px no `sm`, já descontado o `px-1`):
 
     | letras | numa linha precisa de | o que é feito           |
     |---|---|---|
@@ -177,7 +209,7 @@ export function Selo({
 
     A escada antiga ia até 7px e mesmo assim estourava: "UNIPAMPA" no degrau
     de 8px mede 40,33px numa caixa de 31,68px, e sem `overflow` nenhum o
-    excesso era pintado por cima do nome do órgão. Daí a troca de critério —
+    excesso era pintado por cima do nome do órgão. Daí a troca de critério:
     **duas linhas em vez de corpo ilegível**. Uma sigla partida se lê; uma
     sigla de 5px, não. O piso é 9px, e a quebra é `wrap-anywhere` porque
     "UNIPAMPA" não oferece um lugar por onde quebrar e "CAU/BR" oferece um

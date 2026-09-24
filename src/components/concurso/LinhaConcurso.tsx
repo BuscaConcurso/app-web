@@ -65,7 +65,7 @@ export function LinhaConcurso({
       as="article"
       className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3"
     >
-      <Selo sigla={concurso.orgao.sigla} tom={tom} tamanho="sm" />
+      <Selo sigla={concurso.orgao.sigla} logoUrl={concurso.orgao.logoUrl} tom={tom} tamanho="sm" />
 
       <div className="min-w-[16rem] flex-1">
         <h3 className="font-titulo text-base leading-6 font-semibold">

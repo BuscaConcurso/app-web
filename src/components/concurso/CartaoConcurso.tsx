@@ -84,7 +84,7 @@ export function CartaoConcurso({
       {!semOrgao && (
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <Selo sigla={concurso.orgao.sigla} tom={tom} />
+            <Selo sigla={concurso.orgao.sigla} logoUrl={concurso.orgao.logoUrl} tom={tom} />
             <div className="min-w-0">
               {/* Sem `truncate`: o nome do órgão é o nível de cima da
                   hierarquia e quebra em duas linhas quando precisa, como já
