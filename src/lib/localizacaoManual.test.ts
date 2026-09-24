@@ -3,6 +3,7 @@ import {
   escolheuManualmente,
   liberarDeteccao,
   marcarEscolhaManual,
+  paginaPedeLocalizacao,
 } from "./localizacaoManual";
 
 const CHAVE = "buscaconcurso.uf.manual";
@@ -66,5 +67,16 @@ describe("a escolha manual do estado", () => {
     expect(() => marcarEscolhaManual()).not.toThrow();
     expect(() => liberarDeteccao()).not.toThrow();
     expect(escolheuManualmente()).toBe(false);
+  });
+});
+
+describe("paginaPedeLocalizacao", () => {
+  it("pede só onde a barra pedia antes de morar no cabeçalho", () => {
+    expect(paginaPedeLocalizacao("/")).toBe(true);
+    expect(paginaPedeLocalizacao("/concursos")).toBe(true);
+    expect(paginaPedeLocalizacao("/busca/tribunal")).toBe(true);
+    expect(paginaPedeLocalizacao("/entrar")).toBe(false);
+    expect(paginaPedeLocalizacao("/concursos/algum-edital")).toBe(false);
+    expect(paginaPedeLocalizacao("/conta")).toBe(false);
   });
 });

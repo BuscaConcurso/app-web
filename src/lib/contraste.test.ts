@@ -31,6 +31,9 @@ const PARES: Par[] = [
   ...["link", "link-hover"].flatMap((texto) =>
     ["pagina", "cartao", "rebaixada", "bloco"].map((fundo) => ({ texto, fundo, minimo: TEXTO })),
   ),
+  // Os chips do acesso rápido da home no `hover`: rótulo e número sobre tinta-200.
+  { texto: "tinta-800", fundo: "tinta-200", minimo: TEXTO },
+  { texto: "tinta-600", fundo: "tinta-200", minimo: TEXTO },
   { texto: "acao-texto", fundo: "acao", minimo: TEXTO },
   { texto: "acao-texto", fundo: "acao-hover", minimo: TEXTO },
   { texto: "inverso-texto", fundo: "inverso", minimo: TEXTO },

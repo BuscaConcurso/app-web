@@ -56,8 +56,8 @@ export function ListaDeResultados({
       {/*
         Não desenha nada: só grava o termo na memória do navegador quando a
         busca deu resultado. Mora aqui, e não dentro da `BarraBusca`, porque
-        quem sabe o desfecho é esta lista: a barra recebe `q` por prop e
-        aparece também na home e na vitrine, onde ninguém tem esse número.
+        quem sabe o desfecho é esta lista: a barra está no cabeçalho de toda
+        página, onde ninguém tem esse número.
 
         `filtrada` sai de `chips`, que é a mesma lista de filtros ativos que a
         tela desenha logo abaixo: sem uma segunda contagem para divergir da

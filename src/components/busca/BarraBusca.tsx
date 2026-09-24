@@ -1,22 +1,29 @@
 "use client";
 
 import {
+  Suspense,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
+  type FormEvent,
   type MouseEvent,
 } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Sugestoes, useSugestoes } from "@/components/ui/Sugestoes";
 import { UFS, type Uf } from "@/lib/dominio";
+import { termoDaPagina } from "@/lib/enderecoDaBusca";
 import { ufDeCoordenada, type Contornos } from "@/lib/localizacao";
 import { numero } from "@/lib/formato";
 import {
   escolheuManualmente,
   liberarDeteccao,
   marcarEscolhaManual,
+  paginaPedeLocalizacao,
 } from "@/lib/localizacaoManual";
+import { destinoDoFormulario } from "@/lib/parametros";
 import { NOME_UF } from "@/lib/rotulos";
 import {
   assinarTermosBuscados,
@@ -31,29 +38,43 @@ import {
 } from "@/lib/ufLembrada";
 
 /**
- * A barra de busca.
+ * A barra de busca, que mora no cabeçalho de toda página.
  *
- * O esqueleto continua sendo um `<form method="get">` nativo: submeter leva a
- * `/concursos?q=...&uf=...`, uma URL que o buscador rastreia e que funciona
- * antes de qualquer hidratação. O JavaScript daqui só acrescenta a
- * pré-seleção do estado, e a barra inteira segue funcionando sem ele.
+ * O esqueleto continua sendo um `<form method="get">` nativo: sem JavaScript,
+ * submeter leva a `/concursos?q=...&uf=...`, e o `proxy.ts` leva esse
+ * endereço a `/busca/<slug>`. Com JavaScript a busca é navegação do cliente
+ * (`router.push`), sem recarregar a página. O resto do JavaScript daqui só
+ * acrescenta a pré-seleção do estado e a lista de sugestões.
+ *
+ * O termo mostrado no campo sai do caminho (`termoDaPagina`), e não de uma
+ * propriedade: a barra está no layout, que não recebe `searchParams`, e o
+ * termo mora em `/busca/<slug>`. A UF sai de `useSearchParams`, ver
+ * `BarraBuscaDoCabecalho` no fim do arquivo.
  *
  * Três regras governam a detecção:
  *
  *   1. Nunca dispara busca sozinha. Preenche o seletor e avisa, e a pessoa
  *      decide. Localização que submete busca por conta própria tira o usuário
  *      de onde ele estava.
- *   2. Pede a localização ao carregar, mas só enquanto a pessoa não decidiu.
- *      Decisão do parceiro humano: a busca começa pedindo. Não pede quando o
- *      estado já veio pela URL ou pela memória, quando a permissão já foi
- *      negada, em contexto inseguro, ou **quando a pessoa já escolheu o estado
- *      à mão** — inclusive "Todo o Brasil" — e ainda não voltou a usar o botão
- *      de localização (ver `localizacaoManual`). Esta regra dizia "nunca pede
- *      permissão sem gesto", e deixou de ser verdade quando o pedido
- *      automático entrou.
+ *   2. Pede a localização ao carregar, mas só enquanto a pessoa não decidiu,
+ *      e só na home e nas listas (`paginaPedeLocalizacao`). Decisão do
+ *      parceiro humano: a busca começa pedindo. Não pede quando o estado já
+ *      veio pela URL ou pela memória, quando a permissão já foi negada, em
+ *      contexto inseguro, ou **quando a pessoa já escolheu o estado à mão**
+ *      (inclusive "Todo o Brasil") e ainda não voltou a usar o botão de
+ *      localização (ver `localizacaoManual`).
  *   3. A coordenada não sai da máquina. Os contornos dos estados vêm do nosso
  *      próprio servidor e a conta acontece no navegador. O arquivo só é
  *      baixado depois da permissão, então quem recusa não paga por ele.
+ *
+ * ## A forma: uma linha só, em qualquer largura
+ *
+ * No cabeçalho a barra não pode empilhar: campo, seletor e botão ficam na
+ * mesma linha também no celular, com 36px de altura. Abaixo de `sm` a lupa
+ * da esquerda sai e o botão vira só a lupa, que é o que deixa o campo com
+ * espaço para o texto. Na home a cápsula leva o `.aurora`, o anel verde que
+ * gira; fora dela é `bg-rebaixada` e parada, para não competir com o
+ * conteúdo da página.
  *
  * ## O foco: o campo perde o anel, a cápsula ganha
  *
@@ -61,41 +82,28 @@ import {
  * navegador dispara também no clique do mouse, então o anel aparecia sempre
  * que alguém clicava para digitar. Medido: `outline-none` sozinho **não**
  * bastava, porque a regra `:focus-visible` de `globals.css` não está em
- * camada e ganha do utilitário, que está — o anel continuava lá.
+ * camada e ganha do utilitário, que está; o anel continuava lá.
  *
  * Tirar o anel e não pôr nada no lugar deixaria quem navega por teclado cego
- * ao próprio cursor, e esta é a barra que recebe o primeiro Tab da página.
- * Então **o sinal de foco mudou de dono**: quem acende é a cápsula inteira,
- * com `has-[input:focus]`, nos 2px de `acao` do anel global. É o campo que
- * perde o contorno, e não a barra.
+ * ao próprio cursor. Então **o sinal de foco mudou de dono**: quem acende é a
+ * cápsula inteira, com `has-[input:focus]`, nos 2px de `acao` do anel global.
  *
- * A folga é 4px e não os 2px do anel global, e isto foi medido na tela: o
- * `.aurora` já ocupa os 2px logo fora da cápsula, então com 2px de folga o
- * anel de foco encostava nele e os dois liam como uma borda verde grossa só —
- * que é a borda que a barra tem o tempo todo, focada ou não, e portanto não
- * sinaliza nada. Com 4px são dois anéis separados: a aurora colada na cápsula
- * e o foco por fora dela. A 375px a cápsula vai de x=14 a x=361, então o anel
- * vai de 10 a 365 e não encosta na borda da tela.
+ * A folga é 4px e não os 2px do anel global: o `.aurora` já ocupa os 2px logo
+ * fora da cápsula, e com 2px de folga o anel de foco encostava nele e os dois
+ * liam como uma borda verde grossa só. Com 4px são dois anéis separados.
  *
  * `has-[input:focus]` e não `focus-within`: o seletor e o botão mantêm o
- * contorno nativo deles, que só aparece na navegação por teclado, e com
- * `focus-within` a cápsula acenderia junto — dois anéis concêntricos para um
- * foco só.
+ * contorno nativo deles, e com `focus-within` a cápsula acenderia junto, dois
+ * anéis concêntricos para um foco só.
  *
  * ## Clicar em qualquer lugar da barra foca o campo
  *
- * A "barra" é a cápsula inteira, e o vão entre as peças dela não fazia nada
- * ao ser clicado. Agora faz: o clique que não achou dono vai para o campo.
- *
- * Quem responde "isto já tem dono?" é o navegador, e não uma lista de tags
- * nossa — lista fechada envelhece e ninguém percebe. O tratador roda no
- * `click`, quando o navegador **já** decidiu o foco: se o foco está dentro da
- * barra, o clique acertou alguém focável (o próprio campo, o seletor, o
- * botão, ou o que vier depois) e não há nada a fazer. Duas consequências
- * caem de graça: arrastar para selecionar texto dentro do campo continua
- * intacto, porque o campo já está com o foco e não chamamos `focus()` de
- * novo; e a sugestão, que por contrato de combobox segura o foco no campo,
- * nunca tem o clique sequestrado.
+ * O clique que não achou dono vai para o campo. Quem responde "isto já tem
+ * dono?" é o navegador: o tratador roda no `click`, quando o foco já foi
+ * decidido; se ele está dentro da barra, o clique acertou alguém focável e
+ * não há nada a fazer. Arrastar para selecionar texto no campo continua
+ * intacto, e a sugestão, que segura o foco no campo, nunca tem o clique
+ * sequestrado.
  *
  * ## A lista de sugestões
  *
@@ -103,12 +111,11 @@ import {
  * é **aprimoramento pendurado**: sem JavaScript não há `localStorage`, não há
  * lista, e a barra é o mesmo `<form method="get">` de sempre. Por isso o
  * `role="combobox"` e o `aria-expanded` só aparecem quando existe lista para
- * controlar — afirmar um combobox sem popup seria mentir para o leitor de
- * tela, pelo mesmo motivo que o revelador só escreve `aria-modal` depois da
- * hidratação.
+ * controlar.
  *
- * Quem **escreve** na memória não é a barra: é a página, que é a única que
- * sabe quantos resultados a busca deu (ver `RegistroDaBusca`). A barra só lê.
+ * Quem **escreve** na memória não é a barra: é a página de resultados, que é
+ * a única que sabe quantos resultados a busca deu (ver `RegistroDaBusca`). A
+ * barra só lê.
  */
 type Origem = "detectada" | "lembrada";
 type Estado = "ocioso" | "detectando" | "negada" | "falhou" | "fora";
@@ -122,28 +129,48 @@ function useHidratado(): boolean {
   );
 }
 
+function Lupa({ className }: { className: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={className}>
+      <circle cx="9" cy="9" r="6.2" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="m13.6 13.6 3.2 3.2"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function BarraBusca({
-  q,
   uf,
-  compacta = false,
   dimensoes,
 }: {
-  q?: string;
-  uf?: string;
+  /** A UF da URL. Vem de `BarraBuscaDoCabecalho`, que lê a query. */
+  uf?: Uf;
   /**
    * O que a lista consegue filtrar hoje. `undefined` quando quem renderiza
-   * não perguntou (a vitrine do design system), e aí o seletor funciona como
-   * sempre.
+   * não perguntou, e aí o seletor funciona como sempre.
    *
    * `comUf: 0` desabilita o seletor e diz por quê. Oferecer os 27 estados
    * quando nenhum deles devolve nada é a tela afirmando uma capacidade que o
-   * dado não tem — e quem clica conclui que não há concurso no estado dele,
+   * dado não tem, e quem clica conclui que não há concurso no estado dele,
    * que é falso. Desabilitado e explicado, a pessoa sabe que a falta é nossa,
    * e o controle volta sozinho quando o dado chegar.
    */
   dimensoes?: { total: number; comUf: number };
-  compacta?: boolean;
 }) {
+  const caminho = usePathname();
+  const router = useRouter();
+  const q = termoDaPagina(caminho);
+  const naHome = caminho === "/";
+
+  const base = useId();
+  const idCampo = `${base}-q`;
+  const idUf = `${base}-uf`;
+  const idMotivo = `${base}-uf-motivo`;
+
   const hidratado = useHidratado();
   const lembrada = useSyncExternalStore(
     assinarUfLembrada,
@@ -163,9 +190,9 @@ export function BarraBusca({
     itens: termos,
     /**
      * Escolher uma sugestão é buscar por ela: o campo recebe o texto e o
-     * formulário submete pelo caminho nativo, o mesmo do botão. Os filtros
-     * que estiverem na barra vão junto — inclusive o estado, que tem memória
-     * própria e é por isso que ele não é guardado em cada termo.
+     * formulário submete pelo mesmo caminho do botão (`aoEnviar`). O estado
+     * que estiver no seletor vai junto; ele tem memória própria, e é por isso
+     * que não é guardado em cada termo.
      */
     aoEscolher: (termo) => {
       const campoDeBusca = campoDeTexto.current;
@@ -176,10 +203,19 @@ export function BarraBusca({
   });
 
   /**
-   * O clique que não achou dono vai para o campo. Ver a docstring: quem
-   * responde se o alvo já era interativo é o navegador, pelo foco que ele
-   * acabou de dar.
+   * Com JavaScript a busca é navegação do cliente: a URL muda e a página
+   * troca sem recarregar. Sem ele, o `action` nativo leva a `/concursos?q=`,
+   * e o `proxy.ts` redireciona para o mesmo endereço.
    */
+  const aoEnviar = (evento: FormEvent<HTMLFormElement>) => {
+    evento.preventDefault();
+    const dados = new FormData(evento.currentTarget);
+    router.push(
+      destinoDoFormulario(String(dados.get("q") ?? ""), String(dados.get("uf") ?? "")),
+    );
+  };
+
+  /** O clique que não achou dono vai para o campo. Ver a docstring. */
   const aoClicarNaBarra = (evento: MouseEvent<HTMLFormElement>) => {
     const dentro = evento.currentTarget;
     const focado = document.activeElement;
@@ -187,10 +223,22 @@ export function BarraBusca({
     campoDeTexto.current?.focus();
   };
 
-  /** `null` significa que a pessoa não mexeu no seletor nesta navegação. */
+  /** `null` significa que a pessoa não mexeu no seletor desde a última UF da URL. */
   const [manual, setManual] = useState<string | null>(null);
   const [estado, setEstado] = useState<Estado>("ocioso");
   const [detectada, setDetectada] = useState(false);
+
+  /**
+   * A barra não remonta entre páginas (mora no layout), então a escolha à mão
+   * sobreviveria a uma navegação para outra UF da URL e ganharia dela. Quando
+   * a UF da URL muda, a URL volta a mandar: é o padrão do React de ajustar o
+   * estado durante a renderização quando uma propriedade muda.
+   */
+  const [ufAnterior, setUfAnterior] = useState(uf);
+  if (uf !== ufAnterior) {
+    setUfAnterior(uf);
+    setManual(null);
+  }
 
   // A UF da URL vem de uma escolha explícita e ganha da memória. O que a
   // pessoa mexer agora ganha das duas.
@@ -243,41 +291,37 @@ export function BarraBusca({
   /**
    * A busca começa pedindo a localização, por decisão do parceiro humano.
    *
-   * Antes só pedia quem já tinha concedido — sem gesto, sem prompt —, e o
-   * resto dependia do botão. Agora o pedido sai ao carregar, com o prompt do
-   * navegador, sempre que ainda não sabemos o estado.
-   *
    * O custo, registrado para quem vier mexer: prompt de permissão sem
    * contexto é recusado com mais frequência, e **a recusa vale para a origem
-   * inteira** — depois dela nem o botão consegue perguntar de novo; só a
-   * própria pessoa, nas configurações do navegador. Por isso o pedido não
-   * sai quando não adiantaria ou não caberia:
+   * inteira**; depois dela nem o botão consegue perguntar de novo. Por isso o
+   * pedido não sai quando não adiantaria ou não caberia:
    *
+   * - a página não é a home nem uma lista (`paginaPedeLocalizacao`);
    * - o estado já veio pela URL ou pela memória;
-   * - a permissão já foi negada (o navegador não mostraria prompt, e
-   *   insistir só gravaria "negada" de novo);
+   * - a permissão já foi negada (o navegador não mostraria prompt);
    * - o contexto é inseguro (`http://192.168...`): a API recusa sem prompt;
    * - o acervo não sabe o estado de concurso nenhum, e o filtro não filtra.
    *
-   * `jaPediu` segura um pedido por montagem. Em desenvolvimento o React roda
-   * o efeito duas vezes de propósito, e a ref sobrevive a essa repetição.
+   * `jaPediu` segura um pedido por montagem, e a barra monta uma vez por
+   * carga, porque mora no cabeçalho. Quem chega por `/entrar` e depois vai à
+   * home recebe o pedido na home. Em desenvolvimento o React roda o efeito
+   * duas vezes de propósito, e a ref sobrevive a essa repetição.
    */
   const jaPediu = useRef(false);
   useEffect(() => {
     if (jaPediu.current) return;
     if (uf || lembrada) return;
-    // A pessoa já escolheu o estado à mão — inclusive "Todo o Brasil", que
-    // deixa `lembrada` vazia — e ainda não voltou a pedir a localização.
+    // A pessoa já escolheu o estado à mão (inclusive "Todo o Brasil", que
+    // deixa `lembrada` vazia) e ainda não voltou a pedir a localização.
     if (escolheuManualmente()) return;
     if (!window.isSecureContext || !("geolocation" in navigator)) return;
     if (dimensoes !== undefined && dimensoes.comUf === 0) return;
+    if (!paginaPedeLocalizacao(caminho)) return;
 
     jaPediu.current = true;
     // Sempre por promessa, inclusive sem Permissions API: `detectar` muda o
     // estado logo no início, e chamá-lo direto no corpo do efeito dispara
-    // renderização em cascata (`react-hooks/set-state-in-effect`). Sem a API
-    // não dá para saber se já foi negada, então pede — o pior caso é o mesmo
-    // "negada" que o botão daria.
+    // renderização em cascata (`react-hooks/set-state-in-effect`).
     const consulta: Promise<PermissionStatus | null> =
       navigator.permissions?.query({ name: "geolocation" }) ??
       Promise.resolve(null);
@@ -286,7 +330,7 @@ export function BarraBusca({
         if (permissao?.state !== "denied") void detectar();
       })
       .catch(() => void detectar());
-  }, [uf, lembrada, detectar, dimensoes]);
+  }, [uf, lembrada, detectar, dimensoes, caminho]);
 
   const trocar = (valor: string) => {
     // Qualquer escolha à mão desliga o pedido automático ao carregar, até o
@@ -298,21 +342,15 @@ export function BarraBusca({
     lembrarUf((valor as Uf) || null);
   };
 
-  // `navigator.geolocation` EXISTE em contexto inseguro — o que não existe é
-  // a permissão. O navegador só libera a API em HTTPS ou em `localhost`; por
-  // `http://192.168.x.x`, que é como se valida do celular na rede local, ele
-  // recusa, e a recusa chega no mesmo `PERMISSION_DENIED` de quem clicou em
-  // "bloquear".
+  // `navigator.geolocation` EXISTE em contexto inseguro; o que não existe é
+  // a permissão. O navegador só libera a API em HTTPS ou em `localhost`, e
+  // por `http://192.168.x.x` a recusa chega no mesmo `PERMISSION_DENIED` de
+  // quem clicou em "bloquear". Sem esta linha o botão aparecia, o clique
+  // falhava e a tela culpava a pessoa por uma regra do endereço.
   //
-  // Sem esta linha o botão aparecia, o clique falhava e a tela dizia "sem
-  // acesso à localização" — culpando a pessoa por uma regra do endereço.
-  //
-  // **E o botão some calado, sem explicar.** Decisão do parceiro humano: não
-  // exibir o motivo na interface. Quem abre pelo IP da rede local é quem está
-  // desenvolvendo, e para essa pessoa a explicação está aqui, no código, que
-  // é onde ela resolve. Para quem visita o site publicado em HTTPS a condição
-  // nunca é falsa, então uma frase sobre HTTPS seria ruído permanente para
-  // explicar um caso que ela nunca vive.
+  // **E o botão some calado, sem explicar.** Decisão do parceiro humano: quem
+  // abre pelo IP da rede local é quem está desenvolvendo, e para essa pessoa
+  // a explicação está aqui, no código.
   const contextoSeguro = !hidratado || window.isSecureContext;
 
   const podeDetectar =
@@ -324,9 +362,6 @@ export function BarraBusca({
     // Pedir a localização de alguém para preencher um filtro que não filtra
     // nada seria pedir permissão por nada.
     !(dimensoes !== undefined && dimensoes.comUf === 0);
-
-  const altura = compacta ? "h-9" : "h-11";
-  const corpo = compacta ? "text-sm" : "text-base";
 
   // Quem perguntou e recebeu zero: o acervo não sabe o estado de nenhum
   // concurso, e o seletor não tem como cumprir o que oferece.
@@ -344,115 +379,104 @@ export function BarraBusca({
           action="/concursos"
           method="get"
           role="search"
+          onSubmit={aoEnviar}
           onClick={aoClicarNaBarra}
-          className={`aurora flex flex-col gap-2 rounded-3xl bg-cartao outline-acao outline-offset-4 has-[input:focus]:outline-2 sm:flex-row sm:items-center sm:rounded-full ${
-            compacta ? "p-1.5" : "p-2"
+          className={`flex items-center gap-1 rounded-full p-1 outline-acao outline-offset-4 has-[input:focus]:outline-2 ${
+            naHome ? "aurora bg-cartao" : "bg-rebaixada"
           }`}
         >
-          <div className="flex flex-1 items-center gap-2.5 rounded-full px-4">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 20 20"
-              fill="none"
-              className="size-4 shrink-0 text-tinta-500"
-            >
-              <circle cx="9" cy="9" r="6.2" stroke="currentColor" strokeWidth="1.8" />
-              <path
-                d="m13.6 13.6 3.2 3.2"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-            <label htmlFor="busca-q" className="sr-only">
+          <div className="flex min-w-0 flex-1 items-center gap-2 pr-1 pl-3">
+            <Lupa className="hidden size-4 shrink-0 text-tinta-500 sm:block" />
+            <label htmlFor={idCampo} className="sr-only">
               Cargo, órgão ou banca
             </label>
             {/*
               `autoComplete="off"` nos dois controles: o navegador restaura o
-              valor dos campos no recarregamento, ANTES de o React hidratar. O
-              que ele restaura é o que a pessoa digitou da última vez; o que o
-              servidor renderizou é o `q` da URL e "Todo o Brasil" no seletor
-              (`ufLembradaNoServidor` devolve nulo, porque no servidor não há
-              `localStorage`). A divergência aparece como "attributes of the
-              server rendered HTML didn't match the client properties", que é a
-              redação do React para propriedade de controle de formulário.
+              valor dos campos no recarregamento, ANTES de o React hidratar, e
+              o que ele restaura diverge do que o servidor renderizou. A URL já
+              é a fonte do que a pessoa buscou, e a memória do estado é lida do
+              `localStorage` depois da hidratação, de propósito.
 
-              Desligar a restauração devolve a verdade ao servidor, e não custa
-              nada aqui: a URL já é a fonte do que a pessoa buscou, e a memória
-              do estado é lida do `localStorage` depois da hidratação, de
-              propósito.
+              `key={caminho}`: a barra não remonta entre páginas, e
+              `defaultValue` só vale na montagem. Com a chave, ao navegar para
+              outra busca o campo nasce de novo com o termo novo.
             */}
             <input
+              key={caminho}
               ref={campoDeTexto}
-              id="busca-q"
+              id={idCampo}
               name="q"
               type="search"
               defaultValue={q}
               autoComplete="off"
-              placeholder="Cargo, órgão ou banca. Ex.: analista judiciário"
+              placeholder="Cargo, órgão ou banca"
               /* Quem desenha o foco deste campo é a cápsula, logo acima. */
               data-sem-anel=""
-              className={`w-full bg-transparent text-tinta-900 placeholder:text-tinta-500 ${altura} ${corpo}`}
+              className="h-9 w-full min-w-0 bg-transparent text-sm text-tinta-900 placeholder:text-tinta-500"
               {...campo}
             />
           </div>
 
-          <div className="flex gap-2">
-            <label htmlFor="busca-uf" className="sr-only">
-              Estado
-            </label>
-            <div className="relative">
-              <select
-                id="busca-uf"
-                name="uf"
-                value={escolhida}
-                autoComplete="off"
-                onChange={(evento) => trocar(evento.target.value)}
-                disabled={semEstado}
-                aria-describedby={semEstado ? "busca-uf-motivo" : undefined}
-                className={`w-full appearance-none rounded-full bg-rebaixada pr-9 pl-4 text-sm font-medium sm:w-[11rem] ${altura} ${
-                  semEstado
-                    ? "cursor-not-allowed text-tinta-500"
-                    : "cursor-pointer text-tinta-900"
-                }`}
-              >
-                <option value="">Todo o Brasil</option>
-                {UFS.map((sigla) => (
-                  <option key={sigla} value={sigla}>
-                    {NOME_UF[sigla]}
-                  </option>
-                ))}
-              </select>
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-tinta-600"
-              >
-                <path
-                  d="M4 6.5 8 10.5l4-4"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-
-            <button
-              type="submit"
-              className={`shrink-0 rounded-full bg-acao px-7 font-semibold text-acao-texto transition-colors hover:bg-acao-hover ${altura} ${corpo}`}
+          <label htmlFor={idUf} className="sr-only">
+            Estado
+          </label>
+          <div className="relative shrink-0">
+            <select
+              id={idUf}
+              name="uf"
+              value={escolhida}
+              autoComplete="off"
+              onChange={(evento) => trocar(evento.target.value)}
+              disabled={semEstado}
+              aria-describedby={semEstado ? idMotivo : undefined}
+              className={`h-9 w-[7.5rem] appearance-none truncate rounded-full pr-7 pl-3 text-[13px] font-medium sm:w-[11rem] ${
+                naHome ? "bg-rebaixada" : "bg-cartao"
+              } ${
+                semEstado
+                  ? "cursor-not-allowed text-tinta-500"
+                  : "cursor-pointer text-tinta-900"
+              }`}
             >
-              Buscar
-            </button>
+              <option value="">Todo o Brasil</option>
+              {UFS.map((sigla) => (
+                <option key={sigla} value={sigla}>
+                  {NOME_UF[sigla]}
+                </option>
+              ))}
+            </select>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 16 16"
+              fill="none"
+              className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-tinta-600"
+            >
+              <path
+                d="M4 6.5 8 10.5l4-4"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
+
+          <button
+            type="submit"
+            aria-label="Buscar"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-acao text-sm font-semibold text-acao-texto transition-colors hover:bg-acao-hover sm:w-auto sm:px-5"
+          >
+            <Lupa className="size-4 sm:hidden" />
+            <span aria-hidden="true" className="hidden sm:inline">
+              Buscar
+            </span>
+          </button>
         </form>
 
         <Sugestoes rotulo="Buscas recentes que deram resultado" lista={lista} />
       </div>
 
       {semEstado && (
-        <p id="busca-uf-motivo" className="mt-2 text-[12px] text-tinta-600">
+        <p id={idMotivo} className="mt-2 px-1 text-[12px] text-tinta-600">
           Ainda não sabemos o estado de nenhum dos{" "}
           <strong className="numero font-medium">{numero(dimensoes!.total)}</strong>{" "}
           concursos do acervo, então o filtro por estado está desligado.
@@ -460,9 +484,11 @@ export function BarraBusca({
         </p>
       )}
 
+      {/* `empty:hidden` e não `min-h-5`: no cabeçalho, 20px reservados para
+          uma linha vazia seriam 20px de cabeçalho em toda página. */}
       <div
         aria-live="polite"
-        className="mt-2 flex min-h-5 flex-wrap items-center gap-x-2 gap-y-1 px-1 text-xs text-tinta-500"
+        className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 px-3 text-xs text-tinta-500 empty:hidden"
       >
         {podeDetectar && (
           <button
@@ -527,4 +553,34 @@ export function BarraBusca({
       </div>
     </div>
   );
+}
+
+/**
+ * A barra do cabeçalho com o estado da URL.
+ *
+ * "A UF da URL ganha da memória" continua valendo, e a UF da URL só existe
+ * via `useSearchParams`. Numa página estática isso obriga um `Suspense`: o
+ * HTML leva a barra sem a UF (o `fallback`) e o navegador desenha a que leu
+ * a URL. As duas têm a mesma caixa, então a troca não desloca nada.
+ */
+export function BarraBuscaDoCabecalho({
+  dimensoes,
+}: {
+  dimensoes?: { total: number; comUf: number };
+}) {
+  return (
+    <Suspense fallback={<BarraBusca dimensoes={dimensoes} />}>
+      <BarraBuscaComUfDaUrl dimensoes={dimensoes} />
+    </Suspense>
+  );
+}
+
+function BarraBuscaComUfDaUrl({
+  dimensoes,
+}: {
+  dimensoes?: { total: number; comUf: number };
+}) {
+  const bruta = useSearchParams().get("uf") ?? "";
+  const uf = (UFS as readonly string[]).includes(bruta) ? (bruta as Uf) : undefined;
+  return <BarraBusca dimensoes={dimensoes} uf={uf} />;
 }

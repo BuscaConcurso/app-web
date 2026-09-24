@@ -5,14 +5,14 @@
  * A barra de busca pede a localização ao carregar quando ainda não sabe o
  * estado. Isso resolve quem chega; atrapalha quem já decidiu. O caso que
  * este módulo existe para cobrir: a pessoa escolhe "Todo o Brasil" no
- * seletor. A memória do estado (`ufLembrada`) fica vazia — "Todo o Brasil"
- * é ausência de estado —, e sem esta marca o próximo carregamento veria
+ * seletor. A memória do estado (`ufLembrada`) fica vazia ("Todo o Brasil"
+ * é ausência de estado), e sem esta marca o próximo carregamento veria
  * "não sabemos o estado" e pediria a localização de novo, contra a escolha
  * que ela acabou de fazer. Decisão do parceiro humano: trocar o estado à mão
  * desliga o pedido automático até a pessoa voltar a pedir a localização.
  *
  * É lido só dentro de efeito e escrito só em resposta a clique, nunca na
- * renderização — por isso não precisa do `useSyncExternalStore` que
+ * renderização, por isso não precisa do `useSyncExternalStore` que
  * `ufLembrada` usa: o servidor nunca lê, e não há o que divergir na
  * hidratação.
  *
@@ -46,4 +46,16 @@ export function liberarDeteccao(): void {
   } catch {
     // Idem.
   }
+}
+
+/**
+ * As páginas onde a barra pede a localização ao carregar.
+ *
+ * A barra mudou-se para o cabeçalho e agora está em toda página, mas o
+ * pedido automático não foi junto: prompt de permissão em `/entrar` ou no
+ * meio de um edital é pedido sem contexto, e a recusa vale para a origem
+ * inteira. Ficam as três onde ele já existia: a home e as duas listas.
+ */
+export function paginaPedeLocalizacao(caminho: string): boolean {
+  return caminho === "/" || caminho === "/concursos" || caminho.startsWith("/busca/");
 }

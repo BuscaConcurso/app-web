@@ -15,18 +15,18 @@ import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
  *
  * **O título é o do concurso, e o órgão vai para a linha de apoio.** Era o
  * contrário, e isso tornava dois concursos do mesmo órgão indistinguíveis na
- * mesma faixa — medido na home a 375px: das quatro linhas de "Encerra esta
+ * mesma faixa (medido na home a 375px: das quatro linhas de "Encerra esta
  * semana", duas eram concursos diferentes da UFU exibindo "Universidade
- * Federal de Uberlândia" nas duas. O `ItemList` estruturado da mesma página
+ * Federal de Uberlândia" nas duas). O `ItemList` estruturado da mesma página
  * já os nomeava separado, então a tela dizia menos que o dado.
  *
- * É o mesmo conserto que `CartaoConcurso` recebeu antes — "três cartões
- * seguidos de concursos DIFERENTES diziam Transpetro" — e este componente
+ * É o mesmo conserto que `CartaoConcurso` recebeu antes ("três cartões
+ * seguidos de concursos DIFERENTES diziam Transpetro"), e este componente
  * ficou de fora porque o pedido falava de "página e cards".
  *
  * O título usa `tituloSemOrgao` e não o título inteiro, ao contrário do
  * cartão da busca: aqui não há bloco de órgão nem trilha por perto, mas o
- * órgão está na linha de apoio logo abaixo e o selo está ao lado — e a faixa
+ * órgão está na linha de apoio logo abaixo e o selo está ao lado, e a faixa
  * é desenhada para caber em uma linha, que o título inteiro estoura.
  */
 export function LinhaConcurso({
@@ -67,8 +67,16 @@ export function LinhaConcurso({
     >
       <Selo sigla={concurso.orgao.sigla} tom={tom} tamanho="sm" />
 
-      <div className="min-w-[16rem] flex-1">
-        <h3 className="font-titulo text-base leading-6 font-semibold">
+      {/* `min-w-0 basis-[16rem]` e não `min-w-[16rem]`, e `wrap-anywhere` no
+          título: um título de ato sem espaço (do tipo
+          "11/2026/SEGAP/COALEP/...") esticava a linha a 1.044px numa tela de
+          360px, medido na faixa "Previstos" da home. `overflow-wrap:
+          anywhere` é o que reduz a largura mínima intrínseca do bloco
+          (`break-word` não reduz), e `min-w-0` deixa o item de flex encolher
+          abaixo dela. A base de 16rem mantém o selo e o botão na mesma linha
+          quando cabe. */}
+      <div className="min-w-0 flex-1 basis-[16rem]">
+        <h3 className="font-titulo text-base leading-6 font-semibold wrap-anywhere">
           <Link
             href={`/concursos/${concurso.slug}`}
             className="hover:underline hover:underline-offset-4"

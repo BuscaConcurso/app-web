@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { BarraBusca } from "@/components/busca/BarraBusca";
 import { ListaDeResultados } from "@/components/busca/ListaDeResultados";
 import {
   avisoDoAcervo,
@@ -91,7 +90,6 @@ export default async function BuscaDeConcursos(
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
-      <BarraBusca q={consulta.q} uf={consulta.uf} compacta dimensoes={dimensoes} />
       <ListaDeResultados
         consulta={consulta}
         titulo={tituloDaBusca(consulta)}
