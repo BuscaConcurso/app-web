@@ -3,6 +3,7 @@ import { Archivo, Literata } from "next/font/google";
 import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
 import { Cabecalho } from "@/components/layout/Cabecalho";
+import { GoogleTagManager } from "@/components/layout/GoogleTagManager";
 import { Rodape } from "@/components/layout/Rodape";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import { origemDoAcervo } from "@/lib/concursos";
@@ -148,6 +149,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_DO_TEMA }} />
       </head>
       <body className="flex min-h-full flex-col">
+        <GoogleTagManager />
         <SessionProvider>
           <DadosEstruturados dados={dadosEstruturados} />
           <AvisoDeOrigem origem={origem} />

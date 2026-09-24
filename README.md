@@ -58,6 +58,14 @@ Além disso, `/estilo` renderiza o design system inteiro em código, para
 conferir no navegador que ele bate com o canvas. A rota leva `noindex` e fica
 fora do sitemap.
 
+## Imagem
+
+`docker build --build-arg NEXT_PUBLIC_BC_API_URL=https://api.buscaconcurso.com.br -t bc-web .`
+gera a imagem de produção (`output: "standalone"`). `BC_API_URL` chega em
+runtime; `NEXT_PUBLIC_BC_API_URL` fica gravada no bundle, então trocar o
+domínio da API exige novo build. `NEXT_PUBLIC_GTM_ID` também entra no build
+(`--build-arg`); vazio ou fora do formato `GTM-XXXXXXX` não carrega o GTM.
+
 ## O que existe
 
 | Rota | O que é |

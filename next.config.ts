@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // A imagem de produção copia só `.next/standalone` (servidor + dependências
+  // usadas), sem `node_modules` inteiro.
+  output: "standalone",
+
   // O `next dev` bloqueia recursos de desenvolvimento (`/_next/hmr`) vindos de
   // origem diferente de localhost, por segurança. Validar no celular significa
   // abrir o app pelo IP da máquina na rede local, que é outra origem — e sem
