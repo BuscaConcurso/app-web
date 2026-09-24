@@ -85,9 +85,12 @@ export const metadata: Metadata = {
 /**
  * Organization e WebSite ficam no layout porque valem para o site inteiro.
  * O SearchAction é o que habilita a caixa de busca do Google apontando para
- * a nossa própria busca. O `urlTemplate` continua `/concursos?q=`, o
- * parâmetro que o Google sabe preencher, e o `proxy.ts` leva esse endereço
- * com 308 para `/busca/<slug>`, com o resto da query.
+ * a nossa própria busca. O `urlTemplate` vai direto para `/busca/{termo}`,
+ * o endereço final: o padrão do Schema.org aceita o marcador dentro do
+ * caminho, não só na query. Quando o termo que o Google preenche não é a
+ * forma canônica do slug, `proxy.ts` (`destinoCanonico`) redireciona com 308
+ * para `/busca/<slug>`, com o resto da query: o mesmo que já acontecia
+ * partindo de `/concursos?q=`.
  */
 const dadosEstruturados = {
   "@context": "https://schema.org",
@@ -110,7 +113,7 @@ const dadosEstruturados = {
         "@type": "SearchAction",
         target: {
           "@type": "EntryPoint",
-          urlTemplate: `${URL_SITE}/concursos?q={search_term_string}`,
+          urlTemplate: `${URL_SITE}/busca/{search_term_string}`,
         },
         "query-input": "required name=search_term_string",
       },

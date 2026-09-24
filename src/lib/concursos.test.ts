@@ -2,10 +2,21 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
-import { contagensDeFaceta, contarConcursos, listarConcursos, paraALista } from "./concursos";
-import type { Escolaridade } from "./dominio";
+import {
+  contagensDeFaceta,
+  contarConcursos,
+  listarConcursos,
+  normalizarDetalhe,
+  normalizarResumo,
+  paraALista,
+  semTravessao,
+} from "./concursos";
+import type { ConcursoDetalhe, Escolaridade } from "./dominio";
 import type { Situacao } from "./consulta";
 import { CONCURSOS } from "@/mocks/concursos";
+
+/** O travessão por escape, não pelo glifo: ver o cabeçalho de `semTravessao`. */
+const TRAVESSAO = "\u2014";
 
 /**
  * As contagens da coluna de filtros são uma promessa ao usuário: o número ao
@@ -124,5 +135,121 @@ describe("paraALista", () => {
     }
     expect(enxuto.orgao).not.toHaveProperty("resolvido");
     expect(enxuto.orgao).not.toHaveProperty("nomeEhCaminho");
+  });
+});
+
+/**
+ * R4: o parceiro humano proíbe o travessão em qualquer texto visível, e
+ * título e nome de órgão vêm da API, não do código-fonte. Por isso
+ * `semTravessao.test.ts` (que varre `src/`) não os alcança. Estes testes
+ * cobrem o corte isolado e o limite em que ele entra, `normalizarResumo` e
+ * `normalizarDetalhe`.
+ */
+describe("semTravessao (R4)", () => {
+  it(`troca "${TRAVESSAO}" por " - ", com um espaço de cada lado`, () => {
+    expect(semTravessao(`ENFAM ${TRAVESSAO} Edital nº 2`)).toBe("ENFAM - Edital nº 2");
+  });
+
+  it("recolhe o espaço já colado ao travessão, dos dois lados", () => {
+    expect(semTravessao(`ENFAM${TRAVESSAO}Edital`)).toBe("ENFAM - Edital");
+    expect(semTravessao(`ENFAM ${TRAVESSAO}Edital`)).toBe("ENFAM - Edital");
+  });
+
+  it("não mexe em texto sem travessão", () => {
+    expect(semTravessao("Analista Judiciário")).toBe("Analista Judiciário");
+  });
+});
+
+describe("normalizarResumo / normalizarDetalhe (R4)", () => {
+  it("tira o travessão do título, do nome do órgão, da banca, do cargo e do último ato ao moldar o resumo", () => {
+    const sujo = {
+      ...CONCURSOS[0],
+      titulo: `ENFAM ${TRAVESSAO} Edital nº 2`,
+      orgao: { ...CONCURSOS[0].orgao, nome: `Escola ${TRAVESSAO} ENFAM` },
+      banca: { slug: "cespe", nome: `Cespe ${TRAVESSAO} Cebraspe` },
+      nomesDeCargo: [`Analista ${TRAVESSAO} Judiciário`],
+      ultimoAto: { data: "2026-09-01", titulo: `Edital ${TRAVESSAO} 2`, primeiro: true },
+    };
+
+    const limpo = normalizarResumo(sujo);
+
+    expect(limpo.titulo).toBe("ENFAM - Edital nº 2");
+    expect(limpo.orgao.nome).toBe("Escola - ENFAM");
+    expect(limpo.banca?.nome).toBe("Cespe - Cebraspe");
+    expect(limpo.nomesDeCargo).toEqual(["Analista - Judiciário"]);
+    expect(limpo.ultimoAto?.titulo).toBe("Edital - 2");
+    for (const campo of [
+      limpo.titulo,
+      limpo.orgao.nome,
+      limpo.banca?.nome,
+      ...limpo.nomesDeCargo,
+      limpo.ultimoAto?.titulo,
+    ]) {
+      expect(campo).not.toContain(TRAVESSAO);
+    }
+  });
+
+  it("tira o travessão do nome de cada cargo e do título de cada ato no detalhe", () => {
+    const detalheSujo: ConcursoDetalhe = {
+      ...CONCURSOS[0],
+      cronograma: [],
+      cargos: [
+        {
+          nome: `Analista ${TRAVESSAO} Judiciário`,
+          codigo: null,
+          escolaridade: null,
+          area: null,
+          jornadaHoras: null,
+          requisitos: [],
+          taxaInscricao: null,
+          vagas: [],
+          remuneracoes: [],
+          evidencia: [],
+        },
+      ],
+      origens: [],
+      editalCitadoUrl: null,
+    };
+
+    const limpo = normalizarDetalhe(detalheSujo);
+
+    expect(limpo.cargos[0].nome).toBe("Analista - Judiciário");
+  });
+
+  it("NÃO mexe na citação literal do ato: nem `origens[].texto` nem `faq[].trecho`, só `origens[].titulo`", () => {
+    const detalheSujo: ConcursoDetalhe = {
+      ...CONCURSOS[0],
+      cronograma: [],
+      cargos: [],
+      origens: [
+        {
+          chave: "ato-1",
+          url: null,
+          titulo: `Edital ${TRAVESSAO} 2026`,
+          fonte: null,
+          vistoEm: "2026-01-01T00:00:00",
+          texto: `Art. 1º ${TRAVESSAO} fica aberto o concurso.`,
+          caracteres: 40,
+          faq: [
+            {
+              pergunta: "quem_pode",
+              situacao: "respondida",
+              trecho: `pode se inscrever quem ${TRAVESSAO} tiver o requisito`,
+              inicioChar: 0,
+              fimChar: 10,
+              motivoDescarte: null,
+            },
+          ],
+          editalCitadoUrl: null,
+        },
+      ],
+      editalCitadoUrl: null,
+    };
+
+    const limpo = normalizarDetalhe(detalheSujo);
+
+    expect(limpo.origens[0].titulo).toBe("Edital - 2026");
+    expect(limpo.origens[0].texto).toBe(detalheSujo.origens[0].texto);
+    expect(limpo.origens[0].faq[0].trecho).toBe(detalheSujo.origens[0].faq[0].trecho);
   });
 });
