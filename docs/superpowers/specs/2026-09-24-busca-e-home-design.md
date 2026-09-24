@@ -1,4 +1,4 @@
-# Busca com URL amigável, cabeçalho de busca, home e correções — design
+# Busca com URL amigável, cabeçalho de busca, home e correções: design
 
 Data: 2026-09-24
 
@@ -14,7 +14,7 @@ Data: 2026-09-24
 5. As cores não geram contraste suficiente.
 6. Clicar num botão/link dentro do drawer do menu precisa navegar (hoje a URL
    muda, mas o drawer continua aberto, com o resto da página `inert` e a
-   rolagem travada — reproduzido em produção a 375px).
+   rolagem travada; reproduzido em produção a 375px).
 7. Criar conta com Google ou LinkedIn (a API já cria a conta no primeiro login
    social; falta o botão na tela `/cadastrar`).
 
@@ -22,7 +22,7 @@ Data: 2026-09-24
 
 ### URL da busca
 - Rota nova `/busca/[termo]`. `termo` é o slug: `normalizar(q)` (sem acento,
-  minúsculas — `src/lib/consulta.ts`), toda sequência não alfanumérica vira
+  minúsculas, ver `src/lib/consulta.ts`), toda sequência não alfanumérica vira
   um `-`, sem `-` nas pontas. Volta: hífens viram espaços. A busca já ignora
   acento e separa por espaço, então o slug devolve exatamente os mesmos
   resultados que o texto original.
@@ -108,3 +108,10 @@ Data: 2026-09-24
 - Buscas reais de usuários no sitemap.
 - Filtros no caminho da URL.
 - Reescrever o design system.
+
+### Sem travessão
+- Pedido do usuário: nenhum texto visível do site usa o travessão "—". Todas
+  as ocorrências em texto de interface (JSX, metadata, títulos, mensagens,
+  mocks exibidos) são reescritas com vírgula, dois-pontos, parênteses ou
+  ponto. Um teste Vitest varre `src/` e falha se encontrar "—" fora de
+  comentários.
