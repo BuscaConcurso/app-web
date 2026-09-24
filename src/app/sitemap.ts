@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { connection } from "next/server";
 import { urlDoCargo } from "@/lib/cargos";
 import { cargosEscolhidos, listarOrgaos, listarSlugs } from "@/lib/concursos";
 import { UFS, type Escolaridade } from "@/lib/dominio";
@@ -29,10 +28,14 @@ const ESCOLARIDADES_INDEXAVEIS: Escolaridade[] = [
   "superior",
 ];
 
+/**
+ * Uma hora. Se a leitura do acervo acontecer dentro da geração do mapa, o
+ * `revalidate: 300` do `fetch` puxa o valor efetivo para cinco minutos, que
+ * é inofensivo.
+ */
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fora do layout raiz: precisa da mesma marcação para não sair do build
-  // congelado com o mock (ver `app/layout.tsx`).
-  await connection();
   const agora = new Date();
   const slugs = await listarSlugs();
   const cargos = await cargosEscolhidos();

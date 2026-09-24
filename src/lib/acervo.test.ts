@@ -107,7 +107,7 @@ describe("acervo", () => {
     const { listarConcursos } = await carregar();
     const pagina = await listarConcursos({ porPagina: 1000 });
 
-    expect(rede).toHaveBeenCalledWith(`${API}/acervo`, { cache: "no-store" });
+    expect(rede).toHaveBeenCalledWith(`${API}/acervo`, { next: { revalidate: 300 } });
     expect(pagina.total).toBe(1);
     expect(pagina.itens[0].slug).toBe("so-este");
     expect(avisos).toEqual([]);
@@ -121,7 +121,32 @@ describe("acervo", () => {
     const { listarConcursos } = await carregar();
     await listarConcursos();
 
-    expect(rede).toHaveBeenCalledWith(`${API}/acervo`, { cache: "no-store" });
+    expect(rede).toHaveBeenCalledWith(`${API}/acervo`, { next: { revalidate: 300 } });
+  });
+
+  it("no build, API fora do ar derruba o build em vez de congelar o mock", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubEnv("NEXT_PHASE", "phase-production-build");
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new Error("ECONNREFUSED");
+    }));
+
+    const { listarConcursos } = await carregar();
+
+    await expect(listarConcursos()).rejects.toThrow("ECONNREFUSED");
+    expect(avisos).toEqual([]);
+  });
+
+  it("dentro dos cinco minutos, leituras seguidas fazem uma requisição só", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    const rede = vi.fn(async () => respostaCom({ concursos: [UM_CONCURSO], semDado: 0 }));
+    vi.stubGlobal("fetch", rede);
+
+    const { listarConcursos, dimensoesDoAcervo } = await carregar();
+    await listarConcursos();
+    await dimensoesDoAcervo();
+
+    expect(rede).toHaveBeenCalledTimes(1);
   });
 
   it("API fora do ar cai no mock, e avisa", async () => {

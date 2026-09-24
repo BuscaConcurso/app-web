@@ -28,6 +28,9 @@ function isoDeHoje(hoje: Date): string {
   return `${hoje.getFullYear()}-${mes}-${dia}`;
 }
 
+/** ISR de cinco minutos, o mesmo tempo da leitura do acervo (`concursos.ts`). */
+export const revalidate = 300;
+
 export default async function Home() {
   const hoje = new Date();
   const destaques = await obterDestaques(hoje);

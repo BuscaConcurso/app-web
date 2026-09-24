@@ -1,21 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { medirCargos } from "@/lib/cargos";
 import { slugDaBusca } from "@/lib/enderecoDaBusca";
 import { urlAbsoluta } from "@/lib/site";
 import { CONCURSOS } from "@/mocks/concursos";
-
-// `sitemap()` chama `connection()` para não sair do build congelado com o
-// mock (comentário em `sitemap.ts`). Fora do pipeline de renderização do
-// Next, sem um Request de verdade, `connection()` lança: é o mesmo motivo
-// pelo qual não há teste de `app/layout.tsx`. Aqui simulamos o Request que
-// só existe em produção, sem mexer no comportamento real: `connection()`
-// resolve na hora, como resolveria durante uma renderização de verdade.
-vi.mock("next/server", async (importarOriginal) => {
-  const original = await importarOriginal<typeof import("next/server")>();
-  return { ...original, connection: async () => undefined };
-});
-
-const { default: sitemap } = await import("./sitemap");
+import sitemap from "./sitemap";
 
 describe("sitemap", () => {
   it("tem /busca/<slug> para cada cargo medido, diário e com prioridade 0,7", async () => {

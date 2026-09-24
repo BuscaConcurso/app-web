@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { contagensDeFaceta, contarConcursos, listarConcursos } from "./concursos";
+import { contagensDeFaceta, contarConcursos, listarConcursos, paraALista } from "./concursos";
 import type { Escolaridade } from "./dominio";
 import type { Situacao } from "./consulta";
+import { CONCURSOS } from "@/mocks/concursos";
 
 /**
  * As contagens da coluna de filtros são uma promessa ao usuário: o número ao
@@ -90,5 +91,13 @@ describe("listarConcursos", () => {
     const resultado = await listarConcursos({ pagina: 999 }, HOJE);
     expect(resultado.itens).toEqual([]);
     expect(resultado.total).toBeGreaterThan(0);
+  });
+});
+
+describe("paraALista", () => {
+  it("tira só o que a lista não desenha", () => {
+    const [original] = CONCURSOS;
+    const [enxuto] = paraALista([original]);
+    expect(enxuto).toEqual({ ...original, localidades: [], ultimoAto: null });
   });
 });

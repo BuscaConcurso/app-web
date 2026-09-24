@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { connection } from "next/server";
 import { Archivo, Literata } from "next/font/google";
 import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
@@ -80,8 +79,9 @@ export const metadata: Metadata = {
 /**
  * Organization e WebSite ficam no layout porque valem para o site inteiro.
  * O SearchAction é o que habilita a caixa de busca do Google apontando para
- * a nossa própria busca, e por isso o `urlTemplate` precisa bater exatamente
- * com o parâmetro que `/concursos` lê.
+ * a nossa própria busca. O `urlTemplate` continua `/concursos?q=`, o
+ * parâmetro que o Google sabe preencher, e o `proxy.ts` leva esse endereço
+ * com 308 para `/busca/<slug>`, com o resto da query.
  */
 const dadosEstruturados = {
   "@context": "https://schema.org",
@@ -113,20 +113,26 @@ const dadosEstruturados = {
 };
 
 /**
+ * Cinco minutos para toda página sem dado por requisição: a home, as de
+ * conta e a busca por termo. O layout lê o acervo (a faixa de origem e o
+ * rodapé), e sem este valor a rota ficaria só com o `revalidate` dos
+ * `fetch`, que a memória de processo de `concursos.ts` pode pular. Página que
+ * lê `searchParams` continua dinâmica por conta própria.
+ */
+export const revalidate = 300;
+
+/**
  * `async` por causa de uma linha só: a faixa que diz de onde o acervo veio.
  *
  * Ela fica no layout, e não em cada página, porque é o único lugar onde
- * nenhuma página nova pode esquecer de mostrá-la — e a coisa que ela avisa, o
+ * nenhuma página nova pode esquecer de mostrá-la: a coisa que ela avisa, o
  * mock se passando por acervo, é justamente a que ninguém nota quando falta.
- * Não custa requisição: o `fetch` do Next memoriza a chamada que a página já
- * faz no mesmo render, e sem `BC_API_URL` não há requisição nenhuma.
+ * Não custa requisição: a leitura do acervo fica guardada no processo por
+ * cinco minutos (`concursos.ts`), e sem `BC_API_URL` não há requisição
+ * nenhuma. No build ela não congela o mock: com `BC_API_URL` fora do ar o
+ * build falha, e sem a variável a faixa diz que é o mock.
  */
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  // O acervo é sempre o do momento da requisição. Sem isto o `next build`,
-  // que roda no CI sem `BC_API_URL`, congelava as páginas como estáticas com
-  // o mock; em produção a variável existe, o `fetch` sem cache aparecia dentro
-  // de uma rota estática e o Next respondia 500 (DYNAMIC_SERVER_USAGE).
-  await connection();
   const origem = await origemDoAcervo();
 
   return (

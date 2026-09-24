@@ -22,6 +22,7 @@ jobs:
       - run: pnpm build
         env:
           NEXT_PUBLIC_BC_API_URL: ${{ vars.NEXT_PUBLIC_BC_API_URL }}
+          BC_API_URL: ${{ vars.BC_API_URL_BUILD }}
 
   image:
     needs: test
@@ -46,6 +47,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_BC_API_URL=${{ vars.NEXT_PUBLIC_BC_API_URL }}
             NEXT_PUBLIC_GTM_ID=${{ vars.NEXT_PUBLIC_GTM_ID }}
+            BC_API_URL=${{ vars.BC_API_URL_BUILD }}
           tags: |
             ghcr.io/buscaconcurso/app-web:${{ github.sha }}
             ghcr.io/buscaconcurso/app-web:latest

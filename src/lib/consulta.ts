@@ -20,6 +20,7 @@ import type {
   Uf,
 } from "./dominio";
 import { tomDoConcurso } from "./situacao";
+import { ROTULO_ESCOLARIDADE } from "./rotulos";
 
 export type Ordem = "encerrando" | "recentes" | "vagas" | "salario";
 
@@ -269,4 +270,113 @@ export function ultimasAtualizacoes(
     })
     .slice(0, limite)
     .map(({ concurso }) => concurso);
+}
+
+export const POR_PAGINA = 20;
+
+export interface Pagina {
+  itens: ConcursoResumo[];
+  total: number;
+  pagina: number;
+  porPagina: number;
+  paginas: number;
+}
+
+/**
+ * Uma página da lista. Página pedida abaixo de 1 vira 1; além do fim vem
+ * vazia com o total certo, e não quebra.
+ */
+export function paginar(
+  itens: ConcursoResumo[],
+  pagina: number,
+  porPagina: number = POR_PAGINA,
+): Pagina {
+  const atual = Math.max(pagina, 1);
+  const inicio = (atual - 1) * porPagina;
+  return {
+    itens: itens.slice(inicio, inicio + porPagina),
+    total: itens.length,
+    pagina: atual,
+    porPagina,
+    paginas: Math.max(Math.ceil(itens.length / porPagina), 1),
+  };
+}
+
+export interface OpcaoDeFaceta {
+  valor: string;
+  rotulo: string;
+  total: number;
+}
+
+export interface ContagensDeFaceta {
+  situacoes: OpcaoDeFaceta[];
+  escolaridades: OpcaoDeFaceta[];
+  bancas: OpcaoDeFaceta[];
+}
+
+/** Ordem em que a escolaridade aparece na coluna: da mais baixa à mais alta. */
+const ORDEM_DE_ESCOLARIDADE: Escolaridade[] = [
+  "fundamental_incompleto",
+  "fundamental",
+  "medio",
+  "medio_tecnico",
+  "superior",
+  "pos_graduacao",
+  "mestrado",
+  "doutorado",
+];
+
+/**
+ * Quantos resultados cada opção da coluna traria.
+ *
+ * A contagem de uma opção é feita com todas as outras dimensões do filtro
+ * atual valendo, e com a própria dimensão reduzida àquela opção sozinha. É
+ * a contagem que responde "quantos, se eu escolher exatamente este", e é o
+ * que impede alguém marcar um filtro e cair numa lista vazia.
+ *
+ * Opção que zeraria o resultado continua na lista: sumir com a linha faria
+ * a coluna mudar de tamanho a cada clique, e saber que não há nenhum
+ * também é resposta.
+ *
+ * `todos` é a lista sobre a qual se conta: o acervo inteiro em `/concursos`,
+ * os concursos do termo em `/busca/<slug>` (ver `buscaLocal.ts`).
+ */
+export function contarFacetas(
+  todos: ConcursoResumo[],
+  filtro: Filtro,
+  hoje: Date,
+): ContagensDeFaceta {
+  const contar = (sozinha: Filtro) =>
+    filtrar(todos, { ...filtro, ...sozinha }, hoje).length;
+
+  const escolaridadesNoAcervo = ORDEM_DE_ESCOLARIDADE.filter((escolaridade) =>
+    todos.some((concurso) => concurso.escolaridades.includes(escolaridade)),
+  );
+
+  // Slug para nome, tirado do próprio acervo pelo mesmo motivo de `facetas`
+  // (concursos.ts): banca do engine não está em `@/mocks/bancas`.
+  const bancasNoAcervo = new Map<string, string>();
+  for (const concurso of todos) {
+    if (concurso.banca) bancasNoAcervo.set(concurso.banca.slug, concurso.banca.nome);
+  }
+
+  return {
+    situacoes: (Object.keys(SITUACOES) as Situacao[]).map((situacao) => ({
+      valor: situacao,
+      rotulo: SITUACOES[situacao],
+      total: contar({ situacoes: [situacao] }),
+    })),
+    escolaridades: escolaridadesNoAcervo.map((escolaridade) => ({
+      valor: escolaridade,
+      rotulo: ROTULO_ESCOLARIDADE[escolaridade],
+      total: contar({ escolaridades: [escolaridade] }),
+    })),
+    bancas: [...bancasNoAcervo]
+      .map(([slug, nome]) => ({
+        valor: slug,
+        rotulo: nome,
+        total: contar({ bancas: [slug] }),
+      }))
+      .sort((a, b) => b.total - a.total || a.rotulo.localeCompare(b.rotulo)),
+  };
 }

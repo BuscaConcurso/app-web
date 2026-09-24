@@ -13,26 +13,30 @@
  */
 import { cache } from "react";
 import { unstable_rethrow } from "next/navigation";
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import { lembrarPor } from "./memoria";
 import type {
   Banca,
   ConcursoDetalhe,
   ConcursoResumo,
-  Escolaridade,
   Orgao,
   Uf,
 } from "./dominio";
 import {
+  contarFacetas,
   filtrar,
   ordenar,
-  SITUACOES,
+  paginar,
+  POR_PAGINA,
   ultimasAtualizacoes,
+  type ContagensDeFaceta,
   type Filtro,
   type Ordem,
-  type Situacao,
+  type Pagina,
 } from "./consulta";
 import { medirCargos, urlDoCargo, type CargoMedido } from "./cargos";
 import { tomDoConcurso } from "./situacao";
-import { NOME_UF, ROTULO_ESCOLARIDADE } from "./rotulos";
+import { NOME_UF } from "./rotulos";
 import { acharOrgao, agruparPorOrgao, type OrgaoDoAcervo } from "./orgaos";
 import { CONCURSOS } from "@/mocks/concursos";
 
@@ -42,15 +46,7 @@ export interface Consulta extends Filtro {
   porPagina?: number;
 }
 
-export interface Pagina {
-  itens: ConcursoResumo[];
-  total: number;
-  pagina: number;
-  porPagina: number;
-  paginas: number;
-}
-
-const POR_PAGINA = 20;
+export type { ContagensDeFaceta, OpcaoDeFaceta, Pagina } from "./consulta";
 
 /**
  * Teto de quantos cargos o rodapé mostra, e hoje ele não corta nada: a regra
@@ -131,6 +127,34 @@ const ACERVO_DE_MOCK: RespostaDeAcervo = {
 };
 
 /**
+ * Cinco minutos, o mesmo `revalidate` das páginas ISR: o acervo que a página
+ * regenerada mostra nunca é mais velho do que a própria página.
+ */
+const VALIDADE_DO_ACERVO_S = 300;
+
+/**
+ * A leitura da API, guardada no processo por `lembrarPor` (ver lá o porquê:
+ * o corpo passa de 2 MB e o Data Cache do Next não o guarda). O `fetch`
+ * continua com `revalidate` e não com `no-store`: `no-store` dentro de rota
+ * estática é o 500 `DYNAMIC_SERVER_USAGE` que o commit c31d46c contornou
+ * tornando o site inteiro dinâmico.
+ */
+const lerAcervoDaApi = lembrarPor(
+  VALIDADE_DO_ACERVO_S * 1000,
+  async (): Promise<RespostaDeAcervo> => {
+    const resposta = await fetch(`${URL_DA_API}/acervo`, {
+      next: { revalidate: VALIDADE_DO_ACERVO_S },
+    });
+    if (!resposta.ok) throw new Error(`a API respondeu ${resposta.status}`);
+    const corpo: RespostaDeAcervo = await resposta.json();
+    if (!Array.isArray(corpo?.concursos)) {
+      throw new Error("a resposta não tem a lista `concursos`");
+    }
+    return { ...corpo, origem: "api" };
+  },
+);
+
+/**
  * `cache` do React, e não só a memoização do `fetch` do Next.
  *
  * O `fetch` memorizado poupa a requisição, mas devolve uma resposta clonada a
@@ -141,37 +165,32 @@ const ACERVO_DE_MOCK: RespostaDeAcervo = {
  * idêntico. Medido no dev contra a API de verdade, medianas de 15: a home
  * caiu de 722 ms para 585 ms e a busca de 823 ms para 702 ms.
  *
- * Fora de uma renderização — o sitemap, por exemplo — `cache` não memoriza
- * nada e o comportamento é o de antes, uma análise por chamada.
+ * Fora de uma renderização (o sitemap, por exemplo) `cache` não memoriza
+ * nada, e quem poupa a rede e a análise é `lerAcervoDaApi`, que devolve o
+ * mesmo objeto por cinco minutos.
  */
 const carregar = cache(async (): Promise<RespostaDeAcervo> => {
   if (!URL_DA_API) return ACERVO_DE_MOCK;
   try {
-    // `no-store` porque o acervo muda debaixo do app: o engine reprocessa
-    // atos enquanto o app roda, e uma resposta cacheada mostraria um acervo
-    // que não existe mais. Chamadas iguais dentro do mesmo render continuam
-    // sendo uma requisição só, por memoização do `fetch` do Next.
-    const resposta = await fetch(`${URL_DA_API}/acervo`, { cache: "no-store" });
-    if (!resposta.ok) {
-      throw new Error(`a API respondeu ${resposta.status}`);
-    }
-    const corpo: RespostaDeAcervo = await resposta.json();
-    if (!Array.isArray(corpo?.concursos)) {
-      throw new Error("a resposta não tem a lista `concursos`");
-    }
-    return { ...corpo, origem: "api" };
+    return await lerAcervoDaApi();
   } catch (erro) {
-    // `fetch(..., { cache: "no-store" })` é uma das APIs que o Next usa
-    // levantando erro próprio para sair do caminho estático (a lista está em
+    // O `fetch` do Next levanta erro próprio para sair do caminho estático
+    // (a lista está em
     // node_modules/next/dist/docs/01-app/03-api-reference/04-functions/unstable_rethrow.md).
     // Sem esta linha, o `catch` abaixo engolia esse sinal e o `next build`
     // renderizava o MOCK dentro da tentativa de prerender, com a API no ar e
-    // respondendo — medido: sete avisos "usando o mock" num build limpo.
+    // respondendo: medido, sete avisos "usando o mock" num build limpo, na
+    // época em que a leitura usava `no-store`.
     // Erro de aplicação (API fora do ar, resposta torta) não é afetado:
     // `unstable_rethrow` só relança o que é do framework.
     unstable_rethrow(erro);
-    // Cair no mock em silêncio seria pior do que a tela vazia: alguém
-    // demonstraria o mock achando que está vendo o acervo do engine.
+    // No build, cair no mock seria pré-renderizar o mock: a home e cada
+    // página ISR sairiam do deploy com concursos inventados até a primeira
+    // revalidação. O build falha alto e ninguém publica isso.
+    if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) throw erro;
+    // Fora do build, cair no mock em silêncio seria pior do que a tela
+    // vazia: alguém demonstraria o mock achando que está vendo o acervo do
+    // engine.
     console.warn(
       `[concursos] ${URL_DA_API}/acervo falhou (${
         erro instanceof Error ? erro.message : erro
@@ -293,14 +312,26 @@ export async function listarConcursos(
     ordem,
     hoje,
   );
-  const inicio = (Math.max(pagina, 1) - 1) * porPagina;
-  return {
-    itens: encontrados.slice(inicio, inicio + porPagina),
-    total: encontrados.length,
-    pagina: Math.max(pagina, 1),
-    porPagina,
-    paginas: Math.max(Math.ceil(encontrados.length / porPagina), 1),
-  };
+  return paginar(encontrados, pagina, porPagina);
+}
+
+/**
+ * Os concursos de um termo, sem nenhum outro recorte. É o que a página
+ * `/busca/<slug>` entrega pronta: filtro, ordenação e página são do
+ * navegador (ver `buscaLocal.ts`), e é isso que deixa a página estática.
+ */
+export async function concursosDoTermo(termo: string): Promise<ConcursoResumo[]> {
+  return filtrar(await acervo(), { q: termo });
+}
+
+/**
+ * O que a lista do navegador não desenha sai antes de viajar. `localidades`
+ * só serve à busca por texto, que o servidor já fez; `ultimoAto` só aparece
+ * na faixa "Últimas atualizações" da home. Medido em 2026-09-24: "professor"
+ * devolve 2.631 concursos e 2,3 MB de JSON.
+ */
+export function paraALista(itens: ConcursoResumo[]): ConcursoResumo[] {
+  return itens.map((concurso) => ({ ...concurso, localidades: [], ultimoAto: null }));
 }
 
 export async function contarConcursos(
@@ -429,6 +460,19 @@ export async function facetas(hoje: Date = new Date()): Promise<{
   };
 }
 
+const medirCargosDoAcervo = cache(
+  async (): Promise<CargoMedido[]> => medirCargos(await acervo()).escolhidos,
+);
+
+/**
+ * Os cargos que a medição escolheu, todos. Uma medição por render: o rodapé,
+ * o título da busca e o sitemap perguntam a mesma coisa, e `medirCargos`
+ * varre o acervo inteiro.
+ */
+export async function cargosEscolhidos(): Promise<CargoMedido[]> {
+  return medirCargosDoAcervo();
+}
+
 /**
  * Os cargos que viram link no rodapé, medidos no acervo inteiro.
  *
@@ -449,19 +493,6 @@ export async function facetas(hoje: Date = new Date()): Promise<{
  * Não custa requisição nova: dentro do mesmo render, o `fetch` do Next
  * memoriza a chamada que o layout e a página já fizeram.
  */
-const medirCargosDoAcervo = cache(
-  async (): Promise<CargoMedido[]> => medirCargos(await acervo()).escolhidos,
-);
-
-/**
- * Os cargos que a medição escolheu, todos. Uma medição por render: o rodapé,
- * o título da busca e o sitemap perguntam a mesma coisa, e `medirCargos`
- * varre o acervo inteiro.
- */
-export async function cargosEscolhidos(): Promise<CargoMedido[]> {
-  return medirCargosDoAcervo();
-}
-
 export async function cargosEmDestaque(
   limite = LIMITE_DE_CARGOS,
 ): Promise<LinkDeFaceta[]> {
@@ -473,80 +504,15 @@ export async function cargosEmDestaque(
   }));
 }
 
-export interface OpcaoDeFaceta {
-  valor: string;
-  rotulo: string;
-  total: number;
-}
-
-export interface ContagensDeFaceta {
-  situacoes: OpcaoDeFaceta[];
-  escolaridades: OpcaoDeFaceta[];
-  bancas: OpcaoDeFaceta[];
-}
-
-/** Ordem em que a escolaridade aparece na coluna: da mais baixa à mais alta. */
-const ORDEM_DE_ESCOLARIDADE: Escolaridade[] = [
-  "fundamental_incompleto",
-  "fundamental",
-  "medio",
-  "medio_tecnico",
-  "superior",
-  "pos_graduacao",
-  "mestrado",
-  "doutorado",
-];
-
 /**
- * Quantos resultados cada opção da coluna traria.
- *
- * A contagem de uma opção é feita com todas as outras dimensões do filtro
- * atual valendo, e com a própria dimensão reduzida àquela opção sozinha. É
- * a contagem que responde "quantos, se eu escolher exatamente este", e é o
- * que impede alguém marcar um filtro e cair numa lista vazia.
- *
- * Opção que zeraria o resultado continua na lista: sumir com a linha faria
- * a coluna mudar de tamanho a cada clique, e saber que não há nenhum
- * também é resposta.
+ * Quantos resultados cada opção da coluna traria, sobre o acervo inteiro. A
+ * regra está em `contarFacetas` (consulta.ts).
  */
 export async function contagensDeFaceta(
   filtro: Filtro = {},
   hoje: Date = new Date(),
 ): Promise<ContagensDeFaceta> {
-  const todos = await acervo();
-  const contar = (sozinha: Filtro) =>
-    filtrar(todos, { ...filtro, ...sozinha }, hoje).length;
-
-  const escolaridadesNoAcervo = ORDEM_DE_ESCOLARIDADE.filter((escolaridade) =>
-    todos.some((concurso) => concurso.escolaridades.includes(escolaridade)),
-  );
-
-  // Slug para nome, tirado do próprio acervo pelo mesmo motivo de `facetas`:
-  // banca do engine não está em `@/mocks/bancas`.
-  const bancasNoAcervo = new Map<string, string>();
-  for (const concurso of todos) {
-    if (concurso.banca) bancasNoAcervo.set(concurso.banca.slug, concurso.banca.nome);
-  }
-
-  return {
-    situacoes: (Object.keys(SITUACOES) as Situacao[]).map((situacao) => ({
-      valor: situacao,
-      rotulo: SITUACOES[situacao],
-      total: contar({ situacoes: [situacao] }),
-    })),
-    escolaridades: escolaridadesNoAcervo.map((escolaridade) => ({
-      valor: escolaridade,
-      rotulo: ROTULO_ESCOLARIDADE[escolaridade],
-      total: contar({ escolaridades: [escolaridade] }),
-    })),
-    bancas: [...bancasNoAcervo]
-      .map(([slug, nome]) => ({
-        valor: slug,
-        rotulo: nome,
-        total: contar({ bancas: [slug] }),
-      }))
-      .sort((a, b) => b.total - a.total || a.rotulo.localeCompare(b.rotulo)),
-  };
+  return contarFacetas(await acervo(), filtro, hoje);
 }
 
 /**
