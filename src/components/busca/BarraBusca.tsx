@@ -392,7 +392,7 @@ export function BarraBusca({
               placeholder="Cargo, órgão ou banca. Ex.: analista judiciário"
               /* Quem desenha o foco deste campo é a cápsula, logo acima. */
               data-sem-anel=""
-              className={`w-full bg-transparent text-tinta-900 placeholder:text-tinta-400 ${altura} ${corpo}`}
+              className={`w-full bg-transparent text-tinta-900 placeholder:text-tinta-500 ${altura} ${corpo}`}
               {...campo}
             />
           </div>

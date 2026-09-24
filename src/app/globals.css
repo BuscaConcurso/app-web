@@ -25,8 +25,8 @@
   --color-tinta-900: #141715;
   --color-tinta-800: #2a2e2b;
   --color-tinta-600: #4e534f;
-  --color-tinta-500: #666c68;
-  --color-tinta-400: #8d938f;
+  --color-tinta-500: #5a605c;
+  --color-tinta-400: #767c78;
   --color-tinta-300: #c3c7c5;
   --color-tinta-200: #d9dddb;
   --color-tinta-100: #e9ebea;
@@ -142,10 +142,11 @@
  * degrau entre superfícies, e agora o cartão é mais claro que a página em vez
  * de mais branco.
  *
- * Todo par de texto e fundo aqui foi medido antes de entrar: os de leitura
- * passam de 4.5:1 e as superfícies de ação passam de 3:1. O verde de ação
- * escurece para segurar texto branco e o verde de link clareia para ler sobre
- * fundo escuro, que é exatamente o motivo de existirem dois tokens.
+ * A medida de todo par de texto e fundo aqui é `src/lib/contraste.test.ts`:
+ * os de leitura passam de 4.5:1 e as superfícies de ação passam de 3:1. O
+ * verde de ação escurece para segurar texto branco e o verde de link clareia
+ * para ler sobre fundo escuro, que é exatamente o motivo de existirem dois
+ * tokens.
  *
  * A segunda regra cobre tanto a escolha "sistema" quanto a ausência do
  * atributo. Isso vale antes de qualquer JavaScript rodar, então quem usa o
@@ -164,8 +165,8 @@
   --color-tinta-900: #edefee;
   --color-tinta-800: #d5d9d7;
   --color-tinta-600: #a2a8a4;
-  --color-tinta-500: #8a908c;
-  --color-tinta-400: #6e7571;
+  --color-tinta-500: #9a9f9c;
+  --color-tinta-400: #80867f;
   --color-tinta-300: #4c534e;
   --color-tinta-200: #363b38;
   --color-tinta-100: #282d2a;
@@ -191,7 +192,7 @@
   --color-encerrado-chip: #2a2e2b;
 
   --color-acao: #17804d;
-  --color-acao-hover: #1c9159;
+  --color-acao-hover: #136b41;
   --color-acao-texto: #ffffff;
   --color-link: #5fbe8c;
   --color-link-hover: #7dcda2;
@@ -224,8 +225,8 @@
     --color-tinta-900: #edefee;
     --color-tinta-800: #d5d9d7;
     --color-tinta-600: #a2a8a4;
-    --color-tinta-500: #8a908c;
-    --color-tinta-400: #6e7571;
+    --color-tinta-500: #9a9f9c;
+    --color-tinta-400: #80867f;
     --color-tinta-300: #4c534e;
     --color-tinta-200: #363b38;
     --color-tinta-100: #282d2a;
@@ -251,7 +252,7 @@
     --color-encerrado-chip: #2a2e2b;
 
     --color-acao: #17804d;
-    --color-acao-hover: #1c9159;
+    --color-acao-hover: #136b41;
     --color-acao-texto: #ffffff;
     --color-link: #5fbe8c;
     --color-link-hover: #7dcda2;

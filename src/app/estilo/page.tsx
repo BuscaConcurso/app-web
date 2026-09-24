@@ -198,7 +198,7 @@ export default async function Estilo() {
         O seletor de tema, e ele abre a página em vez de fechar: tudo o que
         vem abaixo tem de ser olhado duas vezes, e este é o interruptor.
 
-        É o **mesmo** componente do cabeçalho, e não uma cópia — o estado vive
+        É o **mesmo** componente do cabeçalho, e não uma cópia: o estado vive
         no atributo `data-tema` do `html`, lido por `useSyncExternalStore`, o
         que faz os dois se moverem juntos. Clicar aqui e ver o de cima mudar é
         a conferência: se eles divergirem, o estado deixou de vir do documento.
@@ -208,25 +208,22 @@ export default async function Estilo() {
         superfície vizinhos, e é o degrau mais curto do sistema inteiro.
         Medido a 375px: **1,27:1 no claro** (#ffffff sobre #e2e5e3) e
         **1,16:1 no escuro** (#1c201e sobre #272c29). Não há inversão entre os
-        temas — o degrau é igualmente curto nos dois —, e é de propósito:
+        temas, o degrau é igualmente curto nos dois, e é de propósito:
         **quem diz a posição é o ícone, não a pastilha**. Ativo é `tinta-900`,
-        inativo é `tinta-500`.
+        inativo é `tinta-400`.
 
-        E é aí que os dois temas deixam de concordar, que é o que esta página
-        existe para mostrar. A distância entre o ícone ativo e o inativo é de
-        **3,36:1 no claro** e de **2,82:1 no escuro** — o mesmo par de tokens,
-        e o escuro cai abaixo dos 3:1 que um indicador não textual precisa. Não
-        é token invertido: é o par `tinta-900`/`tinta-500` sendo mais apertado
-        no escuro do que no claro, e sendo a **única** coisa que carrega o
-        estado, porque a pastilha não carrega em tema nenhum.
+        O par que carregava o estado já foi outro: `tinta-900`/`tinta-500`
+        fazia **3,36:1 no claro** e **2,82:1 no escuro**, abaixo dos 3:1 que um
+        indicador não textual precisa, porque o degrau ficava mais apertado no
+        escuro do que no claro. A pastilha não carrega o estado em tema
+        nenhum, então quem precisava segurar os 3:1 sozinho era o ícone.
 
-        Fica escrito e medido em vez de consertado de passagem: mexer no
-        contraste deste controle é mexer no cabeçalho de todas as páginas, e
-        isso é decisão de quem desenha. A saída mais barata está medida e é só
-        para o escuro — o ícone inativo em `tinta-400` (#6e7571) daria 4,09:1
-        contra o ativo e ainda seguraria 3,01:1 contra o trilho, que é o mínimo
-        de que ele próprio precisa. A outra saída é dar à pastilha os 3:1 que
-        ela não tem, e essa mexe nos dois temas.
+        A distância entre o ícone ativo e o inativo é de **4,23:1 no claro** e
+        de **3,23:1 no escuro**: a saída aplicada troca o inativo para
+        `tinta-400`, que ainda faz 3,36:1 no claro e 3,81:1 no escuro contra o
+        trilho `rebaixada`, o mínimo de que ele próprio precisa. Fica medido
+        em vez de consertado de passagem: a medida é `src/lib/contraste.test.ts`,
+        no par `tinta-400`/`tinta-900`.
       */}
       <Bloco titulo="Tema" nota="claro · escuro · sistema, e sistema é o padrão">
         <Cartao className="flex flex-wrap items-center gap-4 p-5">
