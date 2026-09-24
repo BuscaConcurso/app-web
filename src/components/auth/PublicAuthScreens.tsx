@@ -25,11 +25,22 @@ import {
 
 const linkClass = "text-sm font-medium text-link underline hover:text-link-hover";
 
+/**
+ * O verbo de cada botão. Entrar e criar conta são o mesmo `authorize`: a API
+ * cria a conta no primeiro login social, então o que muda entre as duas
+ * telas é só a palavra. Vincular é outro fluxo, com sessão.
+ */
+const VERBO_DO_OAUTH = {
+  login: "Entrar",
+  signup: "Criar conta",
+  link: "Vincular",
+} as const;
+
 export function OAuthButtons({
   mode,
   returnTo = "/",
 }: {
-  mode: "login" | "link";
+  mode: keyof typeof VERBO_DO_OAUTH;
   returnTo?: string;
 }) {
   const [error, setError] = useState<string>();
@@ -41,7 +52,7 @@ export function OAuthButtons({
     sessionStorage.setItem("bc:oauth-mode", mode);
     sessionStorage.setItem("bc:oauth-return-to", safeReturnTo(returnTo));
     try {
-      if (mode === "login") {
+      if (mode !== "link") {
         const url = new URL(
           `${AUTH_API_BASE_URL}/v1/auth/oauth/${provider}/authorize`,
         );
@@ -72,7 +83,7 @@ export function OAuthButtons({
         >
           {pending === provider
             ? "Abrindo…"
-            : `${mode === "login" ? "Entrar" : "Vincular"} com ${
+            : `${VERBO_DO_OAUTH[mode]} com ${
                 provider === "google" ? "Google" : "LinkedIn"
               }`}
         </button>
@@ -262,6 +273,12 @@ export function RegisterScreen() {
         </p>
         <SubmitButton pending={pending}>Criar conta</SubmitButton>
       </form>
+      <div className="flex items-center gap-3 text-xs uppercase text-tinta-500">
+        <span className="h-px flex-1 bg-tinta-200" />
+        ou
+        <span className="h-px flex-1 bg-tinta-200" />
+      </div>
+      <OAuthButtons mode="signup" />
       <Link className={linkClass} href="/entrar">Já tenho uma conta</Link>
     </div>
   );
