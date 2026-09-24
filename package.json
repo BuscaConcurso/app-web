@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "verificar": "pnpm typecheck && pnpm lint && pnpm test",
     "geo": "node scripts/gerar-contornos-uf.mjs"
   },
