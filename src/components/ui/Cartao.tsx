@@ -115,6 +115,7 @@ export function Selo({
   );
   return (
     <SeloComLogo
+      key={face.url}
       url={face.url}
       lado={tamanho === "sm" ? "size-10" : "size-11"}
       alternativa={alternativa}
