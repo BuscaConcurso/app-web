@@ -11,7 +11,7 @@ import { Rotulo } from "@/components/ui/Etiqueta";
  * **Por que "acervo fora do ar" é o caso realista, e não um erro genérico de
  * programação.** A leitura do acervo (`src/lib/concursos.ts`) guarda o
  * último valor bom por processo; quando a API está fora do ar e não há
- * nenhum valor guardado ainda, ela lança em vez de devolver dado fingido — e
+ * nenhum valor guardado ainda, ela lança em vez de devolver dado fingido, e
  * uma rota dinâmica que depende dela lança durante o render. É o caminho mais
  * provável até este componente, então o texto fala dele e não de "algo deu
  * errado" sem contexto, sem entrar em detalhe técnico nenhum: a pessoa não
@@ -20,7 +20,7 @@ import { Rotulo } from "@/components/ui/Etiqueta";
  * **Sem a mensagem técnica.** `error.message` de um componente de servidor já
  * chega genérico em produção (a própria plataforma esconde o texto original
  * para não vazar detalhe sensível), mas o de um componente de cliente chega
- * inteiro — por isso o texto na tela nunca usa `error.message` nem
+ * inteiro, e por isso o texto na tela nunca usa `error.message` nem
  * `error.digest`; os dois só vão para `console.error`, que é o lugar de quem
  * depura, não de quem só queria ver a página.
  *

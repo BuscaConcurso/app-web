@@ -19,7 +19,7 @@ import { NOME_UF } from "@/lib/rotulos";
  *
  * O Next devolve 404 de verdade para quem chega aqui por engano (uma URL que
  * não bate com nenhuma rota) e 200 para quem chega por `notFound()` dentro de
- * uma resposta que já começou a ser transmitida — a distinção é da própria
+ * uma resposta que já começou a ser transmitida: a distinção é da própria
  * plataforma, não deste arquivo.
  */
 export const metadata: Metadata = {

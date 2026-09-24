@@ -6,7 +6,12 @@ import { Cabecalho } from "@/components/layout/Cabecalho";
 import { GoogleTagManager } from "@/components/layout/GoogleTagManager";
 import { Rodape } from "@/components/layout/Rodape";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
-import { dimensoesDoAcervo, origemDoAcervo } from "@/lib/concursos";
+import {
+  dimensoesDoAcervo,
+  origemDoAcervo,
+  type DimensoesDoAcervo,
+  type OrigemDoAcervo,
+} from "@/lib/concursos";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 import { SCRIPT_DO_TEMA } from "@/lib/tema";
 import { SessionProvider } from "@/lib/auth/session";
@@ -122,7 +127,51 @@ const dadosEstruturados = {
 export const revalidate = 300;
 
 /**
- * `async` por causa de uma linha só: a faixa que diz de onde o acervo veio.
+ * O acervo que o layout raiz precisa: a faixa de origem e a contagem que a
+ * barra de busca usa para saber se o filtro de estado tem o que filtrar.
+ *
+ * **O layout não pode lançar.** Ele envolve toda página do site, inclusive
+ * `/entrar`, o cadastro e a 404 (`not-found.tsx`), e um erro aqui derruba
+ * todas elas de uma vez: nem `error.tsx` alcança este nível, porque ele
+ * embrulha `loading.js`, `not-found.js`, `page.js` e os `layout.js` abaixo
+ * dele, não o próprio `layout.tsx` raiz (doc lida antes de escrever este
+ * arquivo, em `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/error.md`).
+ * Sob a regra R3 de `concursos.ts`, a API fora do ar sem leitura boa
+ * guardada lança, e sem este envoltório essa falha bateria direto na
+ * página padrão do Next, sem identidade nenhuma e sem link de volta:
+ * exatamente o que `global-error.tsx` existe para nunca precisar mostrar.
+ *
+ * Degrada assim: sem faixa de origem (`origem: null`, e o layout nem chega
+ * a montar `AvisoDeOrigem`) e com a barra de busca sem contagem nenhuma
+ * (`comUf: 0` já é o bastante para `BarraBuscaDoCabecalho` desligar o
+ * seletor de estado, ver `BarraBusca.tsx`). Uma página que realmente
+ * precisa do acervo (a home, `/concursos`, `/busca/<termo>`) continua
+ * lançando dela mesma, direto para o `error.tsx` daquela rota: só a leitura
+ * feita aqui, para o cabeçalho, é que não pode empacar o site inteiro.
+ */
+async function acervoDoLayout(): Promise<{
+  origem: OrigemDoAcervo | null;
+  dimensoes: DimensoesDoAcervo;
+}> {
+  try {
+    const [origem, dimensoes] = await Promise.all([
+      origemDoAcervo(),
+      dimensoesDoAcervo(),
+    ]);
+    return { origem, dimensoes };
+  } catch (erro) {
+    console.error(
+      "[layout] acervo indisponível ao montar o cabeçalho; a página segue sem " +
+        "a faixa de origem e sem contagem de estado na busca.",
+      erro,
+    );
+    return { origem: null, dimensoes: { total: 0, comUf: 0, comEsfera: 0 } };
+  }
+}
+
+/**
+ * `async` por causa de uma leitura só: o acervo que a faixa de origem e a
+ * busca do cabeçalho precisam.
  *
  * Ela fica no layout, e não em cada página, porque é o único lugar onde
  * nenhuma página nova pode esquecer de mostrá-la: a coisa que ela avisa, o
@@ -133,7 +182,7 @@ export const revalidate = 300;
  * build falha, e sem a variável a faixa diz que é o mock.
  */
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [origem, dimensoes] = await Promise.all([origemDoAcervo(), dimensoesDoAcervo()]);
+  const { origem, dimensoes } = await acervoDoLayout();
 
   return (
     // `suppressHydrationWarning` é o que faltava para o aviso "A tree hydrated
@@ -164,7 +213,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <GoogleTagManager />
         <SessionProvider>
           <DadosEstruturados dados={dadosEstruturados} />
-          <AvisoDeOrigem origem={origem} />
+          {/* `null` só quando o acervo falhou ao montar o layout
+              (`acervoDoLayout`): sem origem para dizer, a faixa fica calada
+              em vez de afirmar "api" ou "mock" sem ter lido nenhum dos dois. */}
+          {origem && <AvisoDeOrigem origem={origem} />}
           <Cabecalho dimensoes={dimensoes} />
           <main className="flex-1">{children}</main>
           <Rodape />
