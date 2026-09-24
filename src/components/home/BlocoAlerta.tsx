@@ -53,7 +53,7 @@ export function AcervoIncompleto({ aviso }: { aviso: AvisoDoAcervo }) {
       */}
       {partes.length === 0 ? (
         <>
-          : não temos cargo nem cronograma deles. Nem todos vão entrar — parte
+          : não temos cargo nem cronograma deles. Nem todos vão entrar: parte
           dos atos é retificação ou anexo, que não abre concurso.
         </>
       ) : partes.length === 1 && partes[0].quantos === aviso.semDado ? (
@@ -124,7 +124,7 @@ export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
             type="email"
             required
             placeholder="voce@email.com"
-            className="h-12 w-full rounded-controle bg-cartao px-3.5 text-sm text-tinta-900 outline-none placeholder:text-tinta-400 sm:w-[16rem]"
+            className="h-12 w-full rounded-controle bg-cartao px-3.5 text-sm text-tinta-900 outline-none placeholder:text-tinta-500 sm:w-[16rem]"
           />
           <button
             type="submit"

@@ -119,6 +119,7 @@ import {
   type ReactNode,
   type SyntheticEvent,
 } from "react";
+import { usePathname } from "next/navigation";
 
 /** O que `globals.css` leva para tirar o painel da tela, com folga. */
 const SEGURANCA_MS = 400;
@@ -244,6 +245,47 @@ function useRevelador({
     const relogio = setTimeout(encerrar, SEGURANCA_MS);
     elemento.addEventListener("animationend", encerrar);
   }, []);
+
+  /**
+   * Fecha na hora, sem a animação de saída.
+   *
+   * É o fechamento de quem já saiu da página: a navegação trocou o conteúdo
+   * por baixo, e segurar o `open` 180ms para animar só manteria o `inert` e a
+   * rolagem travada sobre a página nova por mais tempo. Se uma saída animada
+   * estava em curso, o `animationend` dela chega depois e não acha nada a
+   * fazer, porque `open` já é falso.
+   */
+  const fecharJa = useCallback(() => {
+    const elemento = raiz.current;
+    if (!elemento?.open) return;
+    elemento.removeAttribute("data-fechando");
+    elemento.open = false;
+  }, []);
+
+  /**
+   * Fecha quando o caminho muda.
+   *
+   * O cabeçalho mora no layout, e o layout sobrevive à navegação do cliente.
+   * Clicar em "Entrar" dentro da gaveta do menu trocava a página e deixava a
+   * gaveta aberta por cima, com o resto `inert` e a rolagem travada:
+   * reproduzido em produção a 375px. O `pointerdown` de dentro do painel não
+   * fecha nada, de propósito (é o que deixa selecionar o texto do ato).
+   *
+   * Só o caminho, e não a URL inteira: os filtros do celular mudam a query e
+   * as âncoras do ato mudam o hash, e nos dois casos a pessoa continua na
+   * mesma página e a gaveta precisa continuar aberta.
+   *
+   * `caminhoVisto` guarda o caminho em que a gaveta montou para o efeito não
+   * fechar nada na hidratação: sem script o `<details>` pode ter sido aberto
+   * antes de o React chegar, e fechá-lo ao hidratar desfaria o gesto.
+   */
+  const caminho = usePathname();
+  const caminhoVisto = useRef(caminho);
+  useEffect(() => {
+    if (caminhoVisto.current === caminho) return;
+    caminhoVisto.current = caminho;
+    fecharJa();
+  }, [caminho, fecharJa]);
 
   /**
    * O clique no `<summary>` aberto fecharia na hora, sem animação. Sem script

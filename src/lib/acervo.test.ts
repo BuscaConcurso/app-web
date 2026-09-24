@@ -68,11 +68,16 @@ async function carregar() {
 }
 
 let avisos: string[];
+let erros: string[];
 
 beforeEach(() => {
   avisos = [];
+  erros = [];
   vi.spyOn(console, "warn").mockImplementation((mensagem: string) => {
     avisos.push(String(mensagem));
+  });
+  vi.spyOn(console, "error").mockImplementation((mensagem: string) => {
+    erros.push(String(mensagem));
   });
 });
 
@@ -107,7 +112,10 @@ describe("acervo", () => {
     const { listarConcursos } = await carregar();
     const pagina = await listarConcursos({ porPagina: 1000 });
 
-    expect(rede).toHaveBeenCalledWith(`${API}/acervo`, { cache: "no-store" });
+    expect(rede).toHaveBeenCalledWith(`${API}/acervo`, {
+      next: { revalidate: 300 },
+      signal: expect.any(AbortSignal),
+    });
     expect(pagina.total).toBe(1);
     expect(pagina.itens[0].slug).toBe("so-este");
     expect(avisos).toEqual([]);
@@ -121,48 +129,94 @@ describe("acervo", () => {
     const { listarConcursos } = await carregar();
     await listarConcursos();
 
-    expect(rede).toHaveBeenCalledWith(`${API}/acervo`, { cache: "no-store" });
+    expect(rede).toHaveBeenCalledWith(`${API}/acervo`, {
+      next: { revalidate: 300 },
+      signal: expect.any(AbortSignal),
+    });
   });
 
-  it("API fora do ar cai no mock, e avisa", async () => {
+  it("no build, API fora do ar derruba o build em vez de congelar o mock", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubEnv("NEXT_PHASE", "phase-production-build");
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new Error("ECONNREFUSED");
+    }));
+
+    const { listarConcursos } = await carregar();
+
+    await expect(listarConcursos()).rejects.toThrow("ECONNREFUSED");
+    expect(avisos).toEqual([]);
+  });
+
+  it("dentro dos cinco minutos, leituras seguidas fazem uma requisição só", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    const rede = vi.fn(async () => respostaCom({ concursos: [UM_CONCURSO], semDado: 0 }));
+    vi.stubGlobal("fetch", rede);
+
+    const { listarConcursos, dimensoesDoAcervo } = await carregar();
+    await listarConcursos();
+    await dimensoesDoAcervo();
+
+    expect(rede).toHaveBeenCalledTimes(1);
+  });
+
+  // Com a API configurada, falha sem leitura boa anterior lança, e não cai
+  // no mock: numa regeneração ISR o mock ficaria no cache por cinco minutos,
+  // com concursos inventados, para todo mundo. O erro vai para o log.
+  it("API fora do ar, sem leitura boa anterior, lança em vez de cair no mock", async () => {
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () => {
       throw new Error("ECONNREFUSED");
     }));
 
     const { listarConcursos } = await carregar();
-    const pagina = await listarConcursos({ porPagina: 1000 });
 
-    expect(pagina.total).toBe(CONCURSOS.length);
-    // Cair no mock em silêncio é pior do que a tela vazia: alguém demonstra o
-    // mock achando que está vendo o acervo do engine.
-    expect(avisos.join()).toContain("ECONNREFUSED");
-    expect(avisos.join()).toContain("usando o mock");
+    await expect(listarConcursos()).rejects.toThrow("ECONNREFUSED");
+    expect(erros.join()).toContain("ECONNREFUSED");
+    expect(avisos.join()).not.toContain("usando o mock");
   });
 
-  it("resposta de erro cai no mock, e avisa", async () => {
+  it("resposta de erro lança", async () => {
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ erro: "x" }, 500)));
 
     const { listarConcursos } = await carregar();
-    const pagina = await listarConcursos({ porPagina: 1000 });
 
-    expect(pagina.total).toBe(CONCURSOS.length);
-    expect(avisos.join()).toContain("500");
+    await expect(listarConcursos()).rejects.toThrow("500");
   });
 
-  it("resposta sem a lista de concursos cai no mock, e avisa", async () => {
+  it("resposta sem a lista de concursos lança", async () => {
     vi.stubEnv("BC_API_URL", API);
     // O caso de apontar a variável para outro serviço qualquer que responde
     // 200: sem esta checagem, `filtrar` receberia `undefined` e a página
-    // morreria com TypeError no lugar de mostrar o mock.
+    // morreria com TypeError longe daqui.
     vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ ok: true })));
 
     const { listarConcursos } = await carregar();
-    const pagina = await listarConcursos({ porPagina: 1000 });
 
-    expect(pagina.total).toBe(CONCURSOS.length);
-    expect(avisos.join()).toContain("`concursos`");
+    await expect(listarConcursos()).rejects.toThrow("`concursos`");
+  });
+
+  it("API fora do ar depois de uma leitura boa devolve a leitura boa", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    let agora = 0;
+    vi.spyOn(Date, "now").mockImplementation(() => agora);
+    let vezes = 0;
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      vezes += 1;
+      if (vezes > 1) throw new Error("ECONNREFUSED");
+      return respostaCom({ concursos: [UM_CONCURSO], semDado: 0 });
+    }));
+
+    const { listarConcursos, origemDoAcervo } = await carregar();
+    expect((await listarConcursos()).total).toBe(1);
+
+    agora = 300_000;
+    const pagina = await listarConcursos();
+
+    expect(vezes).toBe(2);
+    expect(pagina.itens[0].slug).toBe("so-este");
+    expect(await origemDoAcervo()).toBe("api");
   });
 
   it("o aviso conta os concursos que a rota não mandou, e por que estão fora", async () => {
@@ -302,7 +356,7 @@ describe("acervo", () => {
     expect(await avisoDoAcervo()).toBeNull();
   });
 
-  it("API fora do ar não inventa aviso", async () => {
+  it("API fora do ar não inventa aviso: lança", async () => {
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () => {
       throw new Error("ECONNREFUSED");
@@ -310,10 +364,7 @@ describe("acervo", () => {
 
     const { avisoDoAcervo } = await carregar();
 
-    // Caiu no mock: dizer "293 estão fora desta lista" sobre o mock seria uma
-    // afirmação falsa sobre um acervo que nem está sendo mostrado.
-    expect(await avisoDoAcervo()).toBeNull();
-    expect(avisos.join()).toContain("usando o mock");
+    await expect(avisoDoAcervo()).rejects.toThrow("ECONNREFUSED");
   });
 
   it("as facetas rotulam órgão e banca com o que vem da rota", async () => {
@@ -404,6 +455,7 @@ describe("obterDetalhe", () => {
 
     expect(rede).toHaveBeenCalledWith(`${API}/concursos/so-este`, {
       cache: "no-store",
+      signal: expect.any(AbortSignal),
     });
     expect(detalhe!.cronograma[0].evidencia).toContain("18 de maio");
     expect(detalhe!.cargos[0].nome).toBe("Professor Visitante");
@@ -423,21 +475,54 @@ describe("obterDetalhe", () => {
     expect(avisos).toEqual([]);
   });
 
-  it("API fora do ar cai no resumo do mock, sem inventar detalhe", async () => {
+  // R3/R9: com BC_API_URL, falha não é mock. Um slug real que o mock não tem
+  // viraria 404 com noindex durante a queda; lançando, a página de erro
+  // responde e o 404 fica só para o slug que a API diz não existir.
+  it("API fora do ar lança, e não cai no mock", async () => {
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () => {
       throw new Error("ECONNREFUSED");
     }));
 
     const { obterDetalhe } = await carregar();
-    const detalhe = await obterDetalhe("trt-2-analista-judiciario-2026");
 
-    expect(detalhe!.titulo).toBe("Analista e técnico judiciário");
-    // Cronograma vazio, não um cronograma inventado a partir das datas do
-    // resumo: o mock não tem evento nenhum, e a página sabe dizer isso.
-    expect(detalhe!.cronograma).toEqual([]);
-    expect(detalhe!.cargos).toEqual([]);
-    expect(avisos.join()).toContain("usando o mock");
+    // Slug que existe no mock: antes, a queda o servia com dado de mentira.
+    await expect(obterDetalhe("trt-2-analista-judiciario-2026")).rejects.toThrow(
+      "ECONNREFUSED",
+    );
+    // Slug real que o mock não tem: antes, virava 404.
+    await expect(obterDetalhe("so-este")).rejects.toThrow("ECONNREFUSED");
+    expect(erros.join()).toContain("a página de erro responde");
+    expect(avisos.join()).not.toContain("mock");
+  });
+
+  it("5xx da API lança", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ detail: "x" }, 503)));
+
+    const { obterDetalhe } = await carregar();
+
+    await expect(obterDetalhe("so-este")).rejects.toThrow("a API respondeu 503");
+  });
+
+  it("tempo esgotado lança", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      throw new DOMException("The operation was aborted due to timeout", "TimeoutError");
+    }));
+
+    const { obterDetalhe } = await carregar();
+
+    await expect(obterDetalhe("so-este")).rejects.toThrow(/timeout/);
+  });
+
+  it("resposta sem concurso lança", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ outra: "coisa" })));
+
+    const { obterDetalhe } = await carregar();
+
+    await expect(obterDetalhe("so-este")).rejects.toThrow("a resposta não tem um concurso");
   });
 
   it("sem BC_API_URL não toca a rede e devolve o resumo do mock", async () => {
@@ -473,22 +558,19 @@ describe("origemDoAcervo", () => {
     expect(await origemDoAcervo()).toBe("api");
   });
 
-  it("diz `falha` quando a API estava configurada e não respondeu", async () => {
-    // O caso que motivou isto: a API reiniciando, a tela mostrando o mock com
-    // cara de acervo real, e quem olhava quase relatando o mock como dado.
+  it("com a API configurada e fora do ar, não finge origem nenhuma: lança", async () => {
+    // O caso que motivou a faixa de origem: a API reiniciando, a tela
+    // mostrando o mock com cara de acervo real. Hoje não há mock com a API
+    // configurada, então não há o que avisar: a página falha ou continua a
+    // velha.
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () => {
       throw new Error("ECONNREFUSED");
     }));
 
-    const { origemDoAcervo, listarConcursos } = await carregar();
+    const { origemDoAcervo } = await carregar();
 
-    expect(await origemDoAcervo()).toBe("falha");
-    // E a lista continua vindo: a reserva não foi tirada, só deixou de ser
-    // silenciosa.
-    expect((await listarConcursos({ porPagina: 1000 })).total).toBe(
-      CONCURSOS.length,
-    );
+    await expect(origemDoAcervo()).rejects.toThrow("ECONNREFUSED");
   });
 
   it("diz `mock` quando ninguém configurou a API", async () => {
@@ -499,13 +581,13 @@ describe("origemDoAcervo", () => {
     expect(await origemDoAcervo()).toBe("mock");
   });
 
-  it("resposta torta também é falha, não `api`", async () => {
+  it("resposta torta também lança, e não vira `api`", async () => {
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ ok: true })));
 
     const { origemDoAcervo } = await carregar();
 
-    expect(await origemDoAcervo()).toBe("falha");
+    await expect(origemDoAcervo()).rejects.toThrow("`concursos`");
   });
 });
 

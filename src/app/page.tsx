@@ -8,6 +8,7 @@ import { Secao } from "@/components/home/Secao";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import {
   avisoDoAcervo,
+  cargosEmDestaque,
   dimensoesDoAcervo,
   facetas,
   obterDestaques,
@@ -28,12 +29,18 @@ function isoDeHoje(hoje: Date): string {
   return `${hoje.getFullYear()}-${mes}-${dia}`;
 }
 
+/** ISR de cinco minutos, o mesmo tempo da leitura do acervo (`concursos.ts`). */
+export const revalidate = 300;
+
 export default async function Home() {
   const hoje = new Date();
-  const destaques = await obterDestaques(hoje);
-  const { ufs, bancas, orgaos } = await facetas(hoje);
-  const aviso = await avisoDoAcervo();
-  const dimensoes = await dimensoesDoAcervo();
+  const [destaques, { ufs, bancas, orgaos }, aviso, dimensoes, cargos] = await Promise.all([
+    obterDestaques(hoje),
+    facetas(hoje),
+    avisoDoAcervo(),
+    dimensoesDoAcervo(),
+    cargosEmDestaque(8),
+  ]);
 
   /**
    * ItemList sobre os concursos em destaque. Descreve para o buscador que
@@ -51,7 +58,7 @@ export default async function Home() {
         position: indice + 1,
         url: urlAbsoluta(`/concursos/${concurso.slug}`),
         // O órgão está colado no nome do item, então o título entra recortado
-        // — ver `tituloSemOrgao`. Sem o recorte, os itens desta lista saíam
+        // (ver `tituloSemOrgao`). Sem o recorte, os itens desta lista saíam
         // com o nome do órgão duas vezes na mesma string.
         name: `${concurso.orgao.nome}: ${tituloSemOrgao(
           concurso.titulo,
@@ -69,6 +76,8 @@ export default async function Home() {
         totalAbertos={destaques.totalAbertos}
         atualizadoEm={dataLonga(isoDeHoje(hoje))}
         dimensoes={dimensoes}
+        ufs={ufs}
+        cargos={cargos}
       />
 
       {destaques.encerrando.length > 0 && (
@@ -80,7 +89,7 @@ export default async function Home() {
         >
           <ul className="grid gap-2">
             {destaques.encerrando.map((concurso) => (
-              <li key={concurso.slug}>
+              <li key={concurso.slug} className="min-w-0">
                 <LinhaConcurso concurso={concurso} hoje={hoje} acao="Abrir" />
               </li>
             ))}
@@ -113,7 +122,7 @@ export default async function Home() {
         >
           <ul className="grid gap-2">
             {destaques.atualizados.map((concurso) => (
-              <li key={concurso.slug}>
+              <li key={concurso.slug} className="min-w-0">
                 <LinhaConcurso
                   concurso={concurso}
                   hoje={hoje}
@@ -135,7 +144,7 @@ export default async function Home() {
         >
           <ul className="grid gap-2">
             {destaques.previstos.map((concurso) => (
-              <li key={concurso.slug}>
+              <li key={concurso.slug} className="min-w-0">
                 <LinhaConcurso concurso={concurso} hoje={hoje} acao="Avisar" />
               </li>
             ))}
@@ -151,7 +160,7 @@ export default async function Home() {
 
       <BlocoAlerta totalAbertos={destaques.totalAbertos} />
 
-      <BlocosSeo ufs={ufs} bancas={bancas} orgaos={orgaos} />
+      <BlocosSeo bancas={bancas} orgaos={orgaos} />
     </>
   );
 }

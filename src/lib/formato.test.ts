@@ -3,6 +3,7 @@ import {
   dataCurta,
   dataLonga,
   diasAte,
+  hojeCivilEmSaoPaulo,
   hojeEmSaoPaulo,
   moeda,
   moedaExata,
@@ -135,5 +136,21 @@ describe("hojeEmSaoPaulo", () => {
   it("sai no mesmo formato das datas do domínio", () => {
     expect(hojeEmSaoPaulo(new Date("2026-01-05T12:00:00Z"))).toBe("2026-01-05");
     expect(hojeEmSaoPaulo(new Date("2026-12-31T23:00:00Z"))).toBe("2026-12-31");
+  });
+});
+
+describe("hojeCivilEmSaoPaulo", () => {
+  it("devolve a meia-noite local do dia civil de Brasília, em qualquer fuso do processo", () => {
+    // 02h UTC do dia 15 ainda é dia 14 em Brasília.
+    const hoje = hojeCivilEmSaoPaulo(new Date("2026-09-15T02:00:00Z"));
+    expect([hoje.getFullYear(), hoje.getMonth(), hoje.getDate()]).toEqual([2026, 8, 14]);
+    expect([hoje.getHours(), hoje.getMinutes()]).toEqual([0, 0]);
+    expect(hoje.getTime()).toBe(paraDataLocal("2026-09-14").getTime());
+  });
+
+  it("um prazo que encerra hoje em Brasília ainda não passou, mesmo com o relógio em UTC no dia seguinte", () => {
+    const hoje = hojeCivilEmSaoPaulo(new Date("2026-09-15T02:30:00Z"));
+    expect(diasAte("2026-09-14", hoje)).toBe(0);
+    expect(prazoRelativo("2026-09-14", hoje)).toBe("Encerra hoje");
   });
 });

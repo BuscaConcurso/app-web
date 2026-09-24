@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoResumo, Escolaridade, Uf } from "./dominio";
 import { filtrar, normalizar, ordenar, ultimasAtualizacoes } from "./consulta";
+import { hojeCivilEmSaoPaulo } from "./formato";
 
 const HOJE = new Date(2026, 3, 10, 9, 0);
 
@@ -368,5 +369,36 @@ describe("ultimasAtualizacoes", () => {
     ];
 
     expect(ultimasAtualizacoes(itens).map((c) => c.slug)).toEqual(["a", "b"]);
+  });
+});
+
+describe("hoje em São Paulo nas duas listas", () => {
+  // /concursos filtra no servidor (UTC na VPS) e /busca no navegador (o fuso
+  // de quem lê). Com `hojeCivilEmSaoPaulo`, os dois dão o mesmo resultado.
+  // 02h30 UTC do dia 15 é 23h30 do dia 14 em Brasília.
+  const INSTANTE = new Date("2026-09-15T02:30:00Z");
+
+  it("abertas e a ordem encerrando não dependem do fuso do processo", () => {
+    const encerraHoje = fixture({ slug: "encerra-hoje", inscricoesAte: "2026-09-14" });
+    const encerraAmanha = fixture({ slug: "encerra-amanha", inscricoesAte: "2026-09-15" });
+    const encerrou = fixture({ slug: "encerrou", inscricoesAte: "2026-09-13" });
+    const itens = [encerrou, encerraAmanha, encerraHoje];
+    const tzOriginal = process.env.TZ;
+    const vistos: string[][] = [];
+    try {
+      for (const tz of ["UTC", "America/Sao_Paulo", "Asia/Tokyo", "America/Los_Angeles"]) {
+        process.env.TZ = tz;
+        const hoje = hojeCivilEmSaoPaulo(INSTANTE);
+        const abertas = filtrar(itens, { situacoes: ["abertas"] }, hoje);
+        expect(abertas.map((c) => c.slug).sort(), tz).toEqual(["encerra-amanha", "encerra-hoje"]);
+        vistos.push(ordenar(itens, "encerrando", hoje).map((c) => c.slug));
+      }
+    } finally {
+      if (tzOriginal === undefined) delete process.env.TZ;
+      else process.env.TZ = tzOriginal;
+    }
+    for (const ordem of vistos) {
+      expect(ordem).toEqual(["encerra-hoje", "encerra-amanha", "encerrou"]);
+    }
   });
 });

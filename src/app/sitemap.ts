@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-import { connection } from "next/server";
-import { listarOrgaos, listarSlugs } from "@/lib/concursos";
+import { urlDoCargo } from "@/lib/cargos";
+import { cargosEscolhidos, listarOrgaos, listarSlugs } from "@/lib/concursos";
 import { UFS, type Escolaridade } from "@/lib/dominio";
 import { urlAbsoluta } from "@/lib/site";
 
@@ -8,9 +8,9 @@ import { urlAbsoluta } from "@/lib/site";
  * O mapa do site.
  *
  * Entram a home, a busca, as facetas finitas (estado e escolaridade), cada
- * órgão com mais de um concurso e cada concurso. Não entram as buscas por
- * texto livre, que são infinitas, nem `/estilo`, que é ferramenta de trabalho
- * e não conteúdo.
+ * cargo que `medirCargos` escolheu, cada órgão com mais de um concurso e cada
+ * concurso. Não entram as buscas por texto livre, que são infinitas, nem
+ * `/estilo`, que é ferramenta de trabalho e não conteúdo.
  *
  * **Os órgãos de um concurso só ficam de fora**, e são 195 dos 466. A página
  * deles é o cartão de um concurso que já está neste mesmo mapa com prioridade
@@ -28,12 +28,17 @@ const ESCOLARIDADES_INDEXAVEIS: Escolaridade[] = [
   "superior",
 ];
 
+/**
+ * Uma hora. Se a leitura do acervo acontecer dentro da geração do mapa, o
+ * `revalidate: 300` do `fetch` puxa o valor efetivo para cinco minutos, que
+ * é inofensivo.
+ */
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fora do layout raiz: precisa da mesma marcação para não sair do build
-  // congelado com o mock (ver `app/layout.tsx`).
-  await connection();
   const agora = new Date();
   const slugs = await listarSlugs();
+  const cargos = await cargosEscolhidos();
   const orgaos = (await listarOrgaos()).filter(
     ({ concursos }) => concursos.length >= MINIMO_DE_CONCURSOS_NO_MAPA,
   );
@@ -62,6 +67,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: agora,
       changeFrequency: "daily" as const,
       priority: 0.6,
+    })),
+    // Todos os cargos que a medição escolheu, e não só os dez do rodapé: a
+    // medição já recusa o que devolveria lista pequena ou de outro cargo, e
+    // é essa mesma regra que decide o que vale uma URL indexável.
+    ...cargos.map((cargo) => ({
+      url: urlAbsoluta(urlDoCargo(cargo)),
+      lastModified: agora,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
     })),
     // Entre a faceta e o concurso: um órgão é mais durável que uma busca por
     // estado e menos específico que um edital, que é o que a pessoa procura.

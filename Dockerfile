@@ -7,8 +7,12 @@ COPY . .
 # O Next grava NEXT_PUBLIC_* no bundle do navegador durante o build.
 ARG NEXT_PUBLIC_BC_API_URL
 ARG NEXT_PUBLIC_GTM_ID=""
-ENV NEXT_PUBLIC_BC_API_URL=$NEXT_PUBLIC_BC_API_URL NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID NEXT_TELEMETRY_DISABLED=1
-RUN test -n "$NEXT_PUBLIC_BC_API_URL" && pnpm build
+# O acervo que o build pré-renderiza (home, sitemap). O CI não alcança a API
+# interna, então o build lê a pública; em runtime o container define
+# BC_API_URL=http://api:8788/v1, e este ENV não passa para o estágio abaixo.
+ARG BC_API_URL
+ENV NEXT_PUBLIC_BC_API_URL=$NEXT_PUBLIC_BC_API_URL NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID BC_API_URL=$BC_API_URL NEXT_TELEMETRY_DISABLED=1
+RUN test -n "$NEXT_PUBLIC_BC_API_URL" && test -n "$BC_API_URL" && pnpm build
 
 FROM node:22-slim AS runtime
 WORKDIR /app

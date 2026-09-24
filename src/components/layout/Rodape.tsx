@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { Logo } from "@/components/marca/Logo";
 import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
 import { Rotulo } from "@/components/ui/Etiqueta";
-import { cargosEmDestaque } from "@/lib/concursos";
+import { cargosEmDestaque, type LinkDeFaceta } from "@/lib/concursos";
 import { NOME_UF } from "@/lib/rotulos";
 import type { Uf } from "@/lib/dominio";
 
@@ -29,25 +30,57 @@ const COLUNAS = [
 ];
 
 /**
- * `async` por causa dos cargos, que saem de uma medição do acervo — ver
- * `cargosEmDestaque()` e, atrás dela, `src/lib/cargos.ts`.
+ * Os cargos do rodapé, ou lista vazia quando o acervo não responde.
+ *
+ * O rodapé mora dentro do layout raiz, em toda página do site, e o layout
+ * raiz não pode lançar (ver `acervoDoLayout` em `src/app/layout.tsx`, e o
+ * porquê lá: `error.tsx` não alcança o que o próprio `layout.tsx` renderiza
+ * diretamente). Sob a regra R3 de `concursos.ts`, a API fora do ar sem
+ * leitura boa guardada lança, e `cargosEmDestaque()` lê o mesmo acervo. Sem
+ * este envoltório, uma falha aqui derrubaria o site inteiro pelo rodapé, não
+ * só pela faixa de origem.
+ *
+ * A coluna "Por cargo" já é condicional a `cargos.length > 0` (o rodapé sem
+ * cargo nenhum simplesmente não a desenha), então devolver `[]` na falha
+ * reaproveita esse mesmo caminho, sem marcação nova.
+ */
+async function cargosDoRodape(): Promise<LinkDeFaceta[]> {
+  try {
+    return await cargosEmDestaque();
+  } catch (erro) {
+    // Sinal do próprio Next (ver o mesmo comentário em `lerAcervoDaApi`,
+    // `src/lib/concursos.ts`) não é falha do acervo e segue para cima, sem
+    // virar `[]` nem log.
+    unstable_rethrow(erro);
+    console.error(
+      "[rodape] acervo indisponível para medir os cargos em destaque; " +
+        "a coluna \"Por cargo\" fica de fora.",
+      erro,
+    );
+    return [];
+  }
+}
+
+/**
+ * `async` por causa dos cargos, que saem de uma medição do acervo: ver
+ * `cargosDoRodape()`, `cargosEmDestaque()` e, atrás delas, `src/lib/cargos.ts`.
  *
  * Eles não são uma quinta coluna, e a razão foi medida a 1240px. Com quatro
  * colunas cada uma tem 269px; com cinco, 206px. Os dez rótulos vão de 38px
  * ("Agente") a 155px ("Assistente em Administração"), então todos caberiam
- * em 206px — empilhados, dez linhas, contra as cinco da coluna mais alta que
+ * em 206px, empilhados, dez linhas, contra as cinco da coluna mais alta que
  * o rodapé tem hoje. Deitados numa fileira de largura inteira eles somam
  * 869px com os vãos, dentro dos 1183 da linha, e viram uma linha só. A 375px
  * a fileira quebra em três linhas e 111px, com `scrollWidth` igual a
- * `clientWidth` — nenhuma rolagem lateral.
+ * `clientWidth`, sem rolagem lateral nenhuma.
  *
- * E sem número ao lado, ao contrário dos blocos da home: o resto do rodapé —
- * "Inscrições abertas", "São Paulo" — também não tem, e uma contagem só aqui
+ * E sem número ao lado, ao contrário dos blocos da home: o resto do rodapé,
+ * "Inscrições abertas", "São Paulo", também não tem, e uma contagem só aqui
  * faria parecer que os outros links valem menos. O número está do outro lado
  * do link, no topo da busca.
  */
 export async function Rodape() {
-  const cargos = await cargosEmDestaque();
+  const cargos = await cargosDoRodape();
 
   return (
     <footer className="mt-16 bg-rodape text-rodape-texto">

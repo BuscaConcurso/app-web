@@ -1,32 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ColunaFiltros } from "@/components/busca/ColunaFiltros";
-import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
-import { BarraBusca } from "@/components/busca/BarraBusca";
-import { RegistroDaBusca } from "@/components/busca/RegistroDaBusca";
-import { Paginacao } from "@/components/ui/Paginacao";
-import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
+import { ListaDeResultados } from "@/components/busca/ListaDeResultados";
 import {
   avisoDoAcervo,
   contagensDeFaceta,
   dimensoesDoAcervo,
   listarConcursos,
 } from "@/lib/concursos";
-import { ORDENS, SITUACOES } from "@/lib/consulta";
-import { moeda, numero } from "@/lib/formato";
+import { hojeCivilEmSaoPaulo } from "@/lib/formato";
 import {
+  filtroDaConsulta,
   lerConsulta,
   urlDaBusca,
-  urlSemValor,
   type ConsultaDaUrl,
 } from "@/lib/parametros";
-import {
-  NOME_UF,
-  ROTULO_ESCOLARIDADE,
-  ROTULO_ESFERA,
-  avisoDeFiltroSemDado,
-} from "@/lib/rotulos";
-import { BANCAS } from "@/mocks/bancas";
+import { NOME_UF, ROTULO_ESCOLARIDADE } from "@/lib/rotulos";
 
 /**
  * Busca.
@@ -89,289 +76,31 @@ function quantasDimensoes(consulta: ConsultaDaUrl): number {
   ].filter(Boolean).length;
 }
 
-interface Chip {
-  chave: string;
-  rotulo: string;
-  href: string;
-}
-
-/** Um chip por valor, não por dimensão: cada um sai sozinho. */
-function chipsAtivos(consulta: ConsultaDaUrl): Chip[] {
-  const chips: Chip[] = [];
-
-  if (consulta.q) {
-    chips.push({
-      chave: "q",
-      rotulo: `"${consulta.q}"`,
-      href: urlDaBusca(consulta, { q: undefined, pagina: 1 }),
-    });
-  }
-  if (consulta.uf) {
-    chips.push({
-      chave: "uf",
-      rotulo: NOME_UF[consulta.uf],
-      href: urlDaBusca(consulta, { uf: undefined, pagina: 1 }),
-    });
-  }
-  for (const situacao of consulta.situacoes) {
-    chips.push({
-      chave: `situacao-${situacao}`,
-      rotulo: SITUACOES[situacao],
-      href: urlSemValor(consulta, "situacoes", situacao),
-    });
-  }
-  for (const escolaridade of consulta.escolaridades) {
-    chips.push({
-      chave: `escolaridade-${escolaridade}`,
-      rotulo: ROTULO_ESCOLARIDADE[escolaridade],
-      href: urlSemValor(consulta, "escolaridades", escolaridade),
-    });
-  }
-  for (const esfera of consulta.esferas) {
-    chips.push({
-      chave: `esfera-${esfera}`,
-      rotulo: ROTULO_ESFERA[esfera],
-      href: urlSemValor(consulta, "esferas", esfera),
-    });
-  }
-  for (const banca of consulta.bancas) {
-    chips.push({
-      chave: `banca-${banca}`,
-      rotulo: BANCAS[banca as keyof typeof BANCAS].nome,
-      href: urlSemValor(consulta, "bancas", banca),
-    });
-  }
-  if (consulta.salarioMin || consulta.salarioMax) {
-    const min = consulta.salarioMin;
-    const max = consulta.salarioMax;
-    chips.push({
-      chave: "salario",
-      rotulo:
-        min && max
-          ? `${moeda(min)} a ${moeda(max)}`
-          : min
-            ? `Acima de ${moeda(min)}`
-            : `Até ${moeda(max!)}`,
-      href: urlDaBusca(consulta, {
-        salarioMin: undefined,
-        salarioMax: undefined,
-        pagina: 1,
-      }),
-    });
-  }
-
-  return chips;
-}
-
 export default async function BuscaDeConcursos(
   props: PageProps<"/concursos">,
 ) {
-  const hoje = new Date();
+  // Data civil de São Paulo, a mesma de /busca: ver `hojeCivilEmSaoPaulo`.
+  const hoje = hojeCivilEmSaoPaulo();
   const consulta = lerConsulta(await props.searchParams);
-  const {
-    q,
-    uf,
-    escolaridades,
-    situacoes,
-    bancas,
-    esferas,
-    salarioMin,
-    salarioMax,
-    ordem,
-    pagina,
-  } = consulta;
-
-  const filtro = {
-    q,
-    uf,
-    escolaridades,
-    situacoes,
-    bancas,
-    esferas,
-    salarioMin,
-    salarioMax,
-  };
-  const resultado = await listarConcursos({ ...filtro, ordem, pagina }, hoje);
-  const contagens = await contagensDeFaceta(filtro, hoje);
-  const aviso = await avisoDoAcervo();
-  const dimensoes = await dimensoesDoAcervo();
-  const semDado = avisoDeFiltroSemDado(consulta, dimensoes);
-  const chips = chipsAtivos(consulta);
+  const filtro = filtroDaConsulta(consulta);
+  const [resultado, contagens, aviso, dimensoes] = await Promise.all([
+    listarConcursos({ ...filtro, ordem: consulta.ordem, pagina: consulta.pagina }, hoje),
+    contagensDeFaceta(filtro, hoje),
+    avisoDoAcervo(),
+    dimensoesDoAcervo(),
+  ]);
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
-      <BarraBusca q={q} uf={uf} compacta dimensoes={dimensoes} />
-
-      {/*
-        Não desenha nada: só grava o termo na memória do navegador quando a
-        busca deu resultado. Mora aqui, e não dentro da `BarraBusca`, porque
-        quem sabe o desfecho é esta página — a barra recebe `q` por prop e
-        aparece também na home e na vitrine, onde ninguém tem esse número.
-
-        `filtrada` sai de `chips`, que é a mesma lista de filtros ativos que a
-        tela desenha logo abaixo: sem uma segunda contagem para divergir da
-        primeira. Ela existe porque zero com filtro não é culpa do termo —
-        "analista" no Acre devolve zero por causa do Acre, e esquecer o termo
-        aí seria punir o inocente.
-      */}
-      <RegistroDaBusca
-        termo={q}
-        resultados={resultado.total}
-        filtrada={chips.length > 0}
+      <ListaDeResultados
+        consulta={consulta}
+        titulo={tituloDaBusca(consulta)}
+        resultado={resultado}
+        contagens={contagens}
+        aviso={aviso}
+        dimensoes={dimensoes}
+        hoje={hoje}
       />
-
-      <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-start">
-        <ColunaFiltros
-          consulta={consulta}
-          contagens={contagens}
-          total={resultado.total}
-        />
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            {/* `min-w-0` para o `break-words` do `h1` ter efeito: item de flex
-                tem `min-width: auto`, e `overflow-wrap: break-word` não muda a
-                largura mínima intrínseca de um bloco — ela continua sendo a da
-                maior palavra. Sem os dois juntos o título não quebra, ele
-                estica a coluna. O título da busca é `q` quando há texto livre,
-                então ele é texto de URL: medido a 375px, `?q=` com o edital
-                "11/2026/SEGAP/COALEP/CGGP/DAGES-FUNAI" — que é título real do
-                acervo, do tipo que se cola na busca — dava 36px de rolagem
-                lateral. */}
-            <div className="min-w-0">
-              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] break-words">
-                {tituloDaBusca(consulta)}
-              </h1>
-              <p className="mt-1 text-[12px] text-tinta-600">
-                <strong className="numero font-medium text-tinta-900">
-                  {numero(resultado.total)}
-                </strong>{" "}
-                {resultado.total === 1
-                  ? "concurso encontrado"
-                  : "concursos encontrados"}
-              </p>
-              {/* Zero resultados por falta de dado nosso não é zero
-                  resultados. Quem marcou "Espírito Santo" e recebeu uma lista
-                  vazia conclui que não há concurso no estado dele. */}
-              {semDado && (
-                <p className="mt-1.5 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
-                  {semDado}
-                </p>
-              )}
-            </div>
-
-            <nav
-              aria-label="Ordenação"
-              className="flex flex-wrap items-center gap-1.5"
-            >
-              <span className="text-[12px] text-tinta-500">Ordenar por</span>
-              {(Object.keys(ORDENS) as (keyof typeof ORDENS)[]).map((chave) => (
-                <Link
-                  key={chave}
-                  href={urlDaBusca(consulta, { ordem: chave, pagina: 1 })}
-                  aria-current={chave === ordem ? "true" : undefined}
-                  className={`rounded-controle px-3 py-1.5 text-[12px] font-medium transition-colors ${
-                    chave === ordem
-                      ? "bg-inverso text-inverso-texto"
-                      : "bg-rebaixada text-tinta-800 hover:bg-tinta-200"
-                  }`}
-                >
-                  {ORDENS[chave]}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {chips.length > 0 && (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              {chips.map((chip) => (
-                <Link
-                  key={chip.chave}
-                  href={chip.href}
-                  aria-label={`Remover filtro ${chip.rotulo}`}
-                  className="inline-flex max-w-full items-center gap-2 rounded-[5px] bg-acao px-2.5 py-1 text-xs font-semibold text-acao-texto hover:bg-acao-hover"
-                >
-                  {/* O chip de `q` carrega texto de URL, do mesmo tamanho que
-                      o do `h1` acima: sem corte ele passava dos 375px sozinho.
-                      O rótulo inteiro continua no `aria-label` do link. */}
-                  <span className="min-w-0 truncate">{chip.rotulo}</span>
-                  <span aria-hidden="true" className="shrink-0 text-white/70">
-                    ×
-                  </span>
-                </Link>
-              ))}
-              <Link
-                href="/concursos"
-                className="px-2 text-xs font-medium text-tinta-600 underline underline-offset-4 hover:text-tinta-900"
-              >
-                Limpar filtros
-              </Link>
-            </div>
-          )}
-
-          {resultado.itens.length === 0 ? (
-            <div className="mt-5 rounded-caixa bg-cartao px-6 py-12 text-center">
-              <p className="font-titulo text-lg font-semibold">
-                Nenhum concurso com esses filtros
-              </p>
-              <p className="mx-auto mt-2 max-w-[46ch] text-sm leading-6 text-tinta-600">
-                Tente remover o estado ou a escolaridade. Se o concurso que
-                você procura ainda não saiu, crie um alerta e avisamos quando o
-                edital for publicado.
-              </p>
-              <Link
-                href="/concursos"
-                className="mt-4 inline-flex h-10 items-center rounded-controle bg-acao px-4 text-sm font-semibold text-acao-texto hover:bg-acao-hover"
-              >
-                Ver todos os concursos
-              </Link>
-            </div>
-          ) : (
-            <ul className="mt-4 grid gap-2 xl:grid-cols-2">
-              {resultado.itens.map((concurso) => (
-                // `min-w-0`: item de grid tem `min-width: auto`, que vale o
-                // min-content do conteúdo — então uma etiqueta que se recusa
-                // a encolher (`whitespace-nowrap`) estica a célula, a lista e
-                // a página. Medido a 375px: 2 dos 15 nomes de banca do acervo
-                // passam dos 319px úteis da fileira e davam scroll horizontal
-                // na busca. O corte é da `Etiqueta`; aqui é só a licença para
-                // encolher.
-                <li key={concurso.slug} className="min-w-0">
-                  {/* `ufDoFiltro` só aqui: é a busca que faz a pergunta
-                      "por que este veio", e é só ela que tem a resposta. */}
-                  <CartaoConcurso
-                    concurso={concurso}
-                    hoje={hoje}
-                    ufDoFiltro={uf}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {resultado.paginas > 1 && (
-            <div className="mt-8 flex justify-center">
-              <Paginacao
-                pagina={resultado.pagina}
-                paginas={resultado.paginas}
-                hrefDe={(numeroDaPagina) =>
-                  urlDaBusca(consulta, { pagina: numeroDaPagina })
-                }
-              />
-            </div>
-          )}
-
-          {/* Aqui a contagem de resultados aparece escrita, e é aqui que o
-              silêncio sobre o resto do acervo mais engana: "12 concursos
-              encontrados" sobre um acervo de 4.838, dos quais 189 estão fora
-              da lista por motivos diferentes entre si. */}
-          {aviso && (
-            <div className="mt-6">
-              <AcervoIncompleto aviso={aviso} />
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

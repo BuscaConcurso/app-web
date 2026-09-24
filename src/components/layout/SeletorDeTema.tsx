@@ -72,7 +72,7 @@ export function SeletorDeTema({ className }: { className?: string }) {
             className={`flex size-7 items-center justify-center rounded-full transition-colors ${
               ativo
                 ? "bg-cartao text-tinta-900"
-                : "text-tinta-500 hover:text-tinta-800"
+                : "text-tinta-400 hover:text-tinta-800"
             }`}
           >
             <svg

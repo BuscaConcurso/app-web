@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import { connection } from "next/server";
 import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
 import { Etiqueta } from "@/components/ui/Etiqueta";
 import { Secao } from "@/components/ui/Secao";
@@ -10,7 +11,7 @@ import { Avaliacao } from "@/components/concurso/Avaliacao";
 import { Cargos, tituloDosCargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
 import { Faq, cabecalhoDoFaq, temFaq } from "@/components/concurso/Faq";
-import { listarSlugs, obterDetalhe } from "@/lib/concursos";
+import { obterDetalhe } from "@/lib/concursos";
 import {
   dataLonga,
   hojeEmSaoPaulo,
@@ -35,14 +36,14 @@ import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
  * que o resumo já traz; cargos, cronograma completo e histórico de
  * retificação dependem das tabelas que só a API vai expor.
  */
-export async function generateStaticParams() {
-  return (await listarSlugs()).map((slug) => ({ slug }));
-}
-
-
 export async function generateMetadata(
   props: PageProps<"/concursos/[slug]">,
 ): Promise<Metadata> {
+  // Na requisição, sempre: o detalhe vem de `obterDetalhe` com `no-store`, e
+  // `no-store` dentro de rota que o Next julgou estática é o 500
+  // `DYNAMIC_SERVER_USAGE` de produção. Com `generateStaticParams` o build
+  // tentaria pré-renderizar os 4.700 concursos para descobrir isso.
+  await connection();
   const { slug } = await props.params;
   const concurso = await obterDetalhe(slug);
   if (!concurso) return { title: "Concurso não encontrado" };
@@ -66,6 +67,11 @@ export async function generateMetadata(
 export default async function PaginaDoConcurso(
   props: PageProps<"/concursos/[slug]">,
 ) {
+  // Na requisição, sempre: o detalhe vem de `obterDetalhe` com `no-store`, e
+  // `no-store` dentro de rota que o Next julgou estática é o 500
+  // `DYNAMIC_SERVER_USAGE` de produção. Com `generateStaticParams` o build
+  // tentaria pré-renderizar os 4.700 concursos para descobrir isso.
+  await connection();
   const { slug } = await props.params;
   const concurso = await obterDetalhe(slug);
   if (!concurso) notFound();
@@ -274,7 +280,7 @@ export default async function PaginaDoConcurso(
                 ? "O ato publicado"
                 : "Os atos publicados"
             }
-            apoio="O ato como saiu no diário oficial, na íntegra — que pode ser o extrato, não o edital completo. O edital com anexos e programa de provas fica no site da banca."
+            apoio="O ato como saiu no diário oficial, na íntegra. Pode ser o extrato, não o edital completo: o edital com anexos e programa de provas fica no site da banca."
           >
             <AtosPublicados origens={concurso.origens} />
           </Secao>

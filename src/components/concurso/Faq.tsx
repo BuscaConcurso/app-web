@@ -114,7 +114,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
                   fim da URL ficava cortado. A quebra em qualquer ponto é feia
                   numa URL e é a única alternativa a esconder o endereço, que
                   é justamente a resposta. */}
-              <p className="mt-1.5 max-w-[74ch] border-l-2 border-tinta-200 pl-3 text-[13px] leading-6 wrap-anywhere text-tinta-700">
+              <p className="mt-1.5 max-w-[74ch] border-l-2 border-tinta-200 pl-3 text-[13px] leading-6 wrap-anywhere text-tinta-800">
                 <TrechoComEnderecos texto={resposta.trecho ?? ""} />
               </p>
               {/* O caminho de volta ao documento. Agora que o FAQ é um bloco

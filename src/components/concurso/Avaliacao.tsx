@@ -223,7 +223,7 @@ export function Avaliacao({
           nenhuma origem gravada, e nele o bloco dos atos não existe. */}
       <p className="mt-1 max-w-[74ch] text-[12px] leading-5 text-tinta-600">
         Tudo o que está acima foi lido de um ato do diário oficial por um
-        modelo. O que você avalia é essa leitura — e é o “não gostei” que faz
+        modelo. O que você avalia é essa leitura, e é o “não gostei” que faz
         alguém conferir.
       </p>
 
@@ -256,7 +256,7 @@ export function Avaliacao({
             Qual parte está errada, e o que devia estar no lugar?
           </h2>
           <p className="text-[12px] leading-5 text-tinta-600">
-            O seu “não gostei” já foi registrado. Escrever é opcional — e é o
+            O seu “não gostei” já foi registrado. Escrever é opcional, e é o
             que permite consertar em vez de só contar. Diga de qual parte você
             fala (o cronograma, os cargos, o órgão, uma resposta) e o que o ato
             publicado diz: quem for corrigir precisa achar o erro no documento.
@@ -266,7 +266,7 @@ export function Avaliacao({
             name="comentario"
             rows={4}
             maxLength={LIMITE_DO_COMENTARIO}
-            placeholder="Ex.: no cronograma, a data de fim das inscrições é de outro concurso — no ato ela é 12/03."
+            placeholder="Ex.: no cronograma, a data de fim das inscrições é de outro concurso; no ato ela é 12/03."
             className="w-full rounded-controle bg-bloco px-3 py-2 text-[13px] leading-6 text-tinta-900 outline-none focus:ring-2 focus:ring-acao"
           />
           {/* O recibo de fora fica atrás do modal, então o comentário que não

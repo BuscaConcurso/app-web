@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LinkDaConsulta } from "@/components/busca/LinkDaConsulta";
 
 /**
  * Paginação.
@@ -41,14 +41,15 @@ export function Paginacao({
   return (
     <nav aria-label="Paginação" className="flex items-center gap-1.5">
       {pagina > 1 ? (
-        <Link
+        <LinkDaConsulta
+          rolarAoTopo
           href={hrefDe(pagina - 1)}
           rel="prev"
           aria-label="Página anterior"
           className={`${QUADRADO} bg-rebaixada text-tinta-800 hover:bg-tinta-200`}
         >
           ‹
-        </Link>
+        </LinkDaConsulta>
       ) : (
         <span
           aria-hidden="true"
@@ -75,25 +76,27 @@ export function Paginacao({
             {item}
           </span>
         ) : (
-          <Link
+          <LinkDaConsulta
+            rolarAoTopo
             key={item}
             href={hrefDe(item)}
             className={`${QUADRADO} bg-rebaixada text-tinta-800 hover:bg-tinta-200`}
           >
             {item}
-          </Link>
+          </LinkDaConsulta>
         ),
       )}
 
       {pagina < paginas ? (
-        <Link
+        <LinkDaConsulta
+          rolarAoTopo
           href={hrefDe(pagina + 1)}
           rel="next"
           aria-label="Próxima página"
           className={`${QUADRADO} bg-rebaixada text-tinta-800 hover:bg-tinta-200`}
         >
           ›
-        </Link>
+        </LinkDaConsulta>
       ) : (
         <span
           aria-hidden="true"

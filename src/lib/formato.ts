@@ -74,6 +74,21 @@ export function hojeEmSaoPaulo(agora: Date = new Date()): string {
 }
 
 /**
+ * Hoje em São Paulo, como `Date` à meia-noite local do processo.
+ *
+ * As listas (`filtrar`, `ordenar`, `tomDoConcurso`) recebem `Date` e leem o
+ * dia com os getters locais. Passar `new Date()` fazia o servidor em UTC
+ * (/concursos) e o navegador de quem lê (/busca) discordarem do dia entre
+ * 21h e meia-noite de Brasília, ou em qualquer fuso fora do Brasil: um
+ * concurso que encerra hoje sumia de "abertas" num lado e não no outro.
+ * Com a data civil brasileira remontada no fuso local, os dois lados leem o
+ * mesmo dia.
+ */
+export function hojeCivilEmSaoPaulo(agora: Date = new Date()): Date {
+  return paraDataLocal(hojeEmSaoPaulo(agora));
+}
+
+/**
  * Dias de calendário entre hoje e a data. Negativo quando já passou, zero
  * quando é hoje.
  */

@@ -11,7 +11,7 @@ import type { LinkDeFaceta } from "@/lib/concursos";
  * JavaScript no lugar disto teria a mesma aparência e nenhum dos efeitos.
  *
  * **O rótulo saiu de dentro do cartão**, como nas seções do detalhe e pelo
- * mesmo motivo — com o bloco desenhado, o rótulo dentro dele disputava com a
+ * mesmo motivo: com o bloco desenhado, o rótulo dentro dele disputava com a
  * primeira linha da lista. Aqui ele não usa `Secao` porque o invólucro é um
  * `<nav>` com nome acessível e o título é um `h3` sob o `h2` da faixa, e não
  * um `<section>` com `h2`; o que se repete é a distância, 8px do rótulo ao
@@ -43,9 +43,9 @@ function Coluna({
                   `truncate` liga), a largura mínima do item vira a linha
                   INTEIRA. Um nome de órgão de 190 caracteres esticava a
                   coluna, a grade inteira ia junto, e o documento ganhava
-                  204 px de rolagem lateral — medido em Chrome a 400 px:
+                  204 px de rolagem lateral (medido em Chrome a 400 px:
                   `scrollWidth 689` contra `clientWidth 485`, e 485 contra
-                  485 depois.
+                  485 depois).
 
                   E quebra de linha em vez de reticências porque cortar
                   esconderia o que distingue dois órgãos congelados pela
@@ -65,11 +65,9 @@ function Coluna({
 }
 
 export function BlocosSeo({
-  ufs,
   bancas,
   orgaos,
 }: {
-  ufs: LinkDeFaceta[];
   bancas: LinkDeFaceta[];
   orgaos: LinkDeFaceta[];
 }) {
@@ -83,15 +81,13 @@ export function BlocosSeo({
         concursos estão com inscrição aberta agora em cada um.
       </p>
 
-      {/* `gap-y-6` contra os `gap-x-2`: empilhadas no celular, as colunas
-          ficam uma embaixo da outra e o rótulo de cada uma mora fora do seu
-          cartão. Com o vão de 7px dos dois lados — o mesmo do `mb-2` do
-          rótulo —, o "POR ÓRGÃO" ficava exatamente no meio do caminho entre o
-          cartão de cima e o seu, sem pertencer a nenhum dos dois. 21px em
-          cima contra 7 embaixo desfaz o empate; lado a lado, a partir de
-          `md`, o vão vertical não separa nada e o horizontal continua 7. */}
-      <div className="mt-5 grid gap-x-2 gap-y-6 md:grid-cols-3">
-        <Coluna titulo="Por estado" links={ufs} />
+      {/* `gap-y-6` contra os `gap-x-2`: empilhadas no celular, o rótulo de
+          cada coluna mora fora do seu cartão, e com o mesmo vão dos dois
+          lados ele ficaria no meio do caminho entre o cartão de cima e o
+          seu. Lado a lado, a partir de `md`, o vão vertical não separa nada.
+          Duas colunas e não três: os estados subiram para o acesso rápido,
+          no topo da home. */}
+      <div className="mt-5 grid gap-x-2 gap-y-6 md:grid-cols-2">
         <Coluna titulo="Por órgão" links={orgaos} />
         <Coluna titulo="Por banca" links={bancas} />
       </div>
@@ -115,9 +111,9 @@ export function BlocosSeo({
             Como usar a busca
           </h3>
           <p className="mt-2 text-sm leading-6 text-tinta-600">
-            Digite o cargo que você quer, o nome do órgão ou a sigla da banca.
-            Combine com o estado para ver só o que dá para prestar perto de
-            casa, e use os filtros de escolaridade e salário para cortar o
+            A barra no topo de toda página aceita o cargo que você quer, o
+            nome do órgão ou a sigla da banca. Combine com o estado para ver
+            só o que dá para prestar perto de casa, e use os filtros de escolaridade e salário para cortar o
             que não serve. Cada combinação vira um endereço próprio, que você
             pode salvar nos favoritos ou transformar em alerta por e-mail.
           </p>

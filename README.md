@@ -44,8 +44,12 @@ O diagnóstico do acervo está em `http://127.0.0.1:8788/v1/diagnostico`.
 acervo não os tem: o selo do cartão fica sem letra e a linha de contexto mostra
 só o que existe. É o tipo descrevendo o dado, não a tela.
 
-`BC_API_URL` definida torna as rotas dinâmicas (`fetch` com `no-store`, para
-o acervo não congelar no build). Sem ela, o build segue estático como antes.
+A home e `/busca/<termo>` são ISR de 5 minutos: servidas do cache e
+regeneradas em segundo plano. Por isso o build precisa de `BC_API_URL`
+alcançável: com ela definida e a API fora do ar, o build falha em vez de
+pré-renderizar o mock. No CI ela vem da variável `BC_API_URL_BUILD` do
+repositório, que aponta para a API pública. Sem `BC_API_URL`, o build usa o
+mock e a faixa de origem avisa.
 
 ## Como verificar
 
@@ -60,9 +64,9 @@ fora do sitemap.
 
 ## Imagem
 
-`docker build --build-arg NEXT_PUBLIC_BC_API_URL=https://api.buscaconcurso.com.br -t bc-web .`
-gera a imagem de produção (`output: "standalone"`). `BC_API_URL` chega em
-runtime; `NEXT_PUBLIC_BC_API_URL` fica gravada no bundle, então trocar o
+`docker build --build-arg NEXT_PUBLIC_BC_API_URL=https://api.buscaconcurso.com.br --build-arg BC_API_URL=https://api.buscaconcurso.com.br/v1 -t bc-web .`
+gera a imagem de produção (`output: "standalone"`). O `BC_API_URL` do build
+só serve à pré-renderização; o de runtime chega pelo ambiente do container; `NEXT_PUBLIC_BC_API_URL` fica gravada no bundle, então trocar o
 domínio da API exige novo build. `NEXT_PUBLIC_GTM_ID` também entra no build
 (`--build-arg`); vazio ou fora do formato `GTM-XXXXXXX` não carrega o GTM.
 

@@ -654,7 +654,7 @@ export function textoDeRodape(concurso: ConcursoDetalhe): string {
     ? " O endereço do edital completo, informado pelo próprio ato, está logo" +
       " abaixo, na seção do ato publicado."
     : " O edital completo, com anexos, programa de provas e eventuais" +
-      " retificações, sai no site da banca — confira sempre lá antes de se" +
+      " retificações, sai no site da banca; confira sempre lá antes de se" +
       " inscrever.";
 
   return `${oQueTemos}${semRemuneracao}${ondeEstaOEdital}`;
@@ -824,7 +824,7 @@ export function acervoIncompletoEmPartes(aviso: {
             " abre concurso"
           : "não vão entrar: são retificações, anexos e outros atos que não" +
             " abrem concurso") +
-        " — uma retificação de prazo atualiza um concurso que já está aqui.",
+        " (uma retificação de prazo atualiza um concurso que já está aqui).",
     },
     {
       quantos: fila,
@@ -844,7 +844,7 @@ export function acervoIncompletoEmPartes(aviso: {
       quantos: nossa,
       texto:
         `${nossa === 1 ? "é" : "são"} lacuna nossa: a leitura falhou, ou não` +
-        " achou cargo nem cronograma no ato —" +
+        " achou cargo nem cronograma no ato, e" +
         ` ${nossa === 1 ? "só entra" : "só entram"} se for refeita.`,
     },
   ].filter((parte) => parte.quantos > 0);

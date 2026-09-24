@@ -37,7 +37,7 @@ export function AvisoDeOrigem({ origem }: { origem: OrigemDoAcervo }) {
           : "Acervo de demonstração."}
       </strong>{" "}
       {falhou
-        ? "O que está na tela é o acervo de demonstração, não o acervo real — os concursos abaixo são inventados. Suba a API com `bc api` no repositório engine."
+        ? "O que está na tela é o acervo de demonstração, não o acervo real: os concursos abaixo são inventados. Suba a API com `bc api` no repositório engine."
         : "`BC_API_URL` não está configurada, então os concursos abaixo são exemplos, não o acervo do engine."}
     </div>
   );

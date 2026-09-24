@@ -138,7 +138,7 @@ const TONS: Tom[] = ["aberto", "urgente", "previsto", "encerrado"];
 const TITULO_MAIS_LONGO =
   "Conselho Nacional de Combate à Pirataria e aos Delitos contra a " +
   "Propriedade Intelectual da Secretaria Nacional do Consumidor do " +
-  "Ministério da Justiça e Segurança Pública - CNCP/SENACON/MJSP — " +
+  "Ministério da Justiça e Segurança Pública - CNCP/SENACON/MJSP: " +
   "Edital nº 1/2026";
 
 /**
@@ -198,7 +198,7 @@ export default async function Estilo() {
         O seletor de tema, e ele abre a página em vez de fechar: tudo o que
         vem abaixo tem de ser olhado duas vezes, e este é o interruptor.
 
-        É o **mesmo** componente do cabeçalho, e não uma cópia — o estado vive
+        É o **mesmo** componente do cabeçalho, e não uma cópia: o estado vive
         no atributo `data-tema` do `html`, lido por `useSyncExternalStore`, o
         que faz os dois se moverem juntos. Clicar aqui e ver o de cima mudar é
         a conferência: se eles divergirem, o estado deixou de vir do documento.
@@ -208,33 +208,30 @@ export default async function Estilo() {
         superfície vizinhos, e é o degrau mais curto do sistema inteiro.
         Medido a 375px: **1,27:1 no claro** (#ffffff sobre #e2e5e3) e
         **1,16:1 no escuro** (#1c201e sobre #272c29). Não há inversão entre os
-        temas — o degrau é igualmente curto nos dois —, e é de propósito:
+        temas, o degrau é igualmente curto nos dois, e é de propósito:
         **quem diz a posição é o ícone, não a pastilha**. Ativo é `tinta-900`,
-        inativo é `tinta-500`.
+        inativo é `tinta-400`.
 
-        E é aí que os dois temas deixam de concordar, que é o que esta página
-        existe para mostrar. A distância entre o ícone ativo e o inativo é de
-        **3,36:1 no claro** e de **2,82:1 no escuro** — o mesmo par de tokens,
-        e o escuro cai abaixo dos 3:1 que um indicador não textual precisa. Não
-        é token invertido: é o par `tinta-900`/`tinta-500` sendo mais apertado
-        no escuro do que no claro, e sendo a **única** coisa que carrega o
-        estado, porque a pastilha não carrega em tema nenhum.
+        O par que carregava o estado já foi outro: `tinta-900`/`tinta-500`
+        fazia **3,36:1 no claro** e **2,82:1 no escuro**, abaixo dos 3:1 que um
+        indicador não textual precisa, porque o degrau ficava mais apertado no
+        escuro do que no claro. A pastilha não carrega o estado em tema
+        nenhum, então quem precisava segurar os 3:1 sozinho era o ícone.
 
-        Fica escrito e medido em vez de consertado de passagem: mexer no
-        contraste deste controle é mexer no cabeçalho de todas as páginas, e
-        isso é decisão de quem desenha. A saída mais barata está medida e é só
-        para o escuro — o ícone inativo em `tinta-400` (#6e7571) daria 4,09:1
-        contra o ativo e ainda seguraria 3,01:1 contra o trilho, que é o mínimo
-        de que ele próprio precisa. A outra saída é dar à pastilha os 3:1 que
-        ela não tem, e essa mexe nos dois temas.
+        A distância entre o ícone ativo e o inativo é de **4,23:1 no claro** e
+        de **3,23:1 no escuro**: a saída aplicada troca o inativo para
+        `tinta-400`, que ainda faz 3,36:1 no claro e 3,81:1 no escuro contra o
+        trilho `rebaixada`, o mínimo de que ele próprio precisa. Fica medido
+        em vez de consertado de passagem: a medida é `src/lib/contraste.test.ts`,
+        no par `tinta-400`/`tinta-900`.
       */}
       <Bloco titulo="Tema" nota="claro · escuro · sistema, e sistema é o padrão">
         <Cartao className="flex flex-wrap items-center gap-4 p-5">
           <SeletorDeTema />
           <p className="max-w-[60ch] text-[12px] leading-5 text-tinta-600">
             Três posições e não um interruptor de duas: quem quer que o site
-            siga o aparelho precisa de um lugar para onde voltar. Sem escolha —
-            e portanto também sem JavaScript — o CSS segue a preferência do
+            siga o aparelho precisa de um lugar para onde voltar. Sem escolha
+            (e portanto também sem JavaScript), o CSS segue a preferência do
             sistema sozinho.
           </p>
         </Cartao>
@@ -540,7 +537,7 @@ export default async function Estilo() {
           >
             <p className="max-w-[74ch] text-[13px] leading-6 text-tinta-800">
               O painel entra pela direita e cobre 94vw, o que a 375px deixa
-              22,5px de página à mostra — o bastante para se ver que há algo
+              22,5px de página à mostra, o bastante para se ver que há algo
               atrás sem que a faixa vire um alvo de toque por engano. A barra
               de cima é o mesmo <code>&lt;summary&gt;</code> que abriu, porque
               ele é o único elemento que fecha um <code>&lt;details&gt;</code>{" "}
@@ -685,7 +682,7 @@ export default async function Estilo() {
       <Bloco titulo="Atos publicados" nota="o texto abre em gaveta, e sem script">
         <Secao
           titulo="Os atos publicados"
-          apoio="O ato como saiu no diário oficial, na íntegra — que pode ser o extrato, não o edital completo."
+          apoio="O ato como saiu no diário oficial, na íntegra. Pode ser o extrato, não o edital completo."
         >
           <AtosPublicados
             origens={[ATO_QUE_RESPONDE, ATO_COM_DESCARTE, ATO_QUE_NAO_RESPONDE]}
@@ -711,11 +708,11 @@ export default async function Estilo() {
       <Bloco titulo="Espaço e separação" nota="a unidade é 3,52px, não 4">
         <Cartao className="flex flex-col gap-2 p-5 text-[12px] leading-5 text-tinta-600">
           <p>
-            A escala é a do canvas —{" "}
+            A escala é a do canvas:{" "}
             <span className="numero text-tinta-900">
               1 2 3 4 5 6 8 10 12 16
             </span>{" "}
-            de degrau — sobre uma unidade de{" "}
+            de degrau, sobre uma unidade de{" "}
             <span className="numero text-tinta-900">3,52px</span>, o que na
             tela dá{" "}
             <span className="numero text-tinta-900">
@@ -726,7 +723,7 @@ export default async function Estilo() {
           <p>
             Cartão se separa de cartão por <span className="numero">2</span>{" "}
             (7px) e os blocos da página de detalhe por{" "}
-            <span className="numero">6</span> (21px) — que é o vão que cabe um
+            <span className="numero">6</span> (21px), que é o vão que cabe um
             rótulo de seção do lado de fora sem ele grudar no bloco de cima, e
             é três vezes os 7px que separam o rótulo do bloco que ele nomeia.
           </p>

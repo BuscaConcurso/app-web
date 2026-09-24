@@ -19,9 +19,15 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm verificar
-      - run: pnpm build
+      # Sem `BC_API_URL`, o build pré-renderizaria o mock e publicaria
+      # concursos inventados: falha aqui, com o motivo, como no Dockerfile.
+      - run: |
+          test -n "$BC_API_URL" || { echo "::error::BC_API_URL vazia: defina a variável BC_API_URL_BUILD do repositório"; exit 1; }
+          test -n "$NEXT_PUBLIC_BC_API_URL" || { echo "::error::NEXT_PUBLIC_BC_API_URL vazia"; exit 1; }
+          pnpm build
         env:
           NEXT_PUBLIC_BC_API_URL: ${{ vars.NEXT_PUBLIC_BC_API_URL }}
+          BC_API_URL: ${{ vars.BC_API_URL_BUILD }}
 
   image:
     needs: test
@@ -46,6 +52,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_BC_API_URL=${{ vars.NEXT_PUBLIC_BC_API_URL }}
             NEXT_PUBLIC_GTM_ID=${{ vars.NEXT_PUBLIC_GTM_ID }}
+            BC_API_URL=${{ vars.BC_API_URL_BUILD }}
           tags: |
             ghcr.io/buscaconcurso/app-web:${{ github.sha }}
             ghcr.io/buscaconcurso/app-web:latest
