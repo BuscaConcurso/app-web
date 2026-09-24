@@ -338,8 +338,8 @@ export async function concursosDoTermo(termo: string): Promise<ConcursoResumo[]>
  * fez; `ultimoAto` só aparece na home; `tipo`, `uf` (o cartão e o filtro
  * leem `ufs`), `inscricoesDe`, `editalUrl` e, no órgão, `resolvido` e
  * `nomeEhCaminho` não são lidos por ninguém da lista. Medido em 2026-09-24:
- * "professor" devolve 2.631 concursos, e o JSON deles caiu de 2,48 MB para
- * 1,86 MB (ver o relatório da Task 5).
+ * "professor" devolve 2.631 concursos, e o JSON deles caiu de 2,08 MB (só
+ * sem `localidades` e `ultimoAto`) para 1,69 MB.
  *
  * O tipo continua `ConcursoResumo` para o cartão e as funções de consulta
  * servirem às duas listas sem cópia de tipo; os campos que faltam são
