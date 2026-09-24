@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { aplicarConsulta } from "./buscaLocal";
-import { contagensDeFaceta, listarConcursos } from "./concursos";
+import { contagensDeFaceta, listarConcursos, paraALista } from "./concursos";
 import { filtrar } from "./consulta";
 import { CONSULTA_VAZIA, filtroDaConsulta, type ConsultaDaUrl } from "./parametros";
 import { CONCURSOS } from "@/mocks/concursos";
@@ -28,12 +28,22 @@ function combinacoes() {
 describe("aplicarConsulta", () => {
   it("dá a mesma página que o servidor dá para a mesma consulta", async () => {
     for (const { termo, consulta } of combinacoes()) {
-      const { resultado } = aplicarConsulta(filtrar(CONCURSOS, { q: termo }), consulta, HOJE);
+      // Sobre a lista enxuta, que é a que viaja: o que ela tirou não pode
+      // mudar quem entra, a ordem nem a página.
+      const { resultado } = aplicarConsulta(
+        paraALista(filtrar(CONCURSOS, { q: termo })),
+        consulta,
+        HOJE,
+      );
       const servidor = await listarConcursos(
         { ...filtroDaConsulta(consulta), ordem: consulta.ordem, pagina: consulta.pagina },
         HOJE,
       );
-      expect(resultado, JSON.stringify(consulta)).toEqual(servidor);
+      expect(resultado.itens.map((c) => c.slug), JSON.stringify(consulta)).toEqual(
+        servidor.itens.map((c) => c.slug),
+      );
+      expect(resultado.itens, JSON.stringify(consulta)).toEqual(paraALista(servidor.itens));
+      expect({ ...resultado, itens: [] }).toEqual({ ...servidor, itens: [] });
     }
   });
 
@@ -42,7 +52,11 @@ describe("aplicarConsulta", () => {
   // aparece nas duas é o mesmo.
   it("a contagem de cada opção é a do servidor", async () => {
     for (const { termo, consulta } of combinacoes()) {
-      const { contagens } = aplicarConsulta(filtrar(CONCURSOS, { q: termo }), consulta, HOJE);
+      const { contagens } = aplicarConsulta(
+        paraALista(filtrar(CONCURSOS, { q: termo })),
+        consulta,
+        HOJE,
+      );
       const servidor = await contagensDeFaceta(filtroDaConsulta(consulta), HOJE);
       for (const dimensao of ["situacoes", "escolaridades", "bancas"] as const) {
         for (const opcao of contagens[dimensao]) {

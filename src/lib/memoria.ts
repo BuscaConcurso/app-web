@@ -8,8 +8,12 @@
  * novo, e o log ganhava um "items over 2MB can not be cached" por vez.
  *
  * A promessa é guardada, e não o valor: duas páginas regenerando juntas
- * dividem uma requisição. Falha não é guardada, para a próxima chamada
- * tentar de novo em vez de repetir o erro por cinco minutos.
+ * dividem uma requisição.
+ *
+ * **Renovação que falha devolve o último valor bom** (o `stale-if-error` do
+ * HTTP), e ele vale por mais uma validade, para a fonte fora do ar não ser
+ * consultada a cada chamada. Sem valor bom anterior, a falha rejeita e não
+ * fica guardada: a próxima chamada tenta de novo.
  */
 export function lembrarPor<T>(
   validadeMs: number,
@@ -17,14 +21,25 @@ export function lembrarPor<T>(
   agora: () => number = Date.now,
 ): () => Promise<T> {
   let guardado: { valor: Promise<T>; ate: number } | null = null;
+  let ultimoBom: { valor: T } | null = null;
   return () => {
     const instante = agora();
     if (guardado && instante < guardado.ate) return guardado.valor;
-    const este = { valor: buscar(), ate: instante + validadeMs };
-    guardado = este;
-    este.valor.catch(() => {
-      if (guardado === este) guardado = null;
+    const anterior = ultimoBom;
+    const busca = buscar().then((valor) => {
+      ultimoBom = { valor };
+      return valor;
     });
+    const este = {
+      valor: anterior ? busca.catch(() => anterior.valor) : busca,
+      ate: instante + validadeMs,
+    };
+    guardado = este;
+    if (!anterior) {
+      busca.catch(() => {
+        if (guardado === este) guardado = null;
+      });
+    }
     return este.valor;
   };
 }

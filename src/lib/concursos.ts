@@ -13,7 +13,6 @@
  */
 import { cache } from "react";
 import { unstable_rethrow } from "next/navigation";
-import { PHASE_PRODUCTION_BUILD } from "next/constants";
 import { lembrarPor } from "./memoria";
 import type {
   Banca,
@@ -108,9 +107,10 @@ interface RespostaDeAcervo {
  * - `api`: o acervo do engine, dado de verdade.
  * - `mock`: `BC_API_URL` não está configurada. É o modo de desenhar a tela
  *   sem o engine no ar, e é escolha de quem rodou.
- * - `falha`: a API estava configurada e não respondeu. **Este é o perigoso**:
- *   a tela mostra "Prefeitura de Curitiba, banca AOCP" com cara de acervo
- *   real, e é indistinguível de um acervo pequeno para quem olha.
+ * - `falha`: a API estava configurada e não respondeu, e a tela caía no
+ *   mock com cara de acervo real. `carregar` não produz mais este valor: com
+ *   a API configurada, a falha devolve a última leitura boa ou lança (ver
+ *   `carregar`). Fica no tipo enquanto `AvisoDeOrigem` o trata.
  */
 export type OrigemDoAcervo = "api" | "mock" | "falha";
 
@@ -133,24 +133,48 @@ const ACERVO_DE_MOCK: RespostaDeAcervo = {
 const VALIDADE_DO_ACERVO_S = 300;
 
 /**
+ * Quinze segundos. Sem teto, uma API pendurada seguraria cada regeneração
+ * (e o build) até o `fetch` desistir sozinho, e a última leitura boa, que é
+ * o que a página mostraria de qualquer jeito, esperaria junto.
+ */
+const TEMPO_MAXIMO_DA_LEITURA_MS = 15_000;
+
+/**
  * A leitura da API, guardada no processo por `lembrarPor` (ver lá o porquê:
  * o corpo passa de 2 MB e o Data Cache do Next não o guarda). O `fetch`
  * continua com `revalidate` e não com `no-store`: `no-store` dentro de rota
  * estática é o 500 `DYNAMIC_SERVER_USAGE` que o commit c31d46c contornou
  * tornando o site inteiro dinâmico.
+ *
+ * Uma leitura que falha depois de uma boa devolve a boa (`lembrarPor`), e o
+ * erro sai aqui no log, porque quem chama não vai vê-lo.
  */
 const lerAcervoDaApi = lembrarPor(
   VALIDADE_DO_ACERVO_S * 1000,
   async (): Promise<RespostaDeAcervo> => {
-    const resposta = await fetch(`${URL_DA_API}/acervo`, {
-      next: { revalidate: VALIDADE_DO_ACERVO_S },
-    });
-    if (!resposta.ok) throw new Error(`a API respondeu ${resposta.status}`);
-    const corpo: RespostaDeAcervo = await resposta.json();
-    if (!Array.isArray(corpo?.concursos)) {
-      throw new Error("a resposta não tem a lista `concursos`");
+    try {
+      const resposta = await fetch(`${URL_DA_API}/acervo`, {
+        next: { revalidate: VALIDADE_DO_ACERVO_S },
+        signal: AbortSignal.timeout(TEMPO_MAXIMO_DA_LEITURA_MS),
+      });
+      if (!resposta.ok) throw new Error(`a API respondeu ${resposta.status}`);
+      const corpo: RespostaDeAcervo = await resposta.json();
+      if (!Array.isArray(corpo?.concursos)) {
+        throw new Error("a resposta não tem a lista `concursos`");
+      }
+      return { ...corpo, origem: "api" };
+    } catch (erro) {
+      // Sinal do próprio Next (a lista está em
+      // node_modules/next/dist/docs/01-app/03-api-reference/04-functions/unstable_rethrow.md)
+      // não é falha da API e não vai para o log.
+      unstable_rethrow(erro);
+      console.error(
+        `[concursos] ${URL_DA_API}/acervo falhou (${
+          erro instanceof Error ? erro.message : erro
+        }). Sem leitura boa anterior, a página falha; com ela, a anterior vale.`,
+      );
+      throw erro;
     }
-    return { ...corpo, origem: "api" };
   },
 );
 
@@ -168,36 +192,18 @@ const lerAcervoDaApi = lembrarPor(
  * Fora de uma renderização (o sitemap, por exemplo) `cache` não memoriza
  * nada, e quem poupa a rede e a análise é `lerAcervoDaApi`, que devolve o
  * mesmo objeto por cinco minutos.
+ *
+ * **Com `BC_API_URL` definida, não há mock.** A API fora do ar e sem leitura
+ * boa anterior faz esta função lançar: no build, o build falha; numa
+ * regeneração ISR, o Next continua servindo a página velha; numa rota
+ * dinâmica, cai na página de erro. Cair no mock aqui era pior do que tudo
+ * isso: a regeneração guardava o mock no cache por cinco minutos, com
+ * concursos inventados, para todo mundo. O mock é só de quem não configurou
+ * a API (desenvolvimento e testes).
  */
 const carregar = cache(async (): Promise<RespostaDeAcervo> => {
   if (!URL_DA_API) return ACERVO_DE_MOCK;
-  try {
-    return await lerAcervoDaApi();
-  } catch (erro) {
-    // O `fetch` do Next levanta erro próprio para sair do caminho estático
-    // (a lista está em
-    // node_modules/next/dist/docs/01-app/03-api-reference/04-functions/unstable_rethrow.md).
-    // Sem esta linha, o `catch` abaixo engolia esse sinal e o `next build`
-    // renderizava o MOCK dentro da tentativa de prerender, com a API no ar e
-    // respondendo: medido, sete avisos "usando o mock" num build limpo, na
-    // época em que a leitura usava `no-store`.
-    // Erro de aplicação (API fora do ar, resposta torta) não é afetado:
-    // `unstable_rethrow` só relança o que é do framework.
-    unstable_rethrow(erro);
-    // No build, cair no mock seria pré-renderizar o mock: a home e cada
-    // página ISR sairiam do deploy com concursos inventados até a primeira
-    // revalidação. O build falha alto e ninguém publica isso.
-    if (process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD) throw erro;
-    // Fora do build, cair no mock em silêncio seria pior do que a tela
-    // vazia: alguém demonstraria o mock achando que está vendo o acervo do
-    // engine.
-    console.warn(
-      `[concursos] ${URL_DA_API}/acervo falhou (${
-        erro instanceof Error ? erro.message : erro
-      }); usando o mock. Suba a API com \`bc api\` no repositório engine.`,
-    );
-    return { ...ACERVO_DE_MOCK, origem: "falha" };
-  }
+  return lerAcervoDaApi();
 });
 
 /**
@@ -257,8 +263,8 @@ async function acervo(): Promise<ConcursoResumo[]> {
  * decide o que disso vira frase — aqui o trabalho é passar os números
  * adiante sem perder nenhum.
  *
- * Não custa requisição: dentro do mesmo render, o `fetch` do Next memoriza a
- * chamada que `acervo()` já fez.
+ * Não custa requisição: lê o mesmo acervo que `acervo()`, guardado no
+ * render por `cache` e no processo por `lerAcervoDaApi`.
  */
 export interface AvisoDoAcervo {
   /** Sem cargo nem evento extraído. */
@@ -325,13 +331,54 @@ export async function concursosDoTermo(termo: string): Promise<ConcursoResumo[]>
 }
 
 /**
- * O que a lista do navegador não desenha sai antes de viajar. `localidades`
- * só serve à busca por texto, que o servidor já fez; `ultimoAto` só aparece
- * na faixa "Últimas atualizações" da home. Medido em 2026-09-24: "professor"
- * devolve 2.631 concursos e 2,3 MB de JSON.
+ * O que a lista do navegador lê, e nada mais, antes de viajar.
+ *
+ * Fica o que `CartaoConcurso`, `filtrar`, `ordenar` e `contarFacetas` leem.
+ * Sai o resto: `localidades` só serve à busca por texto, que o servidor já
+ * fez; `ultimoAto` só aparece na home; `tipo`, `uf` (o cartão e o filtro
+ * leem `ufs`), `inscricoesDe`, `editalUrl` e, no órgão, `resolvido` e
+ * `nomeEhCaminho` não são lidos por ninguém da lista. Medido em 2026-09-24:
+ * "professor" devolve 2.631 concursos, e o JSON deles caiu de 2,48 MB para
+ * 1,86 MB (ver o relatório da Task 5).
+ *
+ * O tipo continua `ConcursoResumo` para o cartão e as funções de consulta
+ * servirem às duas listas sem cópia de tipo; os campos que faltam são
+ * justamente os que nenhum deles lê, e `concursos.test.ts` prova isso
+ * desenhando cada cartão com e sem eles.
  */
 export function paraALista(itens: ConcursoResumo[]): ConcursoResumo[] {
-  return itens.map((concurso) => ({ ...concurso, localidades: [], ultimoAto: null }));
+  // Lista do que fica, e não do que sai: campo novo da API não viaja sem
+  // alguém decidir que a lista precisa dele.
+  return itens.map(
+    (concurso) =>
+      ({
+        slug: concurso.slug,
+        titulo: concurso.titulo,
+        status: concurso.status,
+        orgao: {
+          slug: concurso.orgao.slug,
+          nome: concurso.orgao.nome,
+          sigla: concurso.orgao.sigla,
+          esfera: concurso.orgao.esfera,
+          poder: concurso.orgao.poder,
+          uf: concurso.orgao.uf,
+          municipio: concurso.orgao.municipio,
+        },
+        banca: concurso.banca,
+        ufs: concurso.ufs,
+        inscricoesAte: concurso.inscricoesAte,
+        publicadoEm: concurso.publicadoEm,
+        previstoPara: concurso.previstoPara,
+        vagas: concurso.vagas,
+        vagasPcd: concurso.vagasPcd,
+        vagasNegros: concurso.vagasNegros,
+        cadastroReserva: concurso.cadastroReserva,
+        salarioAte: concurso.salarioAte,
+        taxaInscricao: concurso.taxaInscricao,
+        escolaridades: concurso.escolaridades,
+        nomesDeCargo: concurso.nomesDeCargo,
+      }) as ConcursoResumo,
+  );
 }
 
 export async function contarConcursos(
@@ -490,8 +537,8 @@ export async function cargosEscolhidos(): Promise<CargoMedido[]> {
  * Aqui só entra o que é desta camada: de onde vem o acervo, e o corte de
  * quantos links o rodapé mostra.
  *
- * Não custa requisição nova: dentro do mesmo render, o `fetch` do Next
- * memoriza a chamada que o layout e a página já fizeram.
+ * Não custa requisição nova: lê o acervo que o layout e a página já leram,
+ * guardado no render por `cache` e no processo por `lerAcervoDaApi`.
  */
 export async function cargosEmDestaque(
   limite = LIMITE_DE_CARGOS,
@@ -567,7 +614,7 @@ export async function obterDetalhe(
     : null;
 }
 
-/** Todos os slugs, para prerenderizar as páginas de concurso. */
+/** Todos os slugs. Alimenta o sitemap; a página do concurso rende na requisição. */
 export async function listarSlugs(): Promise<string[]> {
   return (await acervo()).map((concurso) => concurso.slug);
 }
@@ -579,8 +626,8 @@ export async function listarSlugs(): Promise<string[]> {
  * Sai do mesmo `acervo()` que a busca lê, e é isso que garante que a página
  * do órgão liste exatamente o que a busca lista. O porquê de não haver rota
  * de órgão na API, com a medição, está no cabeçalho de `orgaos.ts`; em uma
- * linha: dentro do mesmo render isto não custa requisição nenhuma, porque o
- * `fetch` do Next memoriza a que `acervo()` já fez.
+ * linha: isto não custa requisição nenhuma, porque lê o acervo já guardado
+ * no render por `cache` e no processo por `lerAcervoDaApi`.
  */
 export async function obterOrgao(slug: string): Promise<OrgaoDoAcervo | null> {
   return acharOrgao(await acervo(), slug);

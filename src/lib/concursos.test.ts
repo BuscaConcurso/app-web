@@ -1,4 +1,7 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import { contagensDeFaceta, contarConcursos, listarConcursos, paraALista } from "./concursos";
 import type { Escolaridade } from "./dominio";
 import type { Situacao } from "./consulta";
@@ -95,9 +98,31 @@ describe("listarConcursos", () => {
 });
 
 describe("paraALista", () => {
-  it("tira só o que a lista não desenha", () => {
-    const [original] = CONCURSOS;
-    const [enxuto] = paraALista([original]);
-    expect(enxuto).toEqual({ ...original, localidades: [], ultimoAto: null });
+  // O que viaja para o navegador em `/busca/<slug>` é só o que o cartão, o
+  // filtro, a ordenação e a contagem de faceta leem. As duas provas: o
+  // cartão sai idêntico (aqui) e a busca do navegador dá a mesma página que
+  // a do servidor sobre a lista enxuta (`buscaLocal.test.ts`).
+  const HOJE = new Date("2026-09-24T12:00:00");
+
+  it("o cartão de cada concurso sai idêntico com a lista enxuta", () => {
+    const enxutos = paraALista(CONCURSOS);
+    CONCURSOS.forEach((original, i) => {
+      for (const ufDoFiltro of [undefined, "SP" as const]) {
+        const desenhar = (concurso: typeof original) =>
+          renderToStaticMarkup(createElement(CartaoConcurso, { concurso, hoje: HOJE, ufDoFiltro }));
+        expect(desenhar(enxutos[i]), original.slug).toBe(desenhar(original));
+      }
+    });
+  });
+
+  it("não leva o que ninguém da lista lê", () => {
+    const [enxuto] = paraALista([
+      { ...CONCURSOS[0], localidades: ["Pelotas"], ultimoAto: { data: "2026-09-01", titulo: "X", primeiro: true } },
+    ]);
+    for (const campo of ["tipo", "uf", "inscricoesDe", "editalUrl", "localidades", "ultimoAto"]) {
+      expect(enxuto, campo).not.toHaveProperty(campo);
+    }
+    expect(enxuto.orgao).not.toHaveProperty("resolvido");
+    expect(enxuto.orgao).not.toHaveProperty("nomeEhCaminho");
   });
 });

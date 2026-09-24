@@ -25,7 +25,7 @@ import { linhaDeContexto } from "@/lib/rotulos";
  * é que esta página liste exatamente o que a busca lista: é a mesma lista,
  * filtrada, não uma segunda consulta com a mesma intenção.
  *
- * **Sem `generateStaticParams`**, ao contrário da página do concurso: esta lê
+ * **Sem `generateStaticParams`**, como a página do concurso: esta lê
  * `?pagina=`, como a busca, e uma página que depende da query string não é
  * prerenderizável por parâmetro de rota. São 466 endereços e eles rendem sob
  * demanda, como `/concursos` já faz.
