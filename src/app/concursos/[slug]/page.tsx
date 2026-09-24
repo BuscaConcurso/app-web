@@ -154,7 +154,7 @@ export default async function PaginaDoConcurso(
           */}
           <header>
             <div className="flex items-start gap-4">
-              <Selo sigla={concurso.orgao.sigla} tom={tom} />
+              <Selo sigla={concurso.orgao.sigla} logoUrl={concurso.orgao.logoUrl} tom={tom} />
               <div className="min-w-0">
                 <p className="text-sm leading-5 font-medium text-tinta-800">
                   <Link

@@ -65,7 +65,7 @@ export function LinhaConcurso({
       as="article"
       className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3"
     >
-      <Selo sigla={concurso.orgao.sigla} tom={tom} tamanho="sm" />
+      <Selo sigla={concurso.orgao.sigla} logoUrl={concurso.orgao.logoUrl} tom={tom} tamanho="sm" />
 
       {/* `min-w-0 basis-[16rem]` e não `min-w-[16rem]`, e `wrap-anywhere` no
           título: um título de ato sem espaço (do tipo
