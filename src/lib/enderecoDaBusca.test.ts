@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { filtrar } from "./consulta";
 import {
   destinoCanonico,
+  ehCargoMedido,
   metadadosDaBusca,
   slugDaBusca,
   termoDaPagina,
@@ -167,12 +168,30 @@ describe("título e metadados", () => {
     expect(tituloDoTermo("tribunal", [])).toBe("Concursos de Tribunal");
   });
 
-  it("o canônico é o próprio caminho, sem query, e só busca com resultado é indexável", () => {
-    expect(metadadosDaBusca("tribunal", 12, [])).toMatchObject({
-      title: "Concursos de Tribunal",
-      alternates: { canonical: "/busca/tribunal" },
+  it("só o slug de um cargo medido, com resultado, é indexável", () => {
+    expect(metadadosDaBusca("soldado-de-1-classe", 12, CARGOS)).toMatchObject({
+      title: "Concursos de Soldado de 1ª classe",
+      alternates: { canonical: "/busca/soldado-de-1-classe" },
       robots: { index: true, follow: true },
     });
-    expect(metadadosDaBusca("tribunal", 0, []).robots).toEqual({ index: false, follow: true });
+    expect(metadadosDaBusca("soldado-de-1-classe", 0, CARGOS).robots).toEqual({
+      index: false,
+      follow: true,
+    });
+  });
+
+  it("busca por texto livre fica noindex,follow, com o canônico mantido", () => {
+    for (const slug of ["tribunal", "a", "a-a"]) {
+      const metadados = metadadosDaBusca(slug, 300, CARGOS);
+      expect(metadados.robots).toEqual({ index: false, follow: true });
+      expect(metadados.alternates).toEqual({ canonical: `/busca/${slug}` });
+    }
+    expect(metadadosDaBusca("tribunal", 12, []).robots).toEqual({ index: false, follow: true });
+  });
+
+  it("ehCargoMedido usa a mesma conta de slug do mapa do site", () => {
+    expect(ehCargoMedido("soldado-de-1-classe", CARGOS)).toBe(true);
+    expect(ehCargoMedido("soldado", CARGOS)).toBe(false);
+    expect(ehCargoMedido("soldado-de-1-classe", [])).toBe(false);
   });
 });

@@ -131,10 +131,27 @@ export function tituloDoTermo(
 }
 
 /**
+ * Se o slug é o de um cargo que `medirCargos` escolheu: o mesmo conjunto que
+ * entra no mapa do site, pela mesma conta de `urlDoCargo`.
+ */
+export function ehCargoMedido(
+  slug: string,
+  cargos: readonly CargoComRotulo[],
+): boolean {
+  return cargos.some((cargo) => slugDaBusca(cargo.termo) === slug);
+}
+
+/**
  * Metadados de `/busca/<slug>`. O canônico não leva query: filtro e página
  * são recortes da mesma busca. Busca sem resultado responde 200 (é resposta
- * verdadeira) e fica fora do índice, que é o que separa um cargo que existe
- * de um texto qualquer digitado na barra.
+ * verdadeira) e fica fora do índice.
+ *
+ * Só entra no índice o slug de um cargo medido (o mesmo conjunto do mapa do
+ * site). Busca por texto livre responde, é seguida, mas fica `noindex`: sem
+ * isso, /busca/a, /busca/a-a e toda variação digitada na barra viravam
+ * milhares de páginas finas e quase iguais disputando o mesmo acervo. O
+ * custo é que uma busca livre popular só entra no Google quando a medição a
+ * escolher como cargo (ruling R8).
  */
 export function metadadosDaBusca(
   slug: string,
@@ -142,12 +159,13 @@ export function metadadosDaBusca(
   cargos: readonly CargoComRotulo[],
 ): Metadata {
   const titulo = tituloDoTermo(slug, cargos);
+  const indexavel = total > 0 && ehCargoMedido(slug, cargos);
   return {
     title: titulo,
     description:
       `Vagas, salário, taxa e prazo de inscrição de ${titulo.toLowerCase()}. ` +
       "Dados extraídos do edital original, com link para o documento.",
     alternates: { canonical: `${PREFIXO}${slug}` },
-    robots: total === 0 ? { index: false, follow: true } : { index: true, follow: true },
+    robots: { index: indexavel, follow: true },
   };
 }
