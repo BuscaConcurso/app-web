@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { listarOrgaos, listarSlugs } from "@/lib/concursos";
 import { UFS, type Escolaridade } from "@/lib/dominio";
 import { urlAbsoluta } from "@/lib/site";
@@ -28,6 +29,9 @@ const ESCOLARIDADES_INDEXAVEIS: Escolaridade[] = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Fora do layout raiz: precisa da mesma marcação para não sair do build
+  // congelado com o mock (ver `app/layout.tsx`).
+  await connection();
   const agora = new Date();
   const slugs = await listarSlugs();
   const orgaos = (await listarOrgaos()).filter(

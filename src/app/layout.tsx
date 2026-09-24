@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Archivo, Literata } from "next/font/google";
 import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
@@ -121,6 +122,11 @@ const dadosEstruturados = {
  * faz no mesmo render, e sem `BC_API_URL` não há requisição nenhuma.
  */
 export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // O acervo é sempre o do momento da requisição. Sem isto o `next build`,
+  // que roda no CI sem `BC_API_URL`, congelava as páginas como estáticas com
+  // o mock; em produção a variável existe, o `fetch` sem cache aparecia dentro
+  // de uma rota estática e o Next respondia 500 (DYNAMIC_SERVER_USAGE).
+  await connection();
   const origem = await origemDoAcervo();
 
   return (
