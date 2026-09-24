@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { Logo } from "@/components/marca/Logo";
 import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
 import { Rotulo } from "@/components/ui/Etiqueta";
@@ -47,6 +48,10 @@ async function cargosDoRodape(): Promise<LinkDeFaceta[]> {
   try {
     return await cargosEmDestaque();
   } catch (erro) {
+    // Sinal do próprio Next (ver o mesmo comentário em `lerAcervoDaApi`,
+    // `src/lib/concursos.ts`) não é falha do acervo e segue para cima, sem
+    // virar `[]` nem log.
+    unstable_rethrow(erro);
     console.error(
       "[rodape] acervo indisponível para medir os cargos em destaque; " +
         "a coluna \"Por cargo\" fica de fora.",

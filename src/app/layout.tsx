@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo, Literata } from "next/font/google";
+import { unstable_rethrow } from "next/navigation";
 import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
 import { Cabecalho } from "@/components/layout/Cabecalho";
@@ -160,6 +161,10 @@ async function acervoDoLayout(): Promise<{
     ]);
     return { origem, dimensoes };
   } catch (erro) {
+    // Sinal do próprio Next (ver o mesmo comentário em `lerAcervoDaApi`,
+    // `src/lib/concursos.ts`) não é falha do acervo e segue para cima, sem
+    // virar degradação nem log.
+    unstable_rethrow(erro);
     console.error(
       "[layout] acervo indisponível ao montar o cabeçalho; a página segue sem " +
         "a faixa de origem e sem contagem de estado na busca.",
