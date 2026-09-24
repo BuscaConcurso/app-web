@@ -115,3 +115,12 @@ Data: 2026-09-24
   mocks exibidos) são reescritas com vírgula, dois-pontos, parênteses ou
   ponto. Um teste Vitest varre `src/` e falha se encontrar "—" fora de
   comentários.
+
+### Páginas 404 e de erro
+- Pedido do usuário: a 404 segue a identidade do projeto. `src/app/not-found.tsx`
+  global (usada por `notFound()` em concursos, órgãos e busca, e por qualquer
+  URL inexistente) e `src/app/error.tsx` (erro de renderização, com "tentar de
+  novo"), ambas com cabeçalho e rodapé do layout, tipografia e tokens do site,
+  texto curto em português e caminhos úteis: a busca do cabeçalho, links para
+  a home, a lista de concursos e alguns estados. 404 responde com status 404 e
+  `robots: noindex`. Contraste AA e sem rolagem horizontal a 360px.
