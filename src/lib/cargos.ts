@@ -93,7 +93,7 @@ function palavrasDe(normalizado: string): string[] {
 }
 
 export interface CargoMedido {
-  /** Normalizado, e é o que vira o slug de `/busca/<slug>` — o mesmo que a busca compara. */
+  /** Normalizado, e é o que vira o slug de `/busca/<slug>`: o mesmo que a busca compara. */
   termo: string;
   /** Como o ato escreveu, na grafia mais frequente do acervo. */
   rotulo: string;

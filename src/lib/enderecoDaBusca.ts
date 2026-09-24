@@ -20,10 +20,22 @@ const PREFIXO = "/busca/";
 /** Parâmetro que o próprio Next põe na URL das requisições de RSC. */
 const PARAMETRO_INTERNO = "_rsc";
 
+/**
+ * Teto do slug. Um texto enorme colado na barra não pode virar um `location`
+ * e um canônico do mesmo tamanho; cem caracteres cabem com folga qualquer
+ * cargo do acervo.
+ */
+const MAXIMO_DO_SLUG = 100;
+
 export function slugDaBusca(q: string): string {
-  return normalizar(q)
+  const inteiro = normalizar(q)
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+  if (inteiro.length <= MAXIMO_DO_SLUG) return inteiro;
+  // Corta entre palavras: o hífen logo depois do teto conta como fronteira.
+  // Uma palavra só, maior que o teto, não tem fronteira e é cortada nele.
+  const corte = inteiro.lastIndexOf("-", MAXIMO_DO_SLUG);
+  return corte > 0 ? inteiro.slice(0, corte) : inteiro.slice(0, MAXIMO_DO_SLUG);
 }
 
 export function termoDoSlug(slug: string): string {

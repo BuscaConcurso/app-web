@@ -25,6 +25,40 @@ describe("slugDaBusca", () => {
   });
 });
 
+describe("slugDaBusca, teto de tamanho", () => {
+  // Um `q` enorme colado na barra não pode virar um `location` e um canônico
+  // do mesmo tamanho: o slug para em 100 caracteres, numa fronteira de hífen.
+  it("corta em no máximo 100 caracteres, entre palavras e sem hífen no fim", () => {
+    const slug = slugDaBusca("analista judiciario ".repeat(20));
+    expect(slug.length).toBeLessThanOrEqual(100);
+    expect(slug.endsWith("-")).toBe(false);
+    expect("analista-judiciario-".repeat(20).startsWith(`${slug}-`)).toBe(true);
+    expect(slug.split("-").every((palavra) => ["analista", "judiciario"].includes(palavra))).toBe(true);
+  });
+
+  it("cabe em 100 exatos sem perder a última palavra", () => {
+    const q = `${"a".repeat(49)} ${"b".repeat(50)}`;
+    expect(slugDaBusca(q)).toBe(`${"a".repeat(49)}-${"b".repeat(50)}`);
+    expect(slugDaBusca(`${q} c`)).toBe(`${"a".repeat(49)}-${"b".repeat(50)}`);
+  });
+
+  it("uma palavra só, maior que o teto, é cortada no teto", () => {
+    expect(slugDaBusca("x".repeat(150))).toBe("x".repeat(100));
+  });
+
+  it("o slug cortado é estável", () => {
+    const slug = slugDaBusca("tecnico em enfermagem ".repeat(10));
+    expect(slugDaBusca(termoDoSlug(slug))).toBe(slug);
+  });
+
+  it("o endereço longo redireciona para o cortado", () => {
+    const longo = "professor-".repeat(15) + "fim";
+    const destino = destinoCanonico(`/busca/${longo}`, new URLSearchParams());
+    expect(destino).toBe(`/busca/${slugDaBusca(longo)}`);
+    expect(destino!.length).toBeLessThanOrEqual("/busca/".length + 100);
+  });
+});
+
 describe("termoDoSlug", () => {
   it("troca hífen por espaço e não deixa espaço sobrando", () => {
     expect(termoDoSlug("assistente-em-administracao")).toBe("assistente em administracao");
