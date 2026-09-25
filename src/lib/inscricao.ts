@@ -8,6 +8,8 @@ export interface Periodo { passados: number; total: number; fracao: number }
 const SEMANA = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
 
 function horaDoFim(c: ConcursoDetalhe): string | null {
+  // `inicio ?? fim`: a data única de um fato mora em `inicio`, mesmo em
+  // `fim_inscricao` (ver `dominio.ts`); `fim` só existe nos intervalos.
   const evento = c.cronograma.find((e) => e.tipo === "fim_inscricao" && (e.inicio ?? e.fim) === c.inscricoesAte && e.hora);
   return evento?.hora ? evento.hora.replace(":", "h") : null;
 }
@@ -55,7 +57,12 @@ export function destinoDaInscricao(c: ConcursoDetalhe) {
   const edital = c.editalCitadoUrl ?? c.editalUrl;
   const href = edital ?? c.origens.find((o) => o.url)?.url ?? null;
   if (!href) return null;
-  let host = "";
-  try { host = new URL(href).host; } catch { return null; }
+  // Só `http:` e `https:` com domínio: o endereço vem do texto do ato, e um
+  // `javascript:` ou `data:` ali viraria um link executável na página.
+  let endereco: URL;
+  try { endereco = new URL(href); } catch { return null; }
+  if (endereco.protocol !== "http:" && endereco.protocol !== "https:") return null;
+  const host = endereco.host;
+  if (!host) return null;
   return { href, host, rotulo: edital ? ("Ir para a inscrição" as const) : ("Ver o ato publicado" as const) };
 }

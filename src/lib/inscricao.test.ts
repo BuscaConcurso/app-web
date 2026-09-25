@@ -80,6 +80,16 @@ describe("prazoPorExtenso", () => {
 });
 
 describe("destinoDaInscricao", () => {
+  it("só aceita http e https com domínio", () => {
+    expect(destinoDaInscricao({ ...base, editalCitadoUrl: "javascript:alert(1)", origens: [] })).toBeNull();
+    expect(destinoDaInscricao({ ...base, editalCitadoUrl: "data:text/html,<p>oi</p>", origens: [] })).toBeNull();
+    expect(destinoDaInscricao({ ...base, editalCitadoUrl: "file:///etc/passwd", origens: [] })).toBeNull();
+    // Sem domínio: "http://" nem vira URL, e o teste de `host` vazio cobre
+    // o que o analisador aceitar com host vazio.
+    expect(destinoDaInscricao({ ...base, editalCitadoUrl: "http://", origens: [] })).toBeNull();
+    expect(destinoDaInscricao({ ...base, editalCitadoUrl: "http://banca.org.br/x" })?.host).toBe("banca.org.br");
+  });
+
   it("prefere o endereço do edital e mostra o host", () => {
     expect(destinoDaInscricao(base)).toEqual({ href: "https://sigaa.ufrrj.br/inscricao", host: "sigaa.ufrrj.br", rotulo: "Ir para a inscrição" });
   });

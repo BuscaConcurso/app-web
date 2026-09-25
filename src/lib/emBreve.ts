@@ -75,7 +75,14 @@ export function hrefEmBreve(recurso: RecursoEmBreve): string {
  * Converte o segmento cru da rota num recurso conhecido, ou devolve `null`.
  * É o que decide entre a página "em breve" e a 404, então quem não está na
  * lista não vira uma afirmação de que existe.
+ *
+ * `Object.hasOwn` e não `in`: `in` sobe pelo protótipo, e
+ * `/em-breve/constructor` ou `/em-breve/toString` respondiam 200.
  */
+function ehRecursoEmBreve(valor: string): valor is RecursoEmBreve {
+  return Object.hasOwn(RECURSOS_EM_BREVE, valor);
+}
+
 export function recursoEmBreve(valor: string): RecursoEmBreve | null {
-  return valor in RECURSOS_EM_BREVE ? (valor as RecursoEmBreve) : null;
+  return ehRecursoEmBreve(valor) ? valor : null;
 }

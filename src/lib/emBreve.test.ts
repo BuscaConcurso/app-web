@@ -18,4 +18,11 @@ describe("emBreve", () => {
     expect(recursoEmBreve("banana")).toBeNull();
     expect(recursoEmBreve("salvos")).toBe("salvos");
   });
+
+  it("não aceita nome herdado do protótipo do objeto", () => {
+    expect(recursoEmBreve("constructor")).toBeNull();
+    expect(recursoEmBreve("toString")).toBeNull();
+    expect(recursoEmBreve("__proto__")).toBeNull();
+    expect(recursoEmBreve("hasOwnProperty")).toBeNull();
+  });
 });
