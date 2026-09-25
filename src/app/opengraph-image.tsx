@@ -35,7 +35,7 @@ export const contentType = "image/png";
  * lança: rede fora do ar, resposta que não é 2xx, ou um CSS sem a linha
  * esperada devolvem `null`, e a imagem sai com a fonte padrão do Satori em
  * vez de travar a rota inteira por causa de uma dependência externa (Google
- * Fonts) que esta imagem não deveria conseguir derrubar. Review da Task 15b.
+ * Fonts) que esta imagem não deveria conseguir derrubar.
  */
 
 const COR_DO_LADRILHO: Record<CorDeAzulejo, string> = {

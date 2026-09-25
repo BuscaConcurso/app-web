@@ -151,7 +151,7 @@ export function ehCargoMedido(
  * isso, /busca/a, /busca/a-a e toda variação digitada na barra viravam
  * milhares de páginas finas e quase iguais disputando o mesmo acervo. O
  * custo é que uma busca livre popular só entra no Google quando a medição a
- * escolher como cargo (ruling R8).
+ * escolher como cargo.
  */
 export function metadadosDaBusca(
   slug: string,

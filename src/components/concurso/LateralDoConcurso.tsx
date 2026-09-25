@@ -109,7 +109,7 @@ export function LateralDoConcurso({
             )
           )}
 
-          {/* R25: o passo a passo de inscrição some inteiro no encerrado (o
+          {/* O passo a passo de inscrição some inteiro no encerrado (o
               concurso não recebe mais inscrição nenhuma, "faça a inscrição
               até 25/09" depois de fechado seria instrução morta); previsto
               continua com os passos, para quem quiser se preparar antes de
@@ -121,7 +121,7 @@ export function LateralDoConcurso({
             </>
           )}
 
-          {/* Encerrado não tem prazo nenhum para lembrar (ruling R33): fica só
+          {/* Encerrado não tem prazo nenhum para lembrar: fica só
               Salvar, na largura inteira. */}
           <div className={`grid gap-2 ${tom === "encerrado" ? "grid-cols-1" : "grid-cols-2"}`}>
             <BotaoEmBreve

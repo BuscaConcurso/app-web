@@ -81,7 +81,7 @@
 }
 
 /**
- * O container de conteúdo de toda página (ruling R28): centrado, 1216px de
+ * O container de conteúdo de toda página: centrado, 1216px de
  * largura útil (a do artboard de 1440px, com 112px de margem), 16px de
  * respiro no celular e 32px a partir de `md`. De 1280px para cima o desenho
  * é o mesmo do artboard; abaixo disso a margem cai para 32px em vez dos
@@ -135,7 +135,7 @@
    * como não-texto (o anel de foco em `focus:ring-acao`, o ponto de "hoje"
    * do cronograma, o marcador do filtro selecionado, direto sobre `cartao`
    * ou `pagina`) cai para 2,52:1 e 2,80:1, os dois abaixo do mínimo de
-   * não-texto (3:1). `acao` é só superfície desde a ruling R7: texto verde
+   * não-texto (3:1). Por isso `acao` é só superfície: texto verde
    * usa `verde-texto`, não `acao` (ver `contraste.test.ts`). Clareado em
    * quatro passos de 4 no canal verde, #0B7B3A: 3,10:1 sobre `cartao` e o
    * branco de `acao-texto` ainda lê 5,37:1 sobre ele, longe do piso de

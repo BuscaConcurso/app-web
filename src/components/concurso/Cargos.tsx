@@ -3,7 +3,7 @@
 /**
  * As áreas e vagas do concurso: `Concurso.dc.html:134-156`.
  *
- * Virou cliente com a Task 13, por duas coisas que só existem depois de
+ * É componente cliente por duas coisas que só existem depois de
  * montar: o campo "Filtrar áreas" (sem acento, com `normalizar`) e o botão
  * "Mostrar as N áreas", que esconde tudo além da 8ª até alguém pedir o
  * resto. As duas cabem no mesmo componente porque as duas mexem em quem
@@ -56,8 +56,8 @@ function rotuloDeVagas(total: number | null): string {
 /**
  * "R$ 9.000 a R$ 13.995" quando o cargo tem mais de uma remuneração com
  * valores diferentes, ou o único valor que o ato informou. `null` quando o
- * ato não informou nenhuma remuneração positiva — ruling R22, review da
- * Task 13.
+ * ato não informou nenhuma remuneração positiva. Sem ela, áreas com
+ * salários diferentes perderiam a diferença na tabela.
  */
 function faixaDeRemuneracao(cargo: Cargo): string | null {
   const valores = cargo.remuneracoes
@@ -74,9 +74,8 @@ function faixaDeRemuneracao(cargo: Cargo): string | null {
  * outras: só existe quando `notaComum` volta `null`, porque as áreas
  * discordam em algo (ou há uma só) e a nota comum, que cobriria isto de uma
  * vez para todas, não existe. Sem esta linha, um concurso com cargos de
- * escolaridade e salário diferentes perderia essa diferença inteira — ela
- * não aparecia em lugar nenhum da tabela nova (ruling R22, review da
- * Task 13).
+ * escolaridade e salário diferentes perderia essa diferença inteira: ela
+ * não aparecia em lugar nenhum da tabela.
  */
 function detalheDoCargo(cargo: Cargo): string | null {
   const partes: string[] = [];
@@ -89,10 +88,10 @@ function detalheDoCargo(cargo: Cargo): string | null {
 }
 
 /**
- * "São Paulo: 10 vagas (8 ampla, 1 PCD, 1 negros)". Vive aqui de novo depois
- * da Task 13: a tabela nova resume a vaga a um total com pontos, e esta
- * descrição por localidade tinha ficado sem lugar nenhum na tela. Volta na
- * revelação de "De onde foi lido", ao lado dos requisitos (ruling R22).
+ * "São Paulo: 10 vagas (8 ampla, 1 PCD, 1 negros)". A tabela resume a vaga
+ * a um total com pontos, e sem esta descrição por localidade ela ficaria sem
+ * lugar nenhum na tela. Mora na revelação de "De onde foi lido", ao lado
+ * dos requisitos.
  */
 function descreverVaga(vaga: Vaga): string {
   const onde = [vaga.localidade, vaga.uf].filter(Boolean).join(", ");
@@ -226,7 +225,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
             const aberta = abertas.has(indice);
             // A linha de detalhe só existe quando a nota comum não cobre
             // esta área: as duas nunca aparecem juntas, e uma delas sempre
-            // aparece quando há algo a dizer (ruling R22).
+            // aparece quando há algo a dizer.
             const detalhe = comum ? null : detalheDoCargo(cargo);
             // O que a revelação tem para mostrar além do resumo da linha:
             // evidência, requisitos e a vaga por localidade que o total com
@@ -274,10 +273,9 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
                 {aberta && temRevelacao && (
                   <dl className="flex flex-col gap-3 border-b border-linha-fraca px-1 pt-1 pb-3 text-[12px] leading-5 text-tinta-600">
                     {/* A vaga por localidade e a reserva legal, que o total
-                        com pontos da linha resume num número só. Restaurado
-                        aqui na review da Task 13 (ruling R22): sem isto, "São
-                        Paulo: 8 ampla, 1 PCD, 1 negros" não aparecia em lugar
-                        nenhum da página nova. */}
+                        com pontos da linha resume num número só. Sem isto,
+                        "São Paulo: 8 ampla, 1 PCD, 1 negros" não aparecia em
+                        lugar nenhum da página. */}
                     {cargo.vagas.length > 0 && (
                       <div className="flex gap-2">
                         <dt className="w-28 shrink-0">Vagas</dt>

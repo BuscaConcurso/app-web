@@ -246,8 +246,8 @@ function Marcador({
  * `bg-ouro-fundo text-ouro-sinal-texto`, o dourado do protótipo
  * (`Concurso.dc.html:121`, `#FCF1CF`/`#5C4500`) pelos tokens mais próximos:
  * é o mesmo par que a etiqueta "previsto" já usa, e passa `contraste.test.ts`
- * nos dois temas (correção da review da Task 13; a primeira versão usava
- * `bg-tinta-900 text-cartao`, sem ouro nenhum).
+ * nos dois temas (uma versão anterior usava `bg-tinta-900 text-cartao`, sem
+ * ouro nenhum, e destoava do protótipo).
  */
 function MarcaDeHoje({
   eventos,

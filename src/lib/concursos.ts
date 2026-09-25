@@ -140,9 +140,9 @@ const VALIDADE_DO_ACERVO_S = 300;
 const TEMPO_MAXIMO_DA_LEITURA_MS = 15_000;
 
 /**
- * R4: regra do parceiro humano contra o travessao em qualquer texto visivel
- * do site (acentuacao solta de proposito nesta nota, adiante ela volta).
- * `semTravessao.test.ts` (Task 1) cobre o que esta escrito no proprio
+ * Regra do parceiro humano contra o travessao em qualquer texto visivel do
+ * site (acentuacao solta de proposito nesta nota, adiante ela volta).
+ * `semTravessao.test.ts` cobre o que esta escrito no proprio
  * codigo-fonte, varrendo `src/`; mas titulo de concurso e nome de orgao nao
  * vem do codigo-fonte, vem da API, e o acervo ja mostrou o travessao nos
  * dois campos: "ENFAM", seguido dele, "Edital numero 2". Esta funcao troca
@@ -164,7 +164,7 @@ function normalizarOrgao(orgao: Orgao): Orgao {
 
 /**
  * O título, o nome do órgão, o nome da banca, o nome de cada cargo buscável
- * e o título do último ato: tudo que R4 chama de "título ou nome" no resumo
+ * e o título do último ato: todo "título ou nome" do resumo
  * do concurso. `T extends ConcursoResumo` para que chamar com um
  * `ConcursoDetalhe` devolva um `ConcursoDetalhe` (`cronograma`, `cargos`,
  * `origens` e `editalCitadoUrl` seguem juntos no `...concurso`), sem outra
@@ -247,7 +247,7 @@ const lerAcervoDaApi = lembrarPor(
       if (!Array.isArray(corpo?.concursos)) {
         throw new Error("a resposta não tem a lista `concursos`");
       }
-      // R4: título e nome de órgão sem travessão, aqui e não em cada
+      // Título e nome de órgão sem travessão (`semTravessao`), aqui e não em cada
       // componente. Ver `normalizarNomeacao`, logo abaixo.
       return { ...corpo, concursos: corpo.concursos.map(normalizarResumo), origem: "api" };
     } catch (erro) {
@@ -664,8 +664,8 @@ export async function contagensDeFaceta(
  * que precisa de cronograma, cargo, vaga e remuneração — carregar isso para
  * os 181 concursos só para mostrar um seria pagar a lista inteira por página.
  *
- * **Com `BC_API_URL` definida, não há mock** (a mesma regra de `carregar`,
- * R3). 404 da API é resposta: o slug não existe e a página mostra não
+ * **Com `BC_API_URL` definida, não há mock** (a mesma regra de `carregar`).
+ * 404 da API é resposta: o slug não existe e a página mostra não
  * encontrado. Qualquer outra falha (rede, 5xx, resposta sem concurso, mais de
  * `TEMPO_MAXIMO_DA_LEITURA_MS`) lança, e a página de erro aparece. Cair no
  * mock aqui fazia todo slug real que o mock não tem virar 404 com `noindex`
@@ -695,7 +695,7 @@ export async function obterDetalhe(
       if (typeof corpo?.slug !== "string") {
         throw new Error("a resposta não tem um concurso");
       }
-      // R4: mesmo corte de `lerAcervoDaApi`, para o detalhe.
+      // O mesmo corte do travessão de `lerAcervoDaApi`, para o detalhe.
       return normalizarDetalhe(corpo);
     } catch (erro) {
       unstable_rethrow(erro);

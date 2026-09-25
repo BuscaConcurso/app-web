@@ -18,7 +18,8 @@ export interface ItemDeAba {
  * Com `href` em cada item, são âncoras de verdade e `aria-current="page"`
  * marca a ativa: um filtro que muda o endereço precisa ser seguível, e é o
  * que a escolaridade da home faz. Sem `href`, os itens viram `role="tab"` e
- * quem troca a seleção é o chamador (Task 13 liga o clique a um estado).
+ * quem troca a seleção é o chamador (`AbasDoConcurso` liga o clique a um
+ * estado).
  *
  * Todo `role="tab"` precisa de um `role="tablist"` no ancestral, então o
  * trilho vira `tablist` sempre que existe pelo menos um item sem `href`,

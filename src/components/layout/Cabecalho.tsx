@@ -19,22 +19,22 @@ import { GavetaDeNavegacao, NavPrincipal } from "./NavPrincipal";
  * acervo veio da API, `null` quando não. É a `BarraUtilitaria` quem decide se
  * mostra a frase.
  *
- * **Duas navs, conforme a página** (ruling R27):
+ * **Duas navs, conforme a página**:
  *
  * - Na home, `Main.dc.html:34-51`: logo, as cinco abas (com ícone a partir
- *   de 1440px) ocupando o meio, e o grupo da direita com salvos, alertas e
+ *   de `xl`) ocupando o meio, e o grupo da direita com salvos, alertas e
  *   Entrar, 8px entre eles. Sem busca: quem busca lá é o herói.
  * - Nas páginas internas, `Concurso.dc.html:34-56`: logo, a busca compacta
  *   (até 520px), espaço, três abas em texto, alertas e Entrar.
  *
- * Abaixo de `lg` as duas viram o cabeçalho do celular (`Mobile.dc.html:21-25`,
- * ruling R15): logo, alertas e o menu, em 64px; fora da home a busca desce
+ * Abaixo de `lg` as duas viram o cabeçalho do celular (`Mobile.dc.html:21-25`):
+ * logo, alertas e o menu, em 64px; fora da home a busca desce
  * para uma fileira própria, de largura inteira. **Uma busca só, nunca duas
  * montadas**: a mesma caixa é reposicionada por CSS. A `<nav>` é
  * `flex-wrap`; a busca nasce `order-last basis-full` (quebra para a fileira
  * de baixo) e vira `lg:order-none lg:flex-1` (volta para o lado da logo).
  *
- * A fileira mora no `conteudo` (ruling R28): de 1280px para cima ela é a
+ * A fileira mora no `conteudo` (`globals.css`): de 1280px para cima ela é a
  * do artboard de 1440px.
  *
  * **O cabeçalho do celular na página do concurso** (`ConcursoMobile.dc.html:21-27`)

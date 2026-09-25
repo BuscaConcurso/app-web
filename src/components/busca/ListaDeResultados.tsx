@@ -85,8 +85,8 @@ function TrilhoDeSituacao({ rotulo, itens }: { rotulo: string; itens: ItemDeAba[
  * multiescolha, um quadradinho por opção, e a URL aceita `?situacao=` várias
  * vezes), e os chips de `chipsAtivos` já mostram cada uma. Com duas
  * situações na URL e só a aba de uma marcada (ou nenhuma), o trilho dizia
- * "nenhum filtro" ou "só este" enquanto a lista de baixo respondia por dois,
- * Ruling R26. Por isso `ativo` aqui é "esta situação está entre as da
+ * "nenhum filtro" ou "só este" enquanto a lista de baixo respondia por dois.
+ * Por isso `ativo` aqui é "esta situação está entre as da
  * URL", não "é a única": toda aba cujo valor apareça em `consulta.situacoes`
  * fica marcada, e "Todas" só quando a lista está vazia.
  */

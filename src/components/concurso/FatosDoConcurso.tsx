@@ -60,9 +60,9 @@ export function FatosDoConcurso({ fatos }: { fatos: Fato[] }) {
  * a mesma caixa de `Concurso.dc.html:90-99`, sem depender dos seis rótulos
  * fixos do concurso. `FatosDoConcurso`, abaixo, é quem resolve `CONFIGURACAO`
  * e chama esta forma; a página do órgão (`/orgaos/[slug]`), que tem outros
- * três fatos (abertos, previstos, total), chama-a direto: é a variante que
- * `task-15-brief.md` pede "sem quebrar a página do concurso", e o motivo de
- * isto estar separado da tabela fixa de rótulos.
+ * três fatos (abertos, previstos, total), chama-a direto, sem mexer na
+ * página do concurso: é o motivo de isto estar separado da tabela fixa de
+ * rótulos.
  */
 export function CartaoDeFato({
   icone,

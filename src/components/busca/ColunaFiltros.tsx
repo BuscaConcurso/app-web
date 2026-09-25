@@ -35,7 +35,7 @@ import {
  * O quadradinho de 20px: fica maior no visual novo, mas continua decorativo
  * (`aria-hidden`) e o quadrado de uma âncora, não uma caixa de seleção de
  * verdade. Ver o cabeçalho do arquivo para o porquê de não ser um
- * `<input type="checkbox">`. Marcado, o fundo é `bg-acao` (R7: `acao` é
+ * `<input type="checkbox">`. Marcado, o fundo é `bg-acao` (`acao` é
  * superfície, não texto).
  */
 function Quadradinho({ marcado }: { marcado: boolean }) {

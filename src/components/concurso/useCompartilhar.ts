@@ -59,7 +59,7 @@ export async function resolverCompartilhamento(
 
 /**
  * O botão "Compartilhar" do cabeçalho do concurso, num hook próprio porque o
- * cabeçalho de celular (Task 14) repete o mesmo botão no topo da tela, e as
+ * cabeçalho de celular (`Cabecalho.tsx`) repete o mesmo botão no topo da tela, e as
  * duas telas precisam da mesma decisão (`resolverCompartilhamento`, acima).
  *
  * O aviso, quando há um, some sozinho depois de 4 segundos, o mesmo tempo do

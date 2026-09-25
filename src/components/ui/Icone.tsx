@@ -61,7 +61,7 @@ export const ICONES = {
   filtros: [{ d: "M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M2 14h4M10 8h4M18 16h4" }],
   // O campo de e-mail do bloco de alerta (`Main.dc.html:387`).
   email: [{ retangulo: [2, 4, 20, 16, 2] }, { d: "m22 7-10 6L2 7" }],
-  // Os quatro de baixo entraram com a Task 13 (`Concurso.dc.html:113,150,159,190,199`):
+  // Os quatro de baixo vêm da página do concurso (`Concurso.dc.html:113,150,159,190,199`):
   // o documento pequeno de "Lido de"/"De onde foi lido" (sem o visto que
   // `aberto` já tem), a dúvida do bloco "O que o ato responde", a corrente do
   // cartão "informado pelo ato" e o quadro da avaliação.

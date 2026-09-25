@@ -141,13 +141,13 @@ describe("paraALista", () => {
 });
 
 /**
- * R4: o parceiro humano proíbe o travessão em qualquer texto visível, e
+ * O parceiro humano proíbe o travessão em qualquer texto visível, e
  * título e nome de órgão vêm da API, não do código-fonte. Por isso
  * `semTravessao.test.ts` (que varre `src/`) não os alcança. Estes testes
  * cobrem o corte isolado e o limite em que ele entra, `normalizarResumo` e
  * `normalizarDetalhe`.
  */
-describe("semTravessao (R4)", () => {
+describe("semTravessao", () => {
   it(`troca "${TRAVESSAO}" por " - ", com um espaço de cada lado`, () => {
     expect(semTravessao(`ENFAM ${TRAVESSAO} Edital nº 2`)).toBe("ENFAM - Edital nº 2");
   });
@@ -162,7 +162,7 @@ describe("semTravessao (R4)", () => {
   });
 });
 
-describe("normalizarResumo / normalizarDetalhe (R4)", () => {
+describe("normalizarResumo / normalizarDetalhe, sem travessão", () => {
   it("tira o travessão do título, do nome do órgão, da banca, do cargo e do último ato ao moldar o resumo", () => {
     const sujo = {
       ...CONCURSOS[0],

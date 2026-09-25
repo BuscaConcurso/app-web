@@ -37,7 +37,7 @@ describe("Cargos", () => {
     expect(html).toContain("3 vagas");
   });
 
-  // Ruling R22 (review da Task 13): quando as áreas discordam em algo,
+  // Quando as áreas discordam em algo,
   // `notaComum` volta `null` e cada linha precisa mostrar o que é dela, ou a
   // diferença desaparece da tela inteira.
   it("cargos diferentes mostram o salário de cada um, e não a nota comum", () => {

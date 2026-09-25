@@ -26,8 +26,7 @@ import { numero } from "@/lib/formato";
  * `ufs` e `cargos` chegam prontos (o acesso rápido por estado e cargo da
  * versão anterior do herói) e ainda não têm lugar no desenho novo: ver
  * `docs/prototipo`, que não repete esses atalhos aqui. Ficam na assinatura
- * para a Task 9 (o resto da home) decidir onde entram, sem `page.tsx`
- * precisar mudar de novo.
+ * para, se algum dia voltarem à home, `page.tsx` não precisar mudar.
  */
 export function Hero({
   totalAbertos,
@@ -50,7 +49,7 @@ export function Hero({
 }) {
   return (
     // A faixa verde vai de ponta a ponta; o conteúdo mora no `conteudo`
-    // (ruling R28). Em fileira (texto de 700px e o mosaico) só a partir de
+    // (`globals.css`). Em fileira (texto de 700px e o mosaico) só a partir de
     // `lg`: abaixo disso a coluna de 700px não cabe ao lado de nada. O
     // mosaico entra em `xl`, onde o `conteudo` já tem os 1216px do artboard.
     <section className="overflow-hidden bg-faixa text-white">

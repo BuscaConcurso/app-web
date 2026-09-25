@@ -48,8 +48,8 @@ export function destinoDaBuscaDoHero(q: string, uf: string, escolaridade: string
  * botão "Buscar" ficava ali, no DOM, clicável até, mas literalmente
  * pintado embaixo do cartão flutuante, sem erro nenhum no console.
  *
- * O valor 148px não é arredondado: medi (screenshot + varredura de pixel,
- * ver `task-8-report.md`) o texto de cada rótulo padrão ("Todo o Brasil",
+ * O valor 148px não é arredondado: medi (screenshot + varredura de pixel)
+ * o texto de cada rótulo padrão ("Todo o Brasil",
  * "Escolaridade") no tamanho real do herói (`Public Sans` 500, 15px), que dá
  * ~89px para o mais largo dos dois, e somei ícone + vão + texto + vão + seta
  * + o `px-1` da caixa, com uma folga pequena. Cabe os dois rótulos padrão

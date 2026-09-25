@@ -63,7 +63,7 @@ function AbasComBusca({ caminho, naHome }: { caminho: string; naHome: boolean })
  * mesmos itens é a gaveta (`GavetaDeNavegacao`).
  *
  * Na home são as cinco abas de `Main.dc.html:39-45`. Nas páginas internas a
- * fileira é dividida com a busca compacta (ruling R27) e leva só Abertos,
+ * fileira é dividida com a busca compacta e leva só Abertos,
  * Previstos e Diário Oficial, em texto (`Concurso.dc.html:47-49`).
  *
  * `useSearchParams` pede um limite de `<Suspense>` em rota estática (ver

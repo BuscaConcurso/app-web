@@ -543,8 +543,7 @@ export const CARGOS_DE_PROVA: Cargo[] = [
 ];
 
 /**
- * Os dados da marca e dos tokens, para a parte de cima da vitrine (Task 15,
- * Passo 5). Fica separado do resto do arquivo, que é o acervo congelado dos
+ * Os dados da marca e dos tokens, para a parte de cima da vitrine. Fica separado do resto do arquivo, que é o acervo congelado dos
  * blocos de concurso: isto aqui não vem do acervo, é o próprio sistema de
  * desenho, transcrito de `docs/prototipo/Logo.dc.html`.
  */

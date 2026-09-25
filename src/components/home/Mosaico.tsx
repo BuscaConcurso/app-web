@@ -25,7 +25,7 @@ export function Mosaico({
   novoAto: ConcursoResumo | null;
 }) {
   return (
-    // A partir de `xl` (ruling R28), onde o `conteudo` tem os 1216px do
+    // A partir de `xl`, onde o `conteudo` tem os 1216px do
     // artboard e o desenho é o de 1440px, com a sangria de 40px à direita.
     <div className="relative hidden min-w-0 grow items-center xl:flex">
       <Azulejos
@@ -83,7 +83,7 @@ export function Mosaico({
             </div>
           </div>
 
-          {/* Ruling R7: texto verde usa `verde-texto`, não `acao`. */}
+          {/* Texto verde usa `verde-texto`, não `acao` (que não passa contraste de texto no escuro). */}
           <div className="flex items-center gap-1.5 text-[13px] font-semibold text-verde-texto">
             <Icone nome="aberto" tamanho={15} />
             Conferido no edital original

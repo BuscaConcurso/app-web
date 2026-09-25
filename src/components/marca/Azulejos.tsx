@@ -14,10 +14,10 @@ export type CorDeAzulejo =
   | "ouro"
   | "anil"
   | "papel"
-  // O sexto, só para o canto do cabeçalho do concurso (Task 13): ladrilho
+  // O sexto, só para o canto do cabeçalho do concurso: ladrilho
   // que não pinta fundo nenhum, para o branco do protótipo (`Concurso.
   // dc.html:81,84,85`) virar "deixa ver o cartão de baixo" em vez de um hex
-  // fixo — que destoaria do `bg-cartao` escuro no tema escuro.
+  // fixo, que destoaria do `bg-cartao` escuro no tema escuro.
   | "transparente";
 
 export type Ladrilho = {

@@ -22,7 +22,7 @@ export default async function EmBreve({
   return (
     <section className="conteudo grid gap-8 py-16 md:grid-cols-[1fr_440px]">
       <div className="flex flex-col justify-center gap-4">
-        {/* `acao` é só superfície (ruling R7): o texto verde usa
+        {/* `acao` é só superfície (não passa contraste de texto no escuro): o texto verde usa
             `verde-texto`, que é a mesma cor no claro e o par que passa
             contraste no escuro. */}
         <p className="text-[13px] font-bold tracking-[0.06em] text-verde-texto">

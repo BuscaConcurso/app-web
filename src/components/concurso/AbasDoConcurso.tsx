@@ -14,7 +14,7 @@ import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
  *
  * A partir de `lg` a lista de abas some (`lg:hidden`) e todo painel fica
  * visível (`lg:block` sempre, mesmo no inativo): é a mesma pilha de sempre,
- * sem abas nenhuma, do desenho de desktop da Task 13.
+ * sem abas nenhuma, do desenho de desktop (`Concurso.dc.html`).
  */
 export function AbasDoConcurso({
   paineis,

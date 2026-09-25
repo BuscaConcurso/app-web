@@ -18,7 +18,7 @@ function comSituacoes(situacoes: ConsultaDaUrl["situacoes"]): ConsultaDaUrl {
 }
 
 /**
- * Ruling R26: com duas ou mais situações na URL, cada aba correspondente
+ * Com duas ou mais situações na URL, cada aba correspondente
  * precisa ficar marcada (não só "Todas" apagada e nenhuma outra acesa), para
  * o trilho concordar com os chips de `chipsAtivos` e com a lista de baixo,
  * que já responde pelas duas.

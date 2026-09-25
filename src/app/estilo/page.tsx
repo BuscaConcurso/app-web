@@ -37,8 +37,7 @@ import {
  * A ordem segue `docs/prototipo/Logo.dc.html`: marca, faixa de azulejos,
  * paleta, ícones e tipografia primeiro, o sistema de onde tudo o mais sai;
  * depois cada primitivo (`Botao`, `Etiqueta`, `Calendario`, `Abas`, `Selo`,
- * `Cartao`, `Campo`, `Trilha`, `Paginacao`, `BotaoEmBreve`), na mesma ordem
- * do brief da Task 15.
+ * `Cartao`, `Campo`, `Trilha`, `Paginacao`, `BotaoEmBreve`).
  *
  * ## Os blocos do fim, fora da lista de primitivos
  *
@@ -46,7 +45,7 @@ import {
  * primitivos: são os únicos lugares do app onde eles aparecem contra o mock
  * (`obterDetalhe` sem `BC_API_URL` devolve `cargos: []` e `origens: []`), e o
  * dado deles vem congelado de `./exemplos.ts`, copiado do acervo em
- * 2026-09-14. Desde a Task 13/14 os três desenham o próprio `<h2>` de 28px
+ * 2026-09-14. Os três desenham o próprio `<h2>` de 28px
  * por dentro; por isso entram direto, dentro de um `<section>` que só repete
  * o cartão branco da página real (`rounded-[22px] bg-cartao p-8
  * shadow-cartao`, `Concurso.dc.html`), sem o `Secao` do resto do site por
@@ -55,11 +54,9 @@ import {
  *
  * ## O que ficou de fora
  *
- * `CartaoConcurso` e `LinhaConcurso` (Task 15a) saíram da vitrine: não estão
- * na lista de primitivos do Passo 5, e os dois arquivos estão em edição
- * concorrente por outro agente enquanto este arquivo é escrito. Acoplar a
- * vitrine a um arquivo em obra é risco sem necessidade; quem quiser vê-los
- * encontra exemplo de sobra em `/concursos` e na home.
+ * `CartaoConcurso` e `LinhaConcurso` ficam fora da vitrine: não são
+ * primitivos, e quem quiser vê-los encontra exemplo de sobra em
+ * `/concursos` e na home.
  */
 export const metadata: Metadata = {
   title: "Design system",
@@ -544,7 +541,7 @@ export default function Estilo() {
       {/*
         Daqui até o fim é a página do concurso, na ordem em que ela se lê:
         cargos, o que o ato responde, e o ato. Os três desenham o próprio
-        cabeçalho por dentro (Task 13/14, ruling R23), então entram direto
+        cabeçalho por dentro, então entram direto
         num cartão branco, sem um `Secao` por cima duplicando o título.
       */}
       <section className="mb-8 rounded-[22px] bg-cartao p-8 shadow-cartao">

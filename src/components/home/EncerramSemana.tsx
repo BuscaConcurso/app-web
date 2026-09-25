@@ -123,8 +123,7 @@ function CartaoMovel({ concurso, hoje }: { concurso: ConcursoResumo; hoje: Date 
  * como `encerrando`.
  *
  * `null` sem concurso nenhum: um acervo com zero urgentes some a seção
- * inteira, em vez de desenhar quatro colunas vazias (Review Focus 2 dos
- * `global-constraints.md`).
+ * inteira, em vez de desenhar quatro colunas vazias.
  */
 export function EncerramSemana({
   concursos,

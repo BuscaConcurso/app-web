@@ -31,8 +31,7 @@ import { SessionProvider } from "@/lib/auth/session";
  * corte óptico errado é mais largo por letra que o desenho pensado para
  * título grande, e foi o que fez "Encontre seu concurso." quebrar em duas
  * linhas em vez de uma a 1440px: a mesma string, no mesmo espaço, é mais
- * larga com o eixo óptico errado. Documentado/investigado na Task 8 (ver
- * `task-8-report.md`).
+ * larga com o eixo óptico errado.
  *
  * `weight: "variable"` e não a lista de pesos: o próprio `next/font` recusa
  * `axes` junto de uma lista fixa de pesos ("Axes can only be defined for
@@ -159,7 +158,7 @@ export const revalidate = 300;
  * embrulha `loading.js`, `not-found.js`, `page.js` e os `layout.js` abaixo
  * dele, não o próprio `layout.tsx` raiz (doc lida antes de escrever este
  * arquivo, em `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/error.md`).
- * Sob a regra R3 de `concursos.ts`, a API fora do ar sem leitura boa
+ * Pela regra de `concursos.ts` (com `BC_API_URL` não há mock), a API fora do ar sem leitura boa
  * guardada lança, e sem este envoltório essa falha bateria direto na
  * página padrão do Next, sem identidade nenhuma e sem link de volta:
  * exatamente o que `global-error.tsx` existe para nunca precisar mostrar.

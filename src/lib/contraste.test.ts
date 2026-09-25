@@ -26,7 +26,7 @@ const PARES: Par[] = [
   ...["link", "link-hover"].flatMap((texto) =>
     ["pagina", "cartao"].map((fundo) => ({ texto, fundo, minimo: TEXTO })),
   ),
-  // Ruling R7 (review da Task 2): "acao" é só superfície (fundo do botão
+  // "acao" é só superfície (fundo do botão
   // primário, com texto branco fixo). Texto verde usa `verde-texto`, o
   // mesmo token do sinal "verde" (ver `ESTILO_DO_TOM`/rótulos verdes em
   // `AccountScreen.tsx` e `Cronograma.tsx`).
@@ -38,7 +38,7 @@ const PARES: Par[] = [
   { texto: "ouro-texto", fundo: "ouro", minimo: TEXTO },
   { texto: "ouro-texto", fundo: "ouro-hover", minimo: TEXTO },
   // O sinal ouro tem par próprio: o texto sobre o fundo claro do sinal não é
-  // o mesmo que segura leitura sobre o ouro cheio (ver Step 3 do brief).
+  // o mesmo que segura leitura sobre o ouro cheio.
   { texto: "ouro-sinal-texto", fundo: "ouro-fundo", minimo: TEXTO },
   ...["verde", "anil", "urucum", "neutro"].map((sinal) => ({
     texto: `${sinal}-texto`, fundo: `${sinal}-fundo`, minimo: TEXTO,
@@ -52,29 +52,27 @@ const PARES: Par[] = [
   { texto: "rodape-suave", fundo: "rodape", minimo: TEXTO },
   // Não texto: a superfície do botão primário, o anel de foco e os ícones.
   //
-  // Desvio do brief da Task 2: o passo 1 lista "acao" também no `flatMap`
-  // de texto (junto com "link" e "link-hover"), a 4.5:1. É matematicamente
-  // impossível manter isso e o par abaixo, `acao-texto` (branco fixo) sobre
+  // Por que "acao" não entra nos pares de texto: é matematicamente
+  // impossível ter "acao" como texto a 4.5:1 e o par abaixo, `acao-texto` (branco fixo) sobre
   // `acao`, no escuro: `acao-texto` fixa o teto de luminância de `acao` em
   // 0,183 (para o branco ler 4.5:1), e o piso para `acao` como texto de
   // 4.5:1 sobre `cartao` escuro é 0,234, maior que o teto. Nenhum valor de
-  // `acao` cumpre as duas ao mesmo tempo. A ruling R7 resolveu isso de vez:
-  // `acao` é só superfície (botão, anel de foco, ponto do cronograma,
+  // `acao` cumpre as duas ao mesmo tempo. Então `acao` é só superfície (botão, anel de foco, ponto do cronograma,
   // marcador do filtro), e todo lugar do código que usava `text-acao` como
   // cor de letra passou para `verde-texto` (par de texto logo acima). Só os
   // dois pares de não-texto abaixo ficaram para `acao`.
   { texto: "acao", fundo: "cartao", minimo: NAO_TEXTO },
   { texto: "acao", fundo: "pagina", minimo: NAO_TEXTO },
   { texto: "ouro", fundo: "faixa", minimo: NAO_TEXTO },
-  // Adiado da Task 4: `ouro` também é TEXTO sobre `faixa` no herói novo, a
+  // `ouro` também é TEXTO sobre `faixa` no herói, a
   // segunda linha do título ("Direto do edital."). O par de não-texto acima
   // cobre a superfície (o quadrado do número na pílula, que usa
   // `ouro-texto` como letra, já coberto por outro par); este cobre a letra
   // dourada direto sobre o verde da faixa.
   { texto: "ouro", fundo: "faixa", minimo: TEXTO },
   { texto: "contorno", fundo: "cartao", minimo: 1.3 },
-  // O rename mecânico do Step 7 troca `inverso`/`inverso-texto` por
-  // `tinta-900`/`cartao`: par de leitura direta, e não só um alias, porque
+  // `tinta-900`/`cartao` ocupam o lugar dos antigos `inverso`/`inverso-texto`,
+  // como par de leitura direta, e não só um alias, porque
   // `MenuConta.tsx` e o seletor de tema usam a combinação como superfície
   // de contraste máximo (filtro ativo, ícone marcado).
   { texto: "cartao", fundo: "tinta-900", minimo: TEXTO },

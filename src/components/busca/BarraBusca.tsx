@@ -22,7 +22,7 @@ import {
 import { useAtalhoDeBusca } from "./useAtalhoDeBusca";
 
 /**
- * A busca compacta do cabeçalho das páginas internas (ruling R27), transcrita
+ * A busca compacta do cabeçalho das páginas internas, transcrita
  * de `Concurso.dc.html:39-44`: uma cápsula de 46px, até 520px de largura,
  * raio de 12px, fundo `rebaixada`, lupa, campo de 15px e a dica de atalho
  * `/`. **Sem seletor de estado e sem botão**: Enter envia. Na home ela não

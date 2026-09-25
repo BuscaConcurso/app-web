@@ -44,8 +44,8 @@ export function Alert({
 }
 
 /**
- * O botão de enviar: `primario`, `lg`, largura total, como o brief da Task
- * 15 pede para o formulário de autenticação inteiro. Nenhum chamador jamais
+ * O botão de enviar: `primario`, `lg`, largura total, o mesmo em todo o
+ * formulário de autenticação. Nenhum chamador jamais
  * pediu a variante secundária que existia aqui antes, então ela saiu.
  */
 export function SubmitButton({

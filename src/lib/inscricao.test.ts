@@ -65,7 +65,7 @@ describe("prazoPorExtenso", () => {
   });
 
   it("um instante de 23h30 em Brasília no dia 24 (2h30 UTC do dia 25) ainda é 24 para o prazo", () => {
-    // R5/Review Focus 5: `hojeCivilEmSaoPaulo` é o que `page.tsx` agora passa
+    // Prazo no fuso de São Paulo: `hojeCivilEmSaoPaulo` é o que `page.tsx` passa
     // adiante para `prazoPorExtenso`, `tomDoConcurso` e `periodoDaInscricao`,
     // no lugar do `new Date()` cru. Um servidor em UTC roda este instante já
     // no dia 25 (`2026-09-25T02:30:00Z`); em Brasília (UTC-3) ainda são

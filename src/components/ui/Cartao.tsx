@@ -12,7 +12,7 @@ import type { Tom } from "@/lib/dominio";
  * para a `Etiqueta`, não para o fundo do cartão inteiro.
  *
  * `tom` continua aceito, sem efeito aqui, só para quem ainda o passa
- * (o cartão do concurso, `Task 12`, decide o que fazer com ele).
+ * (o cartão do concurso decide o que fazer com ele).
  */
 export function Cartao({
   children,

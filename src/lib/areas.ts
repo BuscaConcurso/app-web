@@ -1,13 +1,13 @@
 /**
  * As 12 áreas da home, na ordem do protótipo.
  *
- * Nome e apoio saem de `docs/prototipo/Main.dc.html:133-144`, o ícone da
- * Task 3 e o tom do fundo do ícone. O termo é o que a área busca: ele
+ * Nome e apoio saem de `docs/prototipo/Main.dc.html:133-144`, assim como o
+ * ícone e o tom do fundo do ícone. O termo é o que a área busca: ele
  * alimenta `hrefDaArea`, que usa `caminhoDaBusca` para não duplicar a regra
  * de slug que a busca por texto já segue.
  *
- * Cada termo foi conferido contra o acervo local antes do commit (ver
- * `task-7-report.md`); nenhum voltou zero, então nenhum precisou de troca
+ * Cada termo foi conferido contra o acervo local antes do commit; nenhum
+ * voltou zero, então nenhum precisou de troca
  * por sinônimo.
  */
 import type { NomeDoIcone } from "@/components/ui/Icone";

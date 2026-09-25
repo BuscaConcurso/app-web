@@ -26,7 +26,7 @@ import type { Tom } from "@/lib/dominio";
  * próprio `h1` em outro lugar. `not-found.tsx` e `error.tsx` são a exceção:
  * ali o `Secao` é o único título da página inteira, e um documento sem `h1`
  * quebra a hierarquia de quem navega por títulos (leitor de tela, sumário do
- * navegador). Ruling do review da Task 15b.
+ * navegador).
  */
 export function Secao({
   rotulo,

@@ -72,7 +72,7 @@ export default async function PaginaDoConcurso(
     permanentRedirect(`/concursos/${encodeURIComponent(concurso.slug)}`);
   }
 
-  // R5 das global-constraints: quem decide o dia é o dia civil de Brasília,
+  // Quem decide o dia é o dia civil de Brasília,
   // não o relógio cru do processo (um servidor em UTC vira o dia às 21h de
   // Brasília, e das 21h à meia-noite a página diria que encerrou o que
   // encerra hoje). `agora` é o único instante lido; `hoje` (o dia civil, para
@@ -89,7 +89,7 @@ export default async function PaginaDoConcurso(
   const hoje = hojeCivilEmSaoPaulo(agora);
   const hojeCivil = hojeEmSaoPaulo(agora);
 
-  // "Também abertos no {UF}" da lateral (Task 14). Não custa requisição nova
+  // "Também abertos no {UF}" da lateral. Não custa requisição nova
   // (lê o mesmo acervo já guardado em `cache`), mas uma falha aqui não pode
   // derrubar a página do concurso: o pior desfecho é a lateral sem essa
   // lista, não um concurso que existe virando erro 500.
@@ -142,7 +142,7 @@ export default async function PaginaDoConcurso(
       ? null
       : destinoDaInscricao(concurso);
 
-  // As abas do celular (`AbasDoConcurso`, Task 14): cronograma, áreas e
+  // As abas do celular (`AbasDoConcurso`): cronograma, áreas e
   // perguntas, cada uma seu próprio painel com `id` estável. Áreas e
   // perguntas continuam de fora quando não há o que mostrar: a aba não
   // existe sem o painel dela, do mesmo jeito que a seção não existia sem ele
@@ -233,8 +233,7 @@ export default async function PaginaDoConcurso(
         sem borda e sem sombra.
 
         **A cor do tom mora só na pílula de situação, dentro do cabeçalho.**
-        O cabeçalho inteiro é branco, como todo bloco da pilha (desenho novo,
-        Task 12); repetir o salmão de "encerra em 3 dias" atrás dele, do
+        O cabeçalho inteiro é branco, como todo bloco da pilha; repetir o salmão de "encerra em 3 dias" atrás dele, do
         cronograma, dos cargos e do ato afirmaria quatro vezes a mesma coisa e
         gastaria a única cor forte da tela. Cinza por padrão, cor só onde
         informa.
@@ -242,10 +241,10 @@ export default async function PaginaDoConcurso(
         A pilha não inventa um terceiro nível de superfície: continuam sendo
         página < cartão < bloco, os mesmos três de `globals.css`.
 
-        **O rótulo de cada seção passou para DENTRO do seu bloco** (Task 13,
-        `Concurso.dc.html:100-207`): o ícone colorido e o `h2` de 28px moram
+        **O rótulo de cada seção mora DENTRO do seu bloco**
+        (`Concurso.dc.html:100-207`): o ícone colorido e o `h2` de 28px moram
         no mesmo cartão branco do conteúdo, ao contrário do `Secao` do resto
-        do site (título de 40px fora do cartão) — é assim no protótipo da
+        do site (título de 40px fora do cartão): é assim no protótipo da
         página do concurso, e não no da home.
       */}
       <div className="flex flex-col gap-6 lg:gap-10">

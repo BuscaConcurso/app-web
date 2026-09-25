@@ -475,7 +475,7 @@ describe("obterDetalhe", () => {
     expect(avisos).toEqual([]);
   });
 
-  // R3/R9: com BC_API_URL, falha não é mock. Um slug real que o mock não tem
+  // Com BC_API_URL, falha não é mock. Um slug real que o mock não tem
   // viraria 404 com noindex durante a queda; lançando, a página de erro
   // responde e o 404 fica só para o slug que a API diz não existir.
   it("API fora do ar lança, e não cai no mock", async () => {
