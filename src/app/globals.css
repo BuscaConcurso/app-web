@@ -111,12 +111,15 @@
   --color-tinta-900: #eef2ee;
   --color-tinta-600: #b3c0b8;
   --color-tinta-500: #97a59c;
-  /* O protótipo repete o verde de ação do claro (#0B6B3A) aqui, mas
-   * `text-acao` (rótulo do cronograma, item ativo do filtro) cai para
-   * 2,52:1 sobre `cartao` e 2,80:1 sobre `pagina`, os dois abaixo do
-   * mínimo de não-texto (3:1). Clareado em quatro passos de 4 no canal
-   * verde, #0B7B3A: 3,10:1 sobre `cartao` e o branco de `acao-texto`
-   * ainda lê 5,37:1 sobre ele, longe do piso de 4.5:1. */
+  /* O protótipo repete o verde de ação do claro (#0B6B3A) aqui, mas `acao`
+   * como não-texto (o anel de foco em `focus:ring-acao`, o ponto de "hoje"
+   * do cronograma, o marcador do filtro selecionado, direto sobre `cartao`
+   * ou `pagina`) cai para 2,52:1 e 2,80:1, os dois abaixo do mínimo de
+   * não-texto (3:1). `acao` é só superfície desde a ruling R7: texto verde
+   * usa `verde-texto`, não `acao` (ver `contraste.test.ts`). Clareado em
+   * quatro passos de 4 no canal verde, #0B7B3A: 3,10:1 sobre `cartao` e o
+   * branco de `acao-texto` ainda lê 5,37:1 sobre ele, longe do piso de
+   * 4.5:1. */
   --color-acao: #0b7b3a;
   --color-acao-hover: #0e7a43;
   --color-acao-texto: #ffffff;

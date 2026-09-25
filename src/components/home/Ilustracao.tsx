@@ -39,7 +39,7 @@ export function Ilustracao({ className }: { className?: string }) {
         width="168"
         height="200"
         rx="10"
-        fill="var(--color-bloco)"
+        fill="var(--color-rebaixada)"
         transform="rotate(-3.5 114 136)"
       />
 
@@ -55,25 +55,25 @@ export function Ilustracao({ className }: { className?: string }) {
 
       {/* Selo do órgão e o nome. */}
       <rect x="56" y="46" width="30" height="30" rx="7" fill="var(--color-rebaixada)" />
-      <rect x="94" y="50" width="80" height="9" rx="4.5" fill="var(--color-tinta-300)" />
-      <rect x="94" y="64" width="52" height="7" rx="3.5" fill="var(--color-tinta-200)" />
+      <rect x="94" y="50" width="80" height="9" rx="4.5" fill="var(--color-linha)" />
+      <rect x="94" y="64" width="52" height="7" rx="3.5" fill="var(--color-linha)" />
 
       {/* Etiqueta de situação, com o ponto de inscrições abertas. */}
-      <rect x="56" y="90" width="74" height="17" rx="5" fill="var(--color-tinta-100)" />
-      <circle cx="66" cy="98.5" r="3.2" fill="var(--color-verde-500)" />
-      <rect x="74" y="95" width="48" height="7" rx="3.5" fill="var(--color-tinta-300)" />
+      <rect x="56" y="90" width="74" height="17" rx="5" fill="var(--color-rebaixada)" />
+      <circle cx="66" cy="98.5" r="3.2" fill="var(--color-verde)" />
+      <rect x="74" y="95" width="48" height="7" rx="3.5" fill="var(--color-linha)" />
 
       {/* O bloco rebaixado dos números: vagas, salário, prazo. */}
-      <rect x="56" y="119" width="96" height="44" rx="8" fill="var(--color-bloco)" />
-      <rect x="66" y="129" width="20" height="5" rx="2.5" fill="var(--color-tinta-300)" />
-      <rect x="66" y="140" width="30" height="8" rx="4" fill="var(--color-tinta-400)" />
-      <rect x="112" y="129" width="20" height="5" rx="2.5" fill="var(--color-tinta-300)" />
-      <rect x="112" y="140" width="26" height="8" rx="4" fill="var(--color-tinta-400)" />
+      <rect x="56" y="119" width="96" height="44" rx="8" fill="var(--color-rebaixada)" />
+      <rect x="66" y="129" width="20" height="5" rx="2.5" fill="var(--color-linha)" />
+      <rect x="66" y="140" width="30" height="8" rx="4" fill="var(--color-tinta-500)" />
+      <rect x="112" y="129" width="20" height="5" rx="2.5" fill="var(--color-linha)" />
+      <rect x="112" y="140" width="26" height="8" rx="4" fill="var(--color-tinta-500)" />
 
       {/* Corpo do edital. */}
-      <rect x="56" y="177" width="112" height="7" rx="3.5" fill="var(--color-tinta-200)" />
-      <rect x="56" y="192" width="84" height="7" rx="3.5" fill="var(--color-tinta-200)" />
-      <rect x="56" y="207" width="98" height="7" rx="3.5" fill="var(--color-tinta-200)" />
+      <rect x="56" y="177" width="112" height="7" rx="3.5" fill="var(--color-linha)" />
+      <rect x="56" y="192" width="84" height="7" rx="3.5" fill="var(--color-linha)" />
+      <rect x="56" y="207" width="98" height="7" rx="3.5" fill="var(--color-linha)" />
 
       {/* A lente da marca, ampliada. O miolo é branco para ela ler como uma
           lente por cima da pilha, e não como um anel vazado. */}

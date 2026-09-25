@@ -312,7 +312,7 @@ export function AccountScreen() {
   return (
     <div className="mx-auto w-full max-w-[760px] px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-acao">Sua conta</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-verde-texto">Sua conta</p>
         <h1 className="font-titulo text-[32px] leading-tight text-tinta-900">Conta e segurança</h1>
       </header>
       <div className="flex flex-col gap-8 rounded-cartao bg-cartao p-6 sm:p-8">

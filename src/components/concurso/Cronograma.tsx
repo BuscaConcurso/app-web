@@ -116,7 +116,7 @@ export function Cronograma({
                   aria-hidden="true"
                   className="absolute top-[5px] left-[6px] size-1.5 -translate-x-1/2 rounded-full bg-acao"
                 />
-                <p className="text-[11px] leading-4 font-semibold tracking-[0.06em] text-acao uppercase">
+                <p className="text-[11px] leading-4 font-semibold tracking-[0.06em] text-verde-texto uppercase">
                   hoje, {dataLonga(hoje)}
                 </p>
               </>
@@ -131,7 +131,7 @@ export function Cronograma({
                     className={[
                       "numero w-[13.5rem] shrink-0 text-sm",
                       linha.fase === "hoje"
-                        ? "font-medium text-acao"
+                        ? "font-medium text-verde-texto"
                         : linha.fase === "passado"
                           ? "text-tinta-600"
                           : "text-tinta-900",

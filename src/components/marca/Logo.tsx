@@ -24,17 +24,22 @@ const PALETA: Record<
   // No claro é lente verde e documento em tinta; no escuro os mesmos tokens
   // valem a variante "sobre fundo" do canvas, com lente branca e linhas
   // amarelas. Um tom só, dois desenhos, sem o componente saber do tema.
+  // Correção mínima da Task 2 (fundo do achado de review): os tokens
+  // `marca-*` e `amarelo`/`verde-300` do canvas antigo saíram de
+  // `globals.css` e este componente ficava lendo variável indefinida. A
+  // Task 4 reescreve o `Logo` de vez; aqui só troca pelo token que já
+  // existe com o papel mais parecido.
   cor: {
-    lente: "var(--color-marca-lente)",
-    documento: "var(--color-marca-documento)",
-    palavra: "var(--color-marca-palavra)",
-    destaque: "var(--color-marca-destaque)",
+    lente: "var(--color-acao)",
+    documento: "var(--color-tinta-900)",
+    palavra: "var(--color-tinta-900)",
+    destaque: "var(--color-acao)",
   },
   claro: {
     lente: "#ffffff",
-    documento: "var(--color-amarelo)",
+    documento: "var(--color-ouro)",
     palavra: "#ffffff",
-    destaque: "var(--color-verde-300)",
+    destaque: "var(--color-verde-texto)",
   },
   mono: {
     lente: "currentColor",
