@@ -5,7 +5,6 @@ import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
 import { urlDoCargo, type CargoMedido } from "@/lib/cargos";
 import { cargosEscolhidos } from "@/lib/concursos";
 import { hrefEmBreve } from "@/lib/emBreve";
-import { dataCurta, hojeEmSaoPaulo } from "@/lib/formato";
 
 const LIMITE_DE_CARGOS_NO_RODAPE = 8;
 
@@ -85,14 +84,22 @@ function ColunaDeLinks({
  * branco (`Main.dc.html:412` usa `#EFECE3` só na faixa final; o corpo é o
  * mesmo papel de cartão do resto da página), então ele lê os tokens comuns
  * de superfície e texto, como qualquer outro bloco.
+ *
+ * `atualizadoEm` chega pronto de `src/app/layout.tsx`, a mesma regra da
+ * `BarraUtilitaria`: `dataCurta(hojeEmSaoPaulo())` quando o acervo veio da
+ * API, `null` quando não. Sem isso, "Acervo atualizado em hoje" seria uma
+ * data que o mock não sustenta.
  */
-export async function Rodape() {
+export async function Rodape({
+  atualizadoEm,
+}: {
+  atualizadoEm: string | null;
+}) {
   const cargos = await cargosDoRodape();
   const cargosLinks = cargos.map((cargo) => ({
     rotulo: cargo.rotulo,
     href: urlDoCargo(cargo),
   }));
-  const hoje = dataCurta(hojeEmSaoPaulo());
 
   return (
     <footer className="mt-24 border-t border-linha bg-cartao">
@@ -115,15 +122,50 @@ export async function Rodape() {
           </div>
         </div>
 
-        <div className="flex flex-col items-start justify-between gap-4 border-t border-linha pt-6 text-[13px] text-tinta-600 sm:flex-row sm:items-center">
-          <span>© 2026 BuscaConcurso · Acervo atualizado em {hoje}</span>
-          <a
-            href="https://gvtechlab.com.br/"
-            className="inline-flex items-center gap-2 font-semibold hover:text-tinta-900"
-          >
-            <LogoGvTechLab tamanho={18} />
-            Desenvolvido por GV Tech Lab
-          </a>
+        {/* O aviso legal e o crédito, de volta depois da revisão (R14): a
+            versão anterior deste rodapé já tinha os dois, e o desenho novo
+            só não veio com um artboard que os mostrasse. Restilizados nos
+            tokens do canvas novo (`text-tinta-600`, pequeno), mas a palavra
+            é a mesma de antes (`git show 2b91305:src/components/layout/Rodape.tsx`). */}
+        <div className="flex flex-col gap-4 border-t border-linha pt-6 text-[13px] text-tinta-600">
+          <p>
+            BuscaConcurso não organiza concursos. Confira sempre o edital
+            original no diário oficial ou no site da banca antes de se
+            inscrever.
+          </p>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <span>
+              © 2026 BuscaConcurso
+              {atualizadoEm !== null && ` · Acervo atualizado em ${atualizadoEm}`}
+            </span>
+
+            {/* Quem responde pelo site. Os dados são os do cadastro público
+                do CNPJ na Receita Federal (situação ativa em 14/09/2026);
+                mudou o endereço lá, muda aqui. */}
+            <div>
+              <a
+                href="https://gvtechlab.com.br/"
+                className="inline-flex items-center gap-2 font-semibold hover:text-tinta-900"
+              >
+                <LogoGvTechLab tamanho={18} />
+                Desenvolvido por GV Tech Lab
+              </a>
+              <address className="mt-2 text-xs leading-5 not-italic">
+                GV TECH LAB LTDA · CNPJ 50.810.346/0001-23
+                <br />
+                Av. Brig. Faria Lima, 1811, Sala 1119 · Jardim Paulistano · São
+                Paulo/SP · CEP 01452-001
+                <br />
+                <a
+                  href="mailto:contato@gvtechlab.com.br"
+                  className="hover:text-tinta-900"
+                >
+                  contato@gvtechlab.com.br
+                </a>
+              </address>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

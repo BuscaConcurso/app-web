@@ -234,7 +234,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {origem && <AvisoDeOrigem origem={origem} />}
           <Cabecalho dimensoes={dimensoes} atualizadoEm={atualizadoEm} />
           <main className="flex-1">{children}</main>
-          <Rodape />
+          <Rodape atualizadoEm={atualizadoEm} />
         </SessionProvider>
       </body>
     </html>

@@ -99,7 +99,7 @@ export function NavPrincipal({ className }: { className?: string }) {
  * os mesmos `ITENS_DA_NAV` da nav de desktop, mais o seletor de tema. Fechar
  * ao navegar já é comportamento de `Gaveta` (`useRevelador`, `Revelador.tsx`).
  */
-export function GavetaDeNavegacao() {
+export function GavetaDeNavegacao({ className }: { className?: string }) {
   const { classeDaGaveta } = useCorteDaNav();
   return (
     <Gaveta
@@ -108,7 +108,7 @@ export function GavetaDeNavegacao() {
       titulo="Menu"
       largura="estreita"
       gatilho="size-11 justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
-      className={classeDaGaveta}
+      className={`${classeDaGaveta} ${className ?? ""}`}
     >
       <div className="flex flex-col gap-1">
         {ITENS_DA_NAV.map((item) => (
