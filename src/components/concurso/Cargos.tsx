@@ -26,10 +26,11 @@
  */
 import { useId, useState } from "react";
 import { Icone } from "@/components/ui/Icone";
-import type { Cargo } from "@/lib/dominio";
+import type { Cargo, Vaga } from "@/lib/dominio";
 import { normalizar } from "@/lib/consulta";
 import { notaComum, vagasDoCargo } from "@/lib/fatos";
-import { numero } from "@/lib/formato";
+import { moeda, moedaExata, numero } from "@/lib/formato";
+import { ROTULO_ESCOLARIDADE } from "@/lib/rotulos";
 
 /** As primeiras N áreas que chegam visíveis, antes de "Mostrar as N áreas". */
 const LIMITE_VISIVEL = 8;
@@ -50,6 +51,89 @@ function rotuloDeVagas(total: number | null): string {
   if (total === null) return "vagas não informadas no ato";
   if (total === 0) return "a definir";
   return `${numero(total)} ${total === 1 ? "vaga" : "vagas"}`;
+}
+
+/**
+ * "R$ 9.000 a R$ 13.995" quando o cargo tem mais de uma remuneração com
+ * valores diferentes, ou o único valor que o ato informou. `null` quando o
+ * ato não informou nenhuma remuneração positiva — ruling R22, review da
+ * Task 13.
+ */
+function faixaDeRemuneracao(cargo: Cargo): string | null {
+  const valores = cargo.remuneracoes
+    .map((remuneracao) => remuneracao.total ?? remuneracao.base)
+    .filter((valor): valor is number => valor !== null && valor > 0);
+  if (valores.length === 0) return null;
+  const min = Math.min(...valores);
+  const max = Math.max(...valores);
+  return min === max ? moeda(min) : `${moeda(min)} a ${moeda(max)}`;
+}
+
+/**
+ * A linha de 13px sob o nome da área, com o que É desta área e não das
+ * outras: só existe quando `notaComum` volta `null`, porque as áreas
+ * discordam em algo (ou há uma só) e a nota comum, que cobriria isto de uma
+ * vez para todas, não existe. Sem esta linha, um concurso com cargos de
+ * escolaridade e salário diferentes perderia essa diferença inteira — ela
+ * não aparecia em lugar nenhum da tabela nova (ruling R22, review da
+ * Task 13).
+ */
+function detalheDoCargo(cargo: Cargo): string | null {
+  const partes: string[] = [];
+  if (cargo.escolaridade) partes.push(ROTULO_ESCOLARIDADE[cargo.escolaridade]);
+  if (cargo.jornadaHoras) partes.push(`${cargo.jornadaHoras} h semanais`);
+  if (cargo.taxaInscricao) partes.push(`taxa ${moedaExata(cargo.taxaInscricao)}`);
+  const remuneracao = faixaDeRemuneracao(cargo);
+  if (remuneracao) partes.push(`remuneração ${remuneracao}`);
+  return partes.length > 0 ? partes.join(" · ") : null;
+}
+
+/**
+ * "São Paulo: 10 vagas (8 ampla, 1 PCD, 1 negros)". Vive aqui de novo depois
+ * da Task 13: a tabela nova resume a vaga a um total com pontos, e esta
+ * descrição por localidade tinha ficado sem lugar nenhum na tela. Volta na
+ * revelação de "De onde foi lido", ao lado dos requisitos (ruling R22).
+ */
+function descreverVaga(vaga: Vaga): string {
+  const onde = [vaga.localidade, vaga.uf].filter(Boolean).join(", ");
+  // "ampla concorrência: 8", e não "8 ampla concorrência": com uma vaga só,
+  // a segunda forma vira "1 outras reservas". O dois-pontos atravessa
+  // singular e plural sem precisar concordar com nada.
+  const reparticao = [
+    vaga.ampla > 0 ? `ampla concorrência: ${numero(vaga.ampla)}` : null,
+    vaga.pcd > 0 ? `PCD: ${numero(vaga.pcd)}` : null,
+    vaga.negros > 0 ? `negros: ${numero(vaga.negros)}` : null,
+    vaga.outras > 0 ? `outras reservas: ${numero(vaga.outras)}` : null,
+  ].filter(Boolean);
+
+  const quantas =
+    vaga.total > 0
+      ? `${numero(vaga.total)} ${vaga.total === 1 ? "vaga" : "vagas"}`
+      : vaga.cadastroReserva
+        ? "sem vaga imediata"
+        : "quantidade não informada";
+
+  const reserva = vaga.cadastroReserva
+    ? vaga.crQuantidade
+      ? `cadastro reserva de ${numero(vaga.crQuantidade)}`
+      : "cadastro reserva"
+    : null;
+
+  // A repartição aparece sempre que as vagas NÃO forem todas de ampla
+  // concorrência, e não só quando houver duas ou mais categorias. Visto na
+  // tela com dado real: uma vaga com `outras: 1` e `ampla: 0` saía como
+  // "Pelotas: 1 vaga", escondendo que a única vaga é reservada — que é
+  // justamente o que faz alguém decidir se vale concorrer.
+  const soAmplaConcorrencia = vaga.ampla === vaga.total;
+  const detalhe = [
+    soAmplaConcorrencia ? null : reparticao.join(", ") || null,
+    reserva,
+  ].filter(Boolean);
+
+  return [
+    onde ? `${onde}: ${quantas}` : quantas,
+    detalhe.length > 0 ? ` (${detalhe.join("; ")})` : "",
+  ].join("");
 }
 
 export function Cargos({ cargos }: { cargos: Cargo[] }) {
@@ -136,19 +220,31 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
             const oculta = !combina || alemDoLimite;
             const total = vagasDoCargo(cargo);
             const aberta = abertas.has(indice);
+            // A linha de detalhe só existe quando a nota comum não cobre
+            // esta área: as duas nunca aparecem juntas, e uma delas sempre
+            // aparece quando há algo a dizer (ruling R22).
+            const detalhe = comum ? null : detalheDoCargo(cargo);
+            // O que a revelação tem para mostrar além do resumo da linha:
+            // evidência, requisitos e a vaga por localidade que o total com
+            // pontos não diz. Sem nenhum dos três, o botão nem aparece.
+            const temRevelacao =
+              cargo.evidencia.length > 0 || cargo.requisitos.length > 0 || cargo.vagas.length > 0;
 
             return (
               <li key={`${cargo.nome}-${cargo.codigo ?? indice}`} hidden={oculta}>
                 <div className="flex flex-col gap-1.5 border-b border-linha-fraca py-3 text-[15px] sm:grid sm:grid-cols-[1fr_120px_150px] sm:items-center sm:gap-4 sm:py-[15px]">
-                  {/* `sm:truncate`: só a partir de onde a linha vira grade de
-                      uma linha só, com a largura fixa de VAGAS e do link ao
-                      lado. Empilhado (abaixo de `sm`), a área é o único
-                      conteúdo da linha e o nome quebra inteiro — truncar um
-                      nome de 90 caracteres ali esconderia informação que o
-                      layout não precisa mais economizar. */}
-                  <span className="min-w-0 font-semibold break-words text-tinta-900 sm:truncate">
-                    {cargo.nome}
-                  </span>
+                  <div className="min-w-0">
+                    {/* `sm:truncate`: só a partir de onde a linha vira grade
+                        de uma linha só, com a largura fixa de VAGAS e do link
+                        ao lado. Empilhado (abaixo de `sm`), a área é o único
+                        conteúdo da linha e o nome quebra inteiro: truncar um
+                        nome de 90 caracteres ali esconderia informação que o
+                        layout não precisa mais economizar. */}
+                    <span className="block font-semibold break-words text-tinta-900 sm:truncate">
+                      {cargo.nome}
+                    </span>
+                    {detalhe && <p className="mt-0.5 text-[13px] text-tinta-600">{detalhe}</p>}
+                  </div>
                   <span className="flex items-center gap-1.5 text-tinta-900">
                     {total !== null && total > 0 && (
                       <span aria-hidden="true" className="text-[9px] tracking-[2px] text-acao">
@@ -157,7 +253,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
                     )}
                     {rotuloDeVagas(total)}
                   </span>
-                  {cargo.evidencia.length > 0 ? (
+                  {temRevelacao ? (
                     <button
                       type="button"
                       onClick={() => alternarEvidencia(indice)}
@@ -171,8 +267,41 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
                     <span aria-hidden="true" className="hidden sm:block" />
                   )}
                 </div>
-                {aberta && cargo.evidencia.length > 0 && (
-                  <dl className="flex flex-col gap-1 border-b border-linha-fraca px-1 pt-1 pb-3 text-[12px] leading-5 text-tinta-600">
+                {aberta && temRevelacao && (
+                  <dl className="flex flex-col gap-3 border-b border-linha-fraca px-1 pt-1 pb-3 text-[12px] leading-5 text-tinta-600">
+                    {/* A vaga por localidade e a reserva legal, que o total
+                        com pontos da linha resume num número só. Restaurado
+                        aqui na review da Task 13 (ruling R22): sem isto, "São
+                        Paulo: 8 ampla, 1 PCD, 1 negros" não aparecia em lugar
+                        nenhum da página nova. */}
+                    {cargo.vagas.length > 0 && (
+                      <div className="flex gap-2">
+                        <dt className="w-28 shrink-0">Vagas</dt>
+                        <dd className="min-w-0">
+                          <ul className="flex flex-col gap-0.5">
+                            {cargo.vagas.map((vaga, indiceDaVaga) => (
+                              <li key={indiceDaVaga}>{descreverVaga(vaga)}</li>
+                            ))}
+                          </ul>
+                        </dd>
+                      </div>
+                    )}
+                    {cargo.requisitos.length > 0 && (
+                      <div className="flex gap-2">
+                        <dt className="w-28 shrink-0">Requisitos</dt>
+                        <dd className="min-w-0">
+                          <ul className="flex flex-col gap-1">
+                            {cargo.requisitos.map((requisito, indiceDoRequisito) => (
+                              <li key={indiceDoRequisito}>
+                                {requisito.descricao}
+                                {requisito.formacoes.length > 0 &&
+                                  ` (${requisito.formacoes.join("; ")})`}
+                              </li>
+                            ))}
+                          </ul>
+                        </dd>
+                      </div>
+                    )}
                     {cargo.evidencia.map((trecho) => (
                       <div key={trecho.campo} className="flex gap-2">
                         <dt className="w-28 shrink-0">{trecho.campo}</dt>

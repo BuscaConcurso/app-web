@@ -238,10 +238,11 @@ function Marcador({
  * acontecendo agora: a pílula "HOJE" e, quando o próximo marco é o fim das
  * inscrições, quantos dias faltam para ele.
  *
- * `bg-tinta-900 text-cartao` e não o dourado do protótipo (`Concurso.
- * dc.html:121`, `#FCF1CF`/`#5C4500`) porque este segundo tom não é token: o
- * par que já passa `contraste.test.ts` nos dois temas é `cartao` sobre
- * `tinta-900`, e é ele que a pílula usa.
+ * `bg-ouro-fundo text-ouro-sinal-texto`, o dourado do protótipo
+ * (`Concurso.dc.html:121`, `#FCF1CF`/`#5C4500`) pelos tokens mais próximos:
+ * é o mesmo par que a etiqueta "previsto" já usa, e passa `contraste.test.ts`
+ * nos dois temas (correção da review da Task 13; a primeira versão usava
+ * `bg-tinta-900 text-cartao`, sem ouro nenhum).
  */
 function MarcaDeHoje({
   eventos,
@@ -265,7 +266,7 @@ function MarcaDeHoje({
 
   return (
     <div className={`flex flex-1 items-center gap-3 ${ultima ? "" : "pb-6"}`}>
-      <span className="flex h-[26px] items-center rounded-full bg-tinta-900 px-2.5 text-[12px] font-bold text-cartao">
+      <span className="flex h-[26px] items-center rounded-full bg-ouro-fundo px-2.5 text-[12px] font-bold text-ouro-sinal-texto">
         HOJE
       </span>
       <span className="numero text-[15px] font-semibold text-tinta-900">
