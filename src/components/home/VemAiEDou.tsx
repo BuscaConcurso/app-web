@@ -77,7 +77,7 @@ export function VemAiEDou({
   atualizados: ConcursoResumo[];
 }) {
   return (
-    <section className="mt-24 hidden gap-4 px-[112px] lg:grid lg:grid-cols-2">
+    <section className="conteudo mt-24 hidden gap-4 lg:grid lg:grid-cols-2">
       <div className="flex flex-col gap-4 rounded-[20px] bg-cartao p-7 shadow-cartao">
         <div className="flex items-start justify-between gap-4">
           <div>

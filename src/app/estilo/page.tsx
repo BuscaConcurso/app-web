@@ -154,7 +154,7 @@ export default function Estilo() {
   const depois = somarDias(hojeIso, 14);
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6">
+    <div className="conteudo py-10">
       <header className="mb-8">
         <h1 className="font-titulo text-[27px] font-semibold tracking-[-0.02em]">
           Design system

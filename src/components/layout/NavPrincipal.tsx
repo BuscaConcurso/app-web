@@ -38,11 +38,11 @@ function Abas({
                 : "font-medium text-tinta-900 hover:bg-rebaixada"
             }`}
           >
-            {/* Ícone só na home e só a partir de 1440px, a largura do
-                artboard: abaixo dela as cinco abas com ícone não cabem ao
-                lado da logo e do grupo da direita. */}
+            {/* Ícone só na home e só a partir de `xl`, onde o `conteudo`
+                já tem os 1216px do artboard: abaixo disso as cinco abas com
+                ícone não cabem ao lado da logo e do grupo da direita. */}
             {naHome && (
-              <Icone nome={item.icone} tamanho={18} className="hidden min-[1440px]:block" />
+              <Icone nome={item.icone} tamanho={18} className="hidden xl:block" />
             )}
             {item.rotulo}
           </Link>

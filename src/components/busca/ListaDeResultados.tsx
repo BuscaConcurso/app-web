@@ -196,7 +196,7 @@ export function ListaDeResultados({
         filtrada={!soOTermo}
       />
 
-      <div className="grid gap-6 px-4 py-12 md:px-[112px] lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
+      <div className="conteudo grid gap-6 py-12 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
         <ColunaFiltros
           consulta={consulta}
           contagens={contagens}

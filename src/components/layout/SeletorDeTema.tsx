@@ -48,10 +48,12 @@ function SeletorCompacto({ atual, className }: { atual: Tema; className?: string
     <div
       role="group"
       aria-label="Tema"
-      className={`flex items-center gap-1 ${className ?? ""}`}
+      className={`flex items-center ${className ?? ""}`}
     >
       {OPCOES.map((opcao) => {
         const ativo = opcao.tema === atual;
+        // O botão ocupa a altura inteira da barra utilitária (36px, ruling
+        // R31); o círculo de 28px de dentro é só o desenho.
         return (
           <button
             key={opcao.tema}
@@ -59,11 +61,15 @@ function SeletorCompacto({ atual, className }: { atual: Tema; className?: string
             onClick={() => definirTema(opcao.tema)}
             aria-pressed={ativo}
             aria-label={opcao.rotuloCompacto}
-            className={`flex size-7 items-center justify-center rounded-full text-utilitaria-texto transition-colors ${
-              ativo ? "bg-utilitaria-texto/15" : "hover:bg-utilitaria-texto/10"
-            }`}
+            className="group/tema flex h-9 items-center px-0.5 text-utilitaria-texto"
           >
-            <Icone nome={opcao.icone} tamanho={15} />
+            <span
+              className={`flex size-7 items-center justify-center rounded-full transition-colors ${
+                ativo ? "bg-utilitaria-texto/15" : "group-hover/tema:bg-utilitaria-texto/10"
+              }`}
+            >
+              <Icone nome={opcao.icone} tamanho={15} />
+            </span>
           </button>
         );
       })}

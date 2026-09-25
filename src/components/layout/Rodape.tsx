@@ -126,7 +126,7 @@ export async function Rodape({
 
   return (
     <footer className="mt-24 border-t border-linha bg-cartao">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 py-14 md:px-[112px]">
+      <div className="conteudo flex flex-col gap-10 py-14">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="flex max-w-[360px] flex-col gap-3.5">
             <Logo tamanho={32} />

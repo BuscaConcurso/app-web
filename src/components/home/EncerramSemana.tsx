@@ -136,7 +136,7 @@ export function EncerramSemana({
   if (concursos.length === 0) return null;
 
   return (
-    <section className="mt-12 flex flex-col gap-5 md:mt-24 md:gap-7 md:px-[112px]">
+    <section className="mt-12 flex flex-col gap-5 md:conteudo md:mt-24 md:gap-7">
       <div className="flex items-end justify-between gap-4 px-4 md:px-0">
         <div>
           <div className="mb-2.5 hidden md:block">

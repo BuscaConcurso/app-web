@@ -219,7 +219,7 @@ export default async function PaginaDoConcurso(
   ];
 
   return (
-    <div className="px-4 pt-5 pb-28 md:px-[112px] md:pt-0 lg:pb-5">
+    <div className="conteudo pt-5 pb-28 md:pt-0 lg:pb-5">
       {/* No celular não há trilha (`ConcursoMobile.dc.html`): o cabeçalho de
           60px já leva o "voltar". O dado estruturado continua no HTML. */}
       <div className="hidden md:block">
@@ -261,7 +261,7 @@ export default async function PaginaDoConcurso(
             `AbasDoConcurso` (abas só abaixo de `lg`; todas visíveis dali para
             cima); a lateral é `LateralDoConcurso` (o prazo, os passos de
             inscrição, os alertas e "também abertos"). */}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_392px]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_392px]">
           <div className="flex min-w-0 flex-col gap-6">
             <AbasDoConcurso paineis={paineis} />
 

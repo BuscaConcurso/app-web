@@ -25,14 +25,13 @@ export function Mosaico({
   novoAto: ConcursoResumo | null;
 }) {
   return (
-    // A partir de `xl`. Entre 1280 e 1439px a coluna que sobra ao lado do
-    // texto tem menos de 448px, e o mosaico encolhe junto (quadrado, até
-    // 448px); a 1440px é o desenho do artboard, com a sangria de 40px.
+    // A partir de `xl` (ruling R28), onde o `conteudo` tem os 1216px do
+    // artboard e o desenho é o de 1440px, com a sangria de 40px à direita.
     <div className="relative hidden min-w-0 grow items-center xl:flex">
       <Azulejos
         ladrilhos={MOSAICO_HERO}
         colunas={4}
-        className="aspect-square w-full max-w-[448px] rounded-[28px] min-[1440px]:ml-10 min-[1440px]:w-[448px] min-[1440px]:max-w-none min-[1440px]:shrink-0"
+        className="ml-10 size-[448px] shrink-0 rounded-[28px]"
       />
 
       {destaque && (
@@ -95,7 +94,7 @@ export function Mosaico({
       {novoAto && (
         <Link
           href={`/concursos/${novoAto.slug}`}
-          className="absolute top-[88px] -right-2 flex h-11 max-w-[calc(100%+8px)] items-center gap-2.5 rounded-[22px] bg-cartao py-0 pr-4 pl-2 text-[14px] font-semibold text-tinta-900 shadow-flutuante min-[1440px]:max-w-none"
+          className="absolute top-[88px] -right-2 flex h-11 items-center gap-2.5 rounded-[22px] bg-cartao py-0 pr-4 pl-2 text-[14px] font-semibold text-tinta-900 shadow-flutuante"
         >
           <span className="flex size-[30px] shrink-0 items-center justify-center rounded-[15px] bg-ouro-fundo text-ouro-sinal-texto">
             <Icone nome="alerta" tamanho={16} />

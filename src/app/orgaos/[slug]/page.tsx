@@ -120,7 +120,7 @@ export default async function PaginaDoOrgao(
   ];
 
   return (
-    <div className="px-4 pb-8 md:px-[112px] md:pb-12">
+    <div className="conteudo pb-8 md:pb-12">
       <Trilha degraus={trilha} />
 
       <div className="flex flex-col gap-6">

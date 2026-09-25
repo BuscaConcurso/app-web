@@ -15,8 +15,8 @@ import { moedaExata } from "@/lib/formato";
  * na base da tela enquanto a pessoa rola por dentro do container desta
  * página (o `<div>` de `page.tsx`, com o `pb-28` que abre o respiro), e
  * solta sozinho, sem JavaScript, assim que esse container termina, um pouco
- * antes do rodapé começar. `-mx-4 md:-mx-[112px]` cancela a sangria lateral
- * do container (`px-4 md:px-[112px]`) para a barra continuar de ponta a
+ * antes do rodapé começar. `-mx-4 md:-mx-8` cancela a sangria lateral
+ * do container (`conteudo`, 16px e 32px) para a barra continuar de ponta a
  * ponta, como um `fixed inset-x-0` desenharia.
  */
 export function BarraDeInscricao({
@@ -29,7 +29,7 @@ export function BarraDeInscricao({
   if (!destino) return null;
 
   return (
-    <div className="sticky bottom-0 z-10 -mx-4 flex items-center gap-2.5 bg-cartao px-4 pt-3 pb-6 shadow-[0_-1px_0_var(--color-linha),0_-12px_30px_rgb(15_31_23/0.08)] md:-mx-[112px] lg:hidden">
+    <div className="sticky bottom-0 z-10 -mx-4 flex items-center gap-2.5 bg-cartao px-4 pt-3 pb-6 shadow-[0_-1px_0_var(--color-linha),0_-12px_30px_rgb(15_31_23/0.08)] md:-mx-8 lg:hidden">
       <div className="shrink-0">
         <div className="text-[12px] text-tinta-600">Taxa</div>
         <div className="text-[17px] font-bold text-tinta-900">

@@ -40,7 +40,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 sm:py-14">
+    <div className="conteudo py-10 sm:py-14">
       <Secao rotulo="ALGO DEU ERRADO" titulo="Algo deu errado ao carregar esta página" nivel="h1">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] lg:items-center">
           <div className="flex flex-col items-start gap-5">

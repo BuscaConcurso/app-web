@@ -51,7 +51,7 @@ export function TabelaAbertos({
   hoje: Date;
 }) {
   return (
-    <section className="mt-12 flex flex-col gap-4 px-4 md:mt-24 md:gap-5 md:px-[112px]">
+    <section className="conteudo mt-12 flex flex-col gap-4 md:mt-24 md:gap-5">
       <div className="flex items-end justify-between gap-4">
         <div>
           <div className="mb-2.5 hidden md:block">

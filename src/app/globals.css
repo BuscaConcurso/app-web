@@ -81,6 +81,26 @@
 }
 
 /**
+ * O container de conteúdo de toda página (ruling R28): centrado, 1216px de
+ * largura útil (a do artboard de 1440px, com 112px de margem), 16px de
+ * respiro no celular e 32px a partir de `md`. De 1280px para cima o desenho
+ * é o mesmo do artboard; abaixo disso a margem cai para 32px em vez dos
+ * 112px fixos, que deixavam só 544px úteis a 768px. Faixas de fundo que vão
+ * de ponta a ponta (herói, barra utilitária, cabeçalho, rodapé) continuam
+ * largas e põem o `conteudo` por dentro.
+ */
+@utility conteudo {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  max-width: calc(1216px + 2rem);
+  @variant md {
+    padding-inline: 2rem;
+    max-width: calc(1216px + 4rem);
+  }
+}
+
+/**
  * Tema escuro.
  *
  * Só troca o valor dos tokens; nenhum componente sabe que ele existe. As

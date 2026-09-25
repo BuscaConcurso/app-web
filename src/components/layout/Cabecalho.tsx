@@ -34,9 +34,8 @@ import { GavetaDeNavegacao, NavPrincipal } from "./NavPrincipal";
  * `flex-wrap`; a busca nasce `order-last basis-full` (quebra para a fileira
  * de baixo) e vira `lg:order-none lg:flex-1` (volta para o lado da logo).
  *
- * **Entre 1024 e 1279px a logo é só o símbolo**: com a palavra, a busca das
- * páginas internas ficava com menos de 100px, e as abas da home não cabiam
- * na fileira. A partir de 1280px a logo inteira volta.
+ * A fileira mora no `conteudo` (ruling R28): de 1280px para cima ela é a
+ * do artboard de 1440px.
  *
  * **O cabeçalho do celular na página do concurso** (`ConcursoMobile.dc.html:21-27`)
  * é outro, de 60px: voltar, o símbolo da marca, compartilhar e salvar.
@@ -50,11 +49,11 @@ export function Cabecalho({ atualizadoEm }: { atualizadoEm: string | null }) {
   const segmentos = caminho.split("/").filter(Boolean);
   const naPaginaDoConcurso = segmentos[0] === "concursos" && segmentos.length > 1;
 
-  const classeDaNav = [
-    naPaginaDoConcurso ? "hidden lg:flex" : "flex",
-    "flex-wrap items-center gap-x-1 border-b border-linha bg-cartao pr-3 pl-4",
-    "md:px-[112px] lg:h-[76px] lg:flex-nowrap lg:gap-x-6",
-    naHome ? "min-[1440px]:gap-x-10" : "min-[1440px]:gap-x-7",
+  const classeDaNav = `${naPaginaDoConcurso ? "hidden lg:block" : "block"} border-b border-linha bg-cartao`;
+  const classeDaFileira = [
+    "conteudo flex flex-wrap items-center gap-x-1",
+    "lg:h-[76px] lg:flex-nowrap lg:gap-x-6",
+    naHome ? "xl:gap-x-10" : "xl:gap-x-7",
   ].join(" ");
 
   return (
@@ -64,59 +63,63 @@ export function Cabecalho({ atualizadoEm }: { atualizadoEm: string | null }) {
       {naPaginaDoConcurso && <CabecalhoCelularDoConcurso />}
 
       <nav aria-label="Principal" className={classeDaNav}>
-        <Link
-          href="/"
-          aria-label="BuscaConcurso, página inicial"
-          className="flex h-16 shrink-0 items-center lg:h-auto"
-        >
-          <span className="lg:hidden">
-            <Logo tamanho={32} />
-          </span>
-          <span className="hidden lg:block xl:hidden">
-            <Logo variante="simbolo" tamanho={36} />
-          </span>
-          <span className="hidden xl:block">
-            <Logo tamanho={36} />
-          </span>
-        </Link>
+        <div className={classeDaFileira}>
+          <Link
+            href="/"
+            aria-label="BuscaConcurso, página inicial"
+            className="flex h-16 shrink-0 items-center lg:h-auto"
+          >
+            <span className="lg:hidden">
+              <Logo tamanho={32} />
+            </span>
+            {/* Entre 1024 e 1279px só o símbolo: com a palavra, a busca das
+                páginas internas ficava com uns 130px. */}
+            <span className="hidden lg:block xl:hidden">
+              <Logo variante="simbolo" tamanho={36} />
+            </span>
+            <span className="hidden xl:block">
+              <Logo tamanho={36} />
+            </span>
+          </Link>
 
-        {!naHome && (
-          <div className="order-last min-w-0 basis-full pb-3 lg:order-none lg:max-w-[520px] lg:flex-1 lg:basis-auto lg:pb-0">
-            <BarraBuscaDoCabecalho />
-          </div>
-        )}
-
-        <NavPrincipal className={naHome ? "lg:flex-1" : "lg:ml-auto"} />
-
-        <div className="ml-auto flex shrink-0 items-center gap-1 lg:ml-0 lg:gap-2">
-          {naHome && (
-            <BotaoEmBreve
-              recurso="salvos"
-              aria-label="Salvos"
-              className="hidden size-11 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada lg:flex"
-            >
-              <Icone nome="salvar" tamanho={20} />
-            </BotaoEmBreve>
+          {!naHome && (
+            <div className="order-last min-w-0 basis-full pb-3 lg:order-none lg:max-w-[520px] lg:flex-1 lg:basis-auto lg:pb-0">
+              <BarraBuscaDoCabecalho />
+            </div>
           )}
 
-          <BotaoEmBreve
-            recurso="alertas"
-            aria-label="Meus alertas"
-            className="relative flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
-          >
-            <Icone nome="alerta" tamanho={20} />
-            {/* A bolinha de aviso, `Main.dc.html:48`: sinal só, sem número. */}
-            <span
-              aria-hidden="true"
-              className="absolute top-[10px] right-[11px] size-2 rounded-full bg-urucum ring-2 ring-cartao"
-            />
-          </BotaoEmBreve>
+          <NavPrincipal className={naHome ? "lg:flex-1" : "lg:ml-auto"} />
 
-          <div className="hidden lg:flex">
-            <MenuConta />
+          <div className="ml-auto flex shrink-0 items-center gap-1 lg:ml-0 lg:gap-2">
+            {naHome && (
+              <BotaoEmBreve
+                recurso="salvos"
+                aria-label="Salvos"
+                className="hidden size-11 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada lg:flex"
+              >
+                <Icone nome="salvar" tamanho={20} />
+              </BotaoEmBreve>
+            )}
+
+            <BotaoEmBreve
+              recurso="alertas"
+              aria-label="Meus alertas"
+              className="relative flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
+            >
+              <Icone nome="alerta" tamanho={20} />
+              {/* A bolinha de aviso, `Main.dc.html:48`: sinal só, sem número. */}
+              <span
+                aria-hidden="true"
+                className="absolute top-[10px] right-[11px] size-2 rounded-full bg-urucum ring-2 ring-cartao"
+              />
+            </BotaoEmBreve>
+
+            <div className="hidden lg:flex">
+              <MenuConta />
+            </div>
+
+            <GavetaDeNavegacao />
           </div>
-
-          <GavetaDeNavegacao />
         </div>
       </nav>
     </header>

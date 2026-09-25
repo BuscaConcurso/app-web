@@ -49,70 +49,72 @@ export function Hero({
   novoAto: ConcursoResumo | null;
 }) {
   return (
-    // O herói em fileira (texto de 700px e o mosaico) só a partir de `lg`:
-    // abaixo disso os 700px da coluna não cabem ao lado de nada, e a 768px a
-    // coluna sozinha já passava da tela. Entre `md` e `lg` é a pilha do
-    // celular, com a margem de 112px das outras seções.
-    <section className="flex flex-col gap-4 overflow-hidden bg-faixa px-4 py-7 text-white md:px-[112px] md:py-10 lg:min-h-[620px] lg:flex-row lg:gap-10 lg:py-0 min-[1440px]:gap-16">
-      <div className="relative flex flex-col gap-4 lg:w-[700px] lg:shrink-0 lg:justify-center lg:gap-6 lg:pb-10">
-        {/* O sol dourado que só aparece no celular (`Mobile.dc.html:29`);
-            no desktop o mosaico de azulejos já cumpre o papel decorativo. */}
-        <span
-          aria-hidden="true"
-          className="absolute -top-[60px] -right-[60px] size-[120px] rounded-full bg-ouro md:hidden"
-        />
+    // A faixa verde vai de ponta a ponta; o conteúdo mora no `conteudo`
+    // (ruling R28). Em fileira (texto de 700px e o mosaico) só a partir de
+    // `lg`: abaixo disso a coluna de 700px não cabe ao lado de nada. O
+    // mosaico entra em `xl`, onde o `conteudo` já tem os 1216px do artboard.
+    <section className="overflow-hidden bg-faixa text-white">
+      <div className="conteudo flex flex-col gap-4 py-7 md:py-10 lg:min-h-[620px] lg:flex-row lg:gap-10 lg:py-0 xl:gap-16">
+        <div className="relative flex flex-col gap-4 lg:w-[700px] lg:shrink-0 lg:justify-center lg:gap-6 lg:pb-10">
+          {/* O sol dourado que só aparece no celular (`Mobile.dc.html:29`);
+              no desktop o mosaico de azulejos já cumpre o papel decorativo. */}
+          <span
+            aria-hidden="true"
+            className="absolute -top-[60px] -right-[60px] size-[120px] rounded-full bg-ouro md:hidden"
+          />
 
-        <div className="inline-flex h-[30px] items-center gap-2 self-start rounded-full bg-white/10 pr-3.5 pl-1.5 text-[13px] text-faixa-texto lg:h-[34px] lg:gap-2.5 lg:pr-3.5 lg:pl-2 lg:text-sm">
-          <span className="flex h-5 items-center rounded-full bg-ouro px-1.5 text-[11px] font-bold text-ouro-texto lg:h-[22px] lg:px-2 lg:text-xs">
-            {numero(totalAbertos)}
-          </span>
-          <span className="lg:hidden">abertos hoje</span>
-          <span className="hidden lg:inline">concursos com inscrição aberta hoje</span>
+          <div className="inline-flex h-[30px] items-center gap-2 self-start rounded-full bg-white/10 pr-3.5 pl-1.5 text-[13px] text-faixa-texto lg:h-[34px] lg:gap-2.5 lg:pr-3.5 lg:pl-2 lg:text-sm">
+            <span className="flex h-5 items-center rounded-full bg-ouro px-1.5 text-[11px] font-bold text-ouro-texto lg:h-[22px] lg:px-2 lg:text-xs">
+              {numero(totalAbertos)}
+            </span>
+            <span className="lg:hidden">abertos hoje</span>
+            <span className="hidden lg:inline">concursos com inscrição aberta hoje</span>
+          </div>
+
+          <h1 className="font-titulo text-[40px] leading-[1.04] font-bold tracking-[-0.035em] md:text-[52px] lg:text-[68px] lg:leading-[1.02]">
+            Encontre seu concurso.
+            <br className="hidden lg:block" />
+            <span className="lg:hidden"> </span>
+            <span className="text-ouro">Direto do edital.</span>
+          </h1>
+
+          <p className="text-base leading-[1.5] text-faixa-texto lg:max-w-[580px] lg:text-[19px] lg:leading-[1.55]">
+            <span className="lg:hidden">
+              Cargo, vagas, salário e prazo, com o link para o documento original.
+            </span>
+            <span className="hidden lg:inline">
+              Lemos todo dia os editais das bancas e dos diários oficiais e mostramos cargo,
+              vagas, salário e prazo, com o link para o documento original.
+            </span>
+          </p>
+
+          <BuscaDoHero />
+
+          <div className="flex flex-wrap gap-2">
+            <Link href="/concursos?situacao=abertas" className={CLASSE_CHIP_DO_HERO}>
+              <Icone nome="prazo" tamanho={16} />
+              Encerram esta semana
+            </Link>
+            <Link
+              href="/concursos?situacao=abertas&salarioMin=10000"
+              className={CLASSE_CHIP_DO_HERO}
+            >
+              <Icone nome="salario" tamanho={16} />
+              Acima de R$ 10 mil
+            </Link>
+            <Link
+              href="/concursos?situacao=abertas&escolaridade=medio"
+              className={CLASSE_CHIP_DO_HERO}
+            >
+              <Icone nome="educacao" tamanho={16} />
+              Nível médio
+            </Link>
+            <PertoDeMim />
+          </div>
         </div>
 
-        <h1 className="font-titulo text-[40px] leading-[1.04] font-bold tracking-[-0.035em] md:text-[52px] lg:text-[68px] lg:leading-[1.02]">
-          Encontre seu concurso.
-          <br className="hidden lg:block" />
-          <span className="lg:hidden"> </span>
-          <span className="text-ouro">Direto do edital.</span>
-        </h1>
-
-        <p className="text-base leading-[1.5] text-faixa-texto lg:max-w-[580px] lg:text-[19px] lg:leading-[1.55]">
-          <span className="lg:hidden">
-            Cargo, vagas, salário e prazo, com o link para o documento original.
-          </span>
-          <span className="hidden lg:inline">
-            Lemos todo dia os editais das bancas e dos diários oficiais e mostramos cargo,
-            vagas, salário e prazo, com o link para o documento original.
-          </span>
-        </p>
-
-        <BuscaDoHero />
-
-        <div className="flex flex-wrap gap-2">
-          <Link href="/concursos?situacao=abertas" className={CLASSE_CHIP_DO_HERO}>
-            <Icone nome="prazo" tamanho={16} />
-            Encerram esta semana
-          </Link>
-          <Link
-            href="/concursos?situacao=abertas&salarioMin=10000"
-            className={CLASSE_CHIP_DO_HERO}
-          >
-            <Icone nome="salario" tamanho={16} />
-            Acima de R$ 10 mil
-          </Link>
-          <Link
-            href="/concursos?situacao=abertas&escolaridade=medio"
-            className={CLASSE_CHIP_DO_HERO}
-          >
-            <Icone nome="educacao" tamanho={16} />
-            Nível médio
-          </Link>
-          <PertoDeMim />
-        </div>
+        <Mosaico destaque={destaque} novoAto={novoAto} />
       </div>
-
-      <Mosaico destaque={destaque} novoAto={novoAto} />
     </section>
   );
 }

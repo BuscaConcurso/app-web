@@ -70,36 +70,39 @@ export function Numeros({
   return (
     <>
       {/* Desktop: uma barra só, com divisor entre as caixas. Só a partir de
-          1440px, a largura do artboard: abaixo dela cada caixa tem menos de
-          200px e os rótulos quebram em duas linhas em umas caixas e não em
-          outras, desalinhando os números. Até lá são os cartões abaixo. */}
-      <section
-        className="relative mx-[112px] -mt-14 hidden h-[120px] rounded-[20px] bg-cartao shadow-numeros min-[1440px]:grid"
-        style={{ gridTemplateColumns: `repeat(${itensDoDesktop.length}, minmax(0, 1fr))` }}
-      >
-        {itensDoDesktop.map((item, indice) => (
-          <div
-            key={item.rotulo}
-            className={`flex items-center gap-4 px-5 ${
-              indice < itensDoDesktop.length - 1 ? "border-r border-linha-fraca" : ""
-            }`}
-          >
-            <span
-              className={`flex size-12 shrink-0 items-center justify-center rounded-[14px] ${item.fundo}`}
+          `xl`, onde o `conteudo` tem os 1216px do artboard: abaixo disso
+          cada caixa tem menos de 200px e os rótulos quebram em duas linhas
+          em umas caixas e não em outras, desalinhando os números. Até lá são
+          os cartões abaixo. */}
+      <div className="conteudo relative -mt-14 hidden xl:block">
+        <section
+          className="grid h-[120px] rounded-[20px] bg-cartao shadow-numeros"
+          style={{ gridTemplateColumns: `repeat(${itensDoDesktop.length}, minmax(0, 1fr))` }}
+        >
+          {itensDoDesktop.map((item, indice) => (
+            <div
+              key={item.rotulo}
+              className={`flex items-center gap-4 px-5 ${
+                indice < itensDoDesktop.length - 1 ? "border-r border-linha-fraca" : ""
+              }`}
             >
-              <Icone nome={item.icone} tamanho={24} />
-            </span>
-            <div className="min-w-0">
-              <div className="font-titulo text-[32px] leading-none font-bold">{item.valor}</div>
-              <div className="mt-1 text-sm whitespace-nowrap text-tinta-600">{item.rotulo}</div>
+              <span
+                className={`flex size-12 shrink-0 items-center justify-center rounded-[14px] ${item.fundo}`}
+              >
+                <Icone nome={item.icone} tamanho={24} />
+              </span>
+              <div className="min-w-0">
+                <div className="font-titulo text-[32px] leading-none font-bold">{item.valor}</div>
+                <div className="mt-1 text-sm whitespace-nowrap text-tinta-600">{item.rotulo}</div>
+              </div>
             </div>
-          </div>
-        ))}
-      </section>
+          ))}
+        </section>
+      </div>
 
-      {/* Entre 768 e 1439px: as mesmas caixas, como cartões numa grade de
+      {/* Entre 768 e 1279px: as mesmas caixas, como cartões numa grade de
           dois, no formato dos cartões do celular. */}
-      <section className="mx-[112px] mt-6 hidden grid-cols-2 gap-3 md:max-[1439px]:grid">
+      <section className="conteudo mt-6 hidden grid-cols-2 gap-3 md:grid xl:hidden">
         {itensDoDesktop.map((item) => (
           <div
             key={item.rotulo}
@@ -119,7 +122,7 @@ export function Numeros({
       </section>
 
       {/* Celular: dois cartões soltos, só abertos e vagas previstas. */}
-      <section className="mx-4 mt-5 grid grid-cols-2 gap-2 md:hidden">
+      <section className="conteudo mt-5 grid grid-cols-2 gap-2 md:hidden">
         <div className="flex items-center gap-2.5 rounded-[16px] bg-cartao p-3.5 shadow-cartao">
           <span className="flex size-[38px] shrink-0 items-center justify-center rounded-controle bg-verde-fundo text-verde-texto">
             <Icone nome="aberto" tamanho={20} />

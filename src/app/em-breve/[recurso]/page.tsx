@@ -20,7 +20,7 @@ export default async function EmBreve({
   const { titulo, frase } = RECURSOS_EM_BREVE[recurso];
 
   return (
-    <section className="mx-auto grid max-w-[1216px] gap-8 px-4 py-16 md:grid-cols-[1fr_440px] md:px-0">
+    <section className="conteudo grid gap-8 py-16 md:grid-cols-[1fr_440px]">
       <div className="flex flex-col justify-center gap-4">
         {/* `acao` é só superfície (ruling R7): o texto verde usa
             `verde-texto`, que é a mesma cor no claro e o par que passa

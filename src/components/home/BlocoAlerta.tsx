@@ -157,85 +157,87 @@ export function BlocoAlerta({
   }
 
   return (
-    <section
-      id="alerta"
-      className="mx-4 mt-12 overflow-hidden rounded-[22px] bg-faixa text-white md:mx-[112px] md:mt-24 lg:flex lg:h-[340px] lg:rounded-[28px]"
-    >
-      <div className="relative flex flex-col gap-4 overflow-hidden p-6 lg:flex-grow lg:justify-center lg:gap-[18px] lg:p-0 lg:pl-14">
-        {/* Duas bolhas soltas no celular, no lugar da grade de 9 do desktop. */}
-        <span
-          aria-hidden="true"
-          className="absolute -right-10 -bottom-10 size-[110px] rounded-full bg-anil lg:hidden"
-        />
-        <span
-          aria-hidden="true"
-          className="absolute right-10 -bottom-[30px] size-[60px] rounded-full bg-ouro lg:hidden"
-        />
+    <div className="conteudo mt-12 md:mt-24">
+      <section
+        id="alerta"
+        className="overflow-hidden rounded-[22px] bg-faixa text-white lg:flex lg:h-[340px] lg:rounded-[28px]"
+      >
+        <div className="relative flex flex-col gap-4 overflow-hidden p-6 lg:flex-grow lg:justify-center lg:gap-[18px] lg:p-0 lg:pl-14">
+          {/* Duas bolhas soltas no celular, no lugar da grade de 9 do desktop. */}
+          <span
+            aria-hidden="true"
+            className="absolute -right-10 -bottom-10 size-[110px] rounded-full bg-anil lg:hidden"
+          />
+          <span
+            aria-hidden="true"
+            className="absolute right-10 -bottom-[30px] size-[60px] rounded-full bg-ouro lg:hidden"
+          />
 
-        <div className="relative flex items-center gap-2.5 text-[13px] font-bold tracking-[0.06em] text-ouro">
-          <Icone nome="alerta" tamanho={18} />
-          ALERTA GRÁTIS
-        </div>
-        <h2 className="relative font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.03em] lg:text-[44px] lg:leading-[1.05]">
-          Receba o edital no dia em que ele sair.
-        </h2>
-
-        <form onSubmit={aoEnviar} className="relative flex flex-col gap-2 lg:max-w-[620px] lg:flex-row lg:gap-2">
-          <label htmlFor="alerta-email" className="sr-only">
-            Seu e-mail
-          </label>
-          <div className="flex h-[52px] items-center gap-2.5 rounded-[13px] bg-cartao px-4 lg:h-14 lg:flex-grow lg:rounded-[14px]">
-            <Icone nome="email" tamanho={20} className="hidden text-tinta-500 lg:block" />
-            <input
-              id="alerta-email"
-              name="email"
-              type="email"
-              placeholder="seu@email.com"
-              className="min-w-0 flex-grow border-0 bg-transparent text-base text-tinta-900 outline-none placeholder:text-tinta-500 lg:text-[17px]"
-            />
+          <div className="relative flex items-center gap-2.5 text-[13px] font-bold tracking-[0.06em] text-ouro">
+            <Icone nome="alerta" tamanho={18} />
+            ALERTA GRÁTIS
           </div>
-          <button
-            type="submit"
-            className="h-[52px] shrink-0 rounded-[13px] bg-ouro px-6 font-bold text-ouro-texto lg:h-14 lg:rounded-[14px] lg:text-base"
-          >
-            Criar alerta
-          </button>
-        </form>
+          <h2 className="relative font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.03em] lg:text-[44px] lg:leading-[1.05]">
+            Receba o edital no dia em que ele sair.
+          </h2>
 
-        <div className="relative text-[13px] text-faixa-texto lg:flex lg:gap-6 lg:text-sm">
-          <span className="lg:hidden">{GARANTIAS.join(" · ")}</span>
-          {GARANTIAS.map((garantia) => (
-            <span key={garantia} className="hidden items-center gap-1.5 lg:flex">
-              <Icone nome="check" tamanho={16} className="text-ouro" />
-              {garantia}
-            </span>
+          <form onSubmit={aoEnviar} className="relative flex flex-col gap-2 lg:max-w-[620px] lg:flex-row lg:gap-2">
+            <label htmlFor="alerta-email" className="sr-only">
+              Seu e-mail
+            </label>
+            <div className="flex h-[52px] items-center gap-2.5 rounded-[13px] bg-cartao px-4 lg:h-14 lg:flex-grow lg:rounded-[14px]">
+              <Icone nome="email" tamanho={20} className="hidden text-tinta-500 lg:block" />
+              <input
+                id="alerta-email"
+                name="email"
+                type="email"
+                placeholder="seu@email.com"
+                className="min-w-0 flex-grow border-0 bg-transparent text-base text-tinta-900 outline-none placeholder:text-tinta-500 lg:text-[17px]"
+              />
+            </div>
+            <button
+              type="submit"
+              className="h-[52px] shrink-0 rounded-[13px] bg-ouro px-6 font-bold text-ouro-texto lg:h-14 lg:rounded-[14px] lg:text-base"
+            >
+              Criar alerta
+            </button>
+          </form>
+
+          <div className="relative text-[13px] text-faixa-texto lg:flex lg:gap-6 lg:text-sm">
+            <span className="lg:hidden">{GARANTIAS.join(" · ")}</span>
+            {GARANTIAS.map((garantia) => (
+              <span key={garantia} className="hidden items-center gap-1.5 lg:flex">
+                <Icone nome="check" tamanho={16} className="text-ouro" />
+                {garantia}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="hidden w-[340px] shrink-0 grid-cols-3 grid-rows-3 lg:grid">
+          {CELULAS.map((celula, indice) => (
+            <div key={indice} className={`relative overflow-hidden ${celula.fundo}`}>
+              <span
+                aria-hidden="true"
+                className={`absolute rounded-full ${celula.circulo}`}
+                style={{
+                  left: celula.posicao.left,
+                  top: celula.posicao.top,
+                  width: celula.tamanho,
+                  height: celula.tamanho,
+                }}
+              />
+            </div>
           ))}
         </div>
-      </div>
 
-      <div className="hidden w-[340px] shrink-0 grid-cols-3 grid-rows-3 lg:grid">
-        {CELULAS.map((celula, indice) => (
-          <div key={indice} className={`relative overflow-hidden ${celula.fundo}`}>
-            <span
-              aria-hidden="true"
-              className={`absolute rounded-full ${celula.circulo}`}
-              style={{
-                left: celula.posicao.left,
-                top: celula.posicao.top,
-                width: celula.tamanho,
-                height: celula.tamanho,
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {aberto && (
-        <AvisoFlutuante>
-          Em breve: {RECURSOS_EM_BREVE.alertas.titulo} (avisaríamos sobre os {numero(totalAbertos ?? 0)} concursos
-          abertos)
-        </AvisoFlutuante>
-      )}
-    </section>
+        {aberto && (
+          <AvisoFlutuante>
+            Em breve: {RECURSOS_EM_BREVE.alertas.titulo} (avisaríamos sobre os {numero(totalAbertos ?? 0)} concursos
+            abertos)
+          </AvisoFlutuante>
+        )}
+      </section>
+    </div>
   );
 }

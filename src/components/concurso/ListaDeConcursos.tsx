@@ -29,15 +29,15 @@ export function ListaDeConcursos({
   semOrgao?: boolean;
   /**
    * A lista divide a largura com a coluna de filtros de 300px (a busca).
-   * Aí a tabela só entra a partir de 1440px; sem filtros (o órgão), a partir
-   * de `xl`. Abaixo disso as seis colunas não cabem, e o que sobrava era
+   * Aí a tabela só entra a partir de `xl`, onde o `conteudo` tem os 1216px
+   * do artboard; sem filtros (o órgão), a partir de `lg`. Abaixo disso as seis colunas não cabem, e o que sobrava era
    * "a / definir" em duas linhas e o nome do cargo cortado numa letra: ficam
    * os cartões do celular.
    */
   comFiltros?: boolean;
 }) {
-  const tabela = comFiltros ? "min-[1440px]:block" : "xl:block";
-  const cartoes = comFiltros ? "min-[1440px]:hidden" : "xl:hidden";
+  const tabela = comFiltros ? "xl:block" : "lg:block";
+  const cartoes = comFiltros ? "xl:hidden" : "lg:hidden";
   return (
     <>
       <div
