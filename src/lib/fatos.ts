@@ -41,6 +41,20 @@ function faixa(valores: number[], formatar: (n: number) => string): string | nul
   return min === max ? formatar(min) : `${formatar(min)} a ${formatar(max)}`;
 }
 
+/**
+ * A taxa de inscrição como se lê: a do concurso e a de cada cargo, um valor
+ * só quando todas coincidem e "min a max" quando variam; `null` quando o ato
+ * não informou nenhuma. É a mesma para o fato TAXA e para a barra de
+ * inscrição do celular, que antes lia só a do concurso e dizia "Sem taxa"
+ * quando a taxa vinha por cargo.
+ */
+export function taxaDoConcurso(concurso: Pick<ConcursoDetalhe, "taxaInscricao" | "cargos">): string | null {
+  const taxas = [concurso.taxaInscricao, ...concurso.cargos.map((c) => c.taxaInscricao)].filter(
+    (t): t is number => t !== null && t > 0,
+  );
+  return faixa(taxas, moeda);
+}
+
 /** As remunerações informadas dos cargos, positivas, `total` antes de `base`. */
 function remuneracoes(cargos: Cargo[]): number[] {
   return cargos
@@ -54,9 +68,7 @@ export function fatosDoConcurso(concurso: ConcursoDetalhe): Fato[] {
   const jornadas = cargos
     .map((c) => c.jornadaHoras)
     .filter((h): h is number => h !== null && h > 0);
-  const taxas = [concurso.taxaInscricao, ...cargos.map((c) => c.taxaInscricao)].filter(
-    (t): t is number => t !== null && t > 0,
-  );
+  const taxa = taxaDoConcurso(concurso);
   const salario =
     faixa(remuneracoes(cargos), moeda) ??
     (concurso.salarioAte ? `até ${moeda(concurso.salarioAte)}` : null);
@@ -77,8 +89,8 @@ export function fatosDoConcurso(concurso: ConcursoDetalhe): Fato[] {
     salario
       ? { rotulo: "REMUNERAÇÃO", valor: salario, apoio: "por mês", informado: true }
       : { rotulo: "REMUNERAÇÃO", ...NAO_INFORMADA },
-    taxas.length
-      ? { rotulo: "TAXA", valor: faixa(taxas, moeda)!, apoio: "por inscrição", informado: true }
+    taxa
+      ? { rotulo: "TAXA", valor: taxa, apoio: "por inscrição", informado: true }
       : { rotulo: "TAXA", ...NAO_INFORMADA },
     jornadas.length
       ? {

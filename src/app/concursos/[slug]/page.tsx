@@ -14,7 +14,7 @@ import { Faq, temFaq } from "@/components/concurso/Faq";
 import { FatosDoConcurso } from "@/components/concurso/FatosDoConcurso";
 import { LateralDoConcurso } from "@/components/concurso/LateralDoConcurso";
 import { obterDetalhe, tambemAbertos } from "@/lib/concursos";
-import { fatosDoConcurso } from "@/lib/fatos";
+import { fatosDoConcurso, taxaDoConcurso } from "@/lib/fatos";
 import { dataLonga, hojeCivilEmSaoPaulo, hojeEmSaoPaulo, moeda, vagasTexto } from "@/lib/formato";
 import { destinoDaInscricao } from "@/lib/inscricao";
 import { textoDeRodape, tituloComOrgao, tituloSemOrgao } from "@/lib/rotulos";
@@ -289,7 +289,7 @@ export default async function PaginaDoConcurso(
         </div>
       </div>
 
-      <BarraDeInscricao taxa={concurso.taxaInscricao} destino={destino} />
+      <BarraDeInscricao taxa={taxaDoConcurso(concurso)} destino={destino} />
     </div>
   );
 }

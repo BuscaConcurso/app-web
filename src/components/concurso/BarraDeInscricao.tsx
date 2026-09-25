@@ -1,5 +1,4 @@
 import { BotaoLink } from "@/components/ui/Botao";
-import { moedaExata } from "@/lib/formato";
 
 /**
  * A barra de inscrição do celular, fim de `ConcursoMobile.dc.html`.
@@ -23,7 +22,12 @@ export function BarraDeInscricao({
   taxa,
   destino,
 }: {
-  taxa: number | null;
+  /**
+   * A taxa já escrita (`taxaDoConcurso`, a mesma do fato TAXA), ou `null`
+   * quando o ato não a informou: "Não informada", e não "Sem taxa", que
+   * afirmaria uma isenção que ninguém publicou.
+   */
+  taxa: string | null;
   destino: { href: string; host: string; rotulo: string } | null;
 }) {
   if (!destino) return null;
@@ -33,7 +37,7 @@ export function BarraDeInscricao({
       <div className="shrink-0">
         <div className="text-[12px] text-tinta-600">Taxa</div>
         <div className="text-[17px] font-bold text-tinta-900">
-          {taxa ? moedaExata(taxa) : "Sem taxa"}
+          {taxa ?? "Não informada"}
         </div>
       </div>
       <BotaoLink
