@@ -29,6 +29,13 @@ export interface ItemDaNav {
    * (`Concurso.dc.html:47-49`); a gaveta do celular leva todas.
    */
   soNaHome?: boolean;
+  /**
+   * O destino abaixo de `md`, quando o de `href` não existe ali. "Estados"
+   * leva ao mapa da home (`/#estados`), que só aparece a partir de `md`; no
+   * celular leva aos estados do rodapé (`#por-estado`), que estão em toda
+   * página.
+   */
+  hrefCelular?: string;
 }
 
 export const ITENS_DA_NAV = [
@@ -63,6 +70,7 @@ export const ITENS_DA_NAV = [
     rotulo: "Estados",
     icone: "estados",
     href: "/#estados",
+    hrefCelular: "#por-estado",
     ativo: () => false,
     soNaHome: true,
   },

@@ -146,12 +146,12 @@ export async function Rodape({
           </div>
         </div>
 
-        {/* Só no celular: o mapa de `PorEstado` (`components/home/PorEstado.tsx`)
-            some a partir de `md`, e `BlocosSeo` (removido nesta task) levava
-            os links de UF junto. Esta linha é o que sobra deles no rodapé do
-            celular, para o SEO por estado não desaparecer. */}
+        {/* Só abaixo de `md`: o mapa de `PorEstado` (`components/home/PorEstado.tsx`)
+            só aparece a partir dali. Esta linha leva os links de UF para o
+            celular, para o SEO por estado não desaparecer, e é o destino
+            (`#por-estado`) do item "Estados" da gaveta do menu no celular. */}
         {ufs.length > 0 && (
-          <nav aria-label="Por estado" className="min-w-0 md:hidden">
+          <nav id="por-estado" aria-label="Por estado" className="min-w-0 scroll-mt-6 md:hidden">
             <p className={CLASSE_DO_TITULO}>Por estado</p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {ufs.map((uf) => (

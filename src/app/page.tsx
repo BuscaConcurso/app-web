@@ -90,7 +90,7 @@ export default async function Home() {
 
       <PorEstado ufs={ufs} orgaos={orgaos} bancas={bancas} />
 
-      <VemAiEDou previstos={destaques.previstos} atualizados={destaques.atualizados} />
+      <VemAiEDou previstos={destaques.previstos} atualizados={destaques.atualizados} hoje={hoje} />
 
       <ComoFunciona aviso={aviso} />
 

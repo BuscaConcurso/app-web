@@ -35,3 +35,11 @@ describe("abas da nav interna", () => {
     ]);
   });
 });
+
+describe("Estados no celular", () => {
+  it("abaixo de md leva aos estados do rodapé, porque o mapa da home some ali", () => {
+    const estados = ITENS_DA_NAV.find((item) => item.rotulo === "Estados");
+    expect(estados?.href).toBe("/#estados");
+    expect(estados && "hrefCelular" in estados ? estados.hrefCelular : null).toBe("#por-estado");
+  });
+});

@@ -163,7 +163,7 @@ export function PorEstado({
           <div className="rounded-[20px] bg-cartao p-6 shadow-cartao">
             <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-[0.05em] text-tinta-500 uppercase">
               <Icone nome="estatais" tamanho={16} />
-              Órgãos com mais vagas abertas
+              Órgãos com mais concursos abertos
             </div>
             {orgaos.slice(0, 6).map((link) => (
               <LinhaDeRanking key={link.href} link={link} classeDoNumero="bg-verde-fundo text-verde-texto" />

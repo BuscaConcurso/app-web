@@ -15,25 +15,37 @@ function siglaEEdital(concurso: ConcursoResumo): string {
   return concurso.orgao.sigla ? `${concurso.orgao.sigla} · ${edital}` : edital;
 }
 
+/** O título de cada linha leva à página do concurso, como na home anterior. */
+function TituloDoConcurso({ concurso }: { concurso: ConcursoResumo }) {
+  return (
+    <Link
+      href={`/concursos/${concurso.slug}`}
+      className="block truncate text-[15px] font-bold text-tinta-900 hover:underline hover:underline-offset-4"
+    >
+      {siglaEEdital(concurso)}
+    </Link>
+  );
+}
+
 function Linha({
   numero: valorGrande,
   rotulo,
-  titulo,
+  concurso,
   apoio,
 }: {
   numero: string;
   rotulo: string | null;
-  titulo: string;
+  concurso: ConcursoResumo;
   apoio: string;
 }) {
   return (
     <Fragment>
-      <div className="w-[92px] shrink-0">
-        <div className="font-titulo text-[28px] leading-none font-bold">{valorGrande}</div>
+      <div className="w-[72px] shrink-0 md:w-[92px]">
+        <div className="font-titulo text-[22px] leading-none font-bold md:text-[28px]">{valorGrande}</div>
         {rotulo && <div className="text-xs text-tinta-500">{rotulo}</div>}
       </div>
       <div className="min-w-0 flex-grow">
-        <div className="truncate text-[15px] font-bold">{titulo}</div>
+        <TituloDoConcurso concurso={concurso} />
         <div className="truncate text-[13px] text-tinta-600">{apoio}</div>
       </div>
     </Fragment>
@@ -64,25 +76,27 @@ function contextoDoAto(concurso: ConcursoResumo): string {
  * "Previstos" e "Saiu no DOU" lado a lado (`Main.dc.html:336-357`): quem está
  * a caminho, sem edital ainda, e o que o Diário publicou por último.
  *
- * Some por completo no celular: nenhuma das duas listas está em
- * `Mobile.dc.html`, e os quatro previstos e as seis atualizações continuam
- * alcançáveis pela busca (`?situacao=previstos`) e pelas páginas de cada
- * concurso.
+ * Lado a lado a partir de `lg`; abaixo disso as duas listas empilham, numa
+ * versão mais compacta no celular. `Mobile.dc.html` não tem estes blocos, mas
+ * sem eles o celular perdia os previstos e o que acabou de sair no Diário.
  */
 export function VemAiEDou({
   previstos,
   atualizados,
+  hoje,
 }: {
   previstos: ConcursoResumo[];
   atualizados: ConcursoResumo[];
+  /** O dia civil de São Paulo, para a situação de cada ato. */
+  hoje: Date;
 }) {
   return (
-    <section className="conteudo mt-24 hidden gap-4 lg:grid lg:grid-cols-2">
-      <div className="flex flex-col gap-4 rounded-[20px] bg-cartao p-7 shadow-cartao">
+    <section className="conteudo mt-12 grid gap-4 md:mt-24 lg:grid-cols-2">
+      <div className="flex min-w-0 flex-col gap-4 rounded-[20px] bg-cartao p-5 shadow-cartao md:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <Rotulo icone="previsto" tom="previsto">PREVISTOS</Rotulo>
-            <h2 className="mt-2 font-titulo text-[30px] leading-[1.1] font-bold tracking-[-0.025em]">
+            <h2 className="mt-2 font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.025em] md:text-[30px]">
               Vem aí
             </h2>
             <p className="mt-1 text-sm text-tinta-600">
@@ -101,23 +115,26 @@ export function VemAiEDou({
           {previstos.map((concurso) => {
             const vagas = quantidade(concurso.vagas);
             return (
-              <div key={concurso.slug} className="flex items-center gap-4 border-t border-linha-fraca py-3.5">
+              <div key={concurso.slug} className="flex items-center gap-3 border-t border-linha-fraca py-3.5 md:gap-4">
                 <Linha
                   numero={vagas === null ? "A definir" : numero(vagas)}
                   rotulo={vagas === null ? null : concurso.cadastroReserva ? "vagas + CR" : "vagas"}
-                  titulo={siglaEEdital(concurso)}
+                  concurso={concurso}
                   apoio={
                     concurso.escolaridades[0]
                       ? `${concurso.orgao.nome} · ${ROTULO_ESCOLARIDADE[concurso.escolaridades[0]].toLowerCase()}`
                       : concurso.orgao.nome
                   }
                 />
+                {/* No celular só o sino (com o nome no `aria-label`), para o
+                    título caber ao lado do número. */}
                 <BotaoEmBreve
                   recurso="alertas"
-                  className="flex h-10 shrink-0 items-center gap-1.5 rounded-controle bg-ouro-fundo px-3.5 text-sm font-semibold text-ouro-sinal-texto"
+                  aria-label="Avisar quando abrir"
+                  className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-controle bg-ouro-fundo px-3 text-sm font-semibold text-ouro-sinal-texto sm:px-3.5"
                 >
                   <Icone nome="alerta" tamanho={16} />
-                  Avisar
+                  <span className="hidden sm:inline">Avisar</span>
                 </BotaoEmBreve>
               </div>
             );
@@ -125,11 +142,11 @@ export function VemAiEDou({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-[20px] bg-cartao p-7 shadow-cartao">
+      <div className="flex min-w-0 flex-col gap-4 rounded-[20px] bg-cartao p-5 shadow-cartao md:p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <Rotulo icone="diario" tom="anil">DIÁRIO OFICIAL DA UNIÃO</Rotulo>
-            <h2 className="mt-2 font-titulo text-[30px] leading-[1.1] font-bold tracking-[-0.025em]">
+            <h2 className="mt-2 font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.025em] md:text-[30px]">
               Saiu no DOU
             </h2>
             <p className="mt-1 text-sm text-tinta-600">
@@ -153,9 +170,9 @@ export function VemAiEDou({
                   <Icone nome={estilo.icone} tamanho={18} />
                 </span>
                 <div className="min-w-0 flex-grow">
-                  <div className="truncate text-[15px] font-bold">{siglaEEdital(concurso)}</div>
+                  <TituloDoConcurso concurso={concurso} />
                   <div className="truncate text-[13px] text-tinta-600">
-                    {rotuloDeSituacao(concurso)} · {contextoDoAto(concurso)}
+                    {rotuloDeSituacao(concurso, hoje)} · {contextoDoAto(concurso)}
                   </div>
                 </div>
                 {concurso.ultimoAto?.data && (

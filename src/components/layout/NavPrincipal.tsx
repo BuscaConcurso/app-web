@@ -103,16 +103,33 @@ export function GavetaDeNavegacao({ className }: { className?: string }) {
       className={`lg:hidden ${className ?? ""}`}
     >
       <div className="flex flex-col gap-1">
-        {ITENS_DA_NAV.map((item) => (
-          <Link
-            key={item.rotulo}
-            href={item.href}
-            className="flex h-11 items-center gap-3 rounded-controle px-3 text-[15px] font-medium text-tinta-900 hover:bg-rebaixada"
-          >
-            <Icone nome={item.icone} tamanho={18} />
-            {item.rotulo}
-          </Link>
-        ))}
+        {ITENS_DA_NAV.flatMap((item) => {
+          const classe =
+            "h-11 items-center gap-3 rounded-controle px-3 text-[15px] font-medium text-tinta-900 hover:bg-rebaixada";
+          const conteudo = (
+            <>
+              <Icone nome={item.icone} tamanho={18} />
+              {item.rotulo}
+            </>
+          );
+          // Com `hrefCelular`, dois links e só um visível por largura: o
+          // destino de `href` não existe abaixo de `md`.
+          if (!("hrefCelular" in item) || !item.hrefCelular) {
+            return [
+              <Link key={item.rotulo} href={item.href} className={`flex ${classe}`}>
+                {conteudo}
+              </Link>,
+            ];
+          }
+          return [
+            <Link key={`${item.rotulo}-celular`} href={item.hrefCelular} className={`flex md:hidden ${classe}`}>
+              {conteudo}
+            </Link>,
+            <Link key={item.rotulo} href={item.href} className={`hidden md:flex ${classe}`}>
+              {conteudo}
+            </Link>,
+          ];
+        })}
       </div>
 
       <div className="mt-4 border-t border-linha pt-4">
