@@ -4,12 +4,25 @@ import { Icone } from "@/components/ui/Icone";
 import type { ConcursoResumo, Uf } from "@/lib/dominio";
 import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
 import { estadoDoCartao } from "@/lib/rotulos";
+import { tomDoConcurso } from "@/lib/situacao";
 import { orgaoECargo } from "./LinhaConcurso";
 
-/** A etiqueta de prazo do cartão do celular: `Mobile.dc.html:88,97,105`. */
-function chipDoPrazoMovel(iso: string, hoje: Date): { texto: string; classe: string } {
+/**
+ * A etiqueta de prazo do cartão do celular: `Mobile.dc.html:88,97,105`.
+ * Encerrado (pelo tom ou pela data já passada) não conta dias: ver
+ * `chipDoPrazo`.
+ */
+export function chipDoPrazoMovel(
+  iso: string,
+  hoje: Date,
+  encerrado = false,
+): { texto: string; classe: string } {
   const dias = diasAte(iso, hoje);
-  if (dias <= 0) return { texto: "encerra hoje", classe: "bg-urucum text-white" };
+  // A data só entra quando já passou: um homologado com a data de inscrição
+  // no futuro não "encerrou" nela.
+  if (dias < 0) return { texto: `encerrou ${dataCurta(iso)}`, classe: "bg-rebaixada text-tinta-600" };
+  if (encerrado) return { texto: "encerrado", classe: "bg-rebaixada text-tinta-600" };
+  if (dias === 0) return { texto: "encerra hoje", classe: "bg-urucum text-white" };
   if (dias === 1) return { texto: "encerra amanhã", classe: "bg-urucum-fundo text-urucum-texto" };
   return { texto: `até ${dataCurta(iso)}`, classe: "bg-ouro-fundo text-ouro-sinal-texto" };
 }
@@ -67,7 +80,9 @@ export function CartaoConcurso({
 }) {
   const { titulo, subtitulo } = orgaoECargo(concurso, semOrgao);
   const segunda = segundaEtiqueta(concurso, ufDoFiltro);
-  const prazo = concurso.inscricoesAte ? chipDoPrazoMovel(concurso.inscricoesAte, hoje) : null;
+  const prazo = concurso.inscricoesAte
+    ? chipDoPrazoMovel(concurso.inscricoesAte, hoje, tomDoConcurso(concurso, hoje) === "encerrado")
+    : null;
 
   return (
     <Link

@@ -120,8 +120,12 @@ export function Cronograma({
             {"marcaDeHoje" in linha ? (
               <MarcaDeHoje eventos={ordenados} fases={fases} hoje={hoje} ultima={ultima} />
             ) : (
-              <div className={`flex flex-1 flex-wrap items-start justify-between gap-4 ${ultima ? "" : "pb-6"}`}>
-                <div className="min-w-0">
+              // A partir de `sm` a data fica sempre à direita
+              // (`Concurso.dc.html:113`): com `flex-wrap` e o texto sem
+              // `flex-1`, uma linha de procedência longa empurrava a data
+              // para baixo só em alguns eventos.
+              <div className={`flex min-w-0 flex-1 flex-wrap items-start justify-between gap-4 sm:flex-nowrap ${ultima ? "" : "pb-6"}`}>
+                <div className="min-w-0 sm:flex-1">
                   <p
                     className={[
                       "text-[16px] font-bold",

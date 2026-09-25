@@ -47,6 +47,14 @@ describe("prazoPorExtenso", () => {
     expect(prazoPorExtenso(base, new Date(2026, 8, 20))?.titulo).toBe("Encerra em 5 dias");
   });
 
+  it("só conta os dias de quem está com inscrição aberta", () => {
+    expect(prazoPorExtenso({ ...base, status: "previsto" }, HOJE)).toBeNull();
+    expect(prazoPorExtenso({ ...base, status: "homologado" }, HOJE)).toBeNull();
+    expect(prazoPorExtenso({ ...base, status: "inscricoes_abertas" }, HOJE)?.titulo).toBe(
+      "Encerra amanhã",
+    );
+  });
+
   it("sem hora não inventa 23h59", () => {
     expect(prazoPorExtenso({ ...base, cronograma: [] }, HOJE)?.detalhe).toBe("sexta");
   });

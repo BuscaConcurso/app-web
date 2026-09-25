@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoDetalhe } from "./dominio";
 import {
+  noEstado,
   acervoIncompletoEmPartes,
   avisoDeFiltroSemDado,
   cargosDoCartao,
@@ -887,5 +888,15 @@ describe("textoDoAto", () => {
     expect(
       textoDoAto({ data: "2026-09-11", titulo: null, primeiro: false }, "Concurso"),
     ).toBe("11/09");
+  });
+});
+
+describe("noEstado", () => {
+  it("usa a preposição que cada estado pede", () => {
+    expect(noEstado("RJ")).toBe("no Rio de Janeiro");
+    expect(noEstado("BA")).toBe("na Bahia");
+    expect(noEstado("MG")).toBe("em Minas Gerais");
+    expect(noEstado("SP")).toBe("em São Paulo");
+    expect(noEstado("PB")).toBe("na Paraíba");
   });
 });

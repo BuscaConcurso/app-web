@@ -11,7 +11,6 @@ import {
   periodoDaInscricao,
   prazoPorExtenso,
 } from "@/lib/inscricao";
-import { NOME_UF } from "@/lib/rotulos";
 import { tomDoConcurso } from "@/lib/situacao";
 import { PassosDaInscricao } from "./PassosDaInscricao";
 import { TambemAbertos } from "./TambemAbertos";
@@ -52,7 +51,10 @@ export function LateralDoConcurso({
         <CabecalhoDoPrazo concurso={concurso} tom={tom} prazo={prazo} hoje={hoje} />
 
         <div className="flex flex-col gap-[18px] px-6 py-[22px]">
-          {periodo && concurso.inscricoesDe && concurso.inscricoesAte && (
+          {/* A barra do período só com a inscrição aberta (`prazo` não nulo):
+              num homologado com a data de fim no futuro ela dizia "11 de 29
+              dias do período já passaram" embaixo de "Inscrições encerradas". */}
+          {prazo && periodo && concurso.inscricoesDe && concurso.inscricoesAte && (
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-[13px] text-tinta-600">
                 <span>Abriu {dataCurta(concurso.inscricoesDe)}</span>
@@ -139,7 +141,7 @@ export function LateralDoConcurso({
       </div>
 
       {uf && (
-        <TambemAbertos nomeUf={NOME_UF[uf]} concursos={tambem} />
+        <TambemAbertos uf={uf} concursos={tambem} />
       )}
 
       <BlocoAlerta

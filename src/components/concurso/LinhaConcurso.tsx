@@ -5,6 +5,7 @@ import { Icone } from "@/components/ui/Icone";
 import type { ConcursoResumo } from "@/lib/dominio";
 import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
 import { NOME_UF, cargosDoCartao, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos";
+import { tomDoConcurso } from "@/lib/situacao";
 
 /**
  * As proporções das colunas de `Main.dc.html:206`
@@ -75,10 +76,22 @@ export function localDoConcurso(concurso: ConcursoResumo): {
     : { icone: "globo", texto: "Nacional" };
 }
 
-/** O chip curto da coluna "Inscrições até" do desktop: `Main.dc.html:215-260`. */
-export function chipDoPrazo(iso: string, hoje: Date): { texto: string; classe: string } {
+/**
+ * O chip curto da coluna "Inscrições até" do desktop: `Main.dc.html:215-260`.
+ *
+ * `encerrado` (o tom do concurso, `tomDoConcurso`) ganha de qualquer conta de
+ * dias: um concurso homologado com a data de inscrição ainda no futuro, ou
+ * um encerrado com a data no passado, dizia "hoje" em vermelho ou "4 dias"
+ * na aba de encerrados.
+ */
+export function chipDoPrazo(
+  iso: string,
+  hoje: Date,
+  encerrado = false,
+): { texto: string; classe: string } {
   const dias = diasAte(iso, hoje);
-  if (dias <= 0) return { texto: "hoje", classe: "bg-urucum text-white" };
+  if (encerrado || dias < 0) return { texto: "encerrado", classe: "bg-rebaixada text-tinta-600" };
+  if (dias === 0) return { texto: "hoje", classe: "bg-urucum text-white" };
   if (dias === 1) return { texto: "amanhã", classe: "bg-urucum-fundo text-urucum-texto" };
   return { texto: `${dias} dias`, classe: "bg-ouro-fundo text-ouro-sinal-texto" };
 }
@@ -108,7 +121,9 @@ export function LinhaConcurso({
   const { titulo, subtitulo } = orgaoECargo(concurso, semOrgao);
   const vagas = quantidade(concurso.vagas);
   const { icone: iconeLocal, texto: textoLocal } = localDoConcurso(concurso);
-  const prazo = concurso.inscricoesAte ? chipDoPrazo(concurso.inscricoesAte, hoje) : null;
+  const prazo = concurso.inscricoesAte
+    ? chipDoPrazo(concurso.inscricoesAte, hoje, tomDoConcurso(concurso, hoje) === "encerrado")
+    : null;
 
   const Raiz = as;
   const Celula = as === "tr" ? "td" : "div";

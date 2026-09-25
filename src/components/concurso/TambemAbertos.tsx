@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Selo } from "@/components/ui/Cartao";
 import { Icone } from "@/components/ui/Icone";
-import type { ConcursoResumo } from "@/lib/dominio";
+import type { ConcursoResumo, Uf } from "@/lib/dominio";
 import { dataCurta, moeda, numero } from "@/lib/formato";
-import { tituloSemOrgao } from "@/lib/rotulos";
+import { noEstado, tituloSemOrgao } from "@/lib/rotulos";
 
 /** "R$ 13.753", "Banca IADES" ou "30 vagas"/"Vagas a definir", nessa ordem de prioridade. */
 function detalheDoConcurso(concurso: ConcursoResumo): string {
@@ -14,16 +14,16 @@ function detalheDoConcurso(concurso: ConcursoResumo): string {
 }
 
 /**
- * "TAMBÉM ABERTOS NO {UF}" da lateral do concurso (`Concurso.dc.html:241-246`):
+ * "TAMBÉM ABERTOS NO {UF}" (com a preposição do estado, `noEstado`) da lateral do concurso (`Concurso.dc.html:241-246`):
  * até três outros concursos com inscrição aberta na mesma UF
  * (`tambemAbertos`, `lib/concursos.ts`). Some quando a lista vier vazia: um
  * título sem linha nenhuma embaixo afirmaria uma busca que não achou nada.
  */
 export function TambemAbertos({
-  nomeUf,
+  uf,
   concursos,
 }: {
-  nomeUf: string;
+  uf: Uf;
   concursos: ConcursoResumo[];
 }) {
   if (concursos.length === 0) return null;
@@ -32,7 +32,7 @@ export function TambemAbertos({
     <div className="flex flex-col gap-1 rounded-[22px] bg-cartao p-6 shadow-cartao">
       <div className="mb-2 flex items-center gap-2 text-[12px] font-bold tracking-[0.05em] text-tinta-500">
         <Icone nome="local" tamanho={16} />
-        TAMBÉM ABERTOS NO {nomeUf.toUpperCase()}
+        TAMBÉM ABERTOS {noEstado(uf).toUpperCase()}
       </div>
       {concursos.map((concurso, indice) => (
         <Link

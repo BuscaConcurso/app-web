@@ -233,12 +233,12 @@ function GavetaDoAto({ origem, texto }: { origem: Origem; texto: string }) {
     <Gaveta
       className="self-start"
       gatilho={GATILHO_LER_NA_INTEGRA}
-      rotulo={
-        <span className="inline-flex items-center gap-1.5">
-          Ler o ato na íntegra
-          <Icone nome="seta" tamanho={15} />
-        </span>
-      }
+      /* Texto puro, com a seta como caractere: o rótulo cruza a fronteira
+         servidor/cliente e a `Gaveta` o desenha duas vezes (o gatilho e o
+         lugar que ele guarda). Com um `<span>` de texto e `<Icone>` dentro,
+         o React acusava "each child in a list should have a unique key" no
+         console, medido com dois atos na mesma página; com a string, não. */
+      rotulo="Ler o ato na íntegra →"
       titulo="O ato publicado"
       ancoras={faixas.map((faixa) => faixa.ancora as string)}
     >
@@ -267,7 +267,10 @@ function GavetaDoAto({ origem, texto }: { origem: Origem; texto: string }) {
                         apontando para cá. O `scroll-mt` é a barra de topo
                         `fixed` da gaveta, medida em 44px, que sem folga
                         cobriria justamente o começo do grifo. */}
-                    {pedaco.ancoras?.map((ancora) => (
+                    {/* Sem repetição: duas perguntas iguais no FAQ davam a
+                        mesma âncora duas vezes, `id` duplicado no documento
+                        e chave duplicada no React. */}
+                    {[...new Set(pedaco.ancoras ?? [])].map((ancora) => (
                       <span key={ancora} id={ancora} className="scroll-mt-16" />
                     ))}
                     {pedaco.texto}

@@ -92,6 +92,23 @@ export const NOME_UF: Record<Uf, string> = {
   TO: "Tocantins",
 };
 
+/**
+ * A preposição que o nome de cada estado pede: "no Rio de Janeiro", "na
+ * Bahia", "em Minas Gerais". "Também abertos no Minas Gerais" era o que a
+ * lateral do concurso dizia com "no" fixo.
+ */
+const PREPOSICAO_UF: Record<Uf, "no" | "na" | "em"> = {
+  AC: "no", AL: "em", AP: "no", AM: "no", BA: "na", CE: "no", DF: "no",
+  ES: "no", GO: "em", MA: "no", MT: "em", MS: "em", MG: "em", PA: "no",
+  PB: "na", PR: "no", PE: "em", PI: "no", RJ: "no", RN: "no", RS: "no",
+  RO: "em", RR: "em", SC: "em", SP: "em", SE: "em", TO: "no",
+};
+
+/** "no Rio de Janeiro", "na Bahia", "em Minas Gerais". */
+export function noEstado(uf: Uf): string {
+  return `${PREPOSICAO_UF[uf]} ${NOME_UF[uf]}`;
+}
+
 /** "Estadual · Judiciário · São Paulo, SP", a linha de contexto do cartão. */
 export function linhaDeContexto(orgao: {
   esfera: Esfera | null;
