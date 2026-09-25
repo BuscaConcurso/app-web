@@ -18,16 +18,37 @@
  *   NEXT_PUBLIC_BC_API_URL=https://api.buscaconcurso.com.br pnpm build
  *   (mesmas variáveis) pnpm start
  *   node scripts/verificar-navegador.mjs http://localhost:3000
+ *
+ * **`next.config.ts` tem `output: "standalone"`, e `pnpm start` (= `next
+ * start`) não suporta essa configuração** (aviso do próprio Next.js: "next
+ * start does not work with output: standalone configuration. Use node
+ * .next/standalone/server.js instead"). Depois de alguns rebuilds seguidos
+ * sem limpar `.next`, o HTML servido por `next start` passou a referenciar
+ * um hash de CSS que não existia mais em `.next/static/chunks/`: o `<link>`
+ * dava 404, nenhuma classe Tailwind daquele chunk se aplicava, e isso
+ * quebrou silenciosamente `.hidden` (uma seção "escondida" abaixo de um
+ * breakpoint ficava visível e estourava a largura da página) e o clique num
+ * link dentro de um `<details>` que devia estar oculto. Para não repetir o
+ * falso positivo, use sempre o servidor standalone:
+ *   rm -rf .next
+ *   (mesmas variáveis) pnpm build
+ *   cp -r .next/static .next/standalone/.next/static
+ *   cp -r public .next/standalone/public
+ *   (mesmas variáveis) PORT=3100 HOSTNAME=0.0.0.0 node .next/standalone/server.js
+ *   node scripts/verificar-navegador.mjs http://localhost:3100
  */
 import { spawn } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const BASE = (process.argv[2] ?? "http://localhost:3000").replace(/\/+$/, "");
 const CHROME = process.env.CHROME ?? "/usr/bin/google-chrome";
 const PORTA = 9333;
-const LARGURAS = [360, 375, 390];
+const LARGURAS = [360, 375, 390, 1440];
+const PASTA_SCRIPT = dirname(fileURLToPath(import.meta.url));
+const PASTA_SCREENSHOTS = join(PASTA_SCRIPT, "..", "docs/superpowers/verificacao/2026-09-25-redesign");
 /** Caminho garantido sem rota: prova a 404 sem depender de nenhum dado do acervo. */
 const CAMINHO_404 = "/pagina-que-nunca-existe-0000";
 
@@ -215,6 +236,103 @@ async function verificarTransbordo(cdp, paginas) {
           ? `${medida.scroll} > ${medida.cliente}; ${medida.culpados.join(" | ")}`
           : "",
       );
+    }
+  }
+}
+
+/** Screenshot de página inteira, além do que a viewport mostra (`captureBeyondViewport`). */
+async function tirarScreenshot(cdp, caminhoArquivo) {
+  const metrica = await cdp.enviar("Page.getLayoutMetrics");
+  const tamanho = metrica.cssContentSize ?? metrica.contentSize;
+  const resultado = await cdp.enviar("Page.captureScreenshot", {
+    format: "png",
+    captureBeyondViewport: true,
+    clip: { x: 0, y: 0, width: tamanho.width, height: tamanho.height, scale: 1 },
+  });
+  writeFileSync(caminhoArquivo, Buffer.from(resultado.data, "base64"));
+}
+
+/**
+ * Task 16: por página fixa (mais o primeiro concurso aberto, lido de
+ * `/concursos?situacao=abertas`) e largura (`LARGURAS`, agora até 1440px),
+ * sem `console.error` nem exceção não tratada (`pageerror`). A 1440px a nav
+ * `nav[aria-label="Principal"]` fica visível (na página do concurso ela é
+ * `hidden` abaixo de `lg`) e, na home, o mapa por estado tem as 27 UFs
+ * (`#estados [data-uf]`). No concurso a 390px, `[role="tablist"]` existe e
+ * clicar a segunda aba ("Áreas") mostra o painel dela. Screenshot de página
+ * inteira da home e do concurso a 390 e 1440px.
+ */
+async function verificarTask16(cdp, concurso) {
+  const paginas = ["/", "/concursos", "/busca/professor", "/entrar", "/em-breve/salvos", concurso].filter(
+    Boolean,
+  );
+
+  for (const px of LARGURAS) {
+    await largura(cdp, px);
+    for (const caminho of paginas) {
+      const erros = [];
+      const pararConsole = cdp.sempre("Runtime.consoleAPICalled", (parametros) => {
+        if (parametros.type === "error") {
+          erros.push(parametros.args.map((arg) => arg.value ?? arg.description ?? "?").join(" "));
+        }
+      });
+      const pararExcecao = cdp.sempre("Runtime.exceptionThrown", (parametros) => {
+        erros.push(parametros.exceptionDetails.exception?.description ?? parametros.exceptionDetails.text);
+      });
+      await navegar(cdp, caminho);
+      const medida = await avaliar(cdp, `(${medirTransbordo})()`);
+      pararConsole();
+      pararExcecao();
+
+      conferir(
+        medida.scroll <= medida.cliente,
+        `sem rolagem lateral em ${caminho} a ${px}px`,
+        medida.scroll > medida.cliente
+          ? `${medida.scroll} > ${medida.cliente}; ${medida.culpados.join(" | ")}`
+          : "",
+      );
+      conferir(
+        erros.length === 0,
+        `sem console.error nem pageerror em ${caminho} a ${px}px`,
+        erros.join(" | "),
+      );
+
+      if (px === 1440) {
+        conferir(
+          await avaliar(
+            cdp,
+            `(() => { const el = document.querySelector('nav[aria-label="Principal"]'); return !!el && el.offsetParent !== null; })()`,
+          ),
+          `a nav principal fica visível em ${caminho} a 1440px`,
+        );
+        if (caminho === "/") {
+          conferir(
+            (await avaliar(cdp, `document.querySelectorAll('#estados [data-uf]').length`)) === 27,
+            "o mapa por estado tem as 27 UFs a 1440px",
+          );
+        }
+      }
+
+      if (caminho === concurso && px === 390) {
+        const existeTablist = await avaliar(cdp, `!!document.querySelector('[role="tablist"]')`);
+        conferir(existeTablist, "o concurso tem [role=\"tablist\"] a 390px");
+        if (existeTablist) {
+          await clicar(cdp, '[role="tablist"] button[role="tab"]:nth-of-type(2)');
+          conferir(
+            await ate(
+              cdp,
+              `(() => { const p = document.querySelectorAll('[role="tabpanel"]')[1]; return !!p && p.offsetParent !== null; })()`,
+            ),
+            "clicar a segunda aba do concurso mostra o painel de áreas",
+          );
+        }
+      }
+
+      if ((caminho === "/" || caminho === concurso) && (px === 390 || px === 1440)) {
+        mkdirSync(PASTA_SCREENSHOTS, { recursive: true });
+        const nome = caminho === "/" ? "home" : "concurso";
+        await tirarScreenshot(cdp, join(PASTA_SCREENSHOTS, `${nome}-${px}.png`));
+      }
     }
   }
 }
@@ -462,6 +580,13 @@ async function principal() {
     await verificarCadastro(cdp);
     await verificar404(cdp);
     if (termo) await verificarFiltroSemRsc(cdp, termo);
+
+    await navegar(cdp, "/concursos?situacao=abertas");
+    const concursoAberto = await avaliar(
+      cdp,
+      `document.querySelector('a[href^="/concursos/"]')?.getAttribute("href") ?? null`,
+    );
+    await verificarTask16(cdp, concursoAberto);
 
     await navegar(cdp, "/concursos?q=Analista%20Judici%C3%A1rio");
     conferir(
