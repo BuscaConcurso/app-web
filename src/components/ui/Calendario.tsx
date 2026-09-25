@@ -50,6 +50,40 @@ const ESTILO: Record<
 };
 
 /**
+ * A mesma régua de `ESTILO`, para os blocos de prazo maiores da página do
+ * concurso (a lateral, `LateralDoConcurso`, e o cartão de urgência do
+ * celular, `CabecalhoDoConcurso`): o fundo do cartão, a cor do texto e as
+ * duas pontas da barra de progresso, tudo pelo mesmo `TomDoCalendario` da
+ * folhinha ao lado.
+ */
+export const ESTILO_DO_PRAZO: Record<
+  TomDoCalendario,
+  { fundo: string; texto: string; trilha: string; barra: string; icone: string }
+> = {
+  urucum: {
+    fundo: "bg-urucum-fundo",
+    texto: "text-urucum-texto",
+    trilha: "bg-urucum/18",
+    barra: "bg-urucum",
+    icone: "bg-urucum text-white",
+  },
+  ouro: {
+    fundo: "bg-ouro-fundo",
+    texto: "text-ouro-sinal-texto",
+    trilha: "bg-ouro/25",
+    barra: "bg-ouro-faixa",
+    icone: "bg-ouro-faixa text-white",
+  },
+  verde: {
+    fundo: "bg-verde-fundo",
+    texto: "text-verde-texto",
+    trilha: "bg-acao/18",
+    barra: "bg-acao",
+    icone: "bg-acao text-acao-texto",
+  },
+};
+
+/**
  * A folhinha de calendário do cartão de concurso: mês abreviado numa faixa
  * colorida, dia grande embaixo. Decorativo, então `aria-hidden`; a informação
  * de prazo já é dita em texto ao lado (`prazoRelativo`, `dataLonga`).

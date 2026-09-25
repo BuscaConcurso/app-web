@@ -2,10 +2,12 @@ import Link from "next/link";
 import { AcoesDoConcurso } from "@/components/concurso/AcoesDoConcurso";
 import { Azulejos, CANTO_DO_CABECALHO } from "@/components/marca/Azulejos";
 import { Selo } from "@/components/ui/Cartao";
+import { ESTILO_DO_PRAZO, tomDoCalendario } from "@/components/ui/Calendario";
 import { Etiqueta } from "@/components/ui/Etiqueta";
+import { Icone } from "@/components/ui/Icone";
 import type { ConcursoDetalhe } from "@/lib/dominio";
 import { icsDoPrazo } from "@/lib/agenda";
-import { prazoPorExtenso } from "@/lib/inscricao";
+import { periodoDaInscricao, prazoPorExtenso } from "@/lib/inscricao";
 import { NOME_UF, ROTULO_ESFERA, ROTULO_STATUS, tituloSemOrgao } from "@/lib/rotulos";
 import { urlAbsoluta } from "@/lib/site";
 import { rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
@@ -38,6 +40,10 @@ export function CabecalhoDoConcurso({
   // sozinho, sem o sujeito "Inscrições" na frase. A composição é só desta
   // pílula, por isso não mexe em `prazoPorExtenso`.
   const prazo = prazoPorExtenso(concurso, hoje);
+  // O cartão de urgência do celular (`ConcursoMobile.dc.html:38-41`), só
+  // quando há prazo de verdade: sem `inscricoesAte` não há dias para contar,
+  // e a pílula de situação logo acima já diz o status nesse caso.
+  const periodo = periodoDaInscricao(concurso, hoje);
   const prazoNoPlural = prazo?.titulo.toLowerCase().replace(/^encerra\b/, "encerram");
   const situacao =
     tom === "urgente" && prazoNoPlural
@@ -104,8 +110,67 @@ export function CabecalhoDoConcurso({
           <div className="mt-2">
             <AcoesDoConcurso slug={concurso.slug} titulo={titulo} ics={ics} />
           </div>
+
+          {prazo && concurso.inscricoesAte && (
+            <CartaoDeUrgencia
+              prazo={prazo}
+              inscricoesAte={concurso.inscricoesAte}
+              periodo={periodo}
+              hoje={hoje}
+            />
+          )}
         </div>
       </div>
     </header>
+  );
+}
+
+/**
+ * O bloco `#FBE7E0` de `ConcursoMobile.dc.html:38-41`: o ícone de prazo numa
+ * caixa colorida, o prazo por extenso e a barra de progresso, só abaixo de
+ * `lg`. Acima disso a mesma informação já está na lateral
+ * (`LateralDoConcurso`), maior e com o botão de inscrição ao lado.
+ */
+function CartaoDeUrgencia({
+  prazo,
+  inscricoesAte,
+  periodo,
+  hoje,
+}: {
+  prazo: NonNullable<ReturnType<typeof prazoPorExtenso>>;
+  inscricoesAte: string;
+  periodo: ReturnType<typeof periodoDaInscricao>;
+  hoje: Date;
+}) {
+  const estilo = ESTILO_DO_PRAZO[tomDoCalendario(inscricoesAte, hoje)];
+
+  return (
+    <div className={`flex flex-col gap-3 rounded-[18px] p-4 lg:hidden ${estilo.fundo}`}>
+      <div className="flex items-center gap-3">
+        <span className={`flex size-[42px] shrink-0 items-center justify-center rounded-[12px] ${estilo.icone}`}>
+          <Icone nome="prazo" tamanho={22} />
+        </span>
+        <div>
+          <div className={`font-titulo text-[22px] leading-none font-bold tracking-[-0.02em] ${estilo.texto}`}>
+            {prazo.titulo}
+          </div>
+          <div className={`mt-1 text-[13px] ${estilo.texto}`}>{prazo.detalhe}</div>
+        </div>
+      </div>
+      {periodo && (
+        <div
+          role="progressbar"
+          aria-valuenow={periodo.passados}
+          aria-valuemin={0}
+          aria-valuemax={periodo.total}
+          className={`h-1.5 overflow-hidden rounded-full ${estilo.trilha}`}
+        >
+          <span
+            className={`block h-full rounded-full ${estilo.barra}`}
+            style={{ width: `${periodo.fracao * 100}%` }}
+          />
+        </div>
+      )}
+    </div>
   );
 }

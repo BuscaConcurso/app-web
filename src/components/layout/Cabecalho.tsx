@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useCompartilhar } from "@/components/concurso/useCompartilhar";
 import { BarraBuscaDoCabecalho } from "@/components/busca/BarraBusca";
 import { Logo } from "@/components/marca/Logo";
-import { BotaoEmBreve } from "@/components/ui/EmBreve";
+import { BotaoEmBreve, AvisoFlutuante } from "@/components/ui/EmBreve";
 import { Icone } from "@/components/ui/Icone";
 import type { DimensoesDoAcervo } from "@/lib/concursos";
+import { urlAbsoluta } from "@/lib/site";
 import { MenuConta } from "./MenuConta";
 import { BarraUtilitaria } from "./BarraUtilitaria";
 import { GavetaDeNavegacao, NavPrincipal } from "./NavPrincipal";
@@ -47,6 +52,17 @@ import { SoForaDaHome } from "./SoForaDaHome";
  * (`useCorteDaNav`), porque ele muda com a página, e não só com a largura da
  * tela. Fechar a gaveta ao navegar já é comportamento de `Gaveta`
  * (`useRevelador`, `Revelador.tsx`), sem nada extra a escrever aqui.
+ *
+ * **O cabeçalho do celular na página do concurso** (Task 14,
+ * `ConcursoMobile.dc.html:21-27`) é outro, de 60px: voltar, o símbolo da
+ * marca, compartilhar e salvar, sem busca nem abas. `usePathname` decide
+ * (`naPaginaDoConcurso`, abaixo): `/concursos/<slug>` e não `/concursos`
+ * (a lista continua com a nav de sempre), e é por isso que este componente
+ * virou `"use client"`: o resto dele (`BarraUtilitaria`, `NavPrincipal`...)
+ * não precisa de nada do cliente, só esta escolha precisa. Nessas páginas a
+ * nav de 76/16 de sempre não desmonta, só fica `hidden` abaixo de `lg`
+ * (`classeDaNav`), e ela volta a aparecer normalmente a partir dali, ao lado
+ * da lateral da Task 14.
  */
 export function Cabecalho({
   dimensoes,
@@ -55,14 +71,21 @@ export function Cabecalho({
   dimensoes: DimensoesDoAcervo;
   atualizadoEm: string | null;
 }) {
+  const caminho = usePathname();
+  const segmentos = caminho.split("/").filter(Boolean);
+  // `/concursos/<slug>`, não `/concursos` (a lista): a lista continua com a
+  // nav de sempre em toda largura.
+  const naPaginaDoConcurso = segmentos[0] === "concursos" && segmentos.length > 1;
+
+  const classeDaNav = `${naPaginaDoConcurso ? "hidden lg:flex" : "flex"} min-h-16 flex-wrap items-center gap-x-4 gap-y-2 border-b border-linha bg-cartao px-4 md:min-h-[76px] md:gap-x-10 md:gap-y-3 md:px-[112px]`;
+
   return (
     <header className="bg-cartao">
       <BarraUtilitaria atualizadoEm={atualizadoEm} />
 
-      <nav
-        aria-label="Principal"
-        className="flex min-h-16 flex-wrap items-center gap-x-4 gap-y-2 border-b border-linha bg-cartao px-4 md:min-h-[76px] md:gap-x-10 md:gap-y-3 md:px-[112px]"
-      >
+      {naPaginaDoConcurso && <CabecalhoCelularDoConcurso />}
+
+      <nav aria-label="Principal" className={classeDaNav}>
         <Link
           href="/"
           aria-label="BuscaConcurso, página inicial"
@@ -112,5 +135,80 @@ export function Cabecalho({
         </SoForaDaHome>
       </nav>
     </header>
+  );
+}
+
+/**
+ * O cabeçalho de 60px da página do concurso no celular
+ * (`ConcursoMobile.dc.html:21-27`): voltar, o símbolo da marca, compartilhar
+ * e salvar. `lg:hidden` porque a partir de `lg` a nav de sempre volta.
+ *
+ * **Voltar** usa `router.back()` só quando `document.referrer` é do mesmo
+ * host (voltou de outra página deste site); de fora do site, ou sem
+ * histórico nenhum, vai para `/concursos` em vez de sair do site ou travar
+ * numa pilha de histórico vazia.
+ *
+ * **Compartilhar** reaproveita `useCompartilhar` (o mesmo de
+ * `AcoesDoConcurso`), com o título da aba e o endereço da página atual: o
+ * cabeçalho não recebe o concurso como prop, só a rota já diz qual é.
+ */
+function CabecalhoCelularDoConcurso() {
+  const router = useRouter();
+  const caminho = usePathname();
+  const { compartilhar, aviso } = useCompartilhar({
+    titulo: typeof document !== "undefined" ? document.title : "",
+    url: urlAbsoluta(caminho),
+  });
+
+  function voltar() {
+    if (typeof document !== "undefined" && document.referrer) {
+      try {
+        if (new URL(document.referrer).host === window.location.host) {
+          router.back();
+          return;
+        }
+      } catch {
+        // `document.referrer` malformado: cai no destino fixo abaixo.
+      }
+    }
+    router.push("/concursos");
+  }
+
+  return (
+    <div className="flex h-[60px] items-center gap-1 border-b border-linha bg-cartao px-2 lg:hidden">
+      <button
+        type="button"
+        onClick={voltar}
+        aria-label="Voltar"
+        className="flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
+      >
+        <Icone nome="voltar" tamanho={22} />
+      </button>
+
+      <Link href="/" aria-label="BuscaConcurso, página inicial" className="flex shrink-0 items-center">
+        <Logo variante="simbolo" tamanho={28} />
+      </Link>
+
+      <span className="grow" />
+
+      <button
+        type="button"
+        onClick={compartilhar}
+        aria-label="Compartilhar"
+        className="flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
+      >
+        <Icone nome="compartilhar" tamanho={20} />
+      </button>
+
+      <BotaoEmBreve
+        recurso="salvos"
+        aria-label="Salvar"
+        className="flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
+      >
+        <Icone nome="salvar" tamanho={20} />
+      </BotaoEmBreve>
+
+      {aviso && <AvisoFlutuante>{aviso}</AvisoFlutuante>}
+    </div>
   );
 }

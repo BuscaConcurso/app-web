@@ -88,7 +88,23 @@ const GARANTIAS = ["Sem custo", "No máximo 1 e-mail por dia", "Só quando houve
  * disparado no `onSubmit` do formulário, e não no clique de um botão solto,
  * porque aqui o campo de e-mail é parte do gesto.
  */
-export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
+export function BlocoAlerta({
+  totalAbertos,
+  compacto = false,
+  titulo,
+}: {
+  totalAbertos?: number;
+  /**
+   * A versão de 24px de padding da lateral do concurso
+   * (`Concurso.dc.html:248-255`): cartão único, sem a grade de células do
+   * desktop nem a linha de garantias, com o título vindo de fora (o
+   * "Avise-me de novas {área ou cargo}" de `LateralDoConcurso`) em vez do
+   * "Receba o edital..." fixo da home.
+   */
+  compacto?: boolean;
+  /** Só em `compacto`: substitui "Receba o edital no dia em que ele sair.". */
+  titulo?: string;
+}) {
   const [aberto, setAberto] = useState(false);
   const temporizador = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -99,6 +115,45 @@ export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
     setAberto(true);
     clearTimeout(temporizador.current);
     temporizador.current = setTimeout(() => setAberto(false), 4000);
+  }
+
+  if (compacto) {
+    return (
+      <section className="relative flex flex-col gap-3.5 overflow-hidden rounded-[22px] bg-faixa p-6 text-white">
+        <span
+          aria-hidden="true"
+          className="absolute -top-9 -right-9 size-[72px] rounded-full bg-ouro"
+        />
+        <div className="relative flex items-center gap-2 text-[12px] font-bold tracking-[0.06em] text-ouro">
+          <Icone nome="alerta" tamanho={16} />
+          ALERTA GRÁTIS
+        </div>
+        <h2 className="relative font-titulo text-[22px] leading-[1.15] font-bold tracking-[-0.02em]">
+          {titulo ?? "Receba o edital no dia em que ele sair."}
+        </h2>
+        <form onSubmit={aoEnviar} className="relative flex flex-col gap-2.5">
+          <label htmlFor="alerta-email-compacto" className="sr-only">
+            Seu e-mail
+          </label>
+          <input
+            id="alerta-email-compacto"
+            name="email"
+            type="email"
+            placeholder="seu@email.com"
+            className="h-12 rounded-[12px] border-0 bg-cartao px-3.5 text-[15px] text-tinta-900 outline-none placeholder:text-tinta-500"
+          />
+          <button
+            type="submit"
+            className="h-12 rounded-[12px] bg-cartao font-bold text-verde-texto shadow-[inset_0_0_0_2px_var(--color-ouro)]"
+          >
+            Criar alerta
+          </button>
+        </form>
+        {aberto && (
+          <AvisoFlutuante>Em breve: {RECURSOS_EM_BREVE.alertas.titulo}</AvisoFlutuante>
+        )}
+      </section>
+    );
   }
 
   return (
@@ -177,7 +232,7 @@ export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
 
       {aberto && (
         <AvisoFlutuante>
-          Em breve: {RECURSOS_EM_BREVE.alertas.titulo} (avisaríamos sobre os {numero(totalAbertos)} concursos
+          Em breve: {RECURSOS_EM_BREVE.alertas.titulo} (avisaríamos sobre os {numero(totalAbertos ?? 0)} concursos
           abertos)
         </AvisoFlutuante>
       )}

@@ -3,18 +3,23 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { connection } from "next/server";
 import { Icone } from "@/components/ui/Icone";
 import { Trilha, type Degrau } from "@/components/ui/Trilha";
+import { AbasDoConcurso } from "@/components/concurso/AbasDoConcurso";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
+import { BarraDeInscricao } from "@/components/concurso/BarraDeInscricao";
 import { CabecalhoDoConcurso } from "@/components/concurso/CabecalhoDoConcurso";
 import { Cargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
 import { Faq, temFaq } from "@/components/concurso/Faq";
 import { FatosDoConcurso } from "@/components/concurso/FatosDoConcurso";
-import { obterDetalhe } from "@/lib/concursos";
+import { LateralDoConcurso } from "@/components/concurso/LateralDoConcurso";
+import { obterDetalhe, tambemAbertos } from "@/lib/concursos";
 import { fatosDoConcurso } from "@/lib/fatos";
 import { dataLonga, hojeEmSaoPaulo, moeda, vagasTexto } from "@/lib/formato";
+import { destinoDaInscricao } from "@/lib/inscricao";
 import { textoDeRodape, tituloComOrgao } from "@/lib/rotulos";
 import { nomeCurtoDoOrgao } from "@/lib/orgaos";
+import type { ConcursoResumo } from "@/lib/dominio";
 
 /**
  * Página do concurso, versão reduzida.
@@ -70,6 +75,21 @@ export default async function PaginaDoConcurso(
   // A data civil brasileira, para a linha do tempo: ver `hojeEmSaoPaulo`.
   const hojeCivil = hojeEmSaoPaulo(hoje);
 
+  // "Também abertos no {UF}" da lateral (Task 14). Não custa requisição nova
+  // (lê o mesmo acervo já guardado em `cache`), mas uma falha aqui não pode
+  // derrubar a página do concurso: o pior desfecho é a lateral sem essa
+  // lista, não um concurso que existe virando erro 500.
+  let tambem: ConcursoResumo[] = [];
+  try {
+    tambem = await tambemAbertos(concurso, hoje);
+  } catch (erro) {
+    console.error(
+      `[concurso] tambemAbertos falhou para ${concurso.slug} (${
+        erro instanceof Error ? erro.message : erro
+      })`,
+    );
+  }
+
   // Três degraus, e o do meio é o que passou a existir: Concursos > órgão >
   // este concurso. É uma lista só, e `Trilha` desenha a tela e emite o
   // `BreadcrumbList` a partir dela — ver o componente para o defeito que essa
@@ -90,8 +110,86 @@ export default async function PaginaDoConcurso(
     { nome: concurso.titulo, href: `/concursos/${concurso.slug}` },
   ];
 
+  const destino = destinoDaInscricao(concurso);
+
+  // As abas do celular (`AbasDoConcurso`, Task 14): cronograma, áreas e
+  // perguntas, cada uma seu próprio painel com `id` estável. Áreas e
+  // perguntas continuam de fora quando não há o que mostrar: a aba não
+  // existe sem o painel dela, do mesmo jeito que a seção não existia sem ele
+  // antes das abas.
+  const paineis = [
+    {
+      id: "cronograma",
+      rotulo: "Cronograma",
+      // O cronograma não some quando está vazio: 170 concursos do acervo
+      // (3,7%) não têm data nenhuma lida, e nesses o bloco é o que diz que
+      // ninguém achou data, some ele, e a página afirma por omissão que o
+      // concurso não tem cronograma. O título fica com o bloco nos dois
+      // casos, então não há título órfão.
+      conteudo: (
+        <section
+          id="cronograma"
+          className="flex flex-col gap-6 rounded-[22px] bg-cartao p-8 shadow-cartao"
+        >
+          <div>
+            <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
+              <Icone nome="previsto" tamanho={24} className="text-acao" />
+              Cronograma
+            </h2>
+            <p className="mt-1.5 text-[15px] text-tinta-600">
+              Cada data mostra de qual trecho do ato ela foi lida.
+            </p>
+          </div>
+          {concurso.cronograma.length > 0 ? (
+            <Cronograma eventos={concurso.cronograma} hoje={hojeCivil} />
+          ) : (
+            <p className="text-sm text-tinta-600">
+              Nenhuma data foi lida do ato publicado até agora.
+              {concurso.previstoPara
+                ? ` O concurso é de ${concurso.previstoPara}.`
+                : ""}
+            </p>
+          )}
+        </section>
+      ),
+    },
+    // Aqui, sim, o bloco inteiro pode não existir, e com ele a aba. Um
+    // "Áreas e vagas" sobre nada seria o título órfão que o cronograma vazio
+    // não é: não há o que dizer sobre cargo que o ato não listou, e a linha
+    // de rodapé da página já conta o que falta.
+    ...(concurso.cargos.length > 0
+      ? [
+          {
+            id: "areas",
+            rotulo: `Áreas (${concurso.cargos.length})`,
+            conteudo: (
+              <section id="areas" className="rounded-[22px] bg-cartao p-8 shadow-cartao">
+                <Cargos cargos={concurso.cargos} />
+              </section>
+            ),
+          },
+        ]
+      : []),
+    // O FAQ antes do texto do ato, e não depois: ele é a leitura do
+    // documento, e o documento é a evidência atrás dela. Cada resposta tem
+    // link para o ato que a produziu, logo abaixo.
+    ...(temFaq(concurso.origens)
+      ? [
+          {
+            id: "perguntas",
+            rotulo: "Perguntas",
+            conteudo: (
+              <section id="perguntas" className="rounded-[22px] bg-cartao p-8 shadow-cartao">
+                <Faq origens={concurso.origens} />
+              </section>
+            ),
+          },
+        ]
+      : []),
+  ];
+
   return (
-    <div className="px-4 py-5 md:px-[112px]">
+    <div className="px-4 pt-5 pb-28 md:px-[112px] lg:pb-5">
       <Trilha degraus={trilha} />
 
       {/*
@@ -122,63 +220,13 @@ export default async function PaginaDoConcurso(
         <FatosDoConcurso fatos={fatosDoConcurso(concurso)} />
 
         {/* CORPO: `Concurso.dc.html:100-207`. A coluna principal é a pilha de
-            cartões; a lateral é o espaço da Task 14 (o prazo, os alertas, os
-            concursos próximos) — reservado e vazio por ora, para o grid já
-            nascer com a largura final e não pular quando ela for preenchida.
-            Cada painel principal é o próprio elemento com `id` estável
-            ("cronograma", "areas", "perguntas"), que é o que a Task 14 vai
-            precisar para as abas do celular. */}
+            cartões, com cronograma, áreas e perguntas dentro de
+            `AbasDoConcurso` (abas só abaixo de `lg`; todas visíveis dali para
+            cima); a lateral é `LateralDoConcurso` (o prazo, os passos de
+            inscrição, os alertas e "também abertos"). */}
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="flex min-w-0 flex-col gap-6">
-            {/* O cronograma não some quando está vazio: 170 concursos do
-                acervo (3,7%) não têm data nenhuma lida, e nesses o bloco é o
-                que diz que ninguém achou data — some ele, e a página afirma
-                por omissão que o concurso não tem cronograma. O título fica
-                com o bloco nos dois casos, então não há título órfão. */}
-            <section
-              id="cronograma"
-              className="flex flex-col gap-6 rounded-[22px] bg-cartao p-8 shadow-cartao"
-            >
-              <div>
-                <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
-                  <Icone nome="previsto" tamanho={24} className="text-acao" />
-                  Cronograma
-                </h2>
-                <p className="mt-1.5 text-[15px] text-tinta-600">
-                  Cada data mostra de qual trecho do ato ela foi lida.
-                </p>
-              </div>
-              {concurso.cronograma.length > 0 ? (
-                <Cronograma eventos={concurso.cronograma} hoje={hojeCivil} />
-              ) : (
-                <p className="text-sm text-tinta-600">
-                  Nenhuma data foi lida do ato publicado até agora.
-                  {concurso.previstoPara
-                    ? ` O concurso é de ${concurso.previstoPara}.`
-                    : ""}
-                </p>
-              )}
-            </section>
-
-            {/* Aqui, sim, o bloco inteiro pode não existir — e com ele o
-                título. Um "Áreas e vagas" sobre nada seria o título órfão que
-                o cronograma vazio não é: não há o que dizer sobre cargo que o
-                ato não listou, e a linha de rodapé da página já conta o que
-                falta. */}
-            {concurso.cargos.length > 0 && (
-              <section id="areas" className="rounded-[22px] bg-cartao p-8 shadow-cartao">
-                <Cargos cargos={concurso.cargos} />
-              </section>
-            )}
-
-            {/* O FAQ antes do texto do ato, e não depois: ele é a leitura do
-                documento, e o documento é a evidência atrás dela. Cada
-                resposta tem link para o ato que a produziu, logo abaixo. */}
-            {temFaq(concurso.origens) && (
-              <section id="perguntas" className="rounded-[22px] bg-cartao p-8 shadow-cartao">
-                <Faq origens={concurso.origens} />
-              </section>
-            )}
+            <AbasDoConcurso paineis={paineis} />
 
             {/* A avaliação do concurso, aqui e em nenhum outro ponto da
                 página: um voto por concurso por pessoa, decisão do parceiro
@@ -201,11 +249,11 @@ export default async function PaginaDoConcurso(
             </p>
           </div>
 
-          {/* A lateral da Task 14 (o prazo, os alertas, os concursos
-              próximos): vazia por ora, só reservando a coluna. */}
-          <aside className="hidden lg:block" />
+          <LateralDoConcurso concurso={concurso} hoje={hoje} tambem={tambem} />
         </div>
       </div>
+
+      <BarraDeInscricao taxa={concurso.taxaInscricao} destino={destino} />
     </div>
   );
 }
