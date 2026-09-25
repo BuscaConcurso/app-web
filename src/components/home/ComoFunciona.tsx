@@ -69,7 +69,7 @@ export function ComoFunciona({ aviso }: { aviso: AvisoDoAcervo | null }) {
       : [];
 
   return (
-    <section className="mt-24 hidden flex-col gap-7 px-[112px] md:flex">
+    <section className="mt-24 hidden flex-col gap-7 px-[112px] lg:flex">
       <div className="flex flex-col items-center text-center">
         <Rotulo icone="policia" tom="aberto">DADOS QUE VOCÊ PODE CONFERIR</Rotulo>
         <h2 className="mt-2.5 font-titulo text-[40px] leading-[1.05] font-bold tracking-[-0.03em]">

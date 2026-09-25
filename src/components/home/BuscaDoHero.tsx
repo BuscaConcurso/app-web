@@ -38,7 +38,7 @@ export function destinoDaBuscaDoHero(q: string, uf: string, escolaridade: string
  * `rounded-controle`, 46px); no desktop é só o texto dentro da cápsula da
  * busca, 52px, sem fundo próprio (`Main.dc.html:64-66`).
  *
- * **`md:w-[148px]` é largura fixa, medida, não capricho.** Sem largura
+ * **`lg:w-[148px]` é largura fixa, medida, não capricho.** Sem largura
  * própria, o navegador calcula a largura "automática" do `<select>` pela
  * opção mais larga ("Distrito Federal", "Fundamental incompleto"), não pela
  * selecionada, e esse valor não encolhe no `flex` como o resto da barra
@@ -56,7 +56,7 @@ export function destinoDaBuscaDoHero(q: string, uf: string, escolaridade: string
  * inteiros e ainda deixa o botão "Buscar" (com a seta) inteiro dentro dos
  * 700px; para isso também apertei os vãos do formulário (`gap-2` em vez de
  * `gap-3`) e o vão entre os dois seletores e o botão
- * (`md:mr-[-8px]` no grupo). `truncate` cobre só o que passa disso: um
+ * (`lg:mr-[-8px]` no grupo). `truncate` cobre só o que passa disso: um
  * estado, ou uma escolaridade, mais longa que o rótulo padrão.
  */
 function SeletorDoHero({
@@ -75,7 +75,7 @@ function SeletorDoHero({
   children: ReactNode;
 }) {
   return (
-    <div className="flex h-[46px] shrink-0 items-center justify-center gap-1.5 rounded-controle bg-rebaixada px-2 text-sm font-medium text-tinta-900 md:h-[52px] md:w-[148px] md:justify-start md:gap-1.5 md:bg-transparent md:px-1 md:text-[15px]">
+    <div className="flex h-[46px] shrink-0 items-center justify-center gap-1.5 rounded-controle bg-rebaixada px-2 text-sm font-medium text-tinta-900 lg:h-[52px] lg:w-[148px] lg:justify-start lg:gap-1.5 lg:bg-transparent lg:px-1 lg:text-[15px]">
       <Icone nome={icone} tamanho={18} className="text-verde shrink-0" />
       <label htmlFor={id} className="sr-only">
         {rotulo}
@@ -145,9 +145,9 @@ export function BuscaDoHero() {
       method="get"
       role="search"
       onSubmit={aoEnviar}
-      className="mt-2 flex flex-col gap-2 rounded-cartao bg-cartao p-2 shadow-busca md:h-[72px] md:flex-row md:items-center md:gap-2 md:pl-5"
+      className="mt-2 flex flex-col gap-2 rounded-cartao bg-cartao p-2 shadow-busca lg:h-[72px] lg:flex-row lg:items-center lg:gap-2 lg:pl-5"
     >
-      <div className="flex h-[52px] items-center gap-2.5 px-2.5 md:h-full md:flex-1 md:gap-3 md:px-0">
+      <div className="flex h-[52px] min-w-0 items-center gap-2.5 px-2.5 lg:h-full lg:flex-1 lg:gap-3 lg:px-0">
         <Icone nome="busca" tamanho={22} className="text-verde shrink-0" />
         <label htmlFor={idCampo} className="sr-only">
           Cargo, órgão ou banca
@@ -163,15 +163,15 @@ export function BuscaDoHero() {
         />
         <kbd
           aria-hidden="true"
-          className="hidden h-[26px] min-w-[26px] items-center justify-center rounded-[6px] bg-rebaixada px-1 text-[13px] font-semibold text-tinta-600 shadow-[inset_0_-1px_0_var(--color-contorno)] md:flex"
+          className="hidden h-[26px] min-w-[26px] items-center justify-center rounded-[6px] bg-rebaixada px-1 text-[13px] font-semibold text-tinta-600 shadow-[inset_0_-1px_0_var(--color-contorno)] lg:flex"
         >
           /
         </kbd>
       </div>
 
-      <span aria-hidden="true" className="hidden h-8 w-px shrink-0 bg-linha md:block" />
+      <span aria-hidden="true" className="hidden h-8 w-px shrink-0 bg-linha lg:block" />
 
-      <div className="grid grid-cols-2 gap-2 md:mr-[-8px] md:flex md:shrink-0 md:items-center md:gap-2">
+      <div className="grid grid-cols-2 gap-2 lg:mr-[-8px] lg:flex lg:shrink-0 lg:items-center lg:gap-2">
         <SeletorDoHero
           id={idUf}
           nome="uf"
@@ -187,7 +187,7 @@ export function BuscaDoHero() {
           ))}
         </SeletorDoHero>
 
-        <span aria-hidden="true" className="hidden h-8 w-px shrink-0 bg-linha md:block" />
+        <span aria-hidden="true" className="hidden h-8 w-px shrink-0 bg-linha lg:block" />
 
         <SeletorDoHero
           id={idEscolaridade}
@@ -210,10 +210,10 @@ export function BuscaDoHero() {
         variante="chamada"
         tamanho="xl"
         iconeDepois="seta"
-        className="w-full justify-center md:w-auto md:shrink-0"
+        className="w-full justify-center lg:w-auto lg:shrink-0"
       >
-        <span className="md:hidden">Buscar concursos</span>
-        <span className="hidden md:inline">Buscar</span>
+        <span className="lg:hidden">Buscar concursos</span>
+        <span className="hidden lg:inline">Buscar</span>
       </Botao>
     </form>
   );

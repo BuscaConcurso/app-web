@@ -156,8 +156,10 @@ export function EncerramSemana({
         </Link>
       </div>
 
-      {/* Desktop: 4 colunas fixas, com o cartão inteiro (`Main.dc.html:154`). */}
-      <div className="hidden gap-3 md:grid md:grid-cols-4 md:px-0">
+      {/* Desktop: 4 colunas, com o cartão inteiro (`Main.dc.html:154`), a
+          partir de `xl`; abaixo disso cada cartão tinha menos de 200px e o
+          nome do órgão quebrava letra a letra. Entre 768 e 1279px, 2. */}
+      <div className="hidden gap-3 md:grid md:grid-cols-2 md:px-0 xl:grid-cols-4">
         {concursos.map((concurso) => (
           <Cartao key={concurso.slug} concurso={concurso} hoje={hoje} />
         ))}

@@ -159,53 +159,53 @@ export function BlocoAlerta({
   return (
     <section
       id="alerta"
-      className="mx-4 mt-12 overflow-hidden rounded-[22px] bg-faixa text-white md:mx-[112px] md:mt-24 md:flex md:h-[340px] md:rounded-[28px]"
+      className="mx-4 mt-12 overflow-hidden rounded-[22px] bg-faixa text-white md:mx-[112px] md:mt-24 lg:flex lg:h-[340px] lg:rounded-[28px]"
     >
-      <div className="relative flex flex-col gap-4 overflow-hidden p-6 md:flex-grow md:justify-center md:gap-[18px] md:p-0 md:pl-14">
+      <div className="relative flex flex-col gap-4 overflow-hidden p-6 lg:flex-grow lg:justify-center lg:gap-[18px] lg:p-0 lg:pl-14">
         {/* Duas bolhas soltas no celular, no lugar da grade de 9 do desktop. */}
         <span
           aria-hidden="true"
-          className="absolute -right-10 -bottom-10 size-[110px] rounded-full bg-anil md:hidden"
+          className="absolute -right-10 -bottom-10 size-[110px] rounded-full bg-anil lg:hidden"
         />
         <span
           aria-hidden="true"
-          className="absolute right-10 -bottom-[30px] size-[60px] rounded-full bg-ouro md:hidden"
+          className="absolute right-10 -bottom-[30px] size-[60px] rounded-full bg-ouro lg:hidden"
         />
 
         <div className="relative flex items-center gap-2.5 text-[13px] font-bold tracking-[0.06em] text-ouro">
           <Icone nome="alerta" tamanho={18} />
           ALERTA GRÁTIS
         </div>
-        <h2 className="relative font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.03em] md:text-[44px] md:leading-[1.05]">
+        <h2 className="relative font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.03em] lg:text-[44px] lg:leading-[1.05]">
           Receba o edital no dia em que ele sair.
         </h2>
 
-        <form onSubmit={aoEnviar} className="relative flex flex-col gap-2 md:max-w-[620px] md:flex-row md:gap-2">
+        <form onSubmit={aoEnviar} className="relative flex flex-col gap-2 lg:max-w-[620px] lg:flex-row lg:gap-2">
           <label htmlFor="alerta-email" className="sr-only">
             Seu e-mail
           </label>
-          <div className="flex h-[52px] items-center gap-2.5 rounded-[13px] bg-cartao px-4 md:h-14 md:flex-grow md:rounded-[14px]">
-            <Icone nome="email" tamanho={20} className="hidden text-tinta-500 md:block" />
+          <div className="flex h-[52px] items-center gap-2.5 rounded-[13px] bg-cartao px-4 lg:h-14 lg:flex-grow lg:rounded-[14px]">
+            <Icone nome="email" tamanho={20} className="hidden text-tinta-500 lg:block" />
             <input
               id="alerta-email"
               name="email"
               type="email"
               placeholder="seu@email.com"
-              className="min-w-0 flex-grow border-0 bg-transparent text-base text-tinta-900 outline-none placeholder:text-tinta-500 md:text-[17px]"
+              className="min-w-0 flex-grow border-0 bg-transparent text-base text-tinta-900 outline-none placeholder:text-tinta-500 lg:text-[17px]"
             />
           </div>
           <button
             type="submit"
-            className="h-[52px] shrink-0 rounded-[13px] bg-ouro px-6 font-bold text-ouro-texto md:h-14 md:rounded-[14px] md:text-base"
+            className="h-[52px] shrink-0 rounded-[13px] bg-ouro px-6 font-bold text-ouro-texto lg:h-14 lg:rounded-[14px] lg:text-base"
           >
             Criar alerta
           </button>
         </form>
 
-        <div className="relative text-[13px] text-faixa-texto md:flex md:gap-6 md:text-sm">
-          <span className="md:hidden">{GARANTIAS.join(" · ")}</span>
+        <div className="relative text-[13px] text-faixa-texto lg:flex lg:gap-6 lg:text-sm">
+          <span className="lg:hidden">{GARANTIAS.join(" · ")}</span>
           {GARANTIAS.map((garantia) => (
-            <span key={garantia} className="hidden items-center gap-1.5 md:flex">
+            <span key={garantia} className="hidden items-center gap-1.5 lg:flex">
               <Icone nome="check" tamanho={16} className="text-ouro" />
               {garantia}
             </span>
@@ -213,7 +213,7 @@ export function BlocoAlerta({
         </div>
       </div>
 
-      <div className="hidden w-[340px] shrink-0 grid-cols-3 grid-rows-3 md:grid">
+      <div className="hidden w-[340px] shrink-0 grid-cols-3 grid-rows-3 lg:grid">
         {CELULAS.map((celula, indice) => (
           <div key={indice} className={`relative overflow-hidden ${celula.fundo}`}>
             <span

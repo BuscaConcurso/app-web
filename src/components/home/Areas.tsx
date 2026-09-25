@@ -69,8 +69,10 @@ export function Areas() {
         </Link>
       </div>
 
-      {/* Desktop: as 12, em 6 colunas (`Main.dc.html:132`). */}
-      <div className="hidden gap-3 md:grid md:grid-cols-6">
+      {/* Desktop: as 12, em 6 colunas (`Main.dc.html:132`) a partir de `xl`;
+          entre 768 e 1279px cada azulejo teria menos de 130px e o nome
+          ("Administrativo") vazava, então são 3 colunas. */}
+      <div className="hidden gap-3 md:grid md:grid-cols-3 xl:grid-cols-6">
         {AREAS.map((area) => (
           <Azulejo key={area.nome} area={area} />
         ))}

@@ -73,7 +73,8 @@ function LinhaDeRanking({
  * do site vier a apontar para cá; hoje nenhum aponta, mas a seção já nasce
  * com o alvo pronto e sem custo.
  *
- * **Some no celular** (`hidden md:block`, como `Mobile.dc.html` não repete
+ * **Só a partir de `xl`** (o mapa de 620px e as duas colunas ao lado não
+ * cabem em menos de 1280px; e `Mobile.dc.html` não repete
  * este bloco): os links de UF continuam acessíveis por outro caminho, a
  * linha "Por estado" do rodapé (`layout/Rodape.tsx`).
  */
@@ -94,7 +95,7 @@ export function PorEstado({
   const maximo = Math.max(0, ...[...totalPorUf.values()]);
 
   return (
-    <section id="estados" className="mt-24 hidden scroll-mt-24 px-4 md:flex md:flex-col md:gap-7 md:px-[112px]">
+    <section id="estados" className="mt-24 hidden scroll-mt-24 px-[112px] xl:flex xl:flex-col xl:gap-7">
       <div>
         <Rotulo icone="estados" tom="anil" className="mb-2.5">
           POR ESTADO

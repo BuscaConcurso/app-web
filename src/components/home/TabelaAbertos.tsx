@@ -61,13 +61,16 @@ export function TabelaAbertos({
             {numero(total)} concursos abertos agora
           </h2>
         </div>
-        <BotaoLink href={HREF_ABERTOS} variante="secundario" tamanho="sm" icone="filtros" className="shrink-0 md:hidden">
+        <BotaoLink href={HREF_ABERTOS} variante="secundario" tamanho="sm" icone="filtros" className="shrink-0 xl:hidden">
           Filtros
         </BotaoLink>
       </div>
 
-      {/* Desktop: um cartão só, com as abas, o cabeçalho e as linhas de verdade. */}
-      <div className="hidden overflow-hidden rounded-[20px] bg-cartao shadow-tabela md:block">
+      {/* Desktop: um cartão só, com as abas, o cabeçalho e as linhas de
+          verdade, a partir de `xl`. Abaixo de 1280px as seis colunas não
+          cabem e a de órgão e cargo encolhia até sobrar uma letra; ali ficam
+          os cartões do celular. */}
+      <div className="hidden overflow-hidden rounded-[20px] bg-cartao shadow-tabela xl:block">
         <div className="flex h-[72px] items-center gap-3 border-b border-linha-fraca px-5">
           <Abas rotulo="Escolaridade" itens={abas(total)} />
           <div className="flex-grow" />
@@ -82,32 +85,35 @@ export function TabelaAbertos({
         <table className="w-full table-fixed border-collapse">
           <caption className="sr-only">Concursos com inscrição aberta agora</caption>
           {/* As proporções de `Main.dc.html:206`
-              (`2.6fr 1.2fr 0.9fr 1fr 1.2fr 150px`), num `<table>` de verdade:
-              a última coluna é fixa e as outras cinco dividem o resto na
-              mesma razão. */}
+              (`2.6fr 1.2fr 0.9fr 1fr 1.2fr 150px`), num `<table>` de verdade.
+              Em porcentagem e não em `calc((100% - 150px) * ...)`: o Chrome
+              ignora `calc` que mistura porcentagem e pixel na largura de
+              coluna, e a tabela caía no automático (a coluna de órgão e cargo
+              encolhia até sobrar uma letra). As cinco somam 82%; a última,
+              sem largura, fica com o resto (190px a 1280, 219px a 1440). */}
           <colgroup>
-            <col style={{ width: "calc((100% - 150px) * 2.6 / 6.9)" }} />
-            <col style={{ width: "calc((100% - 150px) * 1.2 / 6.9)" }} />
-            <col style={{ width: "calc((100% - 150px) * 0.9 / 6.9)" }} />
-            <col style={{ width: "calc((100% - 150px) * 1 / 6.9)" }} />
-            <col style={{ width: "calc((100% - 150px) * 1.2 / 6.9)" }} />
-            <col style={{ width: "150px" }} />
+            <col className="w-[31%]" />
+            <col className="w-[14%]" />
+            <col className="w-[11%]" />
+            <col className="w-[12%]" />
+            <col className="w-[14%]" />
+            <col />
           </colgroup>
           <thead>
-            <tr className="h-11 bg-pagina text-left text-xs font-bold tracking-[0.05em] text-tinta-500 uppercase">
+            <tr className="h-11 bg-pagina text-left text-xs font-bold tracking-[0.05em] whitespace-nowrap text-tinta-500 uppercase">
               <th scope="col" className="px-5 font-bold">
                 Órgão e cargo
               </th>
-              <th scope="col" className="px-0 font-bold">
+              <th scope="col" className="pr-4 font-bold">
                 Local
               </th>
-              <th scope="col" className="px-0 font-bold">
+              <th scope="col" className="pr-4 font-bold">
                 Vagas
               </th>
-              <th scope="col" className="px-0 font-bold">
+              <th scope="col" className="pr-4 font-bold">
                 Salário até
               </th>
-              <th scope="col" className="px-0 font-bold">
+              <th scope="col" className="pr-4 font-bold">
                 Inscrições até
               </th>
               <th scope="col" className="px-5" />
@@ -131,7 +137,7 @@ export function TabelaAbertos({
       </div>
 
       {/* Celular: cartões de verdade, um por concurso (`Mobile.dc.html:80-109`). */}
-      <div className="flex flex-col gap-2.5 md:hidden">
+      <div className="flex flex-col gap-2.5 xl:hidden">
         <ul className="flex flex-col gap-2.5">
           {concursos.map((concurso) => (
             <li key={concurso.slug} className="min-w-0">

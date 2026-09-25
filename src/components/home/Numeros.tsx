@@ -69,15 +69,18 @@ export function Numeros({
 
   return (
     <>
-      {/* Desktop: uma barra só, com divisor entre as caixas. */}
+      {/* Desktop: uma barra só, com divisor entre as caixas. Só a partir de
+          1440px, a largura do artboard: abaixo dela cada caixa tem menos de
+          200px e os rótulos quebram em duas linhas em umas caixas e não em
+          outras, desalinhando os números. Até lá são os cartões abaixo. */}
       <section
-        className="relative mx-4 -mt-14 hidden rounded-[20px] bg-cartao shadow-numeros md:mx-[112px] md:grid md:h-[120px]"
+        className="relative mx-[112px] -mt-14 hidden h-[120px] rounded-[20px] bg-cartao shadow-numeros min-[1440px]:grid"
         style={{ gridTemplateColumns: `repeat(${itensDoDesktop.length}, minmax(0, 1fr))` }}
       >
         {itensDoDesktop.map((item, indice) => (
           <div
             key={item.rotulo}
-            className={`flex items-center gap-4 px-7 ${
+            className={`flex items-center gap-4 px-5 ${
               indice < itensDoDesktop.length - 1 ? "border-r border-linha-fraca" : ""
             }`}
           >
@@ -88,6 +91,27 @@ export function Numeros({
             </span>
             <div className="min-w-0">
               <div className="font-titulo text-[32px] leading-none font-bold">{item.valor}</div>
+              <div className="mt-1 text-sm whitespace-nowrap text-tinta-600">{item.rotulo}</div>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Entre 768 e 1439px: as mesmas caixas, como cartões numa grade de
+          dois, no formato dos cartões do celular. */}
+      <section className="mx-[112px] mt-6 hidden grid-cols-2 gap-3 md:max-[1439px]:grid">
+        {itensDoDesktop.map((item) => (
+          <div
+            key={item.rotulo}
+            className="flex items-center gap-3.5 rounded-[16px] bg-cartao p-4 shadow-cartao"
+          >
+            <span
+              className={`flex size-11 shrink-0 items-center justify-center rounded-[12px] ${item.fundo}`}
+            >
+              <Icone nome={item.icone} tamanho={22} />
+            </span>
+            <div className="min-w-0">
+              <div className="font-titulo text-[26px] leading-none font-bold">{item.valor}</div>
               <div className="mt-1 text-sm text-tinta-600">{item.rotulo}</div>
             </div>
           </div>

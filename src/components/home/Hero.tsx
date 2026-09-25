@@ -49,8 +49,12 @@ export function Hero({
   novoAto: ConcursoResumo | null;
 }) {
   return (
-    <section className="flex flex-col gap-4 overflow-hidden bg-faixa px-4 py-7 text-white md:min-h-[620px] md:flex-row md:gap-16 md:px-[112px] md:py-0">
-      <div className="relative flex flex-col gap-4 md:w-[700px] md:shrink-0 md:justify-center md:gap-6 md:pb-10">
+    // O herói em fileira (texto de 700px e o mosaico) só a partir de `lg`:
+    // abaixo disso os 700px da coluna não cabem ao lado de nada, e a 768px a
+    // coluna sozinha já passava da tela. Entre `md` e `lg` é a pilha do
+    // celular, com a margem de 112px das outras seções.
+    <section className="flex flex-col gap-4 overflow-hidden bg-faixa px-4 py-7 text-white md:px-[112px] md:py-10 lg:min-h-[620px] lg:flex-row lg:gap-10 lg:py-0 min-[1440px]:gap-16">
+      <div className="relative flex flex-col gap-4 lg:w-[700px] lg:shrink-0 lg:justify-center lg:gap-6 lg:pb-10">
         {/* O sol dourado que só aparece no celular (`Mobile.dc.html:29`);
             no desktop o mosaico de azulejos já cumpre o papel decorativo. */}
         <span
@@ -58,26 +62,26 @@ export function Hero({
           className="absolute -top-[60px] -right-[60px] size-[120px] rounded-full bg-ouro md:hidden"
         />
 
-        <div className="inline-flex h-[30px] items-center gap-2 self-start rounded-full bg-white/10 pr-3.5 pl-1.5 text-[13px] text-faixa-texto md:h-[34px] md:gap-2.5 md:pr-3.5 md:pl-2 md:text-sm">
-          <span className="flex h-5 items-center rounded-full bg-ouro px-1.5 text-[11px] font-bold text-ouro-texto md:h-[22px] md:px-2 md:text-xs">
+        <div className="inline-flex h-[30px] items-center gap-2 self-start rounded-full bg-white/10 pr-3.5 pl-1.5 text-[13px] text-faixa-texto lg:h-[34px] lg:gap-2.5 lg:pr-3.5 lg:pl-2 lg:text-sm">
+          <span className="flex h-5 items-center rounded-full bg-ouro px-1.5 text-[11px] font-bold text-ouro-texto lg:h-[22px] lg:px-2 lg:text-xs">
             {numero(totalAbertos)}
           </span>
-          <span className="md:hidden">abertos hoje</span>
-          <span className="hidden md:inline">concursos com inscrição aberta hoje</span>
+          <span className="lg:hidden">abertos hoje</span>
+          <span className="hidden lg:inline">concursos com inscrição aberta hoje</span>
         </div>
 
-        <h1 className="font-titulo text-[40px] leading-[1.04] font-bold tracking-[-0.035em] md:text-[68px] md:leading-[1.02]">
+        <h1 className="font-titulo text-[40px] leading-[1.04] font-bold tracking-[-0.035em] md:text-[52px] lg:text-[68px] lg:leading-[1.02]">
           Encontre seu concurso.
-          <br className="hidden md:block" />
-          <span className="md:hidden"> </span>
+          <br className="hidden lg:block" />
+          <span className="lg:hidden"> </span>
           <span className="text-ouro">Direto do edital.</span>
         </h1>
 
-        <p className="text-base leading-[1.5] text-faixa-texto md:max-w-[580px] md:text-[19px] md:leading-[1.55]">
-          <span className="md:hidden">
+        <p className="text-base leading-[1.5] text-faixa-texto lg:max-w-[580px] lg:text-[19px] lg:leading-[1.55]">
+          <span className="lg:hidden">
             Cargo, vagas, salário e prazo, com o link para o documento original.
           </span>
-          <span className="hidden md:inline">
+          <span className="hidden lg:inline">
             Lemos todo dia os editais das bancas e dos diários oficiais e mostramos cargo,
             vagas, salário e prazo, com o link para o documento original.
           </span>
