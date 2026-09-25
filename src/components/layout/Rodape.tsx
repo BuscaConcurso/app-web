@@ -3,10 +3,12 @@ import { unstable_rethrow } from "next/navigation";
 import { Logo } from "@/components/marca/Logo";
 import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
 import { urlDoCargo, type CargoMedido } from "@/lib/cargos";
-import { cargosEscolhidos } from "@/lib/concursos";
+import { cargosEscolhidos, facetas, type LinkDeFaceta } from "@/lib/concursos";
 import { hrefEmBreve } from "@/lib/emBreve";
+import { hojeCivilEmSaoPaulo } from "@/lib/formato";
 
 const LIMITE_DE_CARGOS_NO_RODAPE = 8;
+const LIMITE_DE_UFS_NO_RODAPE = 8;
 
 const COLUNA_BUSCAR = [
   { rotulo: "Abertos", href: "/concursos?situacao=abertas" },
@@ -44,6 +46,27 @@ async function cargosDoRodape(): Promise<CargoMedido[]> {
     console.error(
       "[rodape] acervo indisponível para medir os cargos mais buscados; a " +
         "coluna some.",
+      erro,
+    );
+    return [];
+  }
+}
+
+/**
+ * As UFs com mais abertos, só para a linha "Por estado" do rodapé do
+ * celular (ver `PorEstado.tsx`): com o mapa inteiro escondido a partir de
+ * `md`, `BlocosSeo` removido levaria os links de UF junto, e é esse SEO que
+ * esta linha substitui. O mesmo envoltório de `cargosDoRodape`, pelo mesmo
+ * motivo: o rodapé mora no layout raiz e não pode derrubar o site inteiro
+ * por causa de uma coluna a mais.
+ */
+async function ufsDoRodape(): Promise<LinkDeFaceta[]> {
+  try {
+    return (await facetas(hojeCivilEmSaoPaulo())).ufs.slice(0, LIMITE_DE_UFS_NO_RODAPE);
+  } catch (erro) {
+    unstable_rethrow(erro);
+    console.error(
+      "[rodape] acervo indisponível para os links de UF do celular; a linha some.",
       erro,
     );
     return [];
@@ -95,7 +118,7 @@ export async function Rodape({
 }: {
   atualizadoEm: string | null;
 }) {
-  const cargos = await cargosDoRodape();
+  const [cargos, ufs] = await Promise.all([cargosDoRodape(), ufsDoRodape()]);
   const cargosLinks = cargos.map((cargo) => ({
     rotulo: cargo.rotulo,
     href: urlDoCargo(cargo),
@@ -121,6 +144,29 @@ export async function Rodape({
             <ColunaDeLinks titulo="Sobre" links={COLUNA_SOBRE} />
           </div>
         </div>
+
+        {/* Só no celular: o mapa de `PorEstado` (`components/home/PorEstado.tsx`)
+            some a partir de `md`, e `BlocosSeo` (removido nesta task) levava
+            os links de UF junto. Esta linha é o que sobra deles no rodapé do
+            celular, para o SEO por estado não desaparecer. */}
+        {ufs.length > 0 && (
+          <nav aria-label="Por estado" className="min-w-0 sm:hidden">
+            <p className={CLASSE_DO_TITULO}>Por estado</p>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {ufs.map((uf) => (
+                <li key={uf.href}>
+                  <Link
+                    href={uf.href}
+                    className="flex items-center gap-1.5 rounded-full bg-rebaixada px-3 py-1.5 text-[13px] text-tinta-900"
+                  >
+                    {uf.rotulo}
+                    <span className="numero text-tinta-500">{uf.total}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
 
         {/* O aviso legal e o crédito, de volta depois da revisão (R14): a
             versão anterior deste rodapé já tinha os dois, e o desenho novo

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
-import { LinhaConcurso } from "@/components/concurso/LinhaConcurso";
-import { AcervoIncompleto, BlocoAlerta } from "@/components/home/BlocoAlerta";
-import { BlocosSeo } from "@/components/home/BlocosSeo";
+import { Areas } from "@/components/home/Areas";
+import { BlocoAlerta } from "@/components/home/BlocoAlerta";
+import { ComoFunciona } from "@/components/home/ComoFunciona";
+import { EncerramSemana } from "@/components/home/EncerramSemana";
 import { Hero } from "@/components/home/Hero";
 import { Numeros } from "@/components/home/Numeros";
-import { Secao } from "@/components/home/Secao";
+import { PorEstado } from "@/components/home/PorEstado";
+import { TabelaAbertos } from "@/components/home/TabelaAbertos";
+import { VemAiEDou } from "@/components/home/VemAiEDou";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import {
   avisoDoAcervo,
@@ -31,7 +33,7 @@ export default async function Home() {
   const hoje = new Date();
   const [destaques, { ufs, bancas, orgaos }, aviso, dimensoes, cargos] = await Promise.all([
     obterDestaques(hoje),
-    facetas(hoje),
+    facetas(hoje, { ufs: 27 }),
     avisoDoAcervo(),
     dimensoesDoAcervo(),
     cargosEmDestaque(8),
@@ -81,87 +83,19 @@ export default async function Home() {
         atosLidos={aviso?.total ?? dimensoes.total}
       />
 
-      {destaques.encerrando.length > 0 && (
-        <Secao
-          titulo="Encerra esta semana"
-          apoio="Inscrições que fecham nos próximos sete dias."
-          href="/concursos?situacao=abertas"
-          hrefRotulo="Ver tudo que está aberto"
-        >
-          <ul className="grid gap-2">
-            {destaques.encerrando.map((concurso) => (
-              <li key={concurso.slug} className="min-w-0">
-                <LinhaConcurso concurso={concurso} hoje={hoje} acao="Abrir" />
-              </li>
-            ))}
-          </ul>
-        </Secao>
-      )}
+      <Areas />
 
-      <Secao
-        titulo="Inscrições abertas agora"
-        apoio="Ordenado por quem fecha primeiro."
-        href="/concursos?situacao=abertas"
-        hrefRotulo={`Ver os ${destaques.totalAbertos} abertos`}
-      >
-        <ul className="grid gap-2 lg:grid-cols-2">
-          {destaques.abertos.map((concurso) => (
-            // `min-w-0` pelo mesmo motivo da lista da busca: item de grid não
-            // encolhe abaixo do min-content sem isto, e o mesmo cartão está
-            // aqui.
-            <li key={concurso.slug} className="min-w-0">
-              <CartaoConcurso concurso={concurso} hoje={hoje} />
-            </li>
-          ))}
-        </ul>
-      </Secao>
+      <EncerramSemana concursos={destaques.encerrando} hoje={hoje} />
 
-      {destaques.atualizados.length > 0 && (
-        <Secao
-          titulo="Últimas atualizações"
-          apoio="Concursos com ato novo no Diário Oficial da União, do mais recente para o mais antigo."
-        >
-          <ul className="grid gap-2">
-            {destaques.atualizados.map((concurso) => (
-              <li key={concurso.slug} className="min-w-0">
-                <LinhaConcurso
-                  concurso={concurso}
-                  hoje={hoje}
-                  acao="Ver"
-                  ato={concurso.ultimoAto ?? undefined}
-                />
-              </li>
-            ))}
-          </ul>
-        </Secao>
-      )}
+      <TabelaAbertos concursos={destaques.abertos} total={destaques.totalAbertos} hoje={hoje} />
 
-      {destaques.previstos.length > 0 && (
-        <Secao
-          titulo="Previstos"
-          apoio="Autorizados ou com banca definida, ainda sem edital publicado."
-          href="/concursos?situacao=previstos"
-          hrefRotulo="Ver todos os previstos"
-        >
-          <ul className="grid gap-2">
-            {destaques.previstos.map((concurso) => (
-              <li key={concurso.slug} className="min-w-0">
-                <LinhaConcurso concurso={concurso} hoje={hoje} acao="Avisar" />
-              </li>
-            ))}
-          </ul>
-        </Secao>
-      )}
+      <PorEstado ufs={ufs} orgaos={orgaos} bancas={bancas} />
 
-      {aviso && (
-        <section className="mx-auto max-w-[1240px] px-4 pb-5 sm:px-6">
-          <AcervoIncompleto aviso={aviso} />
-        </section>
-      )}
+      <VemAiEDou previstos={destaques.previstos} atualizados={destaques.atualizados} />
+
+      <ComoFunciona aviso={aviso} />
 
       <BlocoAlerta totalAbertos={destaques.totalAbertos} />
-
-      <BlocosSeo bancas={bancas} orgaos={orgaos} />
     </>
   );
 }

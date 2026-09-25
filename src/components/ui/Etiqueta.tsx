@@ -122,6 +122,11 @@ export function Etiqueta({
  * grande ao lado, como em `error.tsx`), ele é o cabeçalho daquele trecho da
  * página e precisa entrar no sumário de quem navega por títulos, um `<p>` em
  * caixa alta não entra.
+ *
+ * `tom` aceita a situação de sempre (`Tom`) e também a cor pelo nome
+ * (`TomDaEtiqueta`), pela mesma razão de `Etiqueta`: alguns rótulos da home
+ * nova são anil ("POR ESTADO", "DIÁRIO OFICIAL DA UNIÃO", `Main.dc.html:273,
+ * 349`), e nenhuma situação de concurso é anil.
  */
 export function Rotulo({
   children,
@@ -134,9 +139,9 @@ export function Rotulo({
   className?: string;
   as?: "p" | "h2" | "h3";
   icone?: NomeDoIcone;
-  tom?: Tom;
+  tom?: Tom | TomDaEtiqueta;
 }) {
-  const cor = tom ? CORES[CORRESPONDE_A[tom]].texto : "text-tinta-500";
+  const cor = CORES[resolverTom(tom)].texto;
 
   return (
     <Tag
