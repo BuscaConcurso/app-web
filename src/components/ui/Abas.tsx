@@ -19,6 +19,10 @@ export interface ItemDeAba {
  * marca a ativa: um filtro que muda o endereço precisa ser seguível, e é o
  * que a escolaridade da home faz. Sem `href`, os itens viram `role="tab"` e
  * quem troca a seleção é o chamador (Task 13 liga o clique a um estado).
+ *
+ * Todo `role="tab"` precisa de um `role="tablist"` no ancestral, então o
+ * trilho vira `tablist` sempre que existe pelo menos um item sem `href`,
+ * mesmo numa lista mista com links ao lado.
  */
 export function Abas({
   rotulo,
@@ -30,11 +34,11 @@ export function Abas({
   tamanho?: "md" | "sm";
 }) {
   const altura = tamanho === "sm" ? "h-8 px-3 text-[13px]" : "h-9 px-3.5 text-sm";
-  const semHref = itens.every((item) => !item.href);
+  const comAba = itens.some((item) => !item.href);
 
   return (
     <div
-      role={semHref ? "tablist" : undefined}
+      role={comAba ? "tablist" : undefined}
       aria-label={rotulo}
       className="inline-flex items-center gap-1 rounded-[12px] bg-rebaixada p-1"
     >

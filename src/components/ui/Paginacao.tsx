@@ -25,7 +25,7 @@ function janela(pagina: number, paginas: number): (number | "…")[] {
 }
 
 const QUADRADO =
-  "flex size-[30px] items-center justify-center rounded-controle text-[12px] font-semibold";
+  "flex size-[30px] items-center justify-center rounded-controle text-[12px] font-medium";
 
 export function Paginacao({
   pagina,
