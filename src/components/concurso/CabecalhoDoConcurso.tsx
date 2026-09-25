@@ -160,9 +160,11 @@ function CartaoDeUrgencia({
       {periodo && (
         <div
           role="progressbar"
+          aria-label="Período de inscrição"
           aria-valuenow={periodo.passados}
           aria-valuemin={0}
           aria-valuemax={periodo.total}
+          aria-valuetext={`${periodo.passados} de ${periodo.total} dias do período já passaram`}
           className={`h-1.5 overflow-hidden rounded-full ${estilo.trilha}`}
         >
           <span

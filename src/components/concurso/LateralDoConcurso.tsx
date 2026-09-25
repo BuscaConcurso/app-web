@@ -60,9 +60,11 @@ export function LateralDoConcurso({
               </div>
               <div
                 role="progressbar"
+                aria-label="Período de inscrição"
                 aria-valuenow={periodo.passados}
                 aria-valuemin={0}
                 aria-valuemax={periodo.total}
+                aria-valuetext={`${periodo.passados} de ${periodo.total} dias do período já passaram`}
                 className={`h-1.5 overflow-hidden rounded-full ${ESTILO_DO_PRAZO[tomDoCalendario(concurso.inscricoesAte, hoje)].trilha}`}
               >
                 <span
@@ -90,7 +92,7 @@ export function LateralDoConcurso({
                 <BotaoLink
                   href={destino.href}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener noreferrer"
                   variante="chamada"
                   tamanho="xl"
                   iconeDepois="externo"
@@ -105,9 +107,17 @@ export function LateralDoConcurso({
             )
           )}
 
-          <div className="h-px bg-linha-fraca" />
-
-          <PassosDaInscricao slug={concurso.slug} passos={passos} />
+          {/* R25: o passo a passo de inscrição some inteiro no encerrado (o
+              concurso não recebe mais inscrição nenhuma, "faça a inscrição
+              até 25/09" depois de fechado seria instrução morta); previsto
+              continua com os passos, para quem quiser se preparar antes de
+              abrir. */}
+          {tom !== "encerrado" && (
+            <>
+              <div className="h-px bg-linha-fraca" />
+              <PassosDaInscricao slug={concurso.slug} passos={passos} />
+            </>
+          )}
 
           <div className="grid grid-cols-2 gap-2">
             <BotaoEmBreve

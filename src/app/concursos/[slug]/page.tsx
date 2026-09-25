@@ -15,7 +15,7 @@ import { FatosDoConcurso } from "@/components/concurso/FatosDoConcurso";
 import { LateralDoConcurso } from "@/components/concurso/LateralDoConcurso";
 import { obterDetalhe, tambemAbertos } from "@/lib/concursos";
 import { fatosDoConcurso } from "@/lib/fatos";
-import { dataLonga, hojeEmSaoPaulo, moeda, vagasTexto } from "@/lib/formato";
+import { dataLonga, hojeCivilEmSaoPaulo, hojeEmSaoPaulo, moeda, vagasTexto } from "@/lib/formato";
 import { destinoDaInscricao } from "@/lib/inscricao";
 import { textoDeRodape, tituloComOrgao } from "@/lib/rotulos";
 import { nomeCurtoDoOrgao } from "@/lib/orgaos";
@@ -72,9 +72,22 @@ export default async function PaginaDoConcurso(
     permanentRedirect(`/concursos/${encodeURIComponent(concurso.slug)}`);
   }
 
-  const hoje = new Date();
-  // A data civil brasileira, para a linha do tempo: ver `hojeEmSaoPaulo`.
-  const hojeCivil = hojeEmSaoPaulo(hoje);
+  // R5 das global-constraints: quem decide o dia é o dia civil de Brasília,
+  // não o relógio cru do processo (um servidor em UTC vira o dia às 21h de
+  // Brasília, e das 21h à meia-noite a página diria que encerrou o que
+  // encerra hoje). `agora` é o único instante lido; `hoje` (o dia civil, para
+  // tudo que compara data: `tomDoConcurso`, `prazoPorExtenso`,
+  // `periodoDaInscricao`, a folhinha do `Calendario`, `CartaoDeUrgencia` e
+  // `tambemAbertos`) e `hojeCivil` (a mesma data civil, em string, para a
+  // linha do tempo) saem os dois dele, do mesmo jeito que `/concursos` e
+  // `/orgaos/[slug]` já fazem. Formatar `hoje` de novo com `hojeEmSaoPaulo`
+  // seria formatar meia-noite civil já convertida pelo fuso do processo:
+  // com o processo em UTC, meia-noite de Brasília vira 03h, que o fuso de
+  // Brasília ainda lê como o dia anterior, um segundo desvio de fuso em cima
+  // do primeiro.
+  const agora = new Date();
+  const hoje = hojeCivilEmSaoPaulo(agora);
+  const hojeCivil = hojeEmSaoPaulo(agora);
 
   // "Também abertos no {UF}" da lateral (Task 14). Não custa requisição nova
   // (lê o mesmo acervo já guardado em `cache`), mas uma falha aqui não pode

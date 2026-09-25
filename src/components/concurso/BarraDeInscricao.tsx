@@ -39,7 +39,7 @@ export function BarraDeInscricao({
       <BotaoLink
         href={destino.href}
         target="_blank"
-        rel="noopener noreferrer"
+        rel="nofollow noopener noreferrer"
         variante="chamada"
         tamanho="lg"
         iconeDepois="externo"

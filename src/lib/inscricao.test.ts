@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoDetalhe } from "./dominio";
+import { hojeCivilEmSaoPaulo } from "./formato";
 import { destinoDaInscricao, passosDaInscricao, periodoDaInscricao, prazoPorExtenso } from "./inscricao";
 
 const HOJE = new Date(2026, 8, 24);
@@ -53,6 +54,20 @@ describe("prazoPorExtenso", () => {
   it("inicio_inscricao com hora não fornece o horário do fim", () => {
     const comInicio = { ...base, cronograma: [{ tipo: "inicio_inscricao", ato: null, inicio: "2026-08-24", fim: null, hora: "10:00", localidades: [], observacao: null, evidencia: null }] } as unknown as ConcursoDetalhe;
     expect(prazoPorExtenso(comInicio, HOJE)?.detalhe).toBe("sexta");
+  });
+
+  it("um instante de 23h30 em Brasília no dia 24 (2h30 UTC do dia 25) ainda é 24 para o prazo", () => {
+    // R5/Review Focus 5: `hojeCivilEmSaoPaulo` é o que `page.tsx` agora passa
+    // adiante para `prazoPorExtenso`, `tomDoConcurso` e `periodoDaInscricao`,
+    // no lugar do `new Date()` cru. Um servidor em UTC roda este instante já
+    // no dia 25 (`2026-09-25T02:30:00Z`); em Brasília (UTC-3) ainda são
+    // 23h30 do dia 24, e o prazo de amanhã (25/09) não pode ter virado "hoje"
+    // só porque o processo mora noutro fuso.
+    const hoje = hojeCivilEmSaoPaulo(new Date("2026-09-25T02:30:00Z"));
+    expect(prazoPorExtenso(base, hoje)).toEqual({
+      titulo: "Encerra amanhã",
+      detalhe: "sexta, às 23h59 (Brasília)",
+    });
   });
 });
 

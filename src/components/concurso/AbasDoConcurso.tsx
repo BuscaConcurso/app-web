@@ -81,6 +81,7 @@ export function AbasDoConcurso({
           role="tabpanel"
           id={`painel-${painel.id}`}
           aria-labelledby={`aba-${painel.id}`}
+          tabIndex={0}
           className={indice === ativa ? "lg:block" : "hidden lg:block"}
         >
           {painel.conteudo}
