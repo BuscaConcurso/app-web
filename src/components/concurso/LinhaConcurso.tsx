@@ -193,6 +193,9 @@ export function LinhaConcurso({
           </BotaoEmBreve>
           <BotaoLink href={`/concursos/${concurso.slug}`} variante="contorno" tamanho="sm" iconeDepois="seta">
             Ver
+            {/* Sem isto, a lista inteira eram links com o mesmo nome "Ver"
+                para quem navega pela lista de links do leitor de tela. */}
+            <span className="sr-only">: {concurso.titulo}</span>
           </BotaoLink>
         </div>
       </Celula>

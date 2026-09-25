@@ -1,6 +1,19 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from "react";
+
+/** `lg` do Tailwind: a partir daqui as abas somem e os painéis viram pilha. */
+const CONSULTA_LG = "(min-width: 64rem)";
+
+function assinarLargura(avisar: () => void): () => void {
+  const consulta = window.matchMedia(CONSULTA_LG);
+  consulta.addEventListener("change", avisar);
+  return () => consulta.removeEventListener("change", avisar);
+}
+
+function ehDesktop(): boolean {
+  return window.matchMedia(CONSULTA_LG).matches;
+}
 
 /**
  * As abas do celular (`ConcursoMobile.dc.html`, o bloco `role="tablist"`):
@@ -22,6 +35,7 @@ export function AbasDoConcurso({
   paineis: { id: string; rotulo: string; conteudo: ReactNode }[];
 }) {
   const [ativa, setAtiva] = useState(0);
+  const desktop = useSyncExternalStore(assinarLargura, ehDesktop, () => false);
   const botoesRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   function irPara(indice: number) {
@@ -75,18 +89,27 @@ export function AbasDoConcurso({
         })}
       </div>
 
-      {paineis.map((painel, indice) => (
-        <div
-          key={painel.id}
-          role="tabpanel"
-          id={`painel-${painel.id}`}
-          aria-labelledby={`aba-${painel.id}`}
-          tabIndex={0}
-          className={indice === ativa ? "lg:block" : "hidden lg:block"}
-        >
-          {painel.conteudo}
-        </div>
-      ))}
+      {paineis.map((painel, indice) =>
+        // A partir de `lg` a lista de abas some e os painéis são só a pilha
+        // de seções: sem `role="tabpanel"`, `aria-labelledby` (a aba
+        // escondida) e `tabIndex`, que anunciariam abas que não estão lá.
+        desktop ? (
+          <div key={painel.id} id={`painel-${painel.id}`}>
+            {painel.conteudo}
+          </div>
+        ) : (
+          <div
+            key={painel.id}
+            role="tabpanel"
+            id={`painel-${painel.id}`}
+            aria-labelledby={`aba-${painel.id}`}
+            tabIndex={0}
+            className={indice === ativa ? "lg:block" : "hidden lg:block"}
+          >
+            {painel.conteudo}
+          </div>
+        ),
+      )}
     </div>
   );
 }
