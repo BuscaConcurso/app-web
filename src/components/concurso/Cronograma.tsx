@@ -90,8 +90,8 @@ export function Cronograma({
         // onde trocar de cor nem onde parar.
         const trilho =
           "evento" in linha && linha.fase === "passado"
-            ? "bg-tinta-300"
-            : "bg-tinta-200";
+            ? "bg-linha"
+            : "bg-linha";
 
         return (
           <li
@@ -195,10 +195,10 @@ export function Cronograma({
  * trás, e um ponto transparente viraria um anel com uma linha no meio.
  */
 const PONTO: Record<FaseDoEvento, string> = {
-  passado: "top-[5px] size-2.5 bg-tinta-300",
+  passado: "top-[5px] size-2.5 bg-linha",
   hoje: "top-1 size-3 bg-acao ring-[3px] ring-cartao",
-  futuro: "top-[5px] size-2.5 bg-cartao ring-[1.5px] ring-tinta-300",
-  "sem-data": "top-[7px] size-1.5 bg-tinta-200",
+  futuro: "top-[5px] size-2.5 bg-cartao ring-[1.5px] ring-linha",
+  "sem-data": "top-[7px] size-1.5 bg-linha",
 };
 
 /**

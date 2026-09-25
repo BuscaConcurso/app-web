@@ -50,7 +50,7 @@ function Chip({
   return (
     <Link
       href={href}
-      className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-controle bg-rebaixada px-3 text-[12px] font-medium text-tinta-800 transition-colors hover:bg-tinta-200"
+      className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-controle bg-rebaixada px-3 text-[12px] font-medium text-tinta-900 transition-colors hover:bg-linha"
     >
       <span className="min-w-0 break-words">{rotulo}</span>
       {total !== undefined && (
@@ -139,7 +139,7 @@ export function Hero({
         <Ilustracao className="hidden w-[210px] shrink-0 lg:block" />
       </div>
 
-      <div className="mt-6 rounded-caixa bg-cartao p-4 sm:p-5">
+      <div className="mt-6 rounded-cartao bg-cartao p-4 sm:p-5">
         <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em]">
           Acesso rápido
         </h2>

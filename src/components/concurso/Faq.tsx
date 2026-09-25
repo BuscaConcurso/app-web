@@ -98,7 +98,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
               // O mesmo rebaixo dos cargos, pelo mesmo motivo: dentro de um
               // bloco branco, cada par pergunta/resposta é uma caixa
               // rebaixada, não um cartão dentro de outro.
-              className="rounded-lg bg-bloco px-4 py-3.5"
+              className="rounded-lg bg-rebaixada px-4 py-3.5"
             >
               <h3 className="text-sm font-semibold text-tinta-900">
                 {ROTULO_PERGUNTA[resposta.pergunta]}
@@ -114,7 +114,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
                   fim da URL ficava cortado. A quebra em qualquer ponto é feia
                   numa URL e é a única alternativa a esconder o endereço, que
                   é justamente a resposta. */}
-              <p className="mt-1.5 max-w-[74ch] border-l-2 border-tinta-200 pl-3 text-[13px] leading-6 wrap-anywhere text-tinta-800">
+              <p className="mt-1.5 max-w-[74ch] border-l-2 border-linha pl-3 text-[13px] leading-6 wrap-anywhere text-tinta-900">
                 <TrechoComEnderecos texto={resposta.trecho ?? ""} />
               </p>
               {/* O caminho de volta ao documento. Agora que o FAQ é um bloco

@@ -48,7 +48,7 @@ import {
  * daria um retrato do componente, não o componente.
  *
  * O que se perderia de conferência visual é pouco, e é por acidente feliz: o
- * véu do modal é `bg-escura/40`, exatamente o mesmo token do fundo da gaveta —
+ * véu do modal é `bg-tinta-900/40`, exatamente o mesmo token do fundo da gaveta —
  * e a gaveta está no bloco do revelador, logo acima. O véu que clareava no
  * escuro em vez de escurecer continua tendo onde ser visto.
  *
@@ -100,19 +100,19 @@ const SUPERFICIES = [
   { nome: "Cartão", classe: "bg-cartao", token: "cartao" },
   { nome: "Página", classe: "bg-pagina", token: "pagina" },
   { nome: "Rebaixada", classe: "bg-rebaixada", token: "rebaixada" },
-  { nome: "Bloco", classe: "bg-bloco", token: "bloco" },
+  { nome: "Bloco", classe: "bg-rebaixada", token: "bloco" },
   { nome: "Rodapé", classe: "bg-rodape", token: "rodape" },
 ];
 
 const TINTAS = [
   { nome: "900", classe: "bg-tinta-900" },
-  { nome: "800", classe: "bg-tinta-800" },
+  { nome: "800", classe: "bg-tinta-900" },
   { nome: "600", classe: "bg-tinta-600" },
   { nome: "500", classe: "bg-tinta-500" },
-  { nome: "400", classe: "bg-tinta-400" },
-  { nome: "300", classe: "bg-tinta-300" },
-  { nome: "200", classe: "bg-tinta-200" },
-  { nome: "100", classe: "bg-tinta-100" },
+  { nome: "400", classe: "bg-tinta-500" },
+  { nome: "300", classe: "bg-linha" },
+  { nome: "200", classe: "bg-linha" },
+  { nome: "100", classe: "bg-rebaixada" },
 ];
 
 const SINAIS = [
@@ -122,10 +122,10 @@ const SINAIS = [
   // texto da chamada é `amarelo-texto`, que é o mesmo #141715 nos dois temas,
   // de propósito. Este bloco é o lugar onde um token invertido aparece, e a
   // frase que ele mostrava era a própria troca.
-  { nome: "Amarelo · chamada única", classe: "bg-amarelo", uso: "Uma por tela, sempre com texto amarelo-texto." },
-  { nome: "Vermelho · prazo curto", classe: "bg-vermelho", uso: "Encerra em até sete dias." },
-  { nome: "Verde 500 · abertas", classe: "bg-verde-500", uso: "Só como ponto de 6 px." },
-  { nome: "Ocre · previsto", classe: "bg-ocre", uso: "O amarelo quando precisa virar letra." },
+  { nome: "Amarelo · chamada única", classe: "bg-ouro", uso: "Uma por tela, sempre com texto amarelo-texto." },
+  { nome: "Vermelho · prazo curto", classe: "bg-urucum", uso: "Encerra em até sete dias." },
+  { nome: "Verde 500 · abertas", classe: "bg-verde", uso: "Só como ponto de 6 px." },
+  { nome: "Ocre · previsto", classe: "bg-ouro-sinal-texto", uso: "O amarelo quando precisa virar letra." },
 ];
 
 const TONS: Tom[] = ["aberto", "urgente", "previsto", "encerrado"];
@@ -249,10 +249,10 @@ export default async function Estilo() {
           </Cartao>
           <Cartao className="flex flex-col items-start gap-4 p-5">
             <div className="flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-[9px] bg-escura">
+              <span className="flex size-10 items-center justify-center rounded-[9px] bg-tinta-900">
                 <Logo variante="simbolo" tom="claro" tamanho={24} />
               </span>
-              <span className="flex size-6 items-center justify-center rounded-md bg-escura">
+              <span className="flex size-6 items-center justify-center rounded-md bg-tinta-900">
                 <Logo variante="simbolo" tom="claro" tamanho={15} />
               </span>
             </div>
@@ -265,17 +265,17 @@ export default async function Estilo() {
         </div>
 
         {/* Os três fundos em que a marca precisa se segurar. Eram quatro, e
-            dois deles eram o mesmo `bg-escura` com a mesma logo — repetição,
-            não estado. `bg-amarelo` entrou no lugar do duplicado porque é o
+            dois deles eram o mesmo `bg-tinta-900` com a mesma logo — repetição,
+            não estado. `bg-ouro` entrou no lugar do duplicado porque é o
             único fundo forte da tela e o que nunca muda entre os temas. */}
         <div className="mt-2 grid gap-2 sm:grid-cols-3">
-          <div className="rounded-caixa bg-escura p-6">
+          <div className="rounded-cartao bg-tinta-900 p-6">
             <Logo tom="claro" tamanho={28} />
           </div>
-          <div className="rounded-caixa bg-amarelo p-6 text-amarelo-texto">
+          <div className="rounded-cartao bg-ouro p-6 text-ouro-texto">
             <Logo tom="mono" tamanho={28} />
           </div>
-          <div className="rounded-caixa bg-rebaixada p-6">
+          <div className="rounded-cartao bg-rebaixada p-6">
             <Logo tamanho={28} />
           </div>
         </div>
@@ -334,7 +334,7 @@ export default async function Estilo() {
           <p className="text-base leading-6 font-semibold tracking-[-0.01em]">
             Analista judiciário · Área administrativa
           </p>
-          <p className="max-w-[60ch] text-[13px] leading-6 text-tinta-800">
+          <p className="max-w-[60ch] text-[13px] leading-6 text-tinta-900">
             Corpo de texto do edital e das notícias. Linha de 60 a 75
             caracteres, alinhada à esquerda, nunca justificada.
           </p>
@@ -535,7 +535,7 @@ export default async function Estilo() {
             titulo="A gaveta"
             apoio={<>· 352,5px a 375px</>}
           >
-            <p className="max-w-[74ch] text-[13px] leading-6 text-tinta-800">
+            <p className="max-w-[74ch] text-[13px] leading-6 text-tinta-900">
               O painel entra pela direita e cobre 94vw, o que a 375px deixa
               22,5px de página à mostra, o bastante para se ver que há algo
               atrás sem que a faixa vire um alvo de toque por engano. A barra
@@ -553,7 +553,7 @@ export default async function Estilo() {
           <Menu
             rotulo="Abrir o menu de exemplo"
             gatilho={
-              <span className="flex h-8 items-center rounded-controle bg-rebaixada px-3 text-[12px] font-semibold text-tinta-800 transition-colors hover:bg-tinta-200">
+              <span className="flex h-8 items-center rounded-controle bg-rebaixada px-3 text-[12px] font-semibold text-tinta-900 transition-colors hover:bg-linha">
                 Abrir o menu
               </span>
             }

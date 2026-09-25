@@ -23,9 +23,9 @@ export type TamanhoDoBotao = "sm" | "md" | "lg";
 
 const VARIANTE: Record<VarianteDoBotao, string> = {
   primario: "bg-acao text-acao-texto hover:bg-acao-hover font-semibold",
-  secundario: "bg-rebaixada text-tinta-900 hover:bg-tinta-200 font-medium",
-  fantasma: "text-tinta-800 hover:bg-rebaixada font-medium",
-  chamada: "bg-amarelo text-amarelo-texto hover:bg-amarelo-hover font-semibold",
+  secundario: "bg-rebaixada text-tinta-900 hover:bg-linha font-medium",
+  fantasma: "text-tinta-900 hover:bg-rebaixada font-medium",
+  chamada: "bg-ouro text-ouro-texto hover:bg-ouro-hover font-semibold",
 };
 
 const TAMANHO: Record<TamanhoDoBotao, string> = {
@@ -37,7 +37,7 @@ const TAMANHO: Record<TamanhoDoBotao, string> = {
 const BASE =
   "inline-flex items-center justify-center gap-2 rounded-controle " +
   "transition-colors select-none disabled:cursor-not-allowed " +
-  "disabled:bg-tinta-100 disabled:text-tinta-400 disabled:hover:bg-tinta-100";
+  "disabled:bg-rebaixada disabled:text-tinta-500 disabled:hover:bg-rebaixada";
 
 function classes(
   variante: VarianteDoBotao,

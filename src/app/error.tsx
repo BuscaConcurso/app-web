@@ -40,7 +40,7 @@ export default function Error({
 
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 sm:py-14">
-      <div className="rounded-caixa bg-cartao px-6 py-14 text-center sm:py-16">
+      <div className="rounded-cartao bg-cartao px-6 py-14 text-center sm:py-16">
         <Rotulo>Erro</Rotulo>
         <h1 className="mt-2 font-titulo text-2xl font-semibold text-tinta-900 sm:text-[28px]">
           Algo deu errado ao carregar esta página

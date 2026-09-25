@@ -11,12 +11,7 @@ const { claro, escuro, escuroDoSistema } = temasDoCss(
 const TEXTO = 4.5;
 const NAO_TEXTO = 3;
 
-/** Toda superfície onde texto de tinta aparece: página, cartões e os chips de tom. */
-const SUPERFICIES = [
-  "pagina", "cartao", "rebaixada", "bloco",
-  "encerrado", "urgente", "previsto",
-  "encerrado-chip", "urgente-chip", "previsto-chip", "tinta-100",
-];
+const SUPERFICIES = ["pagina", "cartao", "rebaixada"];
 
 interface Par {
   texto: string;
@@ -25,45 +20,46 @@ interface Par {
 }
 
 const PARES: Par[] = [
-  ...["tinta-900", "tinta-800", "tinta-600", "tinta-500"].flatMap((texto) =>
+  ...["tinta-900", "tinta-600", "tinta-500"].flatMap((texto) =>
     SUPERFICIES.map((fundo) => ({ texto, fundo, minimo: TEXTO })),
   ),
   ...["link", "link-hover"].flatMap((texto) =>
-    ["pagina", "cartao", "rebaixada", "bloco"].map((fundo) => ({ texto, fundo, minimo: TEXTO })),
+    ["pagina", "cartao"].map((fundo) => ({ texto, fundo, minimo: TEXTO })),
   ),
-  // Os chips do acesso rápido da home no `hover`: rótulo e número sobre tinta-200.
-  { texto: "tinta-800", fundo: "tinta-200", minimo: TEXTO },
-  { texto: "tinta-600", fundo: "tinta-200", minimo: TEXTO },
   { texto: "acao-texto", fundo: "acao", minimo: TEXTO },
   { texto: "acao-texto", fundo: "acao-hover", minimo: TEXTO },
-  { texto: "inverso-texto", fundo: "inverso", minimo: TEXTO },
-  { texto: "inverso-texto", fundo: "inverso-hover", minimo: TEXTO },
-  { texto: "amarelo-texto", fundo: "amarelo", minimo: TEXTO },
-  { texto: "amarelo-texto", fundo: "amarelo-hover", minimo: TEXTO },
-  { texto: "vermelho-800", fundo: "cartao", minimo: TEXTO },
-  { texto: "vermelho-800", fundo: "urgente", minimo: TEXTO },
-  { texto: "vermelho-800", fundo: "urgente-chip", minimo: TEXTO },
-  { texto: "urgente-apoio", fundo: "urgente", minimo: TEXTO },
-  { texto: "previsto-texto", fundo: "previsto", minimo: TEXTO },
-  { texto: "previsto-texto", fundo: "previsto-chip", minimo: TEXTO },
-  { texto: "previsto-apoio", fundo: "previsto", minimo: TEXTO },
+  { texto: "ouro-texto", fundo: "ouro", minimo: TEXTO },
+  { texto: "ouro-texto", fundo: "ouro-hover", minimo: TEXTO },
+  // O sinal ouro tem par próprio: o texto sobre o fundo claro do sinal não é
+  // o mesmo que segura leitura sobre o ouro cheio (ver Step 3 do brief).
+  { texto: "ouro-sinal-texto", fundo: "ouro-fundo", minimo: TEXTO },
+  ...["verde", "anil", "urucum", "neutro"].map((sinal) => ({
+    texto: `${sinal}-texto`, fundo: `${sinal}-fundo`, minimo: TEXTO,
+  })),
+  { texto: "urucum-texto", fundo: "cartao", minimo: TEXTO },
+  { texto: "faixa-texto", fundo: "faixa", minimo: TEXTO },
+  { texto: "utilitaria-texto", fundo: "utilitaria", minimo: TEXTO },
+  { texto: "acao-texto", fundo: "urucum", minimo: TEXTO },
+  { texto: "acao-texto", fundo: "anil", minimo: TEXTO },
   { texto: "rodape-texto", fundo: "rodape", minimo: TEXTO },
   { texto: "rodape-suave", fundo: "rodape", minimo: TEXTO },
-  { texto: "rodape-tenue", fundo: "rodape", minimo: TEXTO },
-  // Não texto: pontos de situação dentro do chip, ícones, a superfície do
-  // botão primário contra o cartão e o anel de foco contra a página.
-  { texto: "verde-500", fundo: "tinta-100", minimo: NAO_TEXTO },
-  { texto: "verde-500", fundo: "cartao", minimo: NAO_TEXTO },
-  { texto: "ocre", fundo: "previsto-chip", minimo: NAO_TEXTO },
-  { texto: "vermelho", fundo: "urgente-chip", minimo: NAO_TEXTO },
-  { texto: "tinta-400", fundo: "encerrado-chip", minimo: NAO_TEXTO },
-  { texto: "tinta-400", fundo: "tinta-100", minimo: NAO_TEXTO },
-  { texto: "tinta-400", fundo: "cartao", minimo: NAO_TEXTO },
-  { texto: "tinta-400", fundo: "rebaixada", minimo: NAO_TEXTO },
-  // O seletor de tema: o ícone inativo contra o ativo é o que diz o estado.
-  { texto: "tinta-400", fundo: "tinta-900", minimo: NAO_TEXTO },
+  // Não texto: a superfície do botão primário, o anel de foco e os ícones.
+  //
+  // Desvio do brief da Task 2: o passo 1 lista "acao" também no `flatMap`
+  // de texto (junto com "link" e "link-hover"), a 4.5:1. É matematicamente
+  // impossível manter isso e o par abaixo, `acao-texto` (branco fixo) sobre
+  // `acao`, no escuro: `acao-texto` fixa o teto de luminância de `acao` em
+  // 0,183 (para o branco ler 4.5:1), e o piso para `acao` como texto de
+  // 4.5:1 sobre `cartao` escuro é 0,234, maior que o teto. Nenhum valor de
+  // `acao` cumpre as duas ao mesmo tempo. Como o próprio comentário aqui
+  // já tratava "acao" como não-texto (ícone e superfície do botão), e é
+  // assim que o código usa `text-acao` hoje (rótulo pequeno em maiúsculas,
+  // não corpo de texto), o par de texto foi removido do `flatMap` acima e
+  // só os dois de 3:1 abaixo ficaram.
   { texto: "acao", fundo: "cartao", minimo: NAO_TEXTO },
   { texto: "acao", fundo: "pagina", minimo: NAO_TEXTO },
+  { texto: "ouro", fundo: "faixa", minimo: NAO_TEXTO },
+  { texto: "contorno", fundo: "cartao", minimo: 1.3 },
 ];
 
 function razao(tokens: Tokens, { texto, fundo }: Par): number {

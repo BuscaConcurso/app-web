@@ -24,7 +24,7 @@ export function Etiqueta({
 }) {
   const estilo = tom
     ? ESTILO_DO_TOM[tom]
-    : { chip: "bg-tinta-100 text-tinta-600", ponto: "bg-tinta-400" };
+    : { chip: "bg-rebaixada text-tinta-600", ponto: "bg-tinta-500" };
 
   return (
     <span

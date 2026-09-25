@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Literata } from "next/font/google";
+import { Bricolage_Grotesque, Public_Sans } from "next/font/google";
 import { unstable_rethrow } from "next/navigation";
 import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
@@ -18,24 +18,26 @@ import { SCRIPT_DO_TEMA } from "@/lib/tema";
 import { SessionProvider } from "@/lib/auth/session";
 
 /**
- * Literata em título e Archivo em todo o resto, número incluído.
+ * Bricolage Grotesque em título e Public Sans em todo o resto, número
+ * incluído.
  *
- * As duas são variáveis, então uma família cobre todos os pesos que o canvas
- * usa sem baixar um arquivo por peso. `next/font` as autohospeda, o que tira
- * a requisição para o Google e o deslocamento de layout que vem com ela.
- *
- * Duas famílias e não três: os números usam as figuras tabulares do próprio
- * Archivo, e a família a menos é uma requisição a menos no primeiro carregamento.
+ * `weight` lista só os pesos que o protótipo usa (500 a 800 no título, 400 a
+ * 700 na interface), em vez do intervalo variável inteiro que as duas
+ * famílias oferecem: menos peso para baixar, sem faltar nenhum peso que a
+ * tela pede. `next/font` as autohospeda, o que tira a requisição para o
+ * Google e o deslocamento de layout que vem com ela.
  */
-const literata = Literata({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin", "latin-ext"],
-  variable: "--fonte-literata",
+  weight: ["500", "600", "700", "800"],
+  variable: "--fonte-bricolage",
   display: "swap",
 });
 
-const archivo = Archivo({
+const publicSans = Public_Sans({
   subsets: ["latin", "latin-ext"],
-  variable: "--fonte-archivo",
+  weight: ["400", "500", "600", "700"],
+  variable: "--fonte-public-sans",
   display: "swap",
 });
 
@@ -207,7 +209,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     // mostrou o diff apontando para `data-tema` no `<html>`.
     <html
       lang="pt-BR"
-      className={`${literata.variable} ${archivo.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${publicSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>

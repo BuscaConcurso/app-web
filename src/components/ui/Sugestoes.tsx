@@ -281,7 +281,7 @@ function Relogio() {
       strokeWidth="1.4"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="size-3.5 shrink-0 text-tinta-400"
+      className="size-3.5 shrink-0 text-tinta-500"
     >
       <circle cx="8" cy="8" r="6" />
       <path d="M8 4.6V8l2.2 1.6" />
@@ -328,7 +328,7 @@ export function Sugestoes({
       className={[
         "absolute top-full right-0 left-0 z-30 mt-2",
         "max-h-[min(60vh,22rem)] overflow-y-auto overscroll-contain",
-        "rounded-caixa bg-cartao p-1.5",
+        "rounded-cartao bg-cartao p-1.5",
       ].join(" ")}
     >
       {itens.map((item, indice) => (
@@ -347,7 +347,7 @@ export function Sugestoes({
           onClick={() => aoEscolher(indice)}
           className={[
             "flex cursor-pointer items-center gap-2 rounded-controle px-2.5 py-2",
-            "text-sm text-tinta-800",
+            "text-sm text-tinta-900",
             indice === ativo ? "bg-rebaixada" : "",
           ].join(" ")}
         >

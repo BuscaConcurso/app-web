@@ -79,7 +79,7 @@ export function OAuthButtons({
           type="button"
           disabled={Boolean(pending)}
           onClick={() => void start(provider)}
-          className="h-10 rounded-controle bg-rebaixada px-4 text-sm font-semibold text-tinta-900 transition-colors hover:bg-tinta-200 disabled:opacity-60"
+          className="h-10 rounded-controle bg-rebaixada px-4 text-sm font-semibold text-tinta-900 transition-colors hover:bg-linha disabled:opacity-60"
         >
           {pending === provider
             ? "Abrindo…"
@@ -182,9 +182,9 @@ export function LoginScreen({ returnTo }: { returnTo?: string }) {
         <SubmitButton pending={pending}>Entrar</SubmitButton>
       </form>
       <div className="flex items-center gap-3 text-xs uppercase text-tinta-500">
-        <span className="h-px flex-1 bg-tinta-200" />
+        <span className="h-px flex-1 bg-linha" />
         ou
-        <span className="h-px flex-1 bg-tinta-200" />
+        <span className="h-px flex-1 bg-linha" />
       </div>
       <OAuthButtons mode="login" returnTo={safeReturnTo(returnTo)} />
       <div className="flex flex-col gap-2">
@@ -274,9 +274,9 @@ export function RegisterScreen() {
         <SubmitButton pending={pending}>Criar conta</SubmitButton>
       </form>
       <div className="flex items-center gap-3 text-xs uppercase text-tinta-500">
-        <span className="h-px flex-1 bg-tinta-200" />
+        <span className="h-px flex-1 bg-linha" />
         ou
-        <span className="h-px flex-1 bg-tinta-200" />
+        <span className="h-px flex-1 bg-linha" />
       </div>
       <OAuthButtons mode="signup" />
       <Link className={linkClass} href="/entrar">Já tenho uma conta</Link>

@@ -27,7 +27,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-6 border-t border-tinta-200 pt-7 first:border-0 first:pt-0">
+    <section id={id} className="scroll-mt-6 border-t border-linha pt-7 first:border-0 first:pt-0">
       <h2 className="mb-5 font-titulo text-xl text-tinta-900">{title}</h2>
       {children}
     </section>
@@ -240,19 +240,19 @@ function ProvidersSection() {
           <p className="text-sm text-tinta-600">Nenhum provedor vinculado.</p>
         )}
         {identities.map((identity) => (
-          <div key={identity.provider} className="flex items-center justify-between gap-3 rounded-controle bg-bloco p-3">
+          <div key={identity.provider} className="flex items-center justify-between gap-3 rounded-controle bg-rebaixada p-3">
             <div className="min-w-0">
               <p className="text-sm font-semibold capitalize text-tinta-900">{identity.provider}</p>
               <p className="truncate text-xs text-tinta-500">{identity.email}</p>
             </div>
-            <button type="button" onClick={() => void unlink(identity.provider)} className="text-xs font-semibold text-vermelho-800 underline">
+            <button type="button" onClick={() => void unlink(identity.provider)} className="text-xs font-semibold text-urucum-texto underline">
               Desvincular
             </button>
           </div>
         ))}
       </div>
       <div className="mt-5">
-        <p className="mb-3 text-sm font-semibold text-tinta-800">Vincular outro provedor</p>
+        <p className="mb-3 text-sm font-semibold text-tinta-900">Vincular outro provedor</p>
         <OAuthButtons mode="link" returnTo="/conta#provedores" />
       </div>
     </Section>
@@ -284,7 +284,7 @@ function SessionsSection() {
       <p className="mb-4 text-sm text-tinta-600">
         Encerra o acesso desta conta em todos os navegadores e dispositivos.
       </p>
-      <button type="button" disabled={pending} onClick={() => void logoutAll()} className="h-10 w-full rounded-controle bg-rebaixada px-4 text-sm font-semibold text-tinta-900 hover:bg-tinta-200 disabled:opacity-60">
+      <button type="button" disabled={pending} onClick={() => void logoutAll()} className="h-10 w-full rounded-controle bg-rebaixada px-4 text-sm font-semibold text-tinta-900 hover:bg-linha disabled:opacity-60">
         {pending ? "Encerrando…" : "Sair de todos os dispositivos"}
       </button>
     </Section>
@@ -312,10 +312,10 @@ export function AccountScreen() {
   return (
     <div className="mx-auto w-full max-w-[760px] px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-verde-700">Sua conta</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-acao">Sua conta</p>
         <h1 className="font-titulo text-[32px] leading-tight text-tinta-900">Conta e segurança</h1>
       </header>
-      <div className="flex flex-col gap-8 rounded-caixa bg-cartao p-6 sm:p-8">
+      <div className="flex flex-col gap-8 rounded-cartao bg-cartao p-6 sm:p-8">
         <ProfileSection />
         <PasswordSection />
         <EmailSection />

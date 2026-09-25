@@ -124,8 +124,8 @@ export function ListaDeResultados({
                   aria-current={chave === consulta.ordem ? "true" : undefined}
                   className={`rounded-controle px-3 py-1.5 text-[12px] font-medium transition-colors ${
                     chave === consulta.ordem
-                      ? "bg-inverso text-inverso-texto"
-                      : "bg-rebaixada text-tinta-800 hover:bg-tinta-200"
+                      ? "bg-tinta-900 text-cartao"
+                      : "bg-rebaixada text-tinta-900 hover:bg-linha"
                   }`}
                 >
                   {ORDENS[chave]}
@@ -162,7 +162,7 @@ export function ListaDeResultados({
           )}
 
           {resultado.itens.length === 0 ? (
-            <div className="mt-5 rounded-caixa bg-cartao px-6 py-12 text-center">
+            <div className="mt-5 rounded-cartao bg-cartao px-6 py-12 text-center">
               {/* Sem filtro nenhum, o zero é do termo, e sugerir tirar o
                   estado ou a escolaridade seria mandar mexer no que não
                   está marcado. */}

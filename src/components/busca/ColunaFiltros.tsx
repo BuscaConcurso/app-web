@@ -36,7 +36,7 @@ function Quadradinho({ marcado }: { marcado: boolean }) {
     <span
       aria-hidden="true"
       className={`flex size-[16px] shrink-0 items-center justify-center rounded-[5px] ${
-        marcado ? "bg-acao" : "bg-tinta-200"
+        marcado ? "bg-acao" : "bg-linha"
       }`}
     >
       {marcado && (
@@ -80,7 +80,7 @@ function Grupo({
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcado ? "remover filtro" : "filtrar"
                 }`}
-                className="-mx-1.5 flex items-center gap-2.5 rounded-controle px-1.5 py-1 text-sm text-tinta-800 transition-colors hover:bg-rebaixada"
+                className="-mx-1.5 flex items-center gap-2.5 rounded-controle px-1.5 py-1 text-sm text-tinta-900 transition-colors hover:bg-rebaixada"
               >
                 <Quadradinho marcado={marcado} />
                 <span className={marcado ? "font-medium text-tinta-900" : ""}>
@@ -121,7 +121,7 @@ function GrupoDeBancas({
                 className={`inline-block rounded-controle px-2.5 py-1.5 text-[12px] transition-colors ${
                   marcada
                     ? "bg-acao font-medium text-acao-texto hover:bg-acao-hover"
-                    : "bg-rebaixada text-tinta-800 hover:bg-tinta-200"
+                    : "bg-rebaixada text-tinta-900 hover:bg-linha"
                 }`}
               >
                 {opcao.rotulo}
@@ -211,7 +211,7 @@ function FaixaDeSalario({
       </div>
       <button
         type="submit"
-        className="h-9 rounded-controle bg-rebaixada text-[12px] font-semibold text-tinta-900 transition-colors hover:bg-tinta-200"
+        className="h-9 rounded-controle bg-rebaixada text-[12px] font-semibold text-tinta-900 transition-colors hover:bg-linha"
       >
         Aplicar faixa
       </button>
@@ -245,7 +245,7 @@ function Painel({
         className={
           emGaveta
             ? "flex flex-col gap-5"
-            : "flex flex-col gap-5 rounded-caixa bg-cartao p-4"
+            : "flex flex-col gap-5 rounded-cartao bg-cartao p-4"
         }
       >
         <div
@@ -299,7 +299,7 @@ function Painel({
 
 function CartaoDeAlerta({ total }: { total: number }) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-caixa bg-cartao p-4">
+    <div className="flex flex-col gap-2.5 rounded-cartao bg-cartao p-4">
       <p className="text-sm leading-5 font-semibold">
         Receba estes {numero(total)} concursos por e-mail
       </p>
@@ -357,7 +357,7 @@ export function ColunaFiltros({
       <Gaveta
         className="lg:hidden"
         titulo="Filtros"
-        gatilho="h-10 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 transition-colors hover:bg-tinta-200"
+        gatilho="h-10 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 transition-colors hover:bg-linha"
         apoio={
           ativos > 0 ? <span className="numero">· {ativos}</span> : undefined
         }

@@ -23,7 +23,7 @@ export function Cartao({
   return (
     <Tag
       className={[
-        "rounded-caixa",
+        "rounded-cartao",
         ESTILO_DO_TOM[tom].cartao,
         className ?? "p-4",
       ].join(" ")}
@@ -37,7 +37,7 @@ export function Cartao({
  * O bloco rebaixado de dentro do cartão, que agrupa os números para que
  * vagas, salário e prazo leiam como uma tabela e não como frases soltas.
  *
- * **O rebaixo é do tom do cartão, não cinza fixo.** O `bg-bloco` cinza é o
+ * **O rebaixo é do tom do cartão, não cinza fixo.** O `bg-rebaixada` cinza é o
  * rebaixo do cartão BRANCO; dentro do cartão urgente ou do previsto ele é uma
  * mancha de outra família, e no encerrado chegava a ficar mais CLARO que o
  * fundo — a lista parecia levantada em vez de rebaixada. Cada tom rebaixa com
@@ -135,9 +135,9 @@ export function Selo({
   const base = "flex shrink-0 items-center justify-center text-center leading-none";
 
   const fundo = {
-    aberto: "bg-rebaixada text-tinta-800",
-    urgente: "bg-urgente-chip text-vermelho-800",
-    previsto: "bg-previsto-chip text-previsto-texto",
+    aberto: "bg-rebaixada text-tinta-900",
+    urgente: "bg-urgente-chip text-urucum-texto",
+    previsto: "bg-previsto-chip text-ouro-sinal-texto",
     encerrado: "bg-encerrado-chip text-tinta-600",
   }[tom];
 

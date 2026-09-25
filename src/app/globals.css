@@ -1,152 +1,95 @@
 @import "tailwindcss";
 
 /*
- * Tokens do canvas "BuscaConcurso · Identidade".
+ * Tokens do protótipo "BuscaConcurso · Home Redesign" (docs/prototipo).
  *
- * Três regras governam tudo aqui:
- *   1. Cinza por padrão, cor só quando informa alguma coisa.
- *   2. Nada de borda em caixa e nada de sombra. O que separa uma caixa da
- *      outra é o degrau entre a página cinza e o cartão branco.
- *   3. Literata em título e Archivo em todo o resto, número incluído.
- *
- * Os nomes são os mesmos do canvas, em português, para que a conversa sobre
- * o desenho e o código usem uma palavra só.
+ * A marca vem de Athos Bulcão: azulejo verde, sol em ouro, papel de edital.
+ * O ouro é a chamada única da tela. Urucum é prazo curto. Anil é link e
+ * informação. Os nomes são de papel e não de cor: o escuro troca o valor, o
+ * componente não muda.
  */
 @theme {
-  /* Superfícies. O empilhamento é pagina < cartao, e bloco é o rebaixo
-   * dentro do cartão que agrupa os números. */
-  --color-pagina: #eceeed;
+  --color-pagina: #f6f4ee;
   --color-cartao: #ffffff;
-  --color-rebaixada: #e2e5e3;
-  --color-bloco: #f4f6f5;
-  --color-escura: #141715;
+  --color-rebaixada: #f1eee6;
+  --color-faixa: #0a4d2e;
+  --color-faixa-texto: #cfe3d6;
+  --color-utilitaria: #06331e;
+  --color-utilitaria-texto: #cfe3d6;
 
-  /* Tinta. Todo texto e todo o resto sai daqui. */
-  --color-tinta-900: #141715;
-  --color-tinta-800: #2a2e2b;
-  --color-tinta-600: #4e534f;
-  --color-tinta-500: #5a605c;
-  --color-tinta-400: #767c78;
-  --color-tinta-300: #c3c7c5;
-  --color-tinta-200: #d9dddb;
-  --color-tinta-100: #e9ebea;
+  --color-linha: #e3dfd4;
+  --color-linha-fraca: #eeebe3;
+  --color-contorno: #d4cfc2;
 
-  /* Ação. Verde 700 é o botão primário, a marca e o filtro marcado. */
-  --color-verde-900: #06361f;
-  --color-verde-700: #0c5434;
-  --color-verde-600: #116b42;
-  --color-verde-500: #1a8c55;
-  --color-verde-300: #5fbe8c;
+  --color-tinta-900: #0f1f17;
+  --color-tinta-600: #4f5d55;
+  /* O protótipo usa #66736B, que dá 4,28:1 sobre `rebaixada` (falha o
+   * mínimo de 4.5:1 de `contraste.test.ts`). Escurecido um passo de 4 por
+   * canal para #626F67: 4,54:1, e ainda a mesma cor a olho nu. */
+  --color-tinta-500: #626f67;
 
-  /* Sinal. Amarelo é a chamada única da tela, sempre com texto tinta 900.
-   * Ocre é o amarelo quando precisa virar letra e manter contraste. */
-  --color-amarelo: #f2b705;
-  --color-amarelo-escuro: #d9a504;
-  --color-ocre: #8a6407;
-  --color-vermelho: #b3261e;
-  --color-vermelho-800: #8e1c16;
-
-  /* Situação do concurso. O fundo do cartão é o sinal, não uma etiqueta
-   * colorida em cada linha. */
-  --color-urgente: #fdf0ee;
-  --color-urgente-chip: #f8dcd8;
-  --color-urgente-apoio: #6e5450;
-  --color-previsto: #faf4e4;
-  --color-previsto-chip: #f3e6c6;
-  --color-previsto-texto: #6e5005;
-  --color-previsto-apoio: #6b6250;
-  --color-encerrado: #e5e8e6;
-  --color-encerrado-chip: #d9dddb;
-
-  /* Papéis, e não nomes de cor.
-   *
-   * `verde-700` diz que cor é; `acao` diz para que serve. A diferença só
-   * aparece no tema escuro, onde o botão primário e o texto de link precisam
-   * de verdes diferentes: um claro o bastante para ler sobre fundo escuro, e
-   * outro escuro o bastante para segurar texto branco. Com nome de papel, o
-   * componente não muda; muda o valor por trás dele. */
-  --color-acao: #0c5434;
-  --color-acao-hover: #116b42;
+  --color-acao: #0b6b3a;
+  --color-acao-hover: #0a5c32;
   --color-acao-texto: #ffffff;
-  --color-link: #0c5434;
-  --color-link-hover: #116b42;
-  /* Superfície de contraste máximo: botão preto, página atual, filtro ativo. */
-  --color-inverso: #141715;
-  --color-inverso-hover: #2a2e2b;
-  --color-inverso-texto: #ffffff;
-  /* O rodapé.
-   *
-   * No claro ele é uma faixa escura com texto claro, um gesto forte de
-   * fechamento de página. No escuro esse gesto não tem para onde ir: a página
-   * já é quase preta e uma faixa ainda mais escura não se distingue. Lá ele
-   * inverte a lógica e vira uma faixa elevada, como um cartão, que separa
-   * pelo degrau do mesmo jeito. Por isso tem tokens próprios em vez de
-   * reaproveitar `escura`. */
-  --color-rodape: #141715;
-  --color-rodape-texto: #ffffff;
-  --color-rodape-suave: rgb(255 255 255 / 0.75);
-  --color-rodape-tenue: rgb(255 255 255 / 0.48);
-  --color-rodape-faixa: rgb(255 255 255 / 0.06);
+  --color-link: #1d3f8f;
+  --color-link-hover: #0b6b3a;
 
-  /* O amarelo é o mesmo nos dois temas, e o texto sobre ele também. */
-  --color-amarelo-texto: #141715;
-  --color-amarelo-hover: #d9a504;
-  /* A marca. No escuro ela usa a variante "sobre fundo" do canvas. */
-  --color-marca-lente: #0c5434;
-  --color-marca-documento: #141715;
-  --color-marca-palavra: #141715;
-  --color-marca-destaque: #0c5434;
+  --color-ouro: #f2c230;
+  --color-ouro-hover: #e6b422;
+  --color-ouro-texto: #2a2000;
+  --color-ouro-faixa: #c99a00;
 
-  --font-titulo: var(--fonte-literata), Georgia, "Times New Roman", serif;
-  --font-interface: var(--fonte-archivo), "Helvetica Neue", Helvetica, Arial,
-    sans-serif;
+  --color-verde: #0b6b3a;
+  --color-verde-fundo: #e4f1e8;
+  --color-verde-texto: #0b6b3a;
+  --color-anil: #1d3f8f;
+  --color-anil-fundo: #e7ecf8;
+  --color-anil-texto: #1d3f8f;
+  --color-ouro-fundo: #fcf1cf;
+  --color-ouro-sinal-texto: #7a5b00;
+  --color-urucum: #b8401f;
+  --color-urucum-fundo: #fbe7e0;
+  --color-urucum-texto: #8f2f15;
+  --color-neutro-fundo: #f1eee6;
+  --color-neutro-texto: #0f1f17;
 
-  /* Escala tipográfica. Menor que o padrão do Tailwind em todos os degraus:
-   * esta é uma interface de leitura em lista, onde caber mais linha na tela
-   * vale mais do que o conforto de um corpo grande. A hierarquia entre os
-   * degraus é a mesma do canvas, só que comprimida. */
-  --text-xs: 11px;
-  --text-xs--line-height: 15px;
-  --text-sm: 13px;
-  --text-sm--line-height: 18px;
-  --text-base: 14px;
-  --text-base--line-height: 20px;
-  --text-lg: 16px;
-  --text-lg--line-height: 22px;
-  --text-xl: 18px;
-  --text-xl--line-height: 24px;
+  /* Situação do concurso, pelo nome antigo, para situacao.ts e os cartões. */
+  --color-urgente: var(--color-urucum-fundo);
+  --color-urgente-chip: var(--color-urucum-fundo);
+  --color-previsto: var(--color-ouro-fundo);
+  --color-previsto-chip: var(--color-ouro-fundo);
+  --color-encerrado: var(--color-rebaixada);
+  --color-encerrado-chip: var(--color-rebaixada);
 
-  /* Unidade da escala de espaço. O canvas pede múltiplos de 4; 3.5px mantém
-   * a proporção entre os degraus e aperta tudo em 12% de uma vez só, das
-   * margens de seção à altura dos controles. */
-  --spacing: 0.22rem;
+  --color-rodape: #ffffff;
+  --color-rodape-texto: #0f1f17;
+  --color-rodape-suave: #4f5d55;
 
-  --radius-caixa: 10px;
-  --radius-controle: 6px;
+  --font-titulo: var(--fonte-bricolage), "Helvetica Neue", Arial, sans-serif;
+  --font-interface: var(--fonte-public-sans), system-ui, sans-serif;
+
+  --radius-controle: 11px;
+  --radius-cartao: 18px;
+  --radius-painel: 24px;
+
+  --shadow-cartao: 0 1px 0 var(--color-linha);
+  --shadow-numeros: 0 1px 0 var(--color-linha), 0 20px 50px rgb(15 31 23 / 0.08);
+  --shadow-tabela: 0 1px 0 var(--color-linha), 0 12px 40px rgb(15 31 23 / 0.05);
+  --shadow-flutuante: 0 30px 60px rgb(0 30 15 / 0.35);
+  --shadow-busca: 0 24px 60px rgb(0 30 15 / 0.35);
+  --shadow-aba: 0 1px 3px rgb(15 31 23 / 0.12);
 }
-
-/* A escala de espaço deste projeto NÃO é a do Tailwind. `--spacing` está em
- * 0,22rem acima, então cada degrau vale 3,52px e não 4 — `size-11` dá 38,72px,
- * `px-0.5` dá 1,76px e `px-1` dá 3,52px. Nenhum degrau cai em 2px, e é por
- * isso que o separador da trilha usa valor arbitrário.
- *
- * O comentário anterior dizia "múltipla de 4, que é a do canvas" e listava
- * cartões por 12 e seções por 32 — três linhas abaixo da própria declaração
- * que o contradizia. Quem media pelo comentário errava por 12%. */
 
 /**
  * Tema escuro.
  *
  * Só troca o valor dos tokens; nenhum componente sabe que ele existe. As
- * regras do canvas continuam valendo, invertidas: o que separa as caixas é o
- * degrau entre superfícies, e agora o cartão é mais claro que a página em vez
- * de mais branco.
+ * regras do protótipo continuam valendo, invertidas: o que separa as caixas é
+ * o degrau entre superfícies, e agora o cartão é mais claro que a página em
+ * vez de mais branco.
  *
  * A medida de todo par de texto e fundo aqui é `src/lib/contraste.test.ts`:
- * os de leitura passam de 4.5:1 e as superfícies de ação passam de 3:1. O
- * verde de ação escurece para segurar texto branco e o verde de link clareia
- * para ler sobre fundo escuro, que é exatamente o motivo de existirem dois
- * tokens.
+ * os de leitura passam de 4.5:1 e as superfícies de ação passam de 3:1.
  *
  * A segunda regra cobre tanto a escolha "sistema" quanto a ausência do
  * atributo. Isso vale antes de qualquer JavaScript rodar, então quem usa o
@@ -155,121 +98,85 @@
 :root[data-tema="escuro"],
 :root:not([data-tema="claro"]):not([data-tema="escuro"]):not([data-tema="sistema"]) {
   color-scheme: dark;
-
-  --color-pagina: #121513;
-  --color-cartao: #1c201e;
-  --color-rebaixada: #272c29;
-  --color-bloco: #171a18;
-  --color-escura: #0c0e0d;
-
-  --color-tinta-900: #edefee;
-  --color-tinta-800: #d5d9d7;
-  --color-tinta-600: #a2a8a4;
-  --color-tinta-500: #9a9f9c;
-  --color-tinta-400: #80867f;
-  --color-tinta-300: #4c534e;
-  --color-tinta-200: #363b38;
-  --color-tinta-100: #282d2a;
-
-  --color-verde-900: #0a2b1a;
-  --color-verde-700: #17804d;
-  --color-verde-600: #1c9159;
-  --color-verde-500: #34b37a;
-  --color-verde-300: #5fbe8c;
-
-  --color-ocre: #e0c067;
-  --color-vermelho: #e07b82;
-  --color-vermelho-800: #f3aea6;
-
-  --color-urgente: #2a1b1a;
-  --color-urgente-chip: #43241f;
-  --color-urgente-apoio: #c9a49e;
-  --color-previsto: #241e12;
-  --color-previsto-chip: #3a2f16;
-  --color-previsto-texto: #e8c97a;
-  --color-previsto-apoio: #c4b58d;
-  --color-encerrado: #191c1a;
-  --color-encerrado-chip: #2a2e2b;
-
-  --color-acao: #17804d;
-  --color-acao-hover: #136b41;
+  --color-pagina: #0b1611;
+  --color-cartao: #13211a;
+  --color-rebaixada: #1c2d24;
+  --color-faixa: #072a19;
+  --color-faixa-texto: #cfe3d6;
+  --color-utilitaria: #041a0f;
+  --color-utilitaria-texto: #cfe3d6;
+  --color-linha: #22362b;
+  --color-linha-fraca: #1a2a21;
+  --color-contorno: #34493d;
+  --color-tinta-900: #eef2ee;
+  --color-tinta-600: #b3c0b8;
+  --color-tinta-500: #97a59c;
+  /* O protótipo repete o verde de ação do claro (#0B6B3A) aqui, mas
+   * `text-acao` (rótulo do cronograma, item ativo do filtro) cai para
+   * 2,52:1 sobre `cartao` e 2,80:1 sobre `pagina`, os dois abaixo do
+   * mínimo de não-texto (3:1). Clareado em quatro passos de 4 no canal
+   * verde, #0B7B3A: 3,10:1 sobre `cartao` e o branco de `acao-texto`
+   * ainda lê 5,37:1 sobre ele, longe do piso de 4.5:1. */
+  --color-acao: #0b7b3a;
+  --color-acao-hover: #0e7a43;
   --color-acao-texto: #ffffff;
-  --color-link: #5fbe8c;
-  --color-link-hover: #7dcda2;
-  --color-inverso: #edefee;
-  --color-inverso-hover: #d5d9d7;
-  --color-inverso-texto: #121513;
-
-  --color-rodape: #1c201e;
-  --color-rodape-texto: #edefee;
-  --color-rodape-suave: #a2a8a4;
-  --color-rodape-tenue: #8a908c;
-  --color-rodape-faixa: rgb(255 255 255 / 0.04);
-
-  --color-marca-lente: #ffffff;
-  --color-marca-documento: #f2b705;
-  --color-marca-palavra: #ffffff;
-  --color-marca-destaque: #5fbe8c;
+  --color-link: #8fb0f0;
+  --color-link-hover: #7fd3a2;
+  --color-ouro-hover: #f5cd4f;
+  --color-verde-fundo: #16382a;
+  --color-verde-texto: #7fd3a2;
+  --color-anil-fundo: #1a2744;
+  --color-anil-texto: #a9c0f2;
+  --color-ouro-fundo: #33290b;
+  --color-ouro-sinal-texto: #f2c230;
+  --color-urucum: #b8401f;
+  --color-urucum-fundo: #3a1c12;
+  --color-urucum-texto: #f4a58c;
+  --color-neutro-fundo: #1c2d24;
+  --color-neutro-texto: #eef2ee;
+  --color-rodape: #13211a;
+  --color-rodape-texto: #eef2ee;
+  --color-rodape-suave: #b3c0b8;
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-tema="sistema"] {
     color-scheme: dark;
-
-    --color-pagina: #121513;
-    --color-cartao: #1c201e;
-    --color-rebaixada: #272c29;
-    --color-bloco: #171a18;
-    --color-escura: #0c0e0d;
-
-    --color-tinta-900: #edefee;
-    --color-tinta-800: #d5d9d7;
-    --color-tinta-600: #a2a8a4;
-    --color-tinta-500: #9a9f9c;
-    --color-tinta-400: #80867f;
-    --color-tinta-300: #4c534e;
-    --color-tinta-200: #363b38;
-    --color-tinta-100: #282d2a;
-
-    --color-verde-900: #0a2b1a;
-    --color-verde-700: #17804d;
-    --color-verde-600: #1c9159;
-    --color-verde-500: #34b37a;
-    --color-verde-300: #5fbe8c;
-
-    --color-ocre: #e0c067;
-    --color-vermelho: #e07b82;
-    --color-vermelho-800: #f3aea6;
-
-    --color-urgente: #2a1b1a;
-    --color-urgente-chip: #43241f;
-    --color-urgente-apoio: #c9a49e;
-    --color-previsto: #241e12;
-    --color-previsto-chip: #3a2f16;
-    --color-previsto-texto: #e8c97a;
-    --color-previsto-apoio: #c4b58d;
-    --color-encerrado: #191c1a;
-    --color-encerrado-chip: #2a2e2b;
-
-    --color-acao: #17804d;
-    --color-acao-hover: #136b41;
+    --color-pagina: #0b1611;
+    --color-cartao: #13211a;
+    --color-rebaixada: #1c2d24;
+    --color-faixa: #072a19;
+    --color-faixa-texto: #cfe3d6;
+    --color-utilitaria: #041a0f;
+    --color-utilitaria-texto: #cfe3d6;
+    --color-linha: #22362b;
+    --color-linha-fraca: #1a2a21;
+    --color-contorno: #34493d;
+    --color-tinta-900: #eef2ee;
+    --color-tinta-600: #b3c0b8;
+    --color-tinta-500: #97a59c;
+    /* Mesmo ajuste do bloco `[data-tema="escuro"]` acima: ver o comentário
+     * lá para o porquê de #0B7B3A. */
+    --color-acao: #0b7b3a;
+    --color-acao-hover: #0e7a43;
     --color-acao-texto: #ffffff;
-    --color-link: #5fbe8c;
-    --color-link-hover: #7dcda2;
-    --color-inverso: #edefee;
-    --color-inverso-hover: #d5d9d7;
-    --color-inverso-texto: #121513;
-
-    --color-rodape: #1c201e;
-    --color-rodape-texto: #edefee;
-    --color-rodape-suave: #a2a8a4;
-    --color-rodape-tenue: #8a908c;
-    --color-rodape-faixa: rgb(255 255 255 / 0.04);
-
-    --color-marca-lente: #ffffff;
-    --color-marca-documento: #f2b705;
-    --color-marca-palavra: #ffffff;
-    --color-marca-destaque: #5fbe8c;
+    --color-link: #8fb0f0;
+    --color-link-hover: #7fd3a2;
+    --color-ouro-hover: #f5cd4f;
+    --color-verde-fundo: #16382a;
+    --color-verde-texto: #7fd3a2;
+    --color-anil-fundo: #1a2744;
+    --color-anil-texto: #a9c0f2;
+    --color-ouro-fundo: #33290b;
+    --color-ouro-sinal-texto: #f2c230;
+    --color-urucum: #b8401f;
+    --color-urucum-fundo: #3a1c12;
+    --color-urucum-texto: #f4a58c;
+    --color-neutro-fundo: #1c2d24;
+    --color-neutro-texto: #eef2ee;
+    --color-rodape: #13211a;
+    --color-rodape-texto: #eef2ee;
+    --color-rodape-suave: #b3c0b8;
   }
 }
 
@@ -282,6 +189,27 @@ body {
   color: var(--color-tinta-900);
   font-family: var(--font-interface);
   text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
+}
+
+input::placeholder {
+  color: var(--color-tinta-500);
+}
+
+.sr-only-foco:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Número de vaga, salário e prazo.
+ *
+ * O corpo inteiro já liga as figuras tabulares (ver `body` acima); esta
+ * classe fica como alias vazio para não quebrar quem ainda a usa. */
+.numero {
 }
 
 /* Sem borda e sem sombra em caixa, então o foco precisa de um anel próprio
@@ -312,84 +240,6 @@ body {
   outline: none;
 }
 
-/* Número de vaga, salário e prazo.
- *
- * Sem família própria: é o Archivo da interface, só com as figuras de largura
- * fixa ligadas, para que os valores de uma coluna alinhem em vez de dançar
- * conforme o dígito. Uma monoespaçada aqui resolvia o alinhamento e criava
- * uma terceira voz tipográfica na tela, que não vale o preço. */
-.numero {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-
-/**
- * Aurora: um anel de gradiente cônico girando devagar em volta da caixa.
- *
- * O truque é uma máscara que recorta o miolo do pseudoelemento, deixando
- * visível só a faixa de dois pixels que sobra para fora da caixa. Sem ela o
- * gradiente cobriria o campo inteiro.
- *
- * O giro é uma propriedade registrada com `@property`, porque um ângulo
- * declarado só como variável não é interpolável e a animação daria saltos.
- *
- * As cores são as da marca, não um arco-íris: verde de ação, verde claro e
- * um fio de amarelo. Numa página cinza por padrão, isto é o único movimento
- * da tela, e é por isso que funciona.
- */
-@property --aurora-giro {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes aurora-girar {
-  to {
-    --aurora-giro: 360deg;
-  }
-}
-
-.aurora {
-  position: relative;
-}
-
-.aurora::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  padding: 2px;
-  border-radius: inherit;
-  background: conic-gradient(
-    from var(--aurora-giro),
-    transparent 0deg,
-    var(--color-verde-500) 40deg,
-    var(--color-verde-300) 90deg,
-    var(--color-amarelo) 130deg,
-    transparent 190deg,
-    transparent 260deg,
-    var(--color-verde-500) 320deg,
-    transparent 360deg
-  );
-  /* Recorta o miolo: fica só a moldura. */
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  animation: aurora-girar 8s linear infinite;
-}
-
-/* Quem pediu menos movimento fica com o mesmo anel, parado. */
-@media (prefers-reduced-motion: reduce) {
-  .aurora::before {
-    animation: none;
-  }
-}
-
 /**
  * O revelador: a mecânica de abrir e fechar da gaveta e do menu.
  *
@@ -406,7 +256,7 @@ body {
  * navegador só renderiza o conteúdo de um `<details>` aberto, então uma
  * transição com `@starting-style` anima a ENTRADA e não a saída: medido no
  * Chrome 152, o painel entra de 94,7% a 0 em 240ms e, ao fechar, some no mesmo
- * quadro — `translate` já lê `none` 20ms depois. Já uma `@keyframes` disparada
+ * quadro: `translate` já lê `none` 20ms depois. Já uma `@keyframes` disparada
  * pelo seletor recomeça toda vez que ele passa a casar, e o atributo
  * `data-fechando` (posto pelo componente, que segura o `open` até o
  * `animationend`) dá a saída pelo mesmo caminho. Medido: 0% aos 20ms e 85,2%
@@ -417,10 +267,10 @@ body {
  * `<details>` compra.
  *
  * `--revelar` vai de 1 (fora) a 0 (no lugar). Precisa de `@property` porque
- * variável sem tipo declarado não interpola — o mesmo motivo de `--aurora-giro`
- * logo acima. `inherits: true` porque quem lê o valor são os filhos: a barra
- * de topo (o `<summary>`), o painel e o fundo se movem juntos a partir de um
- * número só.
+ * variável sem tipo declarado não interpola, e uma animação com um número
+ * assim daria saltos em vez de deslizar. `inherits: true` porque quem lê o
+ * valor são os filhos: a barra de topo (o `<summary>`), o painel e o fundo se
+ * movem juntos a partir de um número só.
  */
 @property --revelar {
   syntax: "<number>";
@@ -459,7 +309,7 @@ body {
 }
 
 /* A gaveta entra pela direita. O `<summary>` aberto é a barra de topo do
- * painel — e é o único elemento que fecha um `<details>` sem script —, então
+ * painel, e é o único elemento que fecha um `<details>` sem script: por isso
  * ele desliza junto, a partir do mesmo número. */
 [data-revelador="gaveta"][open] > summary,
 [data-revelador="gaveta"][open] > .revelador-painel {
@@ -482,7 +332,7 @@ body {
  * Animação que a pessoa pediu para não ver não roda.
  *
  * Desligar a `@keyframes` sozinho deixaria `--revelar` no valor inicial, 1, e
- * o painel ficaria parado fora da tela — aberto e invisível. Por isso cada
+ * o painel ficaria parado fora da tela: aberto e invisível. Por isso cada
  * propriedade que o número governa é reposta aqui, no estado final.
  */
 @media (prefers-reduced-motion: reduce) {

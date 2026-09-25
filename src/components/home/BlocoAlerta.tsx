@@ -39,7 +39,7 @@ import { acervoIncompletoEmPartes } from "@/lib/rotulos";
 export function AcervoIncompleto({ aviso }: { aviso: AvisoDoAcervo }) {
   const partes = acervoIncompletoEmPartes(aviso);
   return (
-    <p className="rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600">
+    <p className="rounded-cartao bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600">
       Outros{" "}
       <strong className="numero font-medium text-tinta-900">
         {numero(aviso.semDado)}
@@ -99,12 +99,12 @@ export function AcervoIncompleto({ aviso }: { aviso: AvisoDoAcervo }) {
 export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
   return (
     <section className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
-      <div className="flex flex-col items-start gap-5 rounded-caixa bg-amarelo px-7 py-8 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-start gap-5 rounded-cartao bg-ouro px-7 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em] text-amarelo-texto">
+          <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em] text-ouro-texto">
             Receba os {numero(totalAbertos)} concursos abertos por e-mail
           </h2>
-          <p className="mt-1.5 max-w-[62ch] text-sm leading-5 text-amarelo-texto/75">
+          <p className="mt-1.5 max-w-[62ch] text-sm leading-5 text-ouro-texto/75">
             Salvamos a sua busca e avisamos assim que sair edital novo, sem
             custo. Um e-mail por dia, no máximo, e só quando houver novidade.
           </p>
@@ -128,7 +128,7 @@ export function BlocoAlerta({ totalAbertos }: { totalAbertos: number }) {
           />
           <button
             type="submit"
-            className="h-12 shrink-0 rounded-controle bg-inverso px-6 text-[13px] font-semibold text-inverso-texto transition-colors hover:bg-inverso-hover"
+            className="h-12 shrink-0 rounded-controle bg-tinta-900 px-6 text-[13px] font-semibold text-cartao transition-colors hover:bg-tinta-600"
           >
             Criar alerta grátis
           </button>

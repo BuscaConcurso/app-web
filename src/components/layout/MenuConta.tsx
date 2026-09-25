@@ -46,7 +46,7 @@ export function MenuConta() {
       titulo={title}
       nome={title}
       largura="estreita"
-      gatilho="size-10 justify-center rounded-controle bg-rebaixada text-tinta-800 transition-colors hover:bg-tinta-200"
+      gatilho="size-10 justify-center rounded-controle bg-rebaixada text-tinta-900 transition-colors hover:bg-linha"
     >
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-medium text-tinta-600">Tema</span>
@@ -84,7 +84,7 @@ export function MenuConta() {
         <div className="mt-4 flex gap-2">
           <Link
             href="/entrar"
-            className={`${linkClass} bg-rebaixada text-tinta-900 hover:bg-tinta-200`}
+            className={`${linkClass} bg-rebaixada text-tinta-900 hover:bg-linha`}
           >
             Entrar
           </Link>

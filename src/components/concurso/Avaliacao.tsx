@@ -176,7 +176,7 @@ export function Avaliacao({
     // pilha: por item a avaliação era um rodapezinho de seção, e agora ela é
     // uma seção. A pergunta fica escrita porque dois botões soltos no fim de
     // uma página não dizem sobre o que são.
-    <div className={`rounded-caixa bg-cartao px-6 py-5 sm:px-8 ${className ?? ""}`}>
+    <div className={`rounded-cartao bg-cartao px-6 py-5 sm:px-8 ${className ?? ""}`}>
       <div
         role="group"
         aria-labelledby={pergunta}
@@ -229,11 +229,11 @@ export function Avaliacao({
 
       <dialog
         ref={modal}
-        /* `backdrop:bg-escura/40` e não `tinta-900`: os dois são #141715 no
+        /* `backdrop:bg-tinta-900/40` e não `tinta-900`: os dois são #141715 no
            tema claro, mas `tinta-900` é token de texto e inverte no escuro —
            lá o véu virava um clarão branco sobre a página quase preta. É o
            mesmo tom do fundo da gaveta, para as duas camadas concordarem. */
-        className="m-auto w-[min(32rem,92vw)] rounded-caixa bg-cartao p-6 text-tinta-900 backdrop:bg-escura/40"
+        className="m-auto w-[min(32rem,92vw)] rounded-cartao bg-cartao p-6 text-tinta-900 backdrop:bg-tinta-900/40"
       >
         <form
           onSubmit={(evento) => {
@@ -267,13 +267,13 @@ export function Avaliacao({
             rows={4}
             maxLength={LIMITE_DO_COMENTARIO}
             placeholder="Ex.: no cronograma, a data de fim das inscrições é de outro concurso; no ato ela é 12/03."
-            className="w-full rounded-controle bg-bloco px-3 py-2 text-[13px] leading-6 text-tinta-900 outline-none focus:ring-2 focus:ring-acao"
+            className="w-full rounded-controle bg-rebaixada px-3 py-2 text-[13px] leading-6 text-tinta-900 outline-none focus:ring-2 focus:ring-acao"
           />
           {/* O recibo de fora fica atrás do modal, então o comentário que não
               gravou precisa dizer isso aqui dentro — senão a janela fica
               aberta sem explicar por quê. */}
           {estado.comentou && estado.resultado !== "gravada" && (
-            <p role="alert" className="text-[12px] text-vermelho-800">
+            <p role="alert" className="text-[12px] text-urucum-texto">
               {recibo(estado.resultado, estado.gostei)}
             </p>
           )}
@@ -288,7 +288,7 @@ export function Avaliacao({
             <button
               type="submit"
               disabled={enviando}
-              className="rounded-controle bg-acao px-3 py-1.5 text-[12px] font-semibold text-acao-texto hover:bg-acao-hover disabled:bg-tinta-100 disabled:text-tinta-400"
+              className="rounded-controle bg-acao px-3 py-1.5 text-[12px] font-semibold text-acao-texto hover:bg-acao-hover disabled:bg-rebaixada disabled:text-tinta-500"
             >
               Enviar
             </button>

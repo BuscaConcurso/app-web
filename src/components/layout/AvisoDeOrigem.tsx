@@ -27,8 +27,8 @@ export function AvisoDeOrigem({ origem }: { origem: OrigemDoAcervo }) {
       role="status"
       className={`px-4 py-2.5 text-center text-[13px] leading-5 sm:px-6 ${
         falhou
-          ? "bg-urgente-chip text-vermelho-800"
-          : "bg-previsto-chip text-previsto-texto"
+          ? "bg-urgente-chip text-urucum-texto"
+          : "bg-previsto-chip text-ouro-sinal-texto"
       }`}
     >
       <strong className="font-semibold">

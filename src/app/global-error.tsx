@@ -83,7 +83,7 @@ export default function GlobalError({
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_DO_TEMA }} />
       </head>
       <body className="flex min-h-full flex-col items-center justify-center bg-pagina px-4 py-10 font-interface text-tinta-900">
-        <div className="w-full max-w-[480px] rounded-caixa bg-cartao px-6 py-14 text-center sm:py-16">
+        <div className="w-full max-w-[480px] rounded-cartao bg-cartao px-6 py-14 text-center sm:py-16">
           <Rotulo>Erro</Rotulo>
           <h1 className="mt-2 font-titulo text-2xl font-semibold text-tinta-900 sm:text-[28px]">
             Algo deu errado ao carregar o site
@@ -98,7 +98,7 @@ export default function GlobalError({
             </Botao>
             <Link
               href="/"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-controle bg-rebaixada px-[18px] text-sm font-medium text-tinta-900 transition-colors hover:bg-tinta-200"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-controle bg-rebaixada px-[18px] text-sm font-medium text-tinta-900 transition-colors hover:bg-linha"
             >
               Ir para a home
             </Link>

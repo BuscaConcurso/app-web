@@ -205,14 +205,14 @@ function GavetaDoAto({ origem, texto }: { origem: Origem; texto: string }) {
                endereço de banca dentro do texto corrido, e a URL mais longa
                do acervo tem 143 caracteres. É a quebra em qualquer ponto ou a
                rolagem horizontal a 375px, onde o painel mede 352,5px. */
-            className="text-[13px] leading-6 wrap-anywhere text-tinta-800"
+            className="text-[13px] leading-6 wrap-anywhere text-tinta-900"
           >
             {destacar(paragrafo.texto, faixasDoParagrafo(faixas, paragrafo)).map(
               (pedaco, indice) =>
                 pedaco.destacado ? (
                   <mark
                     key={indice}
-                    className="rounded-[3px] bg-amarelo/40 text-tinta-900"
+                    className="rounded-[3px] bg-ouro/40 text-tinta-900"
                   >
                     {/* A âncora do trecho. É um elemento **vazio**, e é de
                         propósito: um `<span>` sem conteúdo não acrescenta

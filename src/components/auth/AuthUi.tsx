@@ -21,8 +21,8 @@ export function Alert({
       role="alert"
       className={`rounded-controle px-4 py-3 text-sm ${
         success
-          ? "bg-bloco text-tinta-800"
-          : "bg-urgente text-vermelho-800"
+          ? "bg-rebaixada text-tinta-900"
+          : "bg-urgente text-urucum-texto"
       }`}
     >
       {children}
@@ -32,7 +32,7 @@ export function Alert({
 
 export function FieldError({ children }: { children?: string }) {
   return children ? (
-    <p className="mt-1 text-xs text-vermelho-800">{children}</p>
+    <p className="mt-1 text-xs text-urucum-texto">{children}</p>
   ) : null;
 }
 
@@ -52,7 +52,7 @@ export function FormField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-tinta-800">
+      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-tinta-900">
         {label}
       </label>
       {children}
@@ -77,7 +77,7 @@ export function SubmitButton({
       className={`h-10 w-full rounded-controle px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
         variant === "primary"
           ? "bg-acao text-acao-texto hover:bg-acao-hover"
-          : "bg-rebaixada text-tinta-900 hover:bg-tinta-200"
+          : "bg-rebaixada text-tinta-900 hover:bg-linha"
       }`}
     >
       {pending ? "Aguarde…" : children}

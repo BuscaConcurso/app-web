@@ -29,12 +29,12 @@ function Coluna({
       <Rotulo as="h3" className="mb-2">
         {titulo}
       </Rotulo>
-      <ul className="flex flex-col rounded-caixa bg-cartao p-4">
+      <ul className="flex flex-col rounded-cartao bg-cartao p-4">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="flex items-baseline justify-between gap-3 rounded-controle px-2 py-1.5 text-sm text-tinta-800 transition-colors hover:bg-rebaixada"
+              className="flex items-baseline justify-between gap-3 rounded-controle px-2 py-1.5 text-sm text-tinta-900 transition-colors hover:bg-rebaixada"
             >
               {/* `min-w-0` é o que conserta a rolagem horizontal no celular,
                   e `truncate` era a causa. Item de flex nasce com
@@ -93,7 +93,7 @@ export function BlocosSeo({
       </div>
 
       <div className="mt-2 grid gap-2 md:grid-cols-2">
-        <div className="rounded-caixa bg-cartao p-5">
+        <div className="rounded-cartao bg-cartao p-5">
           <h3 className="font-titulo text-lg font-semibold">
             De onde vêm estes dados
           </h3>
@@ -106,7 +106,7 @@ export function BlocosSeo({
             original em vez de acreditar na nossa palavra.
           </p>
         </div>
-        <div className="rounded-caixa bg-cartao p-5">
+        <div className="rounded-cartao bg-cartao p-5">
           <h3 className="font-titulo text-lg font-semibold">
             Como usar a busca
           </h3>

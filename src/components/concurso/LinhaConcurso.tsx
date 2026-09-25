@@ -105,7 +105,7 @@ export function LinhaConcurso({
 
       <Link
         href={`/concursos/${concurso.slug}`}
-        className="ml-auto inline-flex h-[30px] items-center rounded-controle bg-inverso px-4 text-[12px] font-semibold text-inverso-texto hover:bg-inverso-hover"
+        className="ml-auto inline-flex h-[30px] items-center rounded-controle bg-tinta-900 px-4 text-[12px] font-semibold text-cartao hover:bg-tinta-600"
       >
         {acao ?? "Abrir"}
       </Link>

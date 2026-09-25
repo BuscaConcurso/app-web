@@ -121,7 +121,7 @@ export default async function PaginaDoConcurso(
         cargos e do ato afirmaria quatro vezes a mesma coisa e gastaria a
         única cor forte da tela. Cinza por padrão, cor só onde informa.
 
-        Isso também acerta um desencontro que existia: `bg-bloco` é o rebaixo
+        Isso também acerta um desencontro que existia: `bg-rebaixada` é o rebaixo
         de dentro do cartão branco, e dentro do cartão `encerrado` ele ficava
         mais CLARO que o fundo, então a lista de cargos parecia levantada em
         vez de rebaixada. Com cada seção no seu bloco branco, o rebaixo volta
@@ -156,7 +156,7 @@ export default async function PaginaDoConcurso(
             <div className="flex items-start gap-4">
               <Selo sigla={concurso.orgao.sigla} tom={tom} />
               <div className="min-w-0">
-                <p className="text-sm leading-5 font-medium text-tinta-800">
+                <p className="text-sm leading-5 font-medium text-tinta-900">
                   <Link
                     href={`/orgaos/${concurso.orgao.slug}`}
                     className="hover:underline hover:underline-offset-4"
@@ -288,7 +288,7 @@ export default async function PaginaDoConcurso(
 
         {/* O rodapé também é um bloco, com a mesma sangria lateral e menos
             altura: é uma nota sobre a página, não uma seção dela. */}
-        <p className="rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600 sm:px-8">
+        <p className="rounded-cartao bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600 sm:px-8">
           {textoDeRodape(concurso)}
         </p>
       </div>

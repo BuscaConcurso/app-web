@@ -30,7 +30,7 @@ function Envelope({
         <label
           htmlFor={para}
           className={`text-xs font-semibold ${
-            erro ? "text-vermelho-800" : "text-tinta-800"
+            erro ? "text-urucum-texto" : "text-tinta-900"
           }`}
         >
           {etiqueta}
@@ -38,7 +38,7 @@ function Envelope({
       )}
       {children}
       {erro && (
-        <p id={`${para}-erro`} className="text-xs text-vermelho-800">
+        <p id={`${para}-erro`} className="text-xs text-urucum-texto">
           {erro}
         </p>
       )}
@@ -65,7 +65,7 @@ export function Campo({
         aria-describedby={erro ? `${id}-erro` : undefined}
         className={[
           CONTROLE,
-          erro ? "bg-urgente ring-2 ring-vermelho" : "bg-rebaixada",
+          erro ? "bg-urgente ring-2 ring-urucum" : "bg-rebaixada",
           className,
         ]
           .filter(Boolean)
@@ -105,7 +105,7 @@ export function Selecao({
           className={[
             CONTROLE,
             "cursor-pointer appearance-none pr-9",
-            erro ? "bg-urgente ring-2 ring-vermelho" : "bg-rebaixada",
+            erro ? "bg-urgente ring-2 ring-urucum" : "bg-rebaixada",
             className,
           ]
             .filter(Boolean)

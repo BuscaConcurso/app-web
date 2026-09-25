@@ -91,7 +91,7 @@ export function CartaoConcurso({
                   fazia no `h3`. Cortá-lo agora que ele é a linha menor
                   esconderia justamente o que a hierarquia acabou de prometer
                   mostrar. */}
-              <p className="text-[13px] leading-5 font-medium text-tinta-800">
+              <p className="text-[13px] leading-5 font-medium text-tinta-900">
                 <Link
                   href={`/orgaos/${concurso.orgao.slug}`}
                   className="hover:underline hover:underline-offset-4"
@@ -153,7 +153,7 @@ export function CartaoConcurso({
       <LinhaRotulada rotulo="Cargos">
         <p
           className={`line-clamp-3 min-w-0 text-[12px] leading-[18px] ${
-            cargos.informado ? "text-tinta-800" : estilo.apoio
+            cargos.informado ? "text-tinta-900" : estilo.apoio
           }`}
         >
           {cargos.texto}

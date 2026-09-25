@@ -95,7 +95,7 @@ export async function Rodape() {
 
         {COLUNAS.map((coluna) => (
           <nav key={coluna.titulo} aria-label={coluna.titulo}>
-            <Rotulo className="text-rodape-tenue">{coluna.titulo}</Rotulo>
+            <Rotulo className="text-rodape-suave">{coluna.titulo}</Rotulo>
             <ul className="mt-3 flex flex-col gap-2">
               {coluna.links.map((link) => (
                 <li key={link.rotulo}>
@@ -112,7 +112,7 @@ export async function Rodape() {
         ))}
 
         <nav aria-label="Concursos por estado">
-          <Rotulo className="text-rodape-tenue">Por estado</Rotulo>
+          <Rotulo className="text-rodape-suave">Por estado</Rotulo>
           <ul className="mt-3 grid grid-cols-2 gap-2">
             {UFS_EM_DESTAQUE.map((uf) => (
               <li key={uf}>
@@ -129,7 +129,7 @@ export async function Rodape() {
 
         {cargos.length > 0 && (
           <nav aria-label="Concursos por cargo" className="md:col-span-4">
-            <Rotulo className="text-rodape-tenue">Por cargo</Rotulo>
+            <Rotulo className="text-rodape-suave">Por cargo</Rotulo>
             {/* `flex-wrap` e `min-w-0` no item: rótulo de cargo pode ser
                 comprido, e item de flex nasce com `min-width: auto`, que o
                 proíbe de encolher abaixo do conteúdo. É a mesma armadilha
@@ -152,9 +152,9 @@ export async function Rodape() {
       </div>
 
       {/* Degrau de superfície no lugar de uma linha: o canvas não usa borda. */}
-      <div className="bg-rodape-faixa">
+      <div className="bg-linha-fraca">
         <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
-          <p className="text-xs text-rodape-tenue">
+          <p className="text-xs text-rodape-suave">
             BuscaConcurso não organiza concursos. Confira sempre o edital
             original no diário oficial ou no site da banca antes de se
             inscrever.
@@ -171,7 +171,7 @@ export async function Rodape() {
               <LogoGvTechLab tamanho={20} />
               Desenvolvido por GV Tech Lab
             </a>
-            <address className="mt-2 text-xs leading-5 not-italic text-rodape-tenue">
+            <address className="mt-2 text-xs leading-5 not-italic text-rodape-suave">
               GV TECH LAB LTDA · CNPJ 50.810.346/0001-23
               <br />
               Av. Brig. Faria Lima, 1811, Sala 1119 · Jardim Paulistano · São

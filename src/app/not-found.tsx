@@ -33,7 +33,7 @@ const ESTADOS: Uf[] = ["SP", "RJ", "MG", "BA", "RS", "PR", "DF", "PA"];
 export default function NotFound() {
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 sm:py-14">
-      <div className="rounded-caixa bg-cartao px-6 py-14 text-center sm:py-16">
+      <div className="rounded-cartao bg-cartao px-6 py-14 text-center sm:py-16">
         <Rotulo>Erro 404</Rotulo>
         <h1 className="mt-2 font-titulo text-2xl font-semibold text-tinta-900 sm:text-[28px]">
           Página não encontrada
@@ -62,7 +62,7 @@ export default function NotFound() {
               <li key={uf} className="min-w-0">
                 <Link
                   href={`/concursos?uf=${uf}`}
-                  className="inline-flex min-h-8 max-w-full items-center rounded-controle bg-rebaixada px-3 text-[12px] font-medium text-tinta-800 transition-colors hover:bg-tinta-200"
+                  className="inline-flex min-h-8 max-w-full items-center rounded-controle bg-rebaixada px-3 text-[12px] font-medium text-tinta-900 transition-colors hover:bg-linha"
                 >
                   <span className="min-w-0 break-words">{NOME_UF[uf]}</span>
                 </Link>

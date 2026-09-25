@@ -462,7 +462,7 @@ export type LarguraDaGaveta = keyof typeof LARGURA;
 /** O gatilho fechado da gaveta, quando quem chama não manda outro. */
 const GATILHO_PADRAO =
   "rounded-controle bg-rebaixada px-3 py-1.5 text-[12px] font-semibold " +
-  "text-tinta-800 transition-colors hover:bg-tinta-200";
+  "text-tinta-900 transition-colors hover:bg-linha";
 
 /**
  * A gaveta: um painel que entra pela direita, por cima da página.
@@ -571,9 +571,9 @@ export function Gaveta({
           "group-open:fixed group-open:top-0 group-open:right-0 group-open:z-[60]",
           LARGURA[largura].barra,
           "group-open:h-auto group-open:justify-between group-open:rounded-none",
-          "group-open:border-b group-open:border-tinta-200 group-open:bg-cartao",
+          "group-open:border-b group-open:border-linha group-open:bg-cartao",
           "group-open:px-5 group-open:py-3.5 group-open:text-[12px]",
-          "group-open:font-semibold group-open:text-tinta-800",
+          "group-open:font-semibold group-open:text-tinta-900",
           "group-open:hover:bg-cartao",
         ].join(" ")}
       >
@@ -670,7 +670,7 @@ export function Gaveta({
       <div
         aria-hidden="true"
         onPointerDown={fechar}
-        className="revelador-fundo fixed inset-0 z-40 bg-escura/40"
+        className="revelador-fundo fixed inset-0 z-40 bg-tinta-900/40"
       />
 
       {/* O painel. Sem corte no conteúdo: ele rola por dentro, e é a única
@@ -681,7 +681,7 @@ export function Gaveta({
         className={[
           "revelador-painel fixed inset-y-0 right-0 z-50",
           LARGURA[largura].painel,
-          "overflow-y-auto overscroll-contain border-l border-tinta-200",
+          "overflow-y-auto overscroll-contain border-l border-linha",
           "bg-cartao px-5 pt-16 pb-10 outline-none",
         ].join(" ")}
       >
@@ -751,7 +751,7 @@ export function Menu({
           // `origin-top-right` combina com a escala de entrada: o painel cresce
           // a partir do canto em que o gatilho está, e não do meio dele.
           "revelador-painel absolute right-0 z-30 mt-2 origin-top-right",
-          "rounded-caixa bg-cartao p-2",
+          "rounded-cartao bg-cartao p-2",
           painelClassName,
         ]
           .filter(Boolean)
