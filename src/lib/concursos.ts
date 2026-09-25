@@ -531,8 +531,15 @@ export interface LinkDeFaceta {
  * Os links internos dos blocos de SEO da home. São âncoras de verdade para
  * `/concursos?uf=SP`, não botões com JavaScript, porque o valor delas é
  * exatamente serem rastreáveis.
+ *
+ * `ufs` é o limite de UFs no resultado (padrão 12, como sempre foi). O mapa
+ * da home passa `{ ufs: 27 }` porque precisa de todas, mesmo as com zero
+ * abertos, para desenhar a grade inteira.
  */
-export async function facetas(hoje: Date = new Date()): Promise<{
+export async function facetas(
+  hoje: Date = new Date(),
+  { ufs: limiteUfs = 12 }: { ufs?: number } = {},
+): Promise<{
   ufs: LinkDeFaceta[];
   bancas: LinkDeFaceta[];
   orgaos: LinkDeFaceta[];
@@ -568,7 +575,7 @@ export async function facetas(hoje: Date = new Date()): Promise<{
     [...mapa.entries()].sort((a, b) => b[1] - a[1]).slice(0, limite);
 
   return {
-    ufs: maisFrequentes(porUf, 12).map(([uf, total]) => ({
+    ufs: maisFrequentes(porUf, limiteUfs).map(([uf, total]) => ({
       rotulo: NOME_UF[uf],
       href: `/concursos?uf=${uf}`,
       total,

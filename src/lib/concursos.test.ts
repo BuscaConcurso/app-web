@@ -5,6 +5,7 @@ import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import {
   contagensDeFaceta,
   contarConcursos,
+  facetas,
   listarConcursos,
   normalizarDetalhe,
   normalizarResumo,
@@ -265,5 +266,14 @@ describe("tambemAbertos", () => {
       expect(c.slug).not.toBe(base.slug);
       expect(c.ufs.includes(base.uf!) || c.uf === base.uf).toBe(true);
     }
+  });
+});
+
+describe("facetas", () => {
+  it("devolve todas as UFs com aberto quando o limite é 27", async () => {
+    const { ufs } = await facetas(HOJE, { ufs: 27 });
+    const padrao = await facetas(HOJE);
+    expect(ufs.length).toBeGreaterThanOrEqual(padrao.ufs.length);
+    expect(padrao.ufs.length).toBeLessThanOrEqual(12);
   });
 });
