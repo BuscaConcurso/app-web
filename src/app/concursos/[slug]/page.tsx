@@ -19,6 +19,7 @@ import { dataLonga, hojeEmSaoPaulo, moeda, vagasTexto } from "@/lib/formato";
 import { destinoDaInscricao } from "@/lib/inscricao";
 import { textoDeRodape, tituloComOrgao } from "@/lib/rotulos";
 import { nomeCurtoDoOrgao } from "@/lib/orgaos";
+import { tomDoConcurso } from "@/lib/situacao";
 import type { ConcursoResumo } from "@/lib/dominio";
 
 /**
@@ -110,7 +111,18 @@ export default async function PaginaDoConcurso(
     { nome: concurso.titulo, href: `/concursos/${concurso.slug}` },
   ];
 
-  const destino = destinoDaInscricao(concurso);
+  // Nula em previsto e encerrado: a `BarraDeInscricao` do celular é a mesma
+  // chamada da lateral (`LateralDoConcurso`), e a lateral não mostra "Ir para
+  // a inscrição" nesses dois tons (previsto vira "Avisar quando abrir",
+  // encerrado não tem CTA nenhum). Sem este corte, a barra fixa do celular
+  // continuaria de pé com "Ver o ato publicado" para um concurso que ainda
+  // nem abriu ou que já fechou, a única leitura possível do endereço que
+  // `destinoDaInscricao` sempre acha quando há edital ou ato publicado.
+  const tomAtual = tomDoConcurso(concurso, hoje);
+  const destino =
+    tomAtual === "previsto" || tomAtual === "encerrado"
+      ? null
+      : destinoDaInscricao(concurso);
 
   // As abas do celular (`AbasDoConcurso`, Task 14): cronograma, áreas e
   // perguntas, cada uma seu próprio painel com `id` estável. Áreas e
