@@ -442,6 +442,8 @@ export function paraALista(itens: ConcursoResumo[]): ConcursoResumo[] {
           poder: concurso.orgao.poder,
           uf: concurso.orgao.uf,
           municipio: concurso.orgao.municipio,
+          // O selo do cartão desenha o logo oficial quando há um revisado.
+          logoUrl: concurso.orgao.logoUrl,
         },
         banca: concurso.banca,
         ufs: concurso.ufs,

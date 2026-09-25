@@ -91,7 +91,11 @@ export function CartaoConcurso({
       className="flex flex-col gap-3 rounded-cartao bg-cartao p-4 shadow-cartao"
     >
       <div className="flex items-start gap-3">
-        <Selo sigla={concurso.orgao.sigla} tamanho={42} />
+        <Selo
+          sigla={concurso.orgao.sigla}
+          logoUrl={concurso.orgao.logoUrl}
+          tamanho={42}
+        />
         <div className="min-w-0 flex-grow">
           <div className="truncate text-[15px] font-bold">{titulo}</div>
           <div className="mt-0.5 truncate text-[13px] text-tinta-600">{subtitulo}</div>

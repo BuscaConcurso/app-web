@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { ESTILO_DO_TOM } from "@/lib/situacao";
 import type { Tom } from "@/lib/dominio";
+import { faceDoSelo } from "@/lib/selo";
+import { SeloComLogo } from "./SeloComLogo";
 
 /**
  * Cartão.
@@ -88,9 +90,70 @@ export function Numero({
   );
 }
 
+
+/** O lado em pixels de um `tamanho` do selo, número ou nome antigo. */
+function ladoDoSelo(tamanho: number | "sm" | "md"): number {
+  return typeof tamanho === "number" ? tamanho : tamanho === "sm" ? 40 : 44;
+}
+
 /**
- * O quadrado com a sigla do órgão. Faz o papel do logotipo que não temos:
- * o acervo tem 1.946 órgãos e nenhum arquivo de marca para eles.
+ * O raio da caixa do selo. O selo grande do cabeçalho do concurso
+ * (`Concurso.dc.html:64`): 72px e raio de 18px. Os menores seguem com 12px.
+ * O logo usa o mesmo raio, para as três faces terem o mesmo contorno.
+ */
+function raioDoSelo(lado: number): string {
+  return lado >= 72 ? "rounded-[18px]" : "rounded-[12px]";
+}
+
+/**
+ * O selo do órgão: o logo oficial quando há um revisado, senão a sigla,
+ * senão a caixa lisa (`faceDoSelo` decide). As três faces medem o mesmo lado
+ * e têm o mesmo raio, e o título ao lado começa no mesmo x em qualquer uma.
+ *
+ * O logo vai por `SeloComLogo`, num fundo branco nos dois temas; se a imagem
+ * quebrar, aparece a caixa com a sigla que existir (ou a lisa).
+ *
+ * **O tamanho** é o lado em pixels (padrão 44, como no cartão de "Encerram
+ * esta semana"), não mais "sm"/"md": um número aceita qualquer caixa que um
+ * cartão futuro peça, sem um nome novo por tamanho. `"sm"` e `"md"`
+ * continuam aceitos, por quem ainda os usa.
+ */
+export function Selo({
+  sigla,
+  logoUrl = null,
+  tom,
+  tamanho = 44,
+}: {
+  sigla: string | null;
+  logoUrl?: string | null;
+  tom?: Tom;
+  tamanho?: number | "sm" | "md";
+}) {
+  const lado = ladoDoSelo(tamanho);
+  const face = faceDoSelo({ logoUrl, sigla });
+  if (face.tipo !== "logo") {
+    const letras = face.tipo === "sigla" ? face.letras : "";
+    return <SeloSemLogo letras={letras} tom={tom} lado={lado} />;
+  }
+  // Se a imagem quebrar, aparece a sigla que existir.
+  const alternativa = (
+    <SeloSemLogo letras={sigla?.trim() ?? ""} tom={tom} lado={lado} />
+  );
+  return (
+    <SeloComLogo
+      key={face.url}
+      url={face.url}
+      lado={lado}
+      raio={raioDoSelo(lado)}
+      alternativa={alternativa}
+    />
+  );
+}
+
+/**
+ * O quadrado com a sigla do órgão, desenhado quando não há logo revisado (ou
+ * quando a imagem do logo falha). Ainda faz o papel do logotipo que falta:
+ * nem todo órgão do acervo tem um arquivo de marca aprovado.
  *
  * **Sem sigla o selo fica sem conteúdo, e não vira outra coisa.** Decisão do
  * parceiro humano: "quando não houver sigla, exiba square sem sigla ao invés
@@ -106,7 +169,7 @@ export function Numero({
  *
  * Duas coisas que a forma preserva:
  *
- * 1. **O alinhamento não se mexe.** A caixa continua `size-10`/`size-11`, e
+ * 1. **O alinhamento não se mexe.** A caixa continua com o mesmo lado, e
  *    medido a 375px o título começa no mesmo x (77,42px) com e sem sigla.
  *    Colapsar a caixa puxaria o título para 28,16px e faria a lista dançar
  *    49,26px a cada cartão sem sigla: um em cada três.
@@ -124,34 +187,20 @@ export function Numero({
  * cartão colorido por situação. Com `tom`, ele volta ao esquema antigo, de
  * quando o quadrado morava dentro de um cartão urgente/previsto/encerrado e
  * precisava combinar com o fundo dele.
- *
- * **O tamanho** agora é o lado em pixels (padrão 44, como no cartão de
- * "Encerram esta semana"), não mais "sm"/"md": um número aceita qualquer
- * caixa que um cartão futuro peça, sem um nome novo por tamanho. `"sm"` e
- * `"md"` continuam aceitos, por quem ainda os usa.
  */
-export function Selo({
-  sigla,
+function SeloSemLogo({
+  letras,
   tom,
-  tamanho = 44,
+  lado,
 }: {
-  sigla: string | null;
+  letras: string;
   tom?: Tom;
-  tamanho?: number | "sm" | "md";
+  lado: number;
 }) {
-  // A API manda `null` nos 1.615 sem sigla, mas quem preenche é outro
-  // processo: string vazia ou só espaço chegaria como sigla e desenharia de
-  // novo o quadrado vazio que este componente acabou de parar de desenhar.
-  const letras = sigla?.trim() ?? "";
-
-  const lado =
-    typeof tamanho === "number" ? tamanho : tamanho === "sm" ? 40 : 44;
-  // O selo grande do cabeçalho do concurso (`Concurso.dc.html:64`): 72px,
-  // raio de 18px e a sigla em Bricolage 17px. Os menores seguem com 12px.
+  // Sigla em Bricolage 17px no selo grande; os menores seguem no corpo da
+  // interface.
   const grande = lado >= 72;
-  const base = `flex shrink-0 items-center justify-center text-center leading-none ${
-    grande ? "rounded-[18px]" : "rounded-[12px]"
-  }`;
+  const base = `flex shrink-0 items-center justify-center text-center leading-none ${raioDoSelo(lado)}`;
 
   const fundo = tom
     ? {

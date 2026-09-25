@@ -40,7 +40,7 @@ export function Mosaico({
           className="absolute bottom-16 left-0 flex w-[340px] flex-col gap-3.5 rounded-cartao bg-cartao p-5 text-tinta-900 shadow-flutuante"
         >
           <div className="flex items-center gap-3">
-            <Selo sigla={destaque.orgao.sigla} />
+            <Selo sigla={destaque.orgao.sigla} logoUrl={destaque.orgao.logoUrl} />
             <div className="min-w-0 flex-1">
               <div className="truncate text-[15px] leading-[1.3] font-semibold">
                 {destaque.nomesDeCargo[0] ?? tituloSemOrgao(destaque.titulo, destaque.orgao)}

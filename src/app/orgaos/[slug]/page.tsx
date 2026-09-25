@@ -132,10 +132,10 @@ export default async function PaginaDoOrgao(
         <header className="rounded-painel bg-cartao p-5 shadow-cartao md:px-10 md:py-9">
           <div className="flex items-start gap-4 md:gap-6">
             <div className="md:hidden">
-              <Selo sigla={orgao.sigla} tamanho={44} />
+              <Selo sigla={orgao.sigla} logoUrl={orgao.logoUrl} tamanho={44} />
             </div>
             <div className="hidden md:block">
-              <Selo sigla={orgao.sigla} tamanho={72} />
+              <Selo sigla={orgao.sigla} logoUrl={orgao.logoUrl} tamanho={72} />
             </div>
             <div className="min-w-0">
               <h1 className="font-titulo text-[22px] leading-[1.15] font-bold tracking-[-0.02em] break-words text-balance md:text-[32px] md:leading-[1.1] md:tracking-[-0.025em]">

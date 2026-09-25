@@ -67,6 +67,9 @@
   /* O véu atrás de gaveta e diálogo: não inverte com o tema (um token de
    * texto como `tinta-900` vira claro no escuro e o véu virava um clarão). */
   --color-veu: #141715;
+  /* O fundo do logo oficial no selo do órgão: branco nos dois temas, porque
+   * o arquivo de marca é desenhado para fundo claro. Como o véu, não inverte. */
+  --color-logo-fundo: #ffffff;
 
   --font-titulo: var(--fonte-bricolage), "Helvetica Neue", Arial, sans-serif;
   --font-interface: var(--fonte-public-sans), system-ui, sans-serif;

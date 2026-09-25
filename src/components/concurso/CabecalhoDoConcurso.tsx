@@ -78,7 +78,11 @@ export function CabecalhoDoConcurso({
       />
 
       <div className="flex items-center gap-2.5 md:hidden">
-        <Selo sigla={concurso.orgao.sigla} tamanho={44} />
+        <Selo
+          sigla={concurso.orgao.sigla}
+          logoUrl={concurso.orgao.logoUrl}
+          tamanho={44}
+        />
         <div className="min-w-0 text-[13px] leading-[1.35] text-tinta-600">
           <Link href={`/orgaos/${concurso.orgao.slug}`} className="hover:underline hover:underline-offset-4">
             {concurso.orgao.nome}
@@ -88,7 +92,11 @@ export function CabecalhoDoConcurso({
         </div>
       </div>
       <div className="hidden md:block">
-        <Selo sigla={concurso.orgao.sigla} tamanho={72} />
+        <Selo
+          sigla={concurso.orgao.sigla}
+          logoUrl={concurso.orgao.logoUrl}
+          tamanho={72}
+        />
       </div>
 
       {/* `max-w-[760px]` no md+: o teto de largura da coluna de texto do

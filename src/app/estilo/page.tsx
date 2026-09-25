@@ -127,6 +127,15 @@ const SIGLAS_DE_PROVA: (string | null)[] = [
   null,
 ];
 
+// As três faces do selo, mais um logo que quebra: esse tem que mostrar a
+// sigla, na mesma caixa.
+const FACES_DO_SELO: { rotulo: string; sigla: string | null; logoUrl: string | null }[] = [
+  { rotulo: "com logo", sigla: "BC", logoUrl: "/icone-32.png" },
+  { rotulo: "com sigla", sigla: "UFMG", logoUrl: null },
+  { rotulo: "vazio", sigla: null, logoUrl: null },
+  { rotulo: "logo quebrado", sigla: "QUEBRA", logoUrl: "/nao-existe.webp" },
+];
+
 /** Um dia depois de `iso`, sem depender de fuso do navegador (UTC puro). */
 function somarDias(iso: string, dias: number): string {
   const [ano, mes, dia] = iso.split("-").map(Number);
@@ -450,6 +459,27 @@ export default function Estilo() {
             </Cartao>
           ))}
         </div>
+      </Bloco>
+
+      {/*
+        O logo oficial do órgão, quando há um revisado (`faceDoSelo`): mesma
+        caixa e mesmo raio da sigla em cada tamanho, fundo branco nos dois
+        temas. O último logo não existe, e a caixa tem que cair para a sigla.
+      */}
+      <Bloco titulo="Selo com logo" nota="Logo, sigla ou vazio, na mesma caixa">
+        <Cartao className="flex flex-col gap-4 p-5">
+          {[72, 44, 36].map((tamanho) => (
+            <div key={tamanho} className="flex flex-wrap items-center gap-3">
+              <span className="numero w-6 text-[11px] text-tinta-500">{tamanho}</span>
+              {FACES_DO_SELO.map(({ rotulo, sigla, logoUrl }) => (
+                <Selo key={rotulo} sigla={sigla} logoUrl={logoUrl} tamanho={tamanho} />
+              ))}
+            </div>
+          ))}
+          <p className="text-xs text-tinta-500">
+            {FACES_DO_SELO.map(({ rotulo }) => rotulo).join(" · ")}
+          </p>
+        </Cartao>
       </Bloco>
 
       <Bloco titulo="Cartão" nota="O degrau que separa é a sombra, não a borda">

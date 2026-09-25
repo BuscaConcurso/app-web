@@ -142,7 +142,11 @@ export function LinhaConcurso({
     >
       <Celula role={emGrade ? "cell" : undefined} className={emGrade ? "min-w-0" : "px-5"}>
         <div className="flex min-w-0 items-center gap-3.5">
-          <Selo sigla={concurso.orgao.sigla} tamanho={44} />
+          <Selo
+            sigla={concurso.orgao.sigla}
+            logoUrl={concurso.orgao.logoUrl}
+            tamanho={44}
+          />
           <div className="min-w-0">
             <div className="truncate font-bold">{titulo}</div>
             <div className="mt-0.5 truncate text-[13px] text-tinta-600">{subtitulo}</div>

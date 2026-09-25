@@ -92,6 +92,12 @@ export interface Orgao {
   uf: Uf | null;
   municipio: string | null;
   /**
+   * URL do logo oficial, revisado à mão no engine (`bc logos aprovar`).
+   * Opcional porque o mock não o traz; a API manda `null` quando o órgão não
+   * tem logo aprovado, e o `Selo` cai para a sigla.
+   */
+  logoUrl?: string | null;
+  /**
    * `false` quando ninguém ainda separou o nome do órgão do caminho onde ele
    * foi publicado: ver `nomeEhCaminho`. Opcional porque o mock não o traz;
    * a API do engine manda sempre, e hoje manda `false` em todos os 1.332

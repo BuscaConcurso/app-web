@@ -42,7 +42,11 @@ export function TambemAbertos({
             indice < concursos.length - 1 ? "border-b border-linha-fraca" : ""
           }`}
         >
-          <Selo sigla={concurso.orgao.sigla} tamanho={36} />
+          <Selo
+            sigla={concurso.orgao.sigla}
+            logoUrl={concurso.orgao.logoUrl}
+            tamanho={36}
+          />
           <div className="min-w-0 flex-grow">
             <div className="truncate text-sm font-bold">
               {concurso.nomesDeCargo[0] ?? tituloSemOrgao(concurso.titulo, concurso.orgao)}
