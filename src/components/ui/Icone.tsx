@@ -5,7 +5,7 @@ type Parte =
   | { circulo: [number, number, number] }
   | { retangulo: [number, number, number, number, number?] };
 
-/** Paths Lucide (ISC), copiados do prototipo. Traco 1,75, 24 px. */
+/** Paths Lucide (ISC), copiados do protótipo. Traço 1,75, 24 px. */
 export const ICONES = {
   busca: [{ circulo: [11, 11, 7] }, { d: "m20 20-3.5-3.5" }],
   tribunais: [{ d: "M12 3v18M7 21h10M5 7h14" }, { d: "m5 7-3 7a3.5 3.5 0 0 0 6 0Z" }, { d: "m19 7-3 7a3.5 3.5 0 0 0 6 0Z" }],
