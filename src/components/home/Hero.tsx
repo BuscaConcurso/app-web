@@ -9,25 +9,46 @@ import type { ConcursoResumo } from "@/lib/dominio";
 import { numero } from "@/lib/formato";
 
 /**
- * Embrulha o chip de escolaridade, que só cabe no herói de desktop
- * (`Main.dc.html:72-77`, quatro chips numa fileira só): abaixo de `lg` o
- * celular tem só três (`Mobile.dc.html`: "Encerram na semana", "Perto de
- * mim" e "+ R$ 10 mil", nessa ordem), e não uma fileira quebrada em três
- * linhas que o protótipo não tem.
+ * Embrulha um chip do herói para reordená-lo e/ou escondê-lo por breakpoint,
+ * sem tocar na classe do chip em si (`CLASSE_CHIP_DO_HERO`, de
+ * `PertoDeMim.tsx`, que é `"use client"`).
  *
- * `hidden` esconde o embrulho (e o chip dentro) abaixo de `lg`; a partir daí
- * `contents` faz o embrulho sumir da árvore de caixas e o `<Link>` vira item
- * direto do `flex` do pai, como se não houvesse embrulho nenhum. Um `span`
- * em volta, e não alterar a classe do chip: `CLASSE_CHIP_DO_HERO` sai de
- * `PertoDeMim.tsx`, que é `"use client"`, e o valor que atravessa essa
- * fronteira não é uma string comum para `.replace()` chamar em cima durante
- * o build de produção (nem para somar um `hidden` a ela: `CLASSE_CHIP_DO_HERO`
- * já é `inline-flex` sem condição nenhuma, e uma classe de exibição
- * incondicional do mesmo peso que `hidden` fica ao sabor da ordem de geração
- * do Tailwind).
+ * **Por que um embrulho, e não `${CLASSE_CHIP_DO_HERO}` numa string só:**
+ * um valor que atravessa a fronteira de cliente para um Server Component
+ * (este arquivo não tem `"use client"`) só é utilizável passado por
+ * referência direta (`className={CLASSE_CHIP_DO_HERO}`, como o primeiro
+ * chip abaixo faz). Qualquer operação que o transforme em texto — template
+ * string, `.replace()`, `.join()` — aciona o mecanismo de referência de
+ * cliente do React/Next por baixo, e em vez da classe o navegador recebe o
+ * texto de uma função de erro (`"Attempted to call ... from the server"`),
+ * sem nenhum estilo de pílula. Foi exatamente esse bug que apareceu na
+ * primeira versão desta correção, com `` `order-3 ${CLASSE_CHIP_DO_HERO}` ``.
+ *
+ * **Por que não um `<span className="hidden lg:contents">`** (a primeira
+ * ideia, e a que gerava o cabeçalho do concurso): `display: contents` tira o
+ * embrulho da árvore de caixas, e um elemento sem caixa não tem `order` para
+ * aplicar — quem precisaria do `order` é o próprio `<Link>` lá dentro, e
+ * escrevê-lo nele exigiria mexer na classe do chip de novo. Aqui o embrulho
+ * FICA como caixa (`inline-flex`), e é ele que recebe `hidden`/`order`; o
+ * `self-start` evita que o `align-items: stretch` padrão da fileira estique
+ * o embrulho (sem altura própria) e descentralize o chip lá dentro.
  */
-function SoDesktop({ children }: { children: ReactNode }) {
-  return <span className="hidden lg:contents">{children}</span>;
+function EmbrulhoDoChip({
+  ordem,
+  soDesktop = false,
+  children,
+}: {
+  ordem?: string;
+  soDesktop?: boolean;
+  children: ReactNode;
+}) {
+  // `soDesktop`: só `hidden lg:inline-flex`, nunca os dois junto com um
+  // `inline-flex` incondicional à parte — é a mesma classe de exibição dos
+  // dois lados (`hidden` e `inline-flex`, mesmo peso), e ficaria de novo ao
+  // sabor da ordem de geração do Tailwind, como o bug desta correção.
+  const exibicao = soDesktop ? "hidden lg:inline-flex" : "inline-flex";
+  const classes = [exibicao, "self-start", ordem].filter(Boolean).join(" ");
+  return <span className={classes}>{children}</span>;
 }
 
 /**
@@ -125,24 +146,28 @@ export function Hero({
               <span className="lg:hidden">Encerram na semana</span>
               <span className="hidden lg:inline">Encerram esta semana</span>
             </Link>
-            <Link
-              href="/concursos?situacao=abertas&salarioMin=10000"
-              className={`order-3 lg:order-2 ${CLASSE_CHIP_DO_HERO}`}
-            >
-              <Icone nome="salario" tamanho={16} />
-              <span className="lg:hidden">+ R$ 10 mil</span>
-              <span className="hidden lg:inline">Acima de R$ 10 mil</span>
-            </Link>
-            <SoDesktop>
+            <EmbrulhoDoChip ordem="order-3 lg:order-2">
+              <Link
+                href="/concursos?situacao=abertas&salarioMin=10000"
+                className={CLASSE_CHIP_DO_HERO}
+              >
+                <Icone nome="salario" tamanho={16} />
+                <span className="lg:hidden">+ R$ 10 mil</span>
+                <span className="hidden lg:inline">Acima de R$ 10 mil</span>
+              </Link>
+            </EmbrulhoDoChip>
+            <EmbrulhoDoChip ordem="order-3" soDesktop>
               <Link
                 href="/concursos?situacao=abertas&escolaridade=medio"
-                className={`order-3 ${CLASSE_CHIP_DO_HERO}`}
+                className={CLASSE_CHIP_DO_HERO}
               >
                 <Icone nome="educacao" tamanho={16} />
                 Nível médio
               </Link>
-            </SoDesktop>
-            <PertoDeMim className={`order-2 lg:order-4 ${CLASSE_CHIP_DO_HERO}`} />
+            </EmbrulhoDoChip>
+            <EmbrulhoDoChip ordem="order-2 lg:order-4">
+              <PertoDeMim />
+            </EmbrulhoDoChip>
           </div>
         </div>
 
