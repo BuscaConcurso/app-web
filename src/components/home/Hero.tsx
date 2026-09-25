@@ -4,7 +4,6 @@ import { BuscaDoHero } from "./BuscaDoHero";
 import { Mosaico } from "./Mosaico";
 import { CLASSE_CHIP_DO_HERO, PertoDeMim } from "./PertoDeMim";
 import { Icone } from "@/components/ui/Icone";
-import type { LinkDeFaceta } from "@/lib/concursos";
 import type { ConcursoResumo } from "@/lib/dominio";
 import { numero } from "@/lib/formato";
 
@@ -17,8 +16,8 @@ import { numero } from "@/lib/formato";
  * um valor que atravessa a fronteira de cliente para um Server Component
  * (este arquivo não tem `"use client"`) só é utilizável passado por
  * referência direta (`className={CLASSE_CHIP_DO_HERO}`, como o primeiro
- * chip abaixo faz). Qualquer operação que o transforme em texto — template
- * string, `.replace()`, `.join()` — aciona o mecanismo de referência de
+ * chip abaixo faz). Qualquer operação que o transforme em texto (template
+ * string, `.replace()`, `.join()`) aciona o mecanismo de referência de
  * cliente do React/Next por baixo, e em vez da classe o navegador recebe o
  * texto de uma função de erro (`"Attempted to call ... from the server"`),
  * sem nenhum estilo de pílula. Foi exatamente esse bug que apareceu na
@@ -27,7 +26,7 @@ import { numero } from "@/lib/formato";
  * **Por que não um `<span className="hidden lg:contents">`** (a primeira
  * ideia, e a que gerava o cabeçalho do concurso): `display: contents` tira o
  * embrulho da árvore de caixas, e um elemento sem caixa não tem `order` para
- * aplicar — quem precisaria do `order` é o próprio `<Link>` lá dentro, e
+ * aplicar: quem precisaria do `order` é o próprio `<Link>` lá dentro, e
  * escrevê-lo nele exigiria mexer na classe do chip de novo. Aqui o embrulho
  * FICA como caixa (`inline-flex`), e é ele que recebe `hidden`/`order`; o
  * `self-start` evita que o `align-items: stretch` padrão da fileira estique
@@ -43,7 +42,7 @@ function EmbrulhoDoChip({
   children: ReactNode;
 }) {
   // `soDesktop`: só `hidden lg:inline-flex`, nunca os dois junto com um
-  // `inline-flex` incondicional à parte — é a mesma classe de exibição dos
+  // `inline-flex` incondicional à parte: é a mesma classe de exibição dos
   // dois lados (`hidden` e `inline-flex`, mesmo peso), e ficaria de novo ao
   // sabor da ordem de geração do Tailwind, como o bug desta correção.
   const exibicao = soDesktop ? "hidden lg:inline-flex" : "inline-flex";
@@ -66,11 +65,6 @@ function EmbrulhoDoChip({
  * navegador; o resto do herói é HTML estático, e é por isso que
  * `Hero.test.ts` consegue renderizar isto com `renderToStaticMarkup`, sem
  * hidratar nada.
- *
- * `ufs` e `cargos` chegam prontos (o acesso rápido por estado e cargo da
- * versão anterior do herói) e ainda não têm lugar no desenho novo: ver
- * `docs/prototipo`, que não repete esses atalhos aqui. Ficam na assinatura
- * para, se algum dia voltarem à home, `page.tsx` não precisar mudar.
  */
 export function Hero({
   totalAbertos,
@@ -78,14 +72,6 @@ export function Hero({
   novoAto,
 }: {
   totalAbertos: number;
-  ufs: LinkDeFaceta[];
-  /**
-   * Os cargos mais frequentes do acervo, de `cargosEmDestaque`. `LinkDeFaceta`
-   * e não `CargoMedido`: é o mesmo formato pronto (rótulo, href, total) que
-   * `ufs` já usa, e que o acesso rápido da versão anterior do herói
-   * consumia direto, sem reprocessar `CargoMedido` de novo aqui.
-   */
-  cargos: LinkDeFaceta[];
   /** O concurso do cartão flutuante. `null` não desenha o cartão. */
   destaque: ConcursoResumo | null;
   /** O concurso do último ato do Diário. `null` não desenha a pílula. */

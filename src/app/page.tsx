@@ -11,12 +11,11 @@ import { VemAiEDou } from "@/components/home/VemAiEDou";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import {
   avisoDoAcervo,
-  cargosEmDestaque,
   dimensoesDoAcervo,
   facetas,
   obterDestaques,
 } from "@/lib/concursos";
-import { somaOuNull } from "@/lib/formato";
+import { hojeCivilEmSaoPaulo, somaOuNull } from "@/lib/formato";
 import { tituloSemOrgao } from "@/lib/rotulos";
 import { DESCRICAO_SITE, NOME_SITE, urlAbsoluta } from "@/lib/site";
 
@@ -30,13 +29,15 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function Home() {
-  const hoje = new Date();
-  const [destaques, { ufs, bancas, orgaos }, aviso, dimensoes, cargos] = await Promise.all([
+  // O dia civil de São Paulo, não o relógio cru do processo: tudo que
+  // decide por dia (destaques, facetas, "encerra hoje", a tabela) lê daqui.
+  // Um servidor em UTC viraria o dia às 21h de Brasília.
+  const hoje = hojeCivilEmSaoPaulo();
+  const [destaques, { ufs, bancas, orgaos }, aviso, dimensoes] = await Promise.all([
     obterDestaques(hoje),
     facetas(hoje, { ufs: 27 }),
     avisoDoAcervo(),
     dimensoesDoAcervo(),
-    cargosEmDestaque(8),
   ]);
 
   /**
@@ -71,8 +72,6 @@ export default async function Home() {
 
       <Hero
         totalAbertos={destaques.totalAbertos}
-        ufs={ufs}
-        cargos={cargos}
         destaque={destaques.encerrando[0] ?? destaques.abertos[0] ?? null}
         novoAto={destaques.atualizados[0] ?? null}
       />

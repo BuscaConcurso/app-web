@@ -25,8 +25,6 @@ describe("Hero", () => {
     const html = renderToStaticMarkup(
       createElement(Hero, {
         totalAbertos: 113,
-        ufs: [],
-        cargos: [],
         destaque: CONCURSOS[0],
         novoAto: null,
       }),
@@ -40,8 +38,6 @@ describe("Hero", () => {
     const html = renderToStaticMarkup(
       createElement(Hero, {
         totalAbertos: 0,
-        ufs: [],
-        cargos: [],
         destaque: null,
         novoAto: null,
       }),

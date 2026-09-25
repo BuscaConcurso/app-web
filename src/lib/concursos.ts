@@ -33,7 +33,7 @@ import {
   type Ordem,
   type Pagina,
 } from "./consulta";
-import { medirCargos, urlDoCargo, type CargoMedido } from "./cargos";
+import { medirCargos, type CargoMedido } from "./cargos";
 import { tomDoConcurso } from "./situacao";
 import { NOME_UF } from "./rotulos";
 import { acharOrgao, agruparPorOrgao, type OrgaoDoAcervo } from "./orgaos";
@@ -46,14 +46,6 @@ export interface Consulta extends Filtro {
 }
 
 export type { ContagensDeFaceta, OpcaoDeFaceta, Pagina } from "./consulta";
-
-/**
- * Teto de quantos cargos o rodapé mostra, e hoje ele não corta nada: a regra
- * de `cargos.ts` para sozinha em dez. É um limite de forma, medido na
- * fileira do rodapé: dez rótulos ocupam 869px dos 1183 de uma linha a
- * 1240px, e três linhas a 375px.
- */
-const LIMITE_DE_CARGOS = 10;
 
 /**
  * Raiz da API Nest, incluindo o prefixo `/v1` e sem barra no fim.
@@ -612,37 +604,6 @@ const medirCargosDoAcervo = cache(
  */
 export async function cargosEscolhidos(): Promise<CargoMedido[]> {
   return medirCargosDoAcervo();
-}
-
-/**
- * Os cargos que viram link no rodapé, medidos no acervo inteiro.
- *
- * Sobre o acervo inteiro, e não sobre os abertos como `facetas()`, e é por
- * isso que esta lista **não serve para os blocos da home**, que contam
- * "abertos agora". Hoje são 132 abertos em 4.649, e as duas contas foram
- * feitas: a mesma regra medida só nos abertos tem piso 2 e deixa entrar
- * "Alunos", "Curso", "Área" e "Júnior"; e os dez daqui, contados só entre os
- * abertos, dariam 47, 4, 3, 3, 2, 2, 2, 1, 1 e **0**: um link do rodapé
- * levando a busca vazia, que é justamente o que não pode acontecer. O rodapé
- * está em toda página e é âncora permanente; lista que encolhe quando as
- * inscrições fecham não serve a isso.
- *
- * A regra de agrupamento está em `cargos.ts`, com a medição que a sustenta.
- * Aqui só entra o que é desta camada: de onde vem o acervo, e o corte de
- * quantos links o rodapé mostra.
- *
- * Não custa requisição nova: lê o acervo que o layout e a página já leram,
- * guardado no render por `cache` e no processo por `lerAcervoDaApi`.
- */
-export async function cargosEmDestaque(
-  limite = LIMITE_DE_CARGOS,
-): Promise<LinkDeFaceta[]> {
-  const escolhidos = await cargosEscolhidos();
-  return escolhidos.slice(0, limite).map((cargo) => ({
-    rotulo: cargo.rotulo,
-    href: urlDoCargo(cargo),
-    total: cargo.alcance,
-  }));
 }
 
 /**

@@ -80,7 +80,12 @@ function SeletorDoHero({
       <label htmlFor={id} className="sr-only">
         {rotulo}
       </label>
+      {/* `key={defaultValue}`: a UF lembrada só chega depois da hidratação
+          (`useSyncExternalStore` lê o `localStorage`), e um `<select>` não
+          controlado ignora `defaultValue` que muda depois de montar. Com a
+          chave ele remonta com o valor novo e o estado lembrado aparece. */}
       <select
+        key={defaultValue}
         id={id}
         name={nome}
         defaultValue={defaultValue}
