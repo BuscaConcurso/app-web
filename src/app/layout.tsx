@@ -13,6 +13,7 @@ import {
   type DimensoesDoAcervo,
   type OrigemDoAcervo,
 } from "@/lib/concursos";
+import { dataCurta, hojeEmSaoPaulo } from "@/lib/formato";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 import { SCRIPT_DO_TEMA } from "@/lib/tema";
 import { SessionProvider } from "@/lib/auth/session";
@@ -193,6 +194,10 @@ async function acervoDoLayout(): Promise<{
  */
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const { origem, dimensoes } = await acervoDoLayout();
+  // `null` fora da API: afirmar "atualizado hoje" sobre o mock seria uma
+  // data que a fonte não sustenta. Ver `BarraUtilitaria`, que só mostra a
+  // frase quando este valor existe.
+  const atualizadoEm = origem === "api" ? dataCurta(hojeEmSaoPaulo()) : null;
 
   return (
     // `suppressHydrationWarning` é o que faltava para o aviso "A tree hydrated
@@ -227,7 +232,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               (`acervoDoLayout`): sem origem para dizer, a faixa fica calada
               em vez de afirmar "api" ou "mock" sem ter lido nenhum dos dois. */}
           {origem && <AvisoDeOrigem origem={origem} />}
-          <Cabecalho dimensoes={dimensoes} />
+          <Cabecalho dimensoes={dimensoes} atualizadoEm={atualizadoEm} />
           <main className="flex-1">{children}</main>
           <Rodape />
         </SessionProvider>

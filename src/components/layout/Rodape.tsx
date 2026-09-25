@@ -2,189 +2,128 @@ import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { Logo } from "@/components/marca/Logo";
 import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
-import { Rotulo } from "@/components/ui/Etiqueta";
-import { cargosEmDestaque, type LinkDeFaceta } from "@/lib/concursos";
-import { NOME_UF } from "@/lib/rotulos";
-import type { Uf } from "@/lib/dominio";
+import { urlDoCargo, type CargoMedido } from "@/lib/cargos";
+import { cargosEscolhidos } from "@/lib/concursos";
+import { hrefEmBreve } from "@/lib/emBreve";
+import { dataCurta, hojeEmSaoPaulo } from "@/lib/formato";
 
-const UFS_EM_DESTAQUE: Uf[] = ["SP", "RJ", "MG", "BA", "RS", "PR", "PE", "DF"];
+const LIMITE_DE_CARGOS_NO_RODAPE = 8;
 
-const COLUNAS = [
-  {
-    titulo: "Buscar",
-    links: [
-      { rotulo: "Todos os concursos", href: "/concursos" },
-      { rotulo: "Inscrições abertas", href: "/concursos?situacao=abertas" },
-      { rotulo: "Concursos previstos", href: "/concursos?situacao=previstos" },
-      { rotulo: "Nível superior", href: "/concursos?escolaridade=superior" },
-      { rotulo: "Nível médio", href: "/concursos?escolaridade=medio" },
-    ],
-  },
-  {
-    titulo: "O projeto",
-    links: [
-      { rotulo: "Como coletamos os editais", href: "/estilo" },
-      { rotulo: "Design system", href: "/estilo" },
-    ],
-  },
+const COLUNA_BUSCAR = [
+  { rotulo: "Abertos", href: "/concursos?situacao=abertas" },
+  { rotulo: "Previstos", href: "/concursos?situacao=previstos" },
+  { rotulo: "Diário Oficial", href: hrefEmBreve("diario-oficial") },
+  { rotulo: "Por área", href: hrefEmBreve("areas") },
+];
+
+const COLUNA_SOBRE = [
+  { rotulo: "Como lemos os editais", href: hrefEmBreve("como-lemos") },
+  { rotulo: "Design system", href: "/estilo" },
+  { rotulo: "Acessibilidade", href: hrefEmBreve("acessibilidade") },
+  { rotulo: "Contato", href: hrefEmBreve("contato") },
 ];
 
 /**
- * Os cargos do rodapé, ou lista vazia quando o acervo não responde.
+ * Os 8 primeiros cargos mais buscados, ou lista vazia quando o acervo não
+ * responde.
  *
- * O rodapé mora dentro do layout raiz, em toda página do site, e o layout
- * raiz não pode lançar (ver `acervoDoLayout` em `src/app/layout.tsx`, e o
- * porquê lá: `error.tsx` não alcança o que o próprio `layout.tsx` renderiza
+ * O rodapé mora no layout raiz, em toda página, e o layout raiz não pode
+ * lançar (ver `acervoDoLayout` em `src/app/layout.tsx`, e o porquê lá:
+ * `error.tsx` não alcança o que o próprio `layout.tsx` renderiza
  * diretamente). Sob a regra R3 de `concursos.ts`, a API fora do ar sem
- * leitura boa guardada lança, e `cargosEmDestaque()` lê o mesmo acervo. Sem
- * este envoltório, uma falha aqui derrubaria o site inteiro pelo rodapé, não
- * só pela faixa de origem.
- *
- * A coluna "Por cargo" já é condicional a `cargos.length > 0` (o rodapé sem
- * cargo nenhum simplesmente não a desenha), então devolver `[]` na falha
- * reaproveita esse mesmo caminho, sem marcação nova.
+ * leitura boa guardada lança, e `cargosEscolhidos()` lê o mesmo acervo. Sem
+ * este envoltório, uma falha aqui derrubaria o site inteiro pelo rodapé.
  */
-async function cargosDoRodape(): Promise<LinkDeFaceta[]> {
+async function cargosDoRodape(): Promise<CargoMedido[]> {
   try {
-    return await cargosEmDestaque();
+    return (await cargosEscolhidos()).slice(0, LIMITE_DE_CARGOS_NO_RODAPE);
   } catch (erro) {
     // Sinal do próprio Next (ver o mesmo comentário em `lerAcervoDaApi`,
     // `src/lib/concursos.ts`) não é falha do acervo e segue para cima, sem
     // virar `[]` nem log.
     unstable_rethrow(erro);
     console.error(
-      "[rodape] acervo indisponível para medir os cargos em destaque; " +
-        "a coluna \"Por cargo\" fica de fora.",
+      "[rodape] acervo indisponível para medir os cargos mais buscados; a " +
+        "coluna some.",
       erro,
     );
     return [];
   }
 }
 
+const CLASSE_DO_TITULO = "text-[12px] font-bold tracking-[0.06em] text-tinta-500 uppercase";
+const CLASSE_DO_LINK = "block text-[15px] break-words text-tinta-600 hover:text-tinta-900";
+
+function ColunaDeLinks({
+  titulo,
+  links,
+}: {
+  titulo: string;
+  links: { rotulo: string; href: string }[];
+}) {
+  return (
+    <nav aria-label={titulo} className="min-w-0">
+      <p className={CLASSE_DO_TITULO}>{titulo}</p>
+      <ul className="mt-3 flex flex-col gap-3">
+        {links.map((link) => (
+          <li key={link.rotulo} className="min-w-0">
+            <Link href={link.href} className={CLASSE_DO_LINK}>
+              {link.rotulo}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 /**
- * `async` por causa dos cargos, que saem de uma medição do acervo: ver
- * `cargosDoRodape()`, `cargosEmDestaque()` e, atrás delas, `src/lib/cargos.ts`.
+ * `async` por causa dos cargos, que saem de uma medição do acervo (ver
+ * `cargosDoRodape()`).
  *
- * Eles não são uma quinta coluna, e a razão foi medida a 1240px. Com quatro
- * colunas cada uma tem 269px; com cinco, 206px. Os dez rótulos vão de 38px
- * ("Agente") a 155px ("Assistente em Administração"), então todos caberiam
- * em 206px, empilhados, dez linhas, contra as cinco da coluna mais alta que
- * o rodapé tem hoje. Deitados numa fileira de largura inteira eles somam
- * 869px com os vãos, dentro dos 1183 da linha, e viram uma linha só. A 375px
- * a fileira quebra em três linhas e 111px, com `scrollWidth` igual a
- * `clientWidth`, sem rolagem lateral nenhuma.
- *
- * E sem número ao lado, ao contrário dos blocos da home: o resto do rodapé,
- * "Inscrições abertas", "São Paulo", também não tem, e uma contagem só aqui
- * faria parecer que os outros links valem menos. O número está do outro lado
- * do link, no topo da busca.
+ * `bg-cartao` e não um token de rodapé próprio: o rodapé do desenho novo é
+ * branco (`Main.dc.html:412` usa `#EFECE3` só na faixa final; o corpo é o
+ * mesmo papel de cartão do resto da página), então ele lê os tokens comuns
+ * de superfície e texto, como qualquer outro bloco.
  */
 export async function Rodape() {
   const cargos = await cargosDoRodape();
+  const cargosLinks = cargos.map((cargo) => ({
+    rotulo: cargo.rotulo,
+    href: urlDoCargo(cargo),
+  }));
+  const hoje = dataCurta(hojeEmSaoPaulo());
 
   return (
-    <footer className="mt-16 bg-rodape text-rodape-texto">
-      <div className="mx-auto grid max-w-[1240px] gap-10 px-4 py-8 sm:px-6 md:grid-cols-4">
-        <div className="md:col-span-1">
-          <Logo tom="claro" tamanho={26} />
-          <p className="mt-3 max-w-[28ch] text-[12px] leading-5 text-rodape-suave">
-            Editais de concurso público coletados na fonte, com rastro até o
-            documento que originou cada dado.
-          </p>
+    <footer className="mt-24 border-t border-linha bg-cartao">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 py-14 md:px-[112px]">
+        <div className="flex flex-col gap-10 md:flex-row md:justify-between">
+          <div className="flex max-w-[360px] flex-col gap-3.5">
+            <Logo tamanho={32} />
+            <p className="text-[15px] leading-[1.55] text-tinta-600">
+              Concursos públicos abertos no Brasil, lidos direto do edital.
+              Feito no Brasil.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-10 md:gap-[72px]">
+            <ColunaDeLinks titulo="Buscar" links={COLUNA_BUSCAR} />
+            {cargos.length > 0 && (
+              <ColunaDeLinks titulo="Cargos mais buscados" links={cargosLinks} />
+            )}
+            <ColunaDeLinks titulo="Sobre" links={COLUNA_SOBRE} />
+          </div>
         </div>
 
-        {COLUNAS.map((coluna) => (
-          <nav key={coluna.titulo} aria-label={coluna.titulo}>
-            <Rotulo className="text-rodape-suave">{coluna.titulo}</Rotulo>
-            <ul className="mt-3 flex flex-col gap-2">
-              {coluna.links.map((link) => (
-                <li key={link.rotulo}>
-                  <Link
-                    href={link.href}
-                    className="text-[12px] text-rodape-suave hover:text-rodape-texto"
-                  >
-                    {link.rotulo}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
-
-        <nav aria-label="Concursos por estado">
-          <Rotulo className="text-rodape-suave">Por estado</Rotulo>
-          <ul className="mt-3 grid grid-cols-2 gap-2">
-            {UFS_EM_DESTAQUE.map((uf) => (
-              <li key={uf}>
-                <Link
-                  href={`/concursos?uf=${uf}`}
-                  className="text-[12px] text-rodape-suave hover:text-rodape-texto"
-                >
-                  {NOME_UF[uf]}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {cargos.length > 0 && (
-          <nav aria-label="Concursos por cargo" className="md:col-span-4">
-            <Rotulo className="text-rodape-suave">Por cargo</Rotulo>
-            {/* `flex-wrap` e `min-w-0` no item: rótulo de cargo pode ser
-                comprido, e item de flex nasce com `min-width: auto`, que o
-                proíbe de encolher abaixo do conteúdo. É a mesma armadilha
-                que já deu 204px de rolagem lateral na coluna "por órgão" da
-                home. */}
-            <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
-              {cargos.map((cargo) => (
-                <li key={cargo.href} className="min-w-0">
-                  <Link
-                    href={cargo.href}
-                    className="text-[12px] text-rodape-suave hover:text-rodape-texto"
-                  >
-                    {cargo.rotulo}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        )}
-      </div>
-
-      {/* Degrau de superfície no lugar de uma linha: o canvas não usa borda. */}
-      <div className="bg-linha-fraca">
-        <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
-          <p className="text-xs text-rodape-suave">
-            BuscaConcurso não organiza concursos. Confira sempre o edital
-            original no diário oficial ou no site da banca antes de se
-            inscrever.
-          </p>
-
-          {/* Quem responde pelo site. Os dados são os do cadastro público do
-              CNPJ na Receita Federal (situação ativa em 14/09/2026); mudou o
-              endereço lá, muda aqui. */}
-          <div className="mt-4">
-            <a
-              href="https://gvtechlab.com.br/"
-              className="inline-flex items-center gap-2 text-[12px] font-semibold text-rodape-suave hover:text-rodape-texto"
-            >
-              <LogoGvTechLab tamanho={20} />
-              Desenvolvido por GV Tech Lab
-            </a>
-            <address className="mt-2 text-xs leading-5 not-italic text-rodape-suave">
-              GV TECH LAB LTDA · CNPJ 50.810.346/0001-23
-              <br />
-              Av. Brig. Faria Lima, 1811, Sala 1119 · Jardim Paulistano · São
-              Paulo/SP · CEP 01452-001
-              <br />
-              <a
-                href="mailto:contato@gvtechlab.com.br"
-                className="hover:text-rodape-texto"
-              >
-                contato@gvtechlab.com.br
-              </a>
-            </address>
-          </div>
+        <div className="flex flex-col items-start justify-between gap-4 border-t border-linha pt-6 text-[13px] text-tinta-600 sm:flex-row sm:items-center">
+          <span>© 2026 BuscaConcurso · Acervo atualizado em {hoje}</span>
+          <a
+            href="https://gvtechlab.com.br/"
+            className="inline-flex items-center gap-2 font-semibold hover:text-tinta-900"
+          >
+            <LogoGvTechLab tamanho={18} />
+            Desenvolvido por GV Tech Lab
+          </a>
         </div>
       </div>
     </footer>

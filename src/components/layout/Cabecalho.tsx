@@ -1,77 +1,90 @@
 import Link from "next/link";
 import { BarraBuscaDoCabecalho } from "@/components/busca/BarraBusca";
 import { Logo } from "@/components/marca/Logo";
+import { BotaoEmBreve } from "@/components/ui/EmBreve";
+import { Icone } from "@/components/ui/Icone";
 import type { DimensoesDoAcervo } from "@/lib/concursos";
 import { MenuConta } from "./MenuConta";
+import { BarraUtilitaria } from "./BarraUtilitaria";
+import { GavetaDeNavegacao, NavPrincipal } from "./NavPrincipal";
+import { SoForaDaHome } from "./SoForaDaHome";
 
 /**
- * O gatilho do menu.
+ * O cabeçalho: a barra utilitária e, embaixo dela, a nav de 76px do
+ * protótipo novo (`Main.dc.html:23-51`).
  *
- * Era uma silhueta de pessoa, e virou o traço de menu a pedido do parceiro
- * humano. A troca fecha um problema que a silhueta tinha: **avatar é, por
- * convenção, o sinal de que existe uma conta**, e não existe autenticação
- * neste produto: "Entrar" e "Criar conta" apontam os dois para `/concursos`.
- * O símbolo prometia com mais força que os dois links que ele substituiu. O
- * traço de menu não promete nada: diz que há coisas ali dentro, que é
- * exatamente o que há.
+ * `atualizadoEm` chega pronto de `src/app/layout.tsx`: `dataCurta(hojeEmSaoPaulo())`
+ * quando o acervo veio da API, `null` quando não. É a `BarraUtilitaria` quem
+ * decide se mostra a frase, o cabeçalho só entrega o valor adiante.
  *
- * Traço e não preenchimento, como os três ícones do seletor de tema, para não
- * abrir uma segunda família de desenho num cabeçalho que tem um símbolo só.
+ * A busca compacta (`BarraBuscaDoCabecalho`) some na home, por trás de
+ * `SoForaDaHome`: a home tem a busca do herói (fora do escopo desta tarefa),
+ * e duas caixas de busca juntas confundiriam qual delas vale.
+ *
+ * `NavPrincipal` (as abas) e `GavetaDeNavegacao` (a gaveta com os mesmos
+ * itens) nunca aparecem juntas: o corte entre elas está em `NavPrincipal.tsx`
+ * (`useCorteDaNav`), porque ele muda com a página, e não só com a largura da
+ * tela. Fechar a gaveta ao navegar já é comportamento de `Gaveta`
+ * (`useRevelador`, `Revelador.tsx`), sem nada extra a escrever aqui.
  */
-/**
- * Cabeçalho.
- *
- * **A barra de busca mora aqui, em toda página.** Pedido do usuário: buscar
- * não pode depender de voltar à home. A partir de `md` ela fica inline, entre
- * o logotipo e o menu; abaixo disso desce para uma linha própria, sempre
- * visível, sem nada para abrir antes. A grade de três colunas é o que faz a
- * troca sem duplicar a barra: no celular ela ocupa a segunda linha inteira
- * (`col-span-3`), e no desktop a coluna do meio. `minmax(0,1fr)` e `min-w-0`
- * são o que impede a barra de esticar a página no celular, porque item de
- * grade nasce com a largura mínima do conteúdo.
- *
- * O cabeçalho ficou mais alto por causa da barra, a pedido do usuário: 12px
- * de respiro no celular e 16px no desktop, e controles de 44px.
- *
- * **Um menu só, com entrar, criar conta e tema dentro.** Os três estavam
- * escritos duas vezes (na barra do desktop e, repetidos, no menu sanduíche do
- * celular), e agora estão num lugar só, que aparece nas duas larguras.
- *
- * **A navegação saiu inteira**, a pedido do parceiro humano. Três itens
- * foram removidos antes por prometerem feature que não existe, e o último,
- * "Concursos", saiu porque a barra de busca já leva à lista: um link de topo
- * para `/concursos` ao lado dela era um segundo caminho para o mesmo lugar.
- *
- * O rótulo do gatilho é "Entrar, criar conta e tema" e não "conta", "perfil"
- * ou "menu" porque é o que há dentro. Quem não vê o desenho ouve a lista, não
- * uma promessa.
- *
- * **O menu é `ui/Revelador`**, e não `<details>` escritos aqui: fechar com
- * Escape, fechar com clique fora, devolver o foco ao gatilho e animar estão
- * escritos uma vez só, em `components/ui/`. O `<details>` continua sendo o
- * mecanismo por baixo, então o menu continua abrindo sem script. E é
- * `Gaveta`, não `Menu`, a pedido do parceiro humano: a modalidade é o que faz
- * a escolha ser a única coisa na tela. A gaveta entra pela direita, que é
- * onde o gatilho está, na largura `estreita`.
- */
-export function Cabecalho({ dimensoes }: { dimensoes: DimensoesDoAcervo }) {
+export function Cabecalho({
+  dimensoes,
+  atualizadoEm,
+}: {
+  dimensoes: DimensoesDoAcervo;
+  atualizadoEm: string | null;
+}) {
   return (
     <header className="bg-cartao">
-      <div className="mx-auto grid max-w-[1240px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6 md:gap-x-8 md:py-4">
+      <BarraUtilitaria atualizadoEm={atualizadoEm} />
+
+      <nav
+        aria-label="Principal"
+        className="flex h-16 items-center gap-4 border-b border-linha bg-cartao px-4 md:h-[76px] md:gap-10 md:px-[112px]"
+      >
         <Link
           href="/"
           aria-label="BuscaConcurso, página inicial"
-          className="col-start-1 row-start-1 flex items-center"
+          className="flex shrink-0 items-center"
         >
-          <Logo tamanho={26} />
+          <Logo tamanho={36} />
         </Link>
-        <div className="col-span-3 row-start-2 min-w-0 md:col-span-1 md:col-start-2 md:row-start-1">
-          <BarraBuscaDoCabecalho dimensoes={dimensoes} />
+
+        <div className="flex min-w-0 flex-1 items-center gap-6">
+          <NavPrincipal />
+          <SoForaDaHome className="min-w-0 flex-1">
+            <BarraBuscaDoCabecalho dimensoes={dimensoes} />
+          </SoForaDaHome>
         </div>
-        <div className="col-start-3 row-start-1 flex items-center justify-self-end">
+
+        <div className="hidden items-center gap-2 lg:flex">
+          <BotaoEmBreve
+            recurso="salvos"
+            aria-label="Salvos"
+            className="flex size-11 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
+          >
+            <Icone nome="salvar" tamanho={20} />
+          </BotaoEmBreve>
+
+          <BotaoEmBreve
+            recurso="alertas"
+            aria-label="Meus alertas"
+            className="relative flex size-11 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
+          >
+            <Icone nome="alerta" tamanho={20} />
+            {/* A bolinha de aviso, `Main.dc.html:48`: sinal só, sem número,
+                porque não há contagem de alerta nenhuma para mostrar ainda. */}
+            <span
+              aria-hidden="true"
+              className="absolute top-[10px] right-[11px] size-2 rounded-full bg-urucum ring-2 ring-cartao"
+            />
+          </BotaoEmBreve>
+
           <MenuConta />
         </div>
-      </div>
+
+        <GavetaDeNavegacao />
+      </nav>
     </header>
   );
 }

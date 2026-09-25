@@ -383,8 +383,10 @@ export function BarraBusca({
           role="search"
           onSubmit={aoEnviar}
           onClick={aoClicarNaBarra}
-          className={`flex items-center gap-1 rounded-full p-1 outline-acao outline-offset-4 has-[input:focus]:outline-2 ${
-            naHome ? "aurora bg-cartao" : "bg-rebaixada"
+          className={`flex items-center gap-1 outline-acao outline-offset-4 has-[input:focus]:outline-2 ${
+            naHome
+              ? "aurora rounded-full bg-cartao p-1"
+              : "h-11 overflow-hidden rounded-controle bg-rebaixada"
           }`}
         >
           <div className="flex min-w-0 flex-1 items-center gap-2 pr-0.5 pl-3.5">
@@ -418,6 +420,18 @@ export function BarraBusca({
               {...campo}
             />
           </div>
+
+          {/* A dica de atalho, só na cápsula do cabeçalho (`Main.dc.html:64`
+              traz o desenho do `kbd`, ali na busca do herói): decoração pura,
+              sem tratador de tecla nenhum, então nenhuma lógica muda aqui. */}
+          {!naHome && (
+            <kbd
+              aria-hidden="true"
+              className="hidden h-[26px] min-w-[26px] shrink-0 items-center justify-center rounded-[6px] bg-cartao px-1 text-[13px] font-semibold text-tinta-600 shadow-[inset_0_-1px_0_var(--color-linha)] sm:flex"
+            >
+              /
+            </kbd>
+          )}
 
           <label htmlFor={idUf} className="sr-only">
             Estado
