@@ -25,7 +25,7 @@ function janela(pagina: number, paginas: number): (number | "…")[] {
 }
 
 const QUADRADO =
-  "flex size-[30px] items-center justify-center rounded-controle text-[12px] font-medium";
+  "flex size-[30px] items-center justify-center rounded-controle text-[12px] font-semibold";
 
 export function Paginacao({
   pagina,
@@ -71,7 +71,7 @@ export function Paginacao({
           <span
             key={item}
             aria-current="page"
-            className={`${QUADRADO} bg-tinta-900 font-semibold text-cartao`}
+            className={`${QUADRADO} bg-acao text-acao-texto`}
           >
             {item}
           </span>

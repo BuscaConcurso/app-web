@@ -5,28 +5,30 @@ import type { Tom } from "@/lib/dominio";
 /**
  * Cartão.
  *
- * O fundo é o sinal de situação, e é também o que separa o cartão da página:
- * não há borda nem sombra, só o degrau entre o cinza da página e o fundo do
- * cartão.
+ * No desenho novo o cartão é sempre branco: o degrau entre ele e a página
+ * é a sombra fina de `shadow-cartao` (`Main.dc.html`, os cartões de
+ * "Encerram esta semana" e da lista de abertos são `#FFFFFF` mesmo nos que
+ * fecham hoje). O sinal de situação passou para a folhinha do `Calendario` e
+ * para a `Etiqueta`, não para o fundo do cartão inteiro.
+ *
+ * `tom` continua aceito, sem efeito aqui, só para quem ainda o passa
+ * (o cartão do concurso, `Task 12`, decide o que fazer com ele).
  */
 export function Cartao({
-  tom = "aberto",
   children,
   className,
   as: Tag = "div",
 }: {
-  tom?: Tom;
+  tom?: "neutro" | Tom;
   children: ReactNode;
   className?: string;
   as?: "div" | "article" | "li" | "section" | "header";
 }) {
   return (
     <Tag
-      className={[
-        "rounded-cartao",
-        ESTILO_DO_TOM[tom].cartao,
-        className ?? "p-4",
-      ].join(" ")}
+      className={["bg-cartao rounded-cartao shadow-cartao", className ?? "p-4"].join(
+        " ",
+      )}
     >
       {children}
     </Tag>
@@ -114,98 +116,85 @@ export function Numero({
  *
  * O que se perde em relação ao travessão que esteve aqui por algumas horas: o
  * travessão dizia "não há valor" na convenção de tabela, e o quadrado liso
- * não diz nada — a ausência passa a ser lida pelo que falta, não por um
+ * não diz nada, a ausência passa a ser lida pelo que falta, não por um
  * símbolo. É a troca que o parceiro humano escolheu, vendo as duas.
+ *
+ * **O tom.** Sem `tom`, o selo é o anil do desenho novo (`bg-anil-fundo
+ * text-anil-texto`), que é o quadrado de marca do órgão fora de qualquer
+ * cartão colorido por situação. Com `tom`, ele volta ao esquema antigo, de
+ * quando o quadrado morava dentro de um cartão urgente/previsto/encerrado e
+ * precisava combinar com o fundo dele.
+ *
+ * **O tamanho** agora é o lado em pixels (padrão 44, como no cartão de
+ * "Encerram esta semana"), não mais "sm"/"md": um número aceita qualquer
+ * caixa que um cartão futuro peça, sem um nome novo por tamanho. `"sm"` e
+ * `"md"` continuam aceitos, por quem ainda os usa.
  */
 export function Selo({
   sigla,
-  tom = "aberto",
-  tamanho = "md",
+  tom,
+  tamanho = 44,
 }: {
   sigla: string | null;
   tom?: Tom;
-  tamanho?: "sm" | "md";
+  tamanho?: number | "sm" | "md";
 }) {
   // A API manda `null` nos 1.615 sem sigla, mas quem preenche é outro
   // processo: string vazia ou só espaço chegaria como sigla e desenharia de
   // novo o quadrado vazio que este componente acabou de parar de desenhar.
   const letras = sigla?.trim() ?? "";
 
-  const lado = tamanho === "sm" ? "size-10" : "size-11";
-  const base = "flex shrink-0 items-center justify-center text-center leading-none";
+  const lado =
+    typeof tamanho === "number" ? tamanho : tamanho === "sm" ? 40 : 44;
+  const base =
+    "flex shrink-0 items-center justify-center text-center leading-none rounded-[12px]";
 
-  const fundo = {
-    aberto: "bg-rebaixada text-tinta-900",
-    urgente: "bg-urgente-chip text-urucum-texto",
-    previsto: "bg-previsto-chip text-ouro-sinal-texto",
-    encerrado: "bg-encerrado-chip text-tinta-600",
-  }[tom];
+  const fundo = tom
+    ? {
+        aberto: "bg-rebaixada text-tinta-900",
+        urgente: "bg-urgente-chip text-urucum-texto",
+        previsto: "bg-previsto-chip text-ouro-sinal-texto",
+        encerrado: "bg-encerrado-chip text-tinta-600",
+      }[tom]
+    : "bg-anil-fundo text-anil-texto";
 
   if (!letras) {
     // O quadrado sem nada dentro, decisão do parceiro humano: a coluna do
-    // selo mede o mesmo com e sem sigla (o `<h3>` começa em 77,42px nos dois
-    // grupos), e o que estava aqui antes era um travessão.
+    // selo mede o mesmo com e sem sigla, e o que estava aqui antes era um
+    // travessão.
     //
     // Ele não é o quadrado vazio que este componente tinha antes das siglas
     // existirem: aquele era o selo NORMAL desenhando uma sigla que não
     // chegava, indistinguível de um que chegou. Este é a forma do selo sem a
-    // afirmação — mesma caixa, mesmo tom, sem conteúdo e sem alt.
+    // afirmação: mesma caixa, mesmo tom, sem conteúdo e sem alt.
     return (
       <span
         aria-hidden="true"
-        className={[base, lado, "rounded-lg", fundo].join(" ")}
+        className={[base, fundo].join(" ")}
+        style={{ width: lado, height: lado }}
       />
     );
   }
 
-
-  /*
-    A escada de corpo, que só passou a rodar hoje: até ontem a sigla chegava
-    em 1 dos 4.649 cartões e nenhum degrau abaixo do primeiro tinha sido
-    medido. Medidos agora, contra as 118 siglas distintas do acervo (de 2 a 8
-    letras) e contra os dois tamanhos de caixa — 31,68px úteis no `md` e
-    28,15px no `sm`, já descontado o `px-1`:
-
-    | letras | numa linha precisa de | o que é feito           |
-    |---|---|---|
-    | 2 e 3 | 11px  | 11px / 10px, uma linha  |
-    | 4     | 10px (md), 9px (sm) | 10px / 9px, uma linha |
-    | 5     | 8px (md), 7px (sm)  | 9px, duas linhas      |
-    | 6     | 7px                 | 9px, duas linhas      |
-    | 7     | 6px                 | 9px, duas linhas      |
-    | 8     | 5px                 | 9px, duas linhas      |
-
-    A escada antiga ia até 7px e mesmo assim estourava: "UNIPAMPA" no degrau
-    de 8px mede 40,33px numa caixa de 31,68px, e sem `overflow` nenhum o
-    excesso era pintado por cima do nome do órgão. Daí a troca de critério —
-    **duas linhas em vez de corpo ilegível**. Uma sigla partida se lê; uma
-    sigla de 5px, não. O piso é 9px, e a quebra é `wrap-anywhere` porque
-    "UNIPAMPA" não oferece um lugar por onde quebrar e "CAU/BR" oferece um
-    que o navegador não usa sozinho.
-
-    São 707 dos 3.034 cartões com sigla que caem na faixa de duas linhas.
-  */
+  // Siglas do acervo vão de 2 a 8 letras. Acima de 4, o corpo cai para 9px e
+  // quebra em duas linhas (`wrap-anywhere`, porque "UNIPAMPA" não tem hífen
+  // nem barra por onde o navegador quebraria sozinho); é o piso que ainda se
+  // lê sem estourar a caixa. Até 4, 12px numa caixa de 44px ou mais, 11px
+  // numa caixa menor.
   const corpo =
     letras.length > 4
       ? "text-[9px] wrap-anywhere"
-      : letras.length > 3
-        ? tamanho === "sm"
-          ? "text-[9px]"
-          : "text-[10px]"
-        : tamanho === "sm"
-          ? "text-[10px]"
-          : "text-xs";
+      : lado >= 44
+        ? "text-xs"
+        : "text-[11px]";
 
   return (
     <span
       aria-hidden="true"
-      className={[
-        base,
-        lado,
-        "rounded-lg px-1 font-semibold tracking-tight",
-        corpo,
-        fundo,
-      ].join(" ")}
+      className={[base, "px-1 font-bold tracking-tight", corpo, fundo].join(
+        " ",
+      )}
+      style={{ width: lado, height: lado }}
     >
       {letras}
     </span>

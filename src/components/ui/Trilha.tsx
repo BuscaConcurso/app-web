@@ -66,7 +66,7 @@ export function Trilha({ degraus }: { degraus: Degrau[] }) {
 
       <nav
         aria-label="Trilha"
-        className="mb-5 flex min-w-0 flex-wrap items-baseline text-[12px] text-tinta-600"
+        className="mb-5 flex min-w-0 flex-wrap items-baseline text-[14px] text-tinta-600"
       >
         {degraus.map((degrau, indice) => {
           const corrente = indice === degraus.length - 1;
@@ -81,12 +81,15 @@ export function Trilha({ degraus }: { degraus: Degrau[] }) {
             // por par em vez de quebrar entre eles.
             <Fragment key={degrau.href}>
               {indice > 0 && (
-                <span aria-hidden="true" className="px-[2px]">
+                <span aria-hidden="true" className="px-[2px] text-tinta-500">
                   /
                 </span>
               )}
               {corrente ? (
-                <span aria-current="page" className={`${corte} text-tinta-900`}>
+                <span
+                  aria-current="page"
+                  className={`${corte} font-semibold text-tinta-900`}
+                >
                   {degrau.nome}
                 </span>
               ) : (

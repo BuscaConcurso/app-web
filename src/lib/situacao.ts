@@ -76,28 +76,28 @@ export const ESTILO_DO_TOM: Record<
 > = {
   aberto: {
     cartao: "bg-cartao",
-    chip: "bg-rebaixada text-tinta-900",
+    chip: "bg-verde-fundo text-verde-texto",
     ponto: "bg-verde",
     apoio: "text-tinta-600",
     bloco: "bg-rebaixada",
   },
   urgente: {
     cartao: "bg-urgente",
-    chip: "bg-urgente-chip text-urucum-texto",
+    chip: "bg-urucum-fundo text-urucum-texto",
     ponto: "bg-urucum",
     apoio: "text-urucum-texto",
     bloco: "bg-urgente-chip",
   },
   previsto: {
     cartao: "bg-previsto",
-    chip: "bg-previsto-chip text-ouro-sinal-texto",
+    chip: "bg-ouro-fundo text-ouro-sinal-texto",
     ponto: "bg-ouro-sinal-texto",
     apoio: "text-ouro-sinal-texto",
     bloco: "bg-previsto-chip",
   },
   encerrado: {
     cartao: "bg-encerrado",
-    chip: "bg-encerrado-chip text-tinta-600",
+    chip: "bg-rebaixada text-tinta-600",
     ponto: "bg-tinta-500",
     apoio: "text-tinta-600",
     bloco: "bg-encerrado-chip",
