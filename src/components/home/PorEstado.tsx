@@ -95,7 +95,7 @@ export function PorEstado({
   const maximo = Math.max(0, ...[...totalPorUf.values()]);
 
   return (
-    <section id="estados" className="mt-24 hidden scroll-mt-24 px-[112px] xl:flex xl:flex-col xl:gap-7">
+    <section id="estados" className="conteudo mt-24 hidden scroll-mt-24 xl:flex xl:flex-col xl:gap-7">
       <div>
         <Rotulo icone="estados" tom="anil" className="mb-2.5">
           POR ESTADO
@@ -146,6 +146,7 @@ export function PorEstado({
               Toque num estado para ver só o que dá para prestar perto de casa.
               <PertoDeMim
                 id="localizacao"
+                sempreDetectar
                 className="mt-1.5 flex items-center gap-1.5 font-semibold text-tinta-900 hover:text-verde-texto"
               >
                 Usar minha localização

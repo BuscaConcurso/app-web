@@ -121,7 +121,9 @@ export function LateralDoConcurso({
             </>
           )}
 
-          <div className="grid grid-cols-2 gap-2">
+          {/* Encerrado não tem prazo nenhum para lembrar (ruling R33): fica só
+              Salvar, na largura inteira. */}
+          <div className={`grid gap-2 ${tom === "encerrado" ? "grid-cols-1" : "grid-cols-2"}`}>
             <BotaoEmBreve
               recurso="salvos"
               className="flex h-11 items-center justify-center gap-1.5 rounded-controle bg-rebaixada text-sm font-semibold text-tinta-900 hover:bg-linha"
@@ -129,13 +131,15 @@ export function LateralDoConcurso({
               <Icone nome="salvar" tamanho={16} />
               Salvar
             </BotaoEmBreve>
-            <BotaoEmBreve
-              recurso="lembrete"
-              className="flex h-11 items-center justify-center gap-1.5 rounded-controle bg-rebaixada text-sm font-semibold text-tinta-900 hover:bg-linha"
-            >
-              <Icone nome="alerta" tamanho={16} />
-              Lembrar amanhã
-            </BotaoEmBreve>
+            {tom !== "encerrado" && (
+              <BotaoEmBreve
+                recurso="lembrete"
+                className="flex h-11 items-center justify-center gap-1.5 rounded-controle bg-rebaixada text-sm font-semibold text-tinta-900 hover:bg-linha"
+              >
+                <Icone nome="alerta" tamanho={16} />
+                Lembrar amanhã
+              </BotaoEmBreve>
+            )}
           </div>
         </div>
       </div>

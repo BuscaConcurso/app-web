@@ -1,13 +1,29 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { EncerramSemana } from "./EncerramSemana";
 import { PorEstado } from "./PorEstado";
 import { TabelaAbertos } from "./TabelaAbertos";
 import { ComoFunciona } from "./ComoFunciona";
+import { destinoPertoDeMim } from "./PertoDeMim";
 import { CONCURSOS } from "@/mocks/concursos";
 
+// `PertoDeMim` (dentro de `PorEstado`) chama `useRouter()`, que lança fora
+// de um `<AppRouterProvider>`; ver o mesmo mock em `Hero.test.ts`.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 const HOJE = new Date(2026, 8, 24);
+
+describe("destinoPertoDeMim", () => {
+  it("abre os abertos do estado, ou de todo o Brasil sem estado", () => {
+    expect(destinoPertoDeMim("RJ")).toBe("/concursos?situacao=abertas&uf=RJ");
+    expect(destinoPertoDeMim(null)).toBe("/concursos?situacao=abertas");
+  });
+});
 
 describe("blocos da home", () => {
   it("encerram esta semana some sem concurso", () => {
