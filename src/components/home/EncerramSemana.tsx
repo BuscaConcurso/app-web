@@ -11,7 +11,7 @@ import { ROTULO_ESCOLARIDADE, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos"
 /** "Encerra hoje/amanhã/em N dias", na cor de urgência de `Main.dc.html:157-164`. */
 function corDoPrazo(iso: string, hoje: Date): string {
   const dias = diasAte(iso, hoje);
-  if (dias <= 0) return "text-urucum";
+  if (dias <= 0) return "text-urucum-texto";
   if (dias === 1) return "text-ouro-sinal-texto";
   return "text-tinta-600";
 }

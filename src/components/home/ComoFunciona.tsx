@@ -45,8 +45,8 @@ const PASSOS: Passo[] = [
  */
 const CATEGORIAS_DA_LACUNA = [
   { chave: "naoAbreConcurso", icone: "documento" as const, curto: "retificações e anexos", cor: "text-tinta-500", barra: "bg-tinta-500" },
-  { chave: "naFila", icone: "relogio" as const, curto: "na fila de leitura", cor: "text-anil", barra: "bg-anil" },
-  { chave: "lacuna", icone: "ciclo" as const, curto: "leituras a refazer", cor: "text-urucum", barra: "bg-urucum" },
+  { chave: "naFila", icone: "relogio" as const, curto: "na fila de leitura", cor: "text-anil-texto", barra: "bg-anil" },
+  { chave: "lacuna", icone: "ciclo" as const, curto: "leituras a refazer", cor: "text-urucum-texto", barra: "bg-urucum" },
 ] as const;
 
 /**

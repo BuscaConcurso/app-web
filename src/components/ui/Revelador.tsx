@@ -660,17 +660,16 @@ export function Gaveta({
         O fundo. Escurece o que ficou `inert`: deixar a página acesa e
         inalcançável seria dizer com a forma o contrário do que o mecanismo faz.
 
-        O tom é `escura` e não `tinta-900`. Os dois são #141715 no tema claro,
-        mas `tinta-900` é um token de TEXTO e ele inverte no escuro: medido,
-        `tinta-900` vira #edefee e o véu de 40% ficava com luminosidade oklab
-        0,95 sobre uma página #121513: um clarão branco no lugar de uma
-        sombra. `escura` é #141715 no claro e #0c0e0d no escuro, que é o que um
-        véu precisa ser nos dois.
+        O tom é `veu` e não `tinta-900`. Os dois são #141715 no tema claro,
+        mas `tinta-900` é um token de TEXTO e inverte no escuro (lá ele é
+        quase branco), e o véu de 40% virava um clarão sobre a página escura
+        no lugar de uma sombra. `veu` não inverte: #141715 no claro, #000000
+        no escuro.
       */}
       <div
         aria-hidden="true"
         onPointerDown={fechar}
-        className="revelador-fundo fixed inset-0 z-40 bg-tinta-900/40"
+        className="revelador-fundo fixed inset-0 z-40 bg-veu/40"
       />
 
       {/* O painel. Sem corte no conteúdo: ele rola por dentro, e é a única

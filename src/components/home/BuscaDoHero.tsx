@@ -76,7 +76,7 @@ function SeletorDoHero({
 }) {
   return (
     <div className="flex h-[46px] shrink-0 items-center justify-center gap-1.5 rounded-controle bg-rebaixada px-2 text-sm font-medium text-tinta-900 lg:h-[52px] lg:w-[148px] lg:justify-start lg:gap-1.5 lg:bg-transparent lg:px-1 lg:text-[15px]">
-      <Icone nome={icone} tamanho={18} className="text-verde shrink-0" />
+      <Icone nome={icone} tamanho={18} className="shrink-0 text-verde-texto" />
       <label htmlFor={id} className="sr-only">
         {rotulo}
       </label>
@@ -148,7 +148,7 @@ export function BuscaDoHero() {
       className="mt-2 flex flex-col gap-2 rounded-cartao bg-cartao p-2 shadow-busca lg:h-[72px] lg:flex-row lg:items-center lg:gap-2 lg:pl-5"
     >
       <div className="flex h-[52px] min-w-0 items-center gap-2.5 px-2.5 lg:h-full lg:flex-1 lg:gap-3 lg:px-0">
-        <Icone nome="busca" tamanho={22} className="text-verde shrink-0" />
+        <Icone nome="busca" tamanho={22} className="shrink-0 text-verde-texto" />
         <label htmlFor={idCampo} className="sr-only">
           Cargo, órgão ou banca
         </label>
