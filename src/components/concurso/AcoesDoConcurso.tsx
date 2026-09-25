@@ -11,8 +11,10 @@ const CLASSE_DO_BOTAO =
 /**
  * As três ações do cabeçalho: `Concurso.dc.html:70-73`. Salvar não existe
  * ainda (`BotaoEmBreve`); Compartilhar usa a folha nativa quando o navegador
- * tem, o link copiado quando não tem; Pôr na agenda baixa o `.ics` e some
- * quando o concurso não tem data de fim de inscrição (`ics === null`).
+ * tem, e senão copia o link (ou avisa que não deu, ver
+ * `resolverCompartilhamento` em `useCompartilhar.ts`); Pôr na agenda baixa o
+ * `.ics` e some quando o concurso não tem data de fim de inscrição
+ * (`ics === null`).
  */
 export function AcoesDoConcurso({
   slug,
@@ -23,7 +25,7 @@ export function AcoesDoConcurso({
   titulo: string;
   ics: string | null;
 }) {
-  const { compartilhar, linkCopiado } = useCompartilhar({
+  const { compartilhar, aviso } = useCompartilhar({
     titulo,
     url: urlAbsoluta(`/concursos/${slug}`),
   });
@@ -55,7 +57,7 @@ export function AcoesDoConcurso({
           Pôr na agenda
         </button>
       )}
-      {linkCopiado && <AvisoFlutuante>Link copiado</AvisoFlutuante>}
+      {aviso && <AvisoFlutuante>{aviso}</AvisoFlutuante>}
     </div>
   );
 }

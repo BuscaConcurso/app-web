@@ -29,12 +29,18 @@ export function CabecalhoDoConcurso({
 }) {
   const tom = tomDoConcurso(concurso, hoje);
   // No cartão de lista a pílula é só o status ou só o prazo (`rotuloDeSituacao`
-  // já escolhe um dos dois). Aqui, com mais espaço, os dois aparecem juntos
-  // no tom urgente: "Inscrições abertas · encerra amanhã" (`Concurso.dc.html:65`).
+  // já escolhe um dos dois). Aqui, com mais espaço, os dois aparecem juntos no
+  // tom urgente: "Inscrições abertas · encerram amanhã" (`Concurso.dc.html:67`).
+  //
+  // O verbo concorda com "Inscrições" (plural), não com `prazoPorExtenso`, que
+  // fica com "Encerra ..." (singular) para os outros lugares que o chamam
+  // sozinho, sem o sujeito "Inscrições" na frase. A composição é só desta
+  // pílula, por isso não mexe em `prazoPorExtenso`.
   const prazo = prazoPorExtenso(concurso, hoje);
+  const prazoNoPlural = prazo?.titulo.toLowerCase().replace(/^encerra\b/, "encerram");
   const situacao =
-    tom === "urgente" && prazo
-      ? `${ROTULO_STATUS[concurso.status]} · ${prazo.titulo.toLowerCase()}`
+    tom === "urgente" && prazoNoPlural
+      ? `${ROTULO_STATUS[concurso.status]} · ${prazoNoPlural}`
       : rotuloDeSituacao(concurso, hoje);
 
   const titulo = concurso.nomesDeCargo[0] ?? tituloSemOrgao(concurso.titulo, concurso.orgao);
@@ -49,8 +55,8 @@ export function CabecalhoDoConcurso({
         1216px de header (`Main.dc.html`, sangria de 112px a 1440px) para
         abrir espaço ao lado do título sem cobri-lo. Esta página é a coluna
         estreita de `max-w-[880px]` (Task 9), onde esse espaço não existe: um
-        título de duas linhas passaria por baixo do canto. Fica de fora até
-        a página ganhar a largura que o desenho pede.
+        título de duas linhas passaria por baixo do canto. Fica de fora até a
+        Task 13, que muda o container da página para a largura do protótipo.
       */}
       <div className="flex items-start gap-4 md:gap-8">
         <div className="md:hidden">
