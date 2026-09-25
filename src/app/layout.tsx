@@ -27,10 +27,31 @@ import { SessionProvider } from "@/lib/auth/session";
  * famílias oferecem: menos peso para baixar, sem faltar nenhum peso que a
  * tela pede. `next/font` as autohospeda, o que tira a requisição para o
  * Google e o deslocamento de layout que vem com ela.
+ *
+ * `axes: ["opsz"]` no Bricolage: o protótipo carrega
+ * `Bricolage+Grotesque:opsz,wght@12..96,500..800` (o eixo óptico junto do
+ * peso), e sem pedir o eixo aqui o `next/font` baixa só `wght`, e o navegador
+ * usa o tamanho óptico padrão do arquivo (pensado para texto pequeno) em
+ * qualquer tamanho de fonte, inclusive nos 68px do título do herói. Esse
+ * corte óptico errado é mais largo por letra que o desenho pensado para
+ * título grande, e foi o que fez "Encontre seu concurso." quebrar em duas
+ * linhas em vez de uma a 1440px: a mesma string, no mesmo espaço, é mais
+ * larga com o eixo óptico errado. Documentado/investigado na Task 8 (ver
+ * `task-8-report.md`).
+ *
+ * `weight: "variable"` e não a lista de pesos: o próprio `next/font` recusa
+ * `axes` junto de uma lista fixa de pesos ("Axes can only be defined for
+ * variable fonts when the weight property is nonexistent or set to
+ * `variable`", erro visto ao tentar). Com `"variable"`, o arquivo inteiro
+ * (peso e ótica) desce de uma vez, e cada peso usado no CSS (`font-medium` a
+ * `font-extrabold`) continua funcionando: é o navegador que amostra o eixo
+ * `wght` do arquivo variável a partir do `font-weight` de cada utilitário,
+ * em vez do `next/font` gerar uma `@font-face` fixa por peso.
  */
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin", "latin-ext"],
-  weight: ["500", "600", "700", "800"],
+  weight: "variable",
+  axes: ["opsz"],
   variable: "--fonte-bricolage",
   display: "swap",
 });
