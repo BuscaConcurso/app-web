@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { BuscaDoHero } from "./BuscaDoHero";
 import { Mosaico } from "./Mosaico";
 import { CLASSE_CHIP_DO_HERO, PertoDeMim } from "./PertoDeMim";
@@ -6,6 +7,28 @@ import { Icone } from "@/components/ui/Icone";
 import type { LinkDeFaceta } from "@/lib/concursos";
 import type { ConcursoResumo } from "@/lib/dominio";
 import { numero } from "@/lib/formato";
+
+/**
+ * Embrulha o chip de escolaridade, que só cabe no herói de desktop
+ * (`Main.dc.html:72-77`, quatro chips numa fileira só): abaixo de `lg` o
+ * celular tem só três (`Mobile.dc.html`: "Encerram na semana", "Perto de
+ * mim" e "+ R$ 10 mil", nessa ordem), e não uma fileira quebrada em três
+ * linhas que o protótipo não tem.
+ *
+ * `hidden` esconde o embrulho (e o chip dentro) abaixo de `lg`; a partir daí
+ * `contents` faz o embrulho sumir da árvore de caixas e o `<Link>` vira item
+ * direto do `flex` do pai, como se não houvesse embrulho nenhum. Um `span`
+ * em volta, e não alterar a classe do chip: `CLASSE_CHIP_DO_HERO` sai de
+ * `PertoDeMim.tsx`, que é `"use client"`, e o valor que atravessa essa
+ * fronteira não é uma string comum para `.replace()` chamar em cima durante
+ * o build de produção (nem para somar um `hidden` a ela: `CLASSE_CHIP_DO_HERO`
+ * já é `inline-flex` sem condição nenhuma, e uma classe de exibição
+ * incondicional do mesmo peso que `hidden` fica ao sabor da ordem de geração
+ * do Tailwind).
+ */
+function SoDesktop({ children }: { children: ReactNode }) {
+  return <span className="hidden lg:contents">{children}</span>;
+}
 
 /**
  * O topo da home: o herói verde com a busca, o mosaico de azulejos com o
@@ -89,26 +112,37 @@ export function Hero({
 
           <BuscaDoHero />
 
+          {/*
+            A ordem muda por breakpoint (`order-*`), e não só o que aparece:
+            no celular é prazo, perto de mim, salário (`Mobile.dc.html`); no
+            desktop é prazo, salário, escolaridade, perto de mim
+            (`Main.dc.html:72-77`). O prazo não leva `order` porque o padrão
+            (0) já o deixa na frente dos outros três, que levam 2, 3 e 4.
+          */}
           <div className="flex flex-wrap gap-2">
             <Link href="/concursos?situacao=abertas" className={CLASSE_CHIP_DO_HERO}>
               <Icone nome="prazo" tamanho={16} />
-              Encerram esta semana
+              <span className="lg:hidden">Encerram na semana</span>
+              <span className="hidden lg:inline">Encerram esta semana</span>
             </Link>
             <Link
               href="/concursos?situacao=abertas&salarioMin=10000"
-              className={CLASSE_CHIP_DO_HERO}
+              className={`order-3 lg:order-2 ${CLASSE_CHIP_DO_HERO}`}
             >
               <Icone nome="salario" tamanho={16} />
-              Acima de R$ 10 mil
+              <span className="lg:hidden">+ R$ 10 mil</span>
+              <span className="hidden lg:inline">Acima de R$ 10 mil</span>
             </Link>
-            <Link
-              href="/concursos?situacao=abertas&escolaridade=medio"
-              className={CLASSE_CHIP_DO_HERO}
-            >
-              <Icone nome="educacao" tamanho={16} />
-              Nível médio
-            </Link>
-            <PertoDeMim />
+            <SoDesktop>
+              <Link
+                href="/concursos?situacao=abertas&escolaridade=medio"
+                className={`order-3 ${CLASSE_CHIP_DO_HERO}`}
+              >
+                <Icone nome="educacao" tamanho={16} />
+                Nível médio
+              </Link>
+            </SoDesktop>
+            <PertoDeMim className={`order-2 lg:order-4 ${CLASSE_CHIP_DO_HERO}`} />
           </div>
         </div>
 

@@ -31,9 +31,10 @@ export function CabecalhoDoConcurso({
   hoje: Date;
 }) {
   const tom = tomDoConcurso(concurso, hoje);
-  // No cartão de lista a pílula é só o status ou só o prazo (`rotuloDeSituacao`
-  // já escolhe um dos dois). Aqui, com mais espaço, os dois aparecem juntos no
-  // tom urgente: "Inscrições abertas · encerram amanhã" (`Concurso.dc.html:67`).
+  // No cartão de lista, e no celular aqui (`ConcursoMobile.dc.html:31-35`), a
+  // pílula é só o status ou só o prazo (`rotuloDeSituacao` já escolhe um dos
+  // dois). A partir de `md`, com mais espaço, os dois aparecem juntos no tom
+  // urgente: "Inscrições abertas · encerram amanhã" (`Concurso.dc.html:67`).
   //
   // O verbo concorda com "Inscrições" (plural), não com `prazoPorExtenso`, que
   // fica com "Encerra ..." (singular) para os outros lugares que o chamam
@@ -45,10 +46,11 @@ export function CabecalhoDoConcurso({
   // e a pílula de situação logo acima já diz o status nesse caso.
   const periodo = periodoDaInscricao(concurso, hoje);
   const prazoNoPlural = prazo?.titulo.toLowerCase().replace(/^encerra\b/, "encerram");
-  const situacao =
+  const situacaoCompacta = rotuloDeSituacao(concurso, hoje);
+  const situacaoAmpla =
     tom === "urgente" && prazoNoPlural
       ? `${ROTULO_STATUS[concurso.status]} · ${prazoNoPlural}`
-      : rotuloDeSituacao(concurso, hoje);
+      : situacaoCompacta;
 
   const titulo = concurso.nomesDeCargo[0] ?? tituloSemOrgao(concurso.titulo, concurso.orgao);
   const ato = tituloSemOrgao(concurso.titulo, concurso.orgao);
@@ -96,9 +98,20 @@ export function CabecalhoDoConcurso({
         {/* No celular as etiquetas vêm depois do título
             (`ConcursoMobile.dc.html:31-35`); no desktop, antes. */}
         <div className="order-2 flex flex-wrap items-center gap-1.5 md:order-none">
-          <Etiqueta tom={tom} comPonto grande>
-            {situacao}
+          <Etiqueta tom={tom} comPonto grande className="md:hidden">
+            {situacaoCompacta}
           </Etiqueta>
+          {/* `span.hidden md:contents`, e não uma classe de exibição direto na
+              `Etiqueta`: ela já é `inline-flex` sem condição nenhuma, e
+              somar `hidden` a uma classe de exibição incondicional do mesmo
+              peso deixa o resultado ao sabor da ordem de geração do Tailwind
+              (foi o que aconteceu: a etiqueta ficava visível nos dois
+              tamanhos). O embrulho evita mexer na classe da `Etiqueta`. */}
+          <span className="hidden md:contents">
+            <Etiqueta tom={tom} comPonto grande>
+              {situacaoAmpla}
+            </Etiqueta>
+          </span>
           {concurso.orgao.esfera && (
             <Etiqueta icone="estatais" grande>{ROTULO_ESFERA[concurso.orgao.esfera]}</Etiqueta>
           )}
