@@ -4,6 +4,7 @@ import { LinhaConcurso } from "@/components/concurso/LinhaConcurso";
 import { AcervoIncompleto, BlocoAlerta } from "@/components/home/BlocoAlerta";
 import { BlocosSeo } from "@/components/home/BlocosSeo";
 import { Hero } from "@/components/home/Hero";
+import { Numeros } from "@/components/home/Numeros";
 import { Secao } from "@/components/home/Secao";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import {
@@ -13,7 +14,7 @@ import {
   facetas,
   obterDestaques,
 } from "@/lib/concursos";
-import { dataLonga } from "@/lib/formato";
+import { somaOuNull } from "@/lib/formato";
 import { tituloSemOrgao } from "@/lib/rotulos";
 import { DESCRICAO_SITE, NOME_SITE, urlAbsoluta } from "@/lib/site";
 
@@ -22,12 +23,6 @@ export const metadata: Metadata = {
   description: DESCRICAO_SITE,
   alternates: { canonical: "/" },
 };
-
-function isoDeHoje(hoje: Date): string {
-  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-  const dia = String(hoje.getDate()).padStart(2, "0");
-  return `${hoje.getFullYear()}-${mes}-${dia}`;
-}
 
 /** ISR de cinco minutos, o mesmo tempo da leitura do acervo (`concursos.ts`). */
 export const revalidate = 300;
@@ -74,10 +69,16 @@ export default async function Home() {
 
       <Hero
         totalAbertos={destaques.totalAbertos}
-        atualizadoEm={dataLonga(isoDeHoje(hoje))}
-        dimensoes={dimensoes}
         ufs={ufs}
         cargos={cargos}
+        destaque={destaques.encerrando[0] ?? destaques.abertos[0] ?? null}
+        novoAto={destaques.atualizados[0] ?? null}
+      />
+
+      <Numeros
+        totalAbertos={destaques.totalAbertos}
+        vagasPrevistas={somaOuNull(destaques.previstos.map((concurso) => concurso.vagas))}
+        atosLidos={aviso?.total ?? dimensoes.total}
       />
 
       {destaques.encerrando.length > 0 && (

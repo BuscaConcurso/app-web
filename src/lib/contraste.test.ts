@@ -66,6 +66,12 @@ const PARES: Par[] = [
   { texto: "acao", fundo: "cartao", minimo: NAO_TEXTO },
   { texto: "acao", fundo: "pagina", minimo: NAO_TEXTO },
   { texto: "ouro", fundo: "faixa", minimo: NAO_TEXTO },
+  // Adiado da Task 4: `ouro` também é TEXTO sobre `faixa` no herói novo, a
+  // segunda linha do título ("Direto do edital."). O par de não-texto acima
+  // cobre a superfície (o quadrado do número na pílula, que usa
+  // `ouro-texto` como letra, já coberto por outro par); este cobre a letra
+  // dourada direto sobre o verde da faixa.
+  { texto: "ouro", fundo: "faixa", minimo: TEXTO },
   { texto: "contorno", fundo: "cartao", minimo: 1.3 },
   // O rename mecânico do Step 7 troca `inverso`/`inverso-texto` por
   // `tinta-900`/`cartao`: par de leitura direta, e não só um alias, porque

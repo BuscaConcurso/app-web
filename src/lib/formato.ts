@@ -139,6 +139,23 @@ export function numero(valor: number): string {
 }
 
 /**
+ * A soma de uma lista de quantidades que podem faltar, ou `null` quando
+ * nenhuma delas é conhecida.
+ *
+ * Existe para o número "vagas previstas" da faixa de números da home: os
+ * concursos previstos raramente têm vaga informada (o ato ainda não saiu),
+ * e uma soma com `null` tratado como zero afirmaria "0 vagas previstas"
+ * quando a resposta certa é "não sabemos". Só quando todo mundo é `null` a
+ * soma também é `null`; um `null` isolado no meio da lista é ignorado, não
+ * zera o total.
+ */
+export function somaOuNull(valores: (number | null)[]): number | null {
+  const conhecidos = valores.filter((valor): valor is number => valor !== null);
+  if (conhecidos.length === 0) return null;
+  return conhecidos.reduce((total, valor) => total + valor, 0);
+}
+
+/**
  * A quantidade, se for mesmo uma quantidade; `null` em qualquer outro caso.
  *
  * Existe porque o tipo `ConcursoResumo` é uma promessa sobre o JSON de outro
