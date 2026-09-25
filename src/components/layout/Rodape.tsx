@@ -127,7 +127,7 @@ export async function Rodape({
   return (
     <footer className="mt-24 border-t border-linha bg-cartao">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 py-14 md:px-[112px]">
-        <div className="flex flex-col gap-10 md:flex-row md:justify-between">
+        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="flex max-w-[360px] flex-col gap-3.5">
             <Logo tamanho={32} />
             <p className="text-[15px] leading-[1.55] text-tinta-600">
@@ -136,7 +136,7 @@ export async function Rodape({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-10 md:gap-[72px]">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-10 lg:gap-[72px]">
             <ColunaDeLinks titulo="Buscar" links={COLUNA_BUSCAR} />
             {cargos.length > 0 && (
               <ColunaDeLinks titulo="Cargos mais buscados" links={cargosLinks} />
@@ -157,7 +157,7 @@ export async function Rodape({
                 <li key={uf.href}>
                   <Link
                     href={uf.href}
-                    className="flex items-center gap-1.5 rounded-full bg-rebaixada px-3 py-1.5 text-[13px] text-tinta-900"
+                    className="flex min-h-[42px] items-center gap-1.5 rounded-full bg-rebaixada px-3.5 text-[13px] text-tinta-900"
                   >
                     {uf.rotulo}
                     <span className="numero text-tinta-500">{uf.total}</span>

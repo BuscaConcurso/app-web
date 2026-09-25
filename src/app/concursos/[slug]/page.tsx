@@ -261,7 +261,7 @@ export default async function PaginaDoConcurso(
             `AbasDoConcurso` (abas só abaixo de `lg`; todas visíveis dali para
             cima); a lateral é `LateralDoConcurso` (o prazo, os passos de
             inscrição, os alertas e "também abertos"). */}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_392px]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_392px]">
           <div className="flex min-w-0 flex-col gap-6">
             <AbasDoConcurso paineis={paineis} />
 

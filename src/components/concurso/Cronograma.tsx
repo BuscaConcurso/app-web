@@ -120,12 +120,13 @@ export function Cronograma({
             {"marcaDeHoje" in linha ? (
               <MarcaDeHoje eventos={ordenados} fases={fases} hoje={hoje} ultima={ultima} />
             ) : (
-              // A partir de `sm` a data fica sempre à direita
-              // (`Concurso.dc.html:113`): com `flex-wrap` e o texto sem
-              // `flex-1`, uma linha de procedência longa empurrava a data
-              // para baixo só em alguns eventos.
-              <div className={`flex min-w-0 flex-1 flex-wrap items-start justify-between gap-4 sm:flex-nowrap ${ultima ? "" : "pb-6"}`}>
-                <div className="min-w-0 sm:flex-1">
+              // A data fica à direita (`Concurso.dc.html:113`) enquanto o texto
+              // tiver pelo menos 220px ao lado dela (`basis-[220px]` com
+              // `grow`); abaixo disso ela desce para a linha de baixo. Antes o
+              // texto não crescia, e uma procedência longa empurrava a data
+              // para baixo em alguns eventos e não em outros.
+              <div className={`flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-4 gap-y-1 ${ultima ? "" : "pb-6"}`}>
+                <div className="min-w-0 grow basis-[220px]">
                   <p
                     className={[
                       "text-[16px] font-bold",
