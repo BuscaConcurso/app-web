@@ -118,7 +118,7 @@ export function CabecalhoDoConcurso({
           {ato}
         </div>
 
-        <div className={ics ? "order-4 md:order-none md:mt-2" : "hidden md:mt-2 md:block"}>
+        <div className={ics ? "order-4 md:order-none md:mt-2" : "hidden lg:mt-2 lg:block"}>
           <AcoesDoConcurso slug={concurso.slug} titulo={titulo} ics={ics} />
         </div>
 

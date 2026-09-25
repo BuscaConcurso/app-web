@@ -24,12 +24,12 @@ export function BarraUtilitaria({
   atualizadoEm: string | null;
 }) {
   // Alvo de toque: a barra tem 36px de altura, a do artboard
-  // (`Main.dc.html:24`), e fica assim (ruling R31). Cada controle ocupa a
+  // (`Main.dc.html:24`), e fica assim. Cada controle ocupa a
   // altura inteira dela (`h-9`) com respiro dos lados, o maior alvo que
   // cabe; é um desvio consciente da regra dos 42px, restrito a esta faixa
   // que só aparece a partir de `md`. O tema continua na gaveta do menu,
   // com alvos de 44px, para quem precisa de um alvo maior.
-  const alvo = "inline-flex h-9 items-center px-2";
+  const alvo = "inline-flex h-9 min-w-9 items-center justify-center px-2";
 
   return (
     <div className="hidden h-9 bg-utilitaria text-[13px] text-utilitaria-texto md:block">

@@ -16,22 +16,31 @@ describe("chipDoPrazo", () => {
   });
 
   it("encerrado pelo status não conta dias, mesmo com a data no futuro", () => {
-    expect(chipDoPrazo("2026-09-29", HOJE, true).texto).toBe("encerrado");
+    expect(chipDoPrazo("2026-09-29", HOJE, "encerrado").texto).toBe("encerrado");
   });
 });
 
 describe("chipDoPrazoMovel", () => {
   it("encerrado mostra a data em que encerrou", () => {
     expect(chipDoPrazoMovel("2026-09-15", HOJE).texto).toBe("encerrou 15/09");
-    expect(chipDoPrazoMovel("2026-09-15", HOJE, true).texto).toBe("encerrou 15/09");
+    expect(chipDoPrazoMovel("2026-09-15", HOJE, "encerrado").texto).toBe("encerrou 15/09");
   });
 
   it("encerrado pelo status com a data no futuro não diz que encerrou nela", () => {
-    expect(chipDoPrazoMovel("2026-10-13", HOJE, true).texto).toBe("encerrado");
+    expect(chipDoPrazoMovel("2026-10-13", HOJE, "encerrado").texto).toBe("encerrado");
   });
 
   it("aberto segue como antes", () => {
     expect(chipDoPrazoMovel("2026-09-25", HOJE).texto).toBe("encerra hoje");
     expect(chipDoPrazoMovel("2026-10-04", HOJE).texto).toBe("até 04/10");
+  });
+});
+
+describe("previsto nas listas", () => {
+  it("não conta dias, como a lateral do concurso", () => {
+    expect(chipDoPrazo("2026-12-24", HOJE, "previsto").texto).toBe("previsto");
+    expect(chipDoPrazo("2026-09-25", HOJE, "previsto").texto).toBe("previsto");
+    expect(chipDoPrazoMovel("2026-12-24", HOJE, "previsto").texto).toBe("previsto");
+    expect(chipDoPrazoMovel("2026-09-26", HOJE, "previsto").texto).toBe("previsto");
   });
 });

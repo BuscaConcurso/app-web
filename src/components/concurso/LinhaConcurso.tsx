@@ -2,7 +2,7 @@ import { BotaoLink } from "@/components/ui/Botao";
 import { Selo } from "@/components/ui/Cartao";
 import { BotaoEmBreve } from "@/components/ui/EmBreve";
 import { Icone } from "@/components/ui/Icone";
-import type { ConcursoResumo } from "@/lib/dominio";
+import type { ConcursoResumo, Tom } from "@/lib/dominio";
 import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
 import { NOME_UF, cargosDoCartao, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos";
 import { tomDoConcurso } from "@/lib/situacao";
@@ -12,9 +12,9 @@ import { tomDoConcurso } from "@/lib/situacao";
  * (`2.6fr 1.2fr 0.9fr 1fr 1.2fr 150px`), como grade CSS.
  *
  * As duas formas de linha compartilham esta medida: o `<tr>` da home, dentro
- * de um `<table>` de verdade (que usa `calc()` no `colgroup` para a mesma
- * razão), e o `<div role="row">` da busca e do órgão, que não são tabela de
- * verdade por causa da paginação e dos filtros (`task-15-brief.md`).
+ * de um `<table>` de verdade (que usa porcentagens no `colgroup` para a
+ * mesma razão), e o `<div role="row">` da busca e do órgão, que não são
+ * tabela de verdade por causa da paginação e dos filtros.
  */
 // `minmax(0, …)` em cada fração: `fr` sozinho tem mínimo `auto`, e o
 // conteúdo que não quebra (a data com o chip, "a definir") roubava largura
@@ -79,18 +79,20 @@ export function localDoConcurso(concurso: ConcursoResumo): {
 /**
  * O chip curto da coluna "Inscrições até" do desktop: `Main.dc.html:215-260`.
  *
- * `encerrado` (o tom do concurso, `tomDoConcurso`) ganha de qualquer conta de
- * dias: um concurso homologado com a data de inscrição ainda no futuro, ou
- * um encerrado com a data no passado, dizia "hoje" em vermelho ou "4 dias"
- * na aba de encerrados.
+ * O tom do concurso (`tomDoConcurso`) ganha de qualquer conta de dias, como
+ * na lateral do concurso (`prazoPorExtenso`): só inscrição aberta conta
+ * dias. Um homologado com a data de inscrição ainda no futuro, ou um
+ * encerrado com a data no passado, dizia "hoje" em vermelho ou "4 dias" na
+ * aba de encerrados; um previsto com a data de fim anunciada, "90 dias".
  */
 export function chipDoPrazo(
   iso: string,
   hoje: Date,
-  encerrado = false,
+  tom: Tom = "aberto",
 ): { texto: string; classe: string } {
   const dias = diasAte(iso, hoje);
-  if (encerrado || dias < 0) return { texto: "encerrado", classe: "bg-rebaixada text-tinta-600" };
+  if (tom === "encerrado" || dias < 0) return { texto: "encerrado", classe: "bg-rebaixada text-tinta-600" };
+  if (tom === "previsto") return { texto: "previsto", classe: "bg-ouro-fundo text-ouro-sinal-texto" };
   if (dias === 0) return { texto: "hoje", classe: "bg-urucum text-white" };
   if (dias === 1) return { texto: "amanhã", classe: "bg-urucum-fundo text-urucum-texto" };
   return { texto: `${dias} dias`, classe: "bg-ouro-fundo text-ouro-sinal-texto" };
@@ -122,7 +124,7 @@ export function LinhaConcurso({
   const vagas = quantidade(concurso.vagas);
   const { icone: iconeLocal, texto: textoLocal } = localDoConcurso(concurso);
   const prazo = concurso.inscricoesAte
-    ? chipDoPrazo(concurso.inscricoesAte, hoje, tomDoConcurso(concurso, hoje) === "encerrado")
+    ? chipDoPrazo(concurso.inscricoesAte, hoje, tomDoConcurso(concurso, hoje))
     : null;
 
   const Raiz = as;

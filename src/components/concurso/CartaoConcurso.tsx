@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Selo } from "@/components/ui/Cartao";
 import { Icone } from "@/components/ui/Icone";
-import type { ConcursoResumo, Uf } from "@/lib/dominio";
+import type { ConcursoResumo, Tom, Uf } from "@/lib/dominio";
 import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
 import { estadoDoCartao } from "@/lib/rotulos";
 import { tomDoConcurso } from "@/lib/situacao";
@@ -9,19 +9,20 @@ import { orgaoECargo } from "./LinhaConcurso";
 
 /**
  * A etiqueta de prazo do cartão do celular: `Mobile.dc.html:88,97,105`.
- * Encerrado (pelo tom ou pela data já passada) não conta dias: ver
- * `chipDoPrazo`.
+ * Só inscrição aberta conta dias; encerrado (pelo tom ou pela data já
+ * passada) e previsto não: ver `chipDoPrazo`.
  */
 export function chipDoPrazoMovel(
   iso: string,
   hoje: Date,
-  encerrado = false,
+  tom: Tom = "aberto",
 ): { texto: string; classe: string } {
   const dias = diasAte(iso, hoje);
   // A data só entra quando já passou: um homologado com a data de inscrição
   // no futuro não "encerrou" nela.
   if (dias < 0) return { texto: `encerrou ${dataCurta(iso)}`, classe: "bg-rebaixada text-tinta-600" };
-  if (encerrado) return { texto: "encerrado", classe: "bg-rebaixada text-tinta-600" };
+  if (tom === "encerrado") return { texto: "encerrado", classe: "bg-rebaixada text-tinta-600" };
+  if (tom === "previsto") return { texto: "previsto", classe: "bg-ouro-fundo text-ouro-sinal-texto" };
   if (dias === 0) return { texto: "encerra hoje", classe: "bg-urucum text-white" };
   if (dias === 1) return { texto: "encerra amanhã", classe: "bg-urucum-fundo text-urucum-texto" };
   return { texto: `até ${dataCurta(iso)}`, classe: "bg-ouro-fundo text-ouro-sinal-texto" };
@@ -81,7 +82,7 @@ export function CartaoConcurso({
   const { titulo, subtitulo } = orgaoECargo(concurso, semOrgao);
   const segunda = segundaEtiqueta(concurso, ufDoFiltro);
   const prazo = concurso.inscricoesAte
-    ? chipDoPrazoMovel(concurso.inscricoesAte, hoje, tomDoConcurso(concurso, hoje) === "encerrado")
+    ? chipDoPrazoMovel(concurso.inscricoesAte, hoje, tomDoConcurso(concurso, hoje))
     : null;
 
   return (

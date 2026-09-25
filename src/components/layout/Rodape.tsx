@@ -31,7 +31,8 @@ const COLUNA_SOBRE = [
  * O rodapé mora no layout raiz, em toda página, e o layout raiz não pode
  * lançar (ver `acervoDoLayout` em `src/app/layout.tsx`, e o porquê lá:
  * `error.tsx` não alcança o que o próprio `layout.tsx` renderiza
- * diretamente). Sob a regra R3 de `concursos.ts`, a API fora do ar sem
+ * diretamente). Pela regra de `concursos.ts` (com `BC_API_URL` não há
+ * mock), a API fora do ar sem
  * leitura boa guardada lança, e `cargosEscolhidos()` lê o mesmo acervo. Sem
  * este envoltório, uma falha aqui derrubaria o site inteiro pelo rodapé.
  */
@@ -150,7 +151,7 @@ export async function Rodape({
             os links de UF junto. Esta linha é o que sobra deles no rodapé do
             celular, para o SEO por estado não desaparecer. */}
         {ufs.length > 0 && (
-          <nav aria-label="Por estado" className="min-w-0 sm:hidden">
+          <nav aria-label="Por estado" className="min-w-0 md:hidden">
             <p className={CLASSE_DO_TITULO}>Por estado</p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {ufs.map((uf) => (
@@ -168,7 +169,7 @@ export async function Rodape({
           </nav>
         )}
 
-        {/* O aviso legal e o crédito, de volta depois da revisão (R14): a
+        {/* O aviso legal e o crédito: a
             versão anterior deste rodapé já tinha os dois, e o desenho novo
             só não veio com um artboard que os mostrasse. Restilizados nos
             tokens do canvas novo (`text-tinta-600`, pequeno), mas a palavra

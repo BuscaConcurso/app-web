@@ -52,8 +52,9 @@ function SeletorCompacto({ atual, className }: { atual: Tema; className?: string
     >
       {OPCOES.map((opcao) => {
         const ativo = opcao.tema === atual;
-        // O botão ocupa a altura inteira da barra utilitária (36px, ruling
-        // R31); o círculo de 28px de dentro é só o desenho.
+        // O botão é um quadrado de 36px, a altura inteira da barra
+        // utilitária (ver o alvo de toque em `BarraUtilitaria.tsx`); o
+        // círculo de 28px de dentro é só o desenho.
         return (
           <button
             key={opcao.tema}
@@ -61,7 +62,7 @@ function SeletorCompacto({ atual, className }: { atual: Tema; className?: string
             onClick={() => definirTema(opcao.tema)}
             aria-pressed={ativo}
             aria-label={opcao.rotuloCompacto}
-            className="group/tema flex h-9 items-center px-0.5 text-utilitaria-texto"
+            className="group/tema flex size-9 items-center justify-center text-utilitaria-texto"
           >
             <span
               className={`flex size-7 items-center justify-center rounded-full transition-colors ${

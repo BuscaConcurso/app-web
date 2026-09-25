@@ -332,7 +332,7 @@ async function verificarFiltroSemRsc(cdp, termo) {
 }
 
 /**
- * R4: nenhum texto visível pode ter o travessão. Título de concurso e nome
+ * Nenhum texto visível pode ter o travessão (pedido do parceiro humano). Título de concurso e nome
  * de órgão já saem sem ele (`normalizarResumo`/`normalizarDetalhe`, em
  * `src/lib/concursos.ts`), mas isto aqui é a prova pelo HTML de verdade, e
  * não só pelas funções isoladas.
@@ -415,7 +415,8 @@ async function principal() {
     await cdp.enviar("Page.enable");
     await cdp.enviar("Runtime.enable");
     await cdp.enviar("Network.enable");
-    // Sem localização: o pedido automático da barra não pode mexer no seletor.
+    // Localização negada: nenhuma conferência aqui clica em "Perto de mim",
+    // e sem permissão nenhum prompt aparece por engano no meio do roteiro.
     await cdp.enviar("Browser.setPermission", {
       permission: { name: "geolocation" },
       setting: "denied",

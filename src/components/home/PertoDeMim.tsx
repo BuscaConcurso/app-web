@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { AvisoFlutuante } from "@/components/ui/EmBreve";
 import { Icone } from "@/components/ui/Icone";
 import type { Uf } from "@/lib/dominio";
@@ -63,7 +70,7 @@ async function detectarUf(): Promise<Uf | Falha> {
  * O chip "Perto de mim" do herói, e também o link "Usar minha localização"
  * do mapa por estado (`PorEstado.tsx`, `Main.dc.html:311`).
  *
- * **A localização só é pedida no clique** (ruling R29): nenhuma página pede
+ * **A localização só é pedida no clique**: nenhuma página pede
  * sozinha ao carregar. "Perto de mim" com um estado já lembrado
  * (`ufLembrada`) vai direto para a lista dele; sem estado, e sempre em
  * "Usar minha localização" (`sempreDetectar`), o clique pede a posição,
@@ -88,9 +95,16 @@ export function PertoDeMim({
   const uf = useSyncExternalStore(assinarUfLembrada, ufLembrada, ufLembradaNoServidor);
   const [procurando, setProcurando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  const temporizador = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(temporizador.current), []);
 
   async function aoClicar(evento: MouseEvent<HTMLAnchorElement>) {
     if (uf && !sempreDetectar) return;
+    // Abrir em outra aba (ctrl, cmd, shift ou botão do meio) segue o link
+    // como qualquer outro, sem pedir localização.
+    if (evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey || evento.button !== 0) {
+      return;
+    }
     evento.preventDefault();
     if (procurando) return;
     setAviso(null);
@@ -99,7 +113,8 @@ export function PertoDeMim({
     setProcurando(false);
     if (achado === "negada" || achado === "falhou" || achado === "fora") {
       setAviso(AVISO_DA_FALHA[achado]);
-      window.setTimeout(() => setAviso(null), 4000);
+      clearTimeout(temporizador.current);
+      temporizador.current = setTimeout(() => setAviso(null), 4000);
       return;
     }
     lembrarUf(achado);

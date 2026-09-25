@@ -27,7 +27,7 @@ function Celula({ uf, total, maximo }: { uf: Uf; total: number; maximo: number }
         ...(estilo ? { background: estilo.fundo, color: estilo.texto } : {}),
       }}
       className={[
-        "flex size-[52px] flex-col items-center justify-center rounded-[10px] text-xs font-bold",
+        "flex size-11 flex-col items-center justify-center rounded-[10px] text-xs font-bold xl:size-[52px]",
         estilo ? "" : "bg-rebaixada text-tinta-500",
         nivel === 7 ? "shadow-[0_0_0_3px_var(--color-ouro)]" : "",
       ].join(" ")}
@@ -65,18 +65,19 @@ function LinhaDeRanking({
  * UF, com a legenda e "Usar minha localização" ao lado, e os dois rankings
  * (órgãos e bancas) à direita.
  *
- * As 27 UFs desenham sempre, mesmo as com zero abertos (Review Focus 2 dos
- * `global-constraints.md`, e o motivo de `ufs` vir de `facetas(hoje, { ufs:
- * 27 })`): a grade é fixa, só a cor muda.
+ * As 27 UFs desenham sempre, mesmo as com zero abertos (e é por isso que
+ * `ufs` vem de `facetas(hoje, { ufs: 27 })`): a grade é fixa, só a cor muda,
+ * e um acervo vazio não pode dividir por zero nem sumir com o mapa.
  *
  * `id="estados"` e `scroll-mt-24` são o destino de `#estados`, se algum link
  * do site vier a apontar para cá; hoje nenhum aponta, mas a seção já nasce
  * com o alvo pronto e sem custo.
  *
- * **Só a partir de `xl`** (o mapa de 620px e as duas colunas ao lado não
- * cabem em menos de 1280px; e `Mobile.dc.html` não repete
- * este bloco): os links de UF continuam acessíveis por outro caminho, a
- * linha "Por estado" do rodapé (`layout/Rodape.tsx`).
+ * **A partir de `md`**: até `xl` numa versão empilhada (o mapa de 620px e
+ * as duas colunas ao lado só cabem juntos de 1280px para cima); no celular
+ * some, como em `Mobile.dc.html`, que não repete este bloco. Ali os links
+ * de UF continuam acessíveis pela linha "Por estado" do rodapé
+ * (`layout/Rodape.tsx`).
  */
 export function PorEstado({
   ufs,
@@ -95,7 +96,7 @@ export function PorEstado({
   const maximo = Math.max(0, ...[...totalPorUf.values()]);
 
   return (
-    <section id="estados" className="conteudo mt-24 hidden scroll-mt-24 xl:flex xl:flex-col xl:gap-7">
+    <section id="estados" className="conteudo mt-24 hidden scroll-mt-24 md:flex md:flex-col md:gap-7">
       <div>
         <Rotulo icone="estados" tom="anil" className="mb-2.5">
           POR ESTADO
@@ -105,9 +106,12 @@ export function PorEstado({
         </h2>
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex w-[620px] shrink-0 gap-8 rounded-[20px] bg-cartao p-8 shadow-cartao">
-          <div className="grid grid-cols-[repeat(7,52px)] grid-rows-[repeat(8,52px)] gap-1.5">
+      {/* De `md` a `xl` o cartão do mapa ocupa a largura inteira, com
+          células de 44px, e os dois rankings ficam lado a lado embaixo; a
+          partir de `xl`, o desenho do artboard (`Main.dc.html:273-311`). */}
+      <div className="flex flex-col gap-4 xl:flex-row">
+        <div className="flex gap-8 rounded-[20px] bg-cartao p-8 shadow-cartao xl:w-[620px] xl:shrink-0">
+          <div className="grid shrink-0 grid-cols-[repeat(7,44px)] grid-rows-[repeat(8,44px)] gap-1.5 xl:grid-cols-[repeat(7,52px)] xl:grid-rows-[repeat(8,52px)]">
             {UFS.map((uf) => (
               <Celula key={uf} uf={uf} total={totalPorUf.get(uf) ?? 0} maximo={maximo} />
             ))}
@@ -155,7 +159,7 @@ export function PorEstado({
           </div>
         </div>
 
-        <div className="grid flex-grow grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 xl:flex-grow">
           <div className="rounded-[20px] bg-cartao p-6 shadow-cartao">
             <div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-[0.05em] text-tinta-500 uppercase">
               <Icone nome="estatais" tamanho={16} />

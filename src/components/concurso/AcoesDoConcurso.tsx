@@ -42,10 +42,11 @@ export function AcoesDoConcurso({
     URL.revokeObjectURL(url);
   }
 
-  // No celular Salvar e Compartilhar já moram no cabeçalho de 60px
-  // (`ConcursoMobile.dc.html:21-27`); repetidos aqui, eram dois botões iguais
-  // na mesma tela. Fica só "Pôr na agenda", que não tem outro lugar.
-  const soNoDesktop = `hidden md:inline-flex ${FORMA_DO_BOTAO}`;
+  // Abaixo de `lg` Salvar e Compartilhar já moram no cabeçalho de 60px
+  // (`ConcursoMobile.dc.html:21-27`, `Cabecalho.tsx`, que também troca em
+  // `lg`); repetidos aqui, eram dois botões iguais na mesma tela. Fica só
+  // "Pôr na agenda", que não tem outro lugar.
+  const soNoDesktop = `hidden lg:inline-flex ${FORMA_DO_BOTAO}`;
 
   return (
     <div className="flex flex-wrap gap-2">
