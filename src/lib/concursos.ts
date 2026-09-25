@@ -735,3 +735,25 @@ export async function obterOrgao(slug: string): Promise<OrgaoDoAcervo | null> {
 export async function listarOrgaos(): Promise<OrgaoDoAcervo[]> {
   return agruparPorOrgao(await acervo());
 }
+
+/**
+ * "Também abertos em {UF}" na página do concurso: outros concursos com
+ * inscrição aberta na mesma UF, sem o próprio, mais perto de encerrar
+ * primeiro.
+ *
+ * A UF é a do cartão quando existe, e a primeira de `ufs` quando o concurso é
+ * multiestadual (`uf` nula por desenho nesse caso, ver `dominio.ts`). Sem UF
+ * nenhuma não há o que comparar, e a função devolve lista vazia em vez de
+ * inventar um "também aberto" nacional.
+ */
+export async function tambemAbertos(
+  concurso: ConcursoResumo,
+  hoje: Date = new Date(),
+  limite = 3,
+): Promise<ConcursoResumo[]> {
+  const uf = concurso.uf ?? concurso.ufs[0];
+  if (!uf) return [];
+  return ordenar(filtrar(await acervo(), { situacoes: ["abertas"], uf }, hoje), "encerrando", hoje)
+    .filter((c) => c.slug !== concurso.slug)
+    .slice(0, limite);
+}

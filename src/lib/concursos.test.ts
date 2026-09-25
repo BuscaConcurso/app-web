@@ -10,6 +10,7 @@ import {
   normalizarResumo,
   paraALista,
   semTravessao,
+  tambemAbertos,
 } from "./concursos";
 import type { ConcursoDetalhe, Escolaridade } from "./dominio";
 import type { Situacao } from "./consulta";
@@ -251,5 +252,18 @@ describe("normalizarResumo / normalizarDetalhe (R4)", () => {
     expect(limpo.origens[0].titulo).toBe("Edital - 2026");
     expect(limpo.origens[0].texto).toBe(detalheSujo.origens[0].texto);
     expect(limpo.origens[0].faq[0].trecho).toBe(detalheSujo.origens[0].faq[0].trecho);
+  });
+});
+
+describe("tambemAbertos", () => {
+  it("mesma UF, abertos, sem o próprio, no máximo 3", async () => {
+    const base = (await listarConcursos({ situacoes: ["abertas"] }, HOJE)).itens.find((c) => c.uf);
+    if (!base) return;
+    const outros = await tambemAbertos(base, HOJE);
+    expect(outros.length).toBeLessThanOrEqual(3);
+    for (const c of outros) {
+      expect(c.slug).not.toBe(base.slug);
+      expect(c.ufs.includes(base.uf!) || c.uf === base.uf).toBe(true);
+    }
   });
 });
