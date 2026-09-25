@@ -33,7 +33,7 @@ const ESTADOS: Uf[] = ["SP", "RJ", "MG", "BA", "RS", "PR", "DF", "PA"];
 export default function NotFound() {
   return (
     <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 sm:py-14">
-      <Secao rotulo="PÁGINA NÃO ENCONTRADA" titulo="Este endereço não existe">
+      <Secao rotulo="PÁGINA NÃO ENCONTRADA" titulo="Este endereço não existe" nivel="h1">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] lg:items-center">
           <div className="flex flex-col items-start gap-5">
             <p className="max-w-[46ch] text-sm leading-6 break-words text-tinta-600">

@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { MOSAICO_HERO, type CorDeAzulejo } from "@/components/marca/Azulejos";
+import { carregarFonteGoogle } from "@/lib/fonteGoogle";
 
 export const alt = "BuscaConcurso, concursos públicos abertos no Brasil";
 export const size = { width: 1200, height: 630 };
@@ -24,11 +25,17 @@ export const contentType = "image/png";
  *    de "tokens only".
  * 2. **Fonte customizada só entra como `ArrayBuffer`, via `fonts` nas
  *    opções.** Sem `next/font` aqui (ele não roda fora de componente React
- *    normal): o Bricolage Grotesque vem de um `fetch` ao CSS do Google Fonts
- *    sem `User-Agent` de navegador, que é o truque conhecido para a Google
- *    devolver TTF em vez de WOFF2, o único par de formato que o Satori lê
- *    (a doc é explícita: "Only ttf, otf, and woff font formats are
- *    supported").
+ *    normal): o Bricolage Grotesque vem de `carregarFonteGoogle`
+ *    (`src/lib/fonteGoogle.ts`), que busca o CSS do Google Fonts sem
+ *    `User-Agent` de navegador, o truque conhecido para a Google devolver
+ *    TTF em vez de WOFF2 (a doc é explícita: "Only ttf, otf, and woff font
+ *    formats are supported").
+ *
+ * **A fonte é best effort, não obrigatória.** `carregarFonteGoogle` nunca
+ * lança: rede fora do ar, resposta que não é 2xx, ou um CSS sem a linha
+ * esperada devolvem `null`, e a imagem sai com a fonte padrão do Satori em
+ * vez de travar a rota inteira por causa de uma dependência externa (Google
+ * Fonts) que esta imagem não deveria conseguir derrubar. Review da Task 15b.
  */
 
 const COR_DO_LADRILHO: Record<CorDeAzulejo, string> = {
@@ -44,21 +51,22 @@ const TITULO_1 = "Encontre seu concurso.";
 const TITULO_2 = "Direto do edital.";
 
 /**
- * Busca o recorte estático (peso fixo) do Bricolage Grotesque, só com os
- * caracteres do próprio título: o `text` no pedido faz a Google devolver uma
- * fonte cortada para este uso, bem mais leve que a família inteira, o que
- * importa porque `ImageResponse` tem teto de 500KB de pacote.
+ * O recorte estático (peso fixo) do Bricolage Grotesque, só com os
+ * caracteres do próprio título: o `texto` no pedido faz a Google devolver
+ * uma fonte cortada para este uso, bem mais leve que a família inteira, o
+ * que importa porque `ImageResponse` tem teto de 500KB de pacote.
+ *
+ * `null` quando a busca falha (ver o doc do módulo): quem chama decide o que
+ * fazer com a ausência, e aqui a resposta é desenhar sem `fonts` nas opções
+ * do `ImageResponse`, que é como o arquivo original desta rota sempre
+ * funcionou, antes de qualquer fonte customizada.
  */
-async function carregarBricolage(): Promise<ArrayBuffer> {
-  const texto = encodeURIComponent(`${TITULO_1}${TITULO_2}`);
-  const url = `https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&text=${texto}`;
-  const css = await (await fetch(url)).text();
-  const referencia = css.match(/src: url\(([^)]+)\) format\('(?:opentype|truetype)'\)/);
-  if (!referencia) {
-    throw new Error("Não achou a fonte Bricolage Grotesque no CSS do Google Fonts.");
-  }
-  const fonte = await fetch(referencia[1]);
-  return fonte.arrayBuffer();
+async function carregarBricolage(): Promise<ArrayBuffer | null> {
+  return carregarFonteGoogle({
+    familia: "Bricolage Grotesque",
+    peso: 700,
+    texto: `${TITULO_1}${TITULO_2}`,
+  });
 }
 
 export default async function Image() {
@@ -154,7 +162,13 @@ export default async function Image() {
     ),
     {
       ...size,
-      fonts: [{ name: "Bricolage Grotesque", data: bricolage, weight: 700, style: "normal" }],
+      // Sem `bricolage` (Google Fonts fora do ar, resposta ruim, CSS sem a
+      // referência esperada), a chave `fonts` nem entra: o Satori cai na
+      // fonte padrão dele em vez de o `ImageResponse` lançar por causa de
+      // uma fonte que não veio.
+      ...(bricolage
+        ? { fonts: [{ name: "Bricolage Grotesque", data: bricolage, weight: 700, style: "normal" }] }
+        : {}),
     },
   );
 }

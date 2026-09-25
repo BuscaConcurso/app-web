@@ -20,6 +20,13 @@ import type { Tom } from "@/lib/dominio";
  * `tom` segue opcional e vale para duas coisas: a cor do `rotulo` (o "sinal")
  * e o `tom` repassado ao `Cartao` de baixo, que hoje não muda o fundo dele
  * (ver `Cartao.tsx`) mas continua aceito para quem já passa.
+ *
+ * `nivel` escolhe a tag do título, sem mudar nada visual: `h2` é o padrão,
+ * porque a maioria das seções mora dentro de uma página que já tem o seu
+ * próprio `h1` em outro lugar. `not-found.tsx` e `error.tsx` são a exceção:
+ * ali o `Secao` é o único título da página inteira, e um documento sem `h1`
+ * quebra a hierarquia de quem navega por títulos (leitor de tela, sumário do
+ * navegador). Ruling do review da Task 15b.
  */
 export function Secao({
   rotulo,
@@ -31,6 +38,7 @@ export function Secao({
   hrefRotulo,
   children,
   className,
+  nivel = "h2",
 }: {
   /** O rótulo pequeno acima do título, como "POR ÁREA" ou "ÚLTIMA CHAMADA". */
   rotulo?: ReactNode;
@@ -47,7 +55,10 @@ export function Secao({
   children: ReactNode;
   /** O recheio do cartão, quando ele não é o de seção. */
   className?: string;
+  /** A tag do título. Padrão `h2`; `h1` para quem é o título da página. */
+  nivel?: "h1" | "h2";
 }) {
+  const Titulo = nivel;
   return (
     <section>
       <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
@@ -57,9 +68,9 @@ export function Secao({
               {rotulo}
             </Rotulo>
           )}
-          <h2 className="font-titulo text-[40px] leading-[1.05] font-bold tracking-[-0.03em] break-words">
+          <Titulo className="font-titulo text-[40px] leading-[1.05] font-bold tracking-[-0.03em] break-words">
             {titulo}
-          </h2>
+          </Titulo>
           {apoio && (
             <p className="mt-2 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
               {apoio}
