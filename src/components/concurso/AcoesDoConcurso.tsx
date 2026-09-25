@@ -64,7 +64,7 @@ export function AcoesDoConcurso({
           Pôr na agenda
         </button>
       )}
-      {aviso && <AvisoFlutuante>{aviso}</AvisoFlutuante>}
+      <AvisoFlutuante>{aviso}</AvisoFlutuante>
     </div>
   );
 }

@@ -196,7 +196,7 @@ function CabecalhoCelularDoConcurso() {
         <Icone nome="salvar" tamanho={20} />
       </BotaoEmBreve>
 
-      {aviso && <AvisoFlutuante>{aviso}</AvisoFlutuante>}
+      <AvisoFlutuante>{aviso}</AvisoFlutuante>
     </div>
   );
 }

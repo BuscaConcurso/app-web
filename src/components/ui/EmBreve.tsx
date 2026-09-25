@@ -10,18 +10,28 @@ import { RECURSOS_EM_BREVE, type RecursoEmBreve } from "@/lib/emBreve";
  * "Link copiado" de quem não tem `navigator.share`.
  *
  * `role="status"` e `aria-live="polite"` porque o aviso aparece sem que
- * ninguém tenha pedido foco nele; quem lê por leitor de tela ouve o texto
- * quando ele muda, sem perder o lugar onde estava.
+ * ninguém tenha pedido foco nele. **A região fica sempre montada**, vazia
+ * quando não há aviso, e só o texto dentro dela muda: uma região viva que
+ * nasce junto com o texto muitas vezes não é anunciada. Quem chama passa
+ * `null` (ou nada) quando não há o que dizer, e não desmonta o componente.
+ *
+ * `z-[60]` e `bottom-28` abaixo de `lg`: acima da barra de inscrição fixa do
+ * celular (`BarraDeInscricao`, `z-10`, uns 90px de altura), que antes cobria
+ * o aviso inteiro.
  */
-export function AvisoFlutuante({ children }: { children: ReactNode }) {
+export function AvisoFlutuante({ children }: { children?: ReactNode }) {
   return (
-    <p
+    <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-[14px] bg-tinta-900 px-4 py-3 text-sm font-semibold text-cartao shadow-flutuante"
+      className="pointer-events-none fixed bottom-28 left-1/2 z-[60] -translate-x-1/2 lg:bottom-6"
     >
-      {children}
-    </p>
+      {children ? (
+        <p className="rounded-[14px] bg-tinta-900 px-4 py-3 text-sm font-semibold text-cartao shadow-flutuante">
+          {children}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -69,9 +79,9 @@ export function BotaoEmBreve({
       >
         {children}
       </button>
-      {aberto && (
-        <AvisoFlutuante>Em breve: {RECURSOS_EM_BREVE[recurso].titulo}</AvisoFlutuante>
-      )}
+      <AvisoFlutuante>
+        {aberto ? `Em breve: ${RECURSOS_EM_BREVE[recurso].titulo}` : null}
+      </AvisoFlutuante>
     </>
   );
 }

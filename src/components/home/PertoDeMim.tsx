@@ -133,7 +133,7 @@ export function PertoDeMim({
         <Icone nome="mira" tamanho={16} />
         {procurando ? "Procurando seu estado…" : children}
       </Link>
-      {aviso && <AvisoFlutuante>{aviso}</AvisoFlutuante>}
+      <AvisoFlutuante>{aviso}</AvisoFlutuante>
     </>
   );
 }

@@ -149,9 +149,9 @@ export function BlocoAlerta({
             Criar alerta
           </button>
         </form>
-        {aberto && (
-          <AvisoFlutuante>Em breve: {RECURSOS_EM_BREVE.alertas.titulo}</AvisoFlutuante>
-        )}
+        <AvisoFlutuante>
+          {aberto ? `Em breve: ${RECURSOS_EM_BREVE.alertas.titulo}` : null}
+        </AvisoFlutuante>
       </section>
     );
   }
@@ -231,12 +231,11 @@ export function BlocoAlerta({
           ))}
         </div>
 
-        {aberto && (
-          <AvisoFlutuante>
-            Em breve: {RECURSOS_EM_BREVE.alertas.titulo} (avisaríamos sobre os {numero(totalAbertos ?? 0)} concursos
-            abertos)
-          </AvisoFlutuante>
-        )}
+        <AvisoFlutuante>
+          {aberto
+            ? `Em breve: ${RECURSOS_EM_BREVE.alertas.titulo} (avisaríamos sobre os ${numero(totalAbertos ?? 0)} concursos abertos)`
+            : null}
+        </AvisoFlutuante>
       </section>
     </div>
   );
