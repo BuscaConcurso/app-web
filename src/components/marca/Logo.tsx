@@ -1,93 +1,42 @@
 /**
- * A marca.
- *
- * O símbolo é uma lente sobre um edital: as três linhas são o documento, o
- * círculo e o cabo são a busca. Abaixo de 24px as linhas somem, porque nesse
- * tamanho elas viram uma mancha em vez de um documento.
- *
- * Esse corte é para o símbolo isolado, em favicon e ícone de app. No
- * logotipo horizontal ele não deveria ser alcançado nunca: o canvas desenha
- * a marca com símbolo de 26 e palavra de 17, e o mínimo é 120px de largura.
- * Encolher a marca junto com o resto da interface faz as linhas caírem sem
- * ninguém pedir, que foi exatamente o que aconteceu uma vez.
- *
- * O canvas proíbe sombra, contorno, gradiente e inclinação.
+ * A marca: uma lupa sobre um azulejo de Athos Bulcão, cujos painéis vestem
+ * os prédios públicos de Brasília, o lugar do serviço público. A lupa é a
+ * busca; o quarto de círculo em ouro é o sol no canto da peça
+ * (`docs/prototipo/Logo.dc.html:18`).
  */
 
 export type TomDaMarca = "cor" | "claro" | "mono";
 export type VarianteDaMarca = "horizontal" | "empilhado" | "simbolo";
 
-const PALETA: Record<
-  TomDaMarca,
-  { lente: string; documento: string; palavra: string; destaque: string }
-> = {
-  // No claro é lente verde e documento em tinta; no escuro os mesmos tokens
-  // valem a variante "sobre fundo" do canvas, com lente branca e linhas
-  // amarelas. Um tom só, dois desenhos, sem o componente saber do tema.
-  // Correção mínima da Task 2 (fundo do achado de review): os tokens
-  // `marca-*` e `amarelo`/`verde-300` do canvas antigo saíram de
-  // `globals.css` e este componente ficava lendo variável indefinida. A
-  // Task 4 reescreve o `Logo` de vez; aqui só troca pelo token que já
-  // existe com o papel mais parecido.
-  cor: {
-    lente: "var(--color-acao)",
-    documento: "var(--color-tinta-900)",
-    palavra: "var(--color-tinta-900)",
-    destaque: "var(--color-acao)",
-  },
-  claro: {
-    lente: "#ffffff",
-    documento: "var(--color-ouro)",
-    palavra: "#ffffff",
-    destaque: "var(--color-verde-texto)",
-  },
-  mono: {
-    lente: "currentColor",
-    documento: "currentColor",
-    palavra: "currentColor",
-    destaque: "currentColor",
-  },
+const CORES_DO_SIMBOLO: Record<TomDaMarca, { fundo: string; lupa: string; ouro: boolean }> = {
+  cor: { fundo: "#0B6B3A", lupa: "#FFFFFF", ouro: true },
+  claro: { fundo: "#F6F4EE", lupa: "#0A4D2E", ouro: true },
+  mono: { fundo: "currentColor", lupa: "var(--color-cartao)", ouro: false },
 };
 
-function Simbolo({
-  tamanho,
-  tom,
-}: {
-  tamanho: number;
-  tom: TomDaMarca;
-}) {
-  const cores = PALETA[tom];
-  const compacto = tamanho < 24;
+function Simbolo({ tamanho, tom }: { tamanho: number; tom: TomDaMarca }) {
+  const cores = CORES_DO_SIMBOLO[tom];
   return (
     <svg
       width={tamanho}
       height={tamanho}
-      viewBox="0 0 32 32"
-      fill="none"
+      viewBox="0 0 40 40"
       aria-hidden="true"
       className="shrink-0"
     >
-      <circle
-        cx="14"
-        cy="14"
-        r="10.4"
-        stroke={cores.lente}
-        strokeWidth={compacto ? 3 : 2.6}
-      />
-      {!compacto && (
-        <path
-          d="M9 10.6h10M9 14h9M9 17.4h6.4"
-          stroke={cores.documento}
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
+      <rect width="40" height="40" rx="10" fill={cores.fundo} />
+      {cores.ouro && (
+        <path d="M25 0H30A10 10 0 0 1 40 10V15A15 15 0 0 1 25 0Z" fill="#F2C230" />
       )}
-      <path
-        d="M21.9 21.9 28.2 28.2"
-        stroke={cores.lente}
-        strokeWidth={compacto ? 3.6 : 3.2}
-        strokeLinecap="round"
+      <circle
+        cx="17.5"
+        cy="19.5"
+        r="8"
+        fill="none"
+        stroke={cores.lupa}
+        strokeWidth="3.6"
       />
+      <path d="M23.3 25.3 30 32" stroke={cores.lupa} strokeWidth="3.6" strokeLinecap="round" />
     </svg>
   );
 }
@@ -95,17 +44,15 @@ function Simbolo({
 export function Logo({
   variante = "horizontal",
   tom = "cor",
-  tamanho = 26,
+  tamanho = 36,
   className,
 }: {
   variante?: VarianteDaMarca;
   tom?: TomDaMarca;
-  /** Lado do símbolo em pixels. O texto acompanha. */
+  /** Lado do símbolo em pixels. A palavra acompanha. */
   tamanho?: number;
   className?: string;
 }) {
-  const cores = PALETA[tom];
-
   if (variante === "simbolo") {
     return (
       <span className={className}>
@@ -115,25 +62,28 @@ export function Logo({
     );
   }
 
+  const corDaPalavra =
+    tom === "mono" ? "text-current" : tom === "claro" ? "text-acao-texto" : "text-tinta-900";
+  const corDoDestaque =
+    tom === "mono" ? "text-current" : tom === "claro" ? "text-ouro" : "text-verde-texto";
+  const escalaDaPalavra = variante === "empilhado" ? 0.38 : 0.58;
+
   const palavra = (
     <span
       style={{
-        fontSize: Math.round(tamanho * 0.65),
-        letterSpacing: "-0.025em",
+        fontSize: Math.round(tamanho * escalaDaPalavra),
         lineHeight: 1,
       }}
-      className="font-semibold whitespace-nowrap"
+      className={`font-titulo font-bold tracking-[-0.02em] whitespace-nowrap ${corDaPalavra}`}
     >
-      <span style={{ color: cores.palavra }}>Busca</span>
-      <span style={{ color: cores.destaque }}>Concurso</span>
+      Busca
+      <span className={corDoDestaque}>Concurso</span>
     </span>
   );
 
   if (variante === "empilhado") {
     return (
-      <span
-        className={`inline-flex flex-col items-center gap-1.5 ${className ?? ""}`}
-      >
+      <span className={`inline-flex flex-col items-center gap-[18px] ${className ?? ""}`}>
         <Simbolo tamanho={tamanho} tom={tom} />
         {palavra}
       </span>
