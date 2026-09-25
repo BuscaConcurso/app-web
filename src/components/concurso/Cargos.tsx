@@ -17,7 +17,7 @@
  * "De onde foi lido" deixou de ser um link para uma página: `Cargo` não
  * carrega a chave de um ato como `EventoDoCronograma` carrega (`ato`), então
  * não há endereço de verdade para apontar. O que existe é `cargo.evidencia`
- * — o trecho do ato por trás de cada campo —, e é isso que o botão revela,
+ * (o trecho do ato por trás de cada campo), e é isso que o botão revela,
  * em linha, exatamente como o `<details>` que ele substitui (ver a exceção
  * registrada em `ui/Revelador.tsx`). A diferença é que agora é `useState`, e
  * não `<details>` nativo: o componente inteiro já depende de script para o
@@ -38,7 +38,7 @@ const LIMITE_VISIVEL = 8;
 const MAX_PONTOS = 5;
 
 /**
- * O título do bloco. Singular sem número — "Cargo e vagas" — porque um
+ * O título do bloco. Singular sem número ("Cargo e vagas") porque um
  * cargo só não tem o que contar; plural leva a contagem entre parênteses,
  * que é parte do rótulo e não um dado que a página compõe por fora.
  */
@@ -121,7 +121,7 @@ function descreverVaga(vaga: Vaga): string {
   // A repartição aparece sempre que as vagas NÃO forem todas de ampla
   // concorrência, e não só quando houver duas ou mais categorias. Visto na
   // tela com dado real: uma vaga com `outras: 1` e `ampla: 0` saía como
-  // "Pelotas: 1 vaga", escondendo que a única vaga é reservada — que é
+  // "Pelotas: 1 vaga", escondendo que a única vaga é reservada: que é
   // justamente o que faz alguém decidir se vale concorrer.
   const soAmplaConcorrencia = vaga.ampla === vaga.total;
   const detalhe = [

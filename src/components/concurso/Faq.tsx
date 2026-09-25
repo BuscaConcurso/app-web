@@ -18,7 +18,7 @@ const ICONE_DA_PERGUNTA: Record<FaqPergunta, NomeDoIcone> = {
 /**
  * As perguntas que o ato responde, e as que ele não responde.
  *
- * A resposta é o trecho literal do documento — o modelo escolhe onde ela
+ * A resposta é o trecho literal do documento: o modelo escolhe onde ela
  * está, o motor confere palavra por palavra e descarta o que não casar. Por
  * isso esta seção pode dizer "o ato responde" em vez de "segundo a nossa
  * leitura", e por isso o mesmo trecho aparece destacado no texto do ato, no
@@ -48,14 +48,14 @@ const ICONE_DA_PERGUNTA: Record<FaqPergunta, NomeDoIcone> = {
  * São seis perguntas fixas e quase metade volta vazia; a mediana é de 4
  * respondidas por ato, mas 102 dos 837 atos com FAQ não respondem nenhuma.
  * Abrir seis blocos de pergunta e responder "o ato não disse" em três deles
- * faria o bloco crescer com o que não tem — e, em 102 casos, um bloco inteiro
+ * faria o bloco crescer com o que não tem, e, em 102 casos, um bloco inteiro
  * de nadas. Então **respondida vira pergunta e resposta; não respondida vira
  * uma linha no fim**, que nomeia todas de uma vez. O fato fica dito, sem
  * ocupar a mesma altura de um fato.
  *
  * ## A ordem é a das perguntas, não a do ato
  *
- * Consolidar exige uma ordem própria — dois atos não têm uma ordem comum. É a
+ * Consolidar exige uma ordem própria: dois atos não têm uma ordem comum. É a
  * de `ROTULO_PERGUNTA`, que vai de quem pode se inscrever até as etapas da
  * prova, e é a mesma em todo concurso: quem já leu um FAQ sabe onde procurar
  * no seguinte.
@@ -146,7 +146,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
 
               <div className="flex flex-col gap-2.5 px-[18px] pb-[18px] pl-[66px]">
                 {/* A citação. É o produto inteiro: sem ela a resposta vira
-                    afirmação nossa. Fica por extenso, sem corte — a mediana é
+                    afirmação nossa. Fica por extenso, sem corte: a mediana é
                     de 160 caracteres e o maior do acervo tem 7.690, e cortar o
                     maior esconderia justamente o que foi lido.
 
@@ -166,7 +166,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
 
                     `grifavel` é a mesma régua que o bloco das fontes usa para
                     decidir se pinta a marca. Quando a posição não casa com o
-                    texto — ou o texto do ato não está guardado — não há `id`
+                    texto (ou o texto do ato não está guardado) não há `id`
                     para onde ir, e o link volta a apontar para o ato inteiro,
                     que é onde ele apontava antes. Um link para o ato é pior
                     que um link para o trecho; um link para um `id`
@@ -214,7 +214,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
       {descartadas > 0 && (
         /* Dito, e não escondido: é a conferência funcionando. O trecho que o
            modelo devolveu não existia no ato palavra por palavra, então não
-           virou resposta — e quem lê fica sabendo que existe essa régua, em
+           virou resposta, e quem lê fica sabendo que existe essa régua, em
            vez de ver um silêncio igual ao da lacuna. */
         <p className="max-w-[74ch] text-[12px] leading-5 text-tinta-600">
           {descartadas === 1
@@ -234,14 +234,14 @@ export function Faq({ origens }: { origens: Origem[] }) {
  *
  * Não há um caractere a mais nem a menos do que `partirEmEnderecos` recebeu:
  * ela devolve pedaços cuja soma é a entrada, e aqui cada pedaço vira ou texto
- * ou o conteúdo de um `<a>`. Isso é exigência e não capricho — a citação é o
+ * ou o conteúdo de um `<a>`. Isso é exigência e não capricho: a citação é o
  * produto, e `inicioChar`/`fimChar` grifam esse mesmo trecho dentro do texto
  * do ato, no bloco de baixo. Um caractere de diferença e o grifo marca outra
  * frase.
  *
  * É também por isso que **não há aviso de "abre em nova aba" escondido aqui
  * dentro**: um `<span>` de leitor de tela não aparece na tela, mas entra na
- * seleção e vai junto quando alguém copia a resposta — e uma citação literal
+ * seleção e vai junto quando alguém copia a resposta, e uma citação literal
  * que chega ao Ctrl+V com palavra nossa no meio deixa de ser literal. O preço
  * é sabido: quem usa leitor de tela depende do navegador para anunciar a aba
  * nova.
@@ -250,7 +250,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
  *
  * O trecho é texto do Diário lido por um modelo e chega como string. Montar
  * HTML com ele seria deixar o conteúdo de terceiro escrever marcação na nossa
- * página — injeção pela porta da frente. Aqui o texto nunca é marcação: é
+ * página: injeção pela porta da frente. Aqui o texto nunca é marcação: é
  * filho de elemento React, que escapa tudo. O acervo já mostrou entidade crua
  * (`&amp;lt;`) chegando na tela; com `innerHTML` aquilo teria sido tag, não
  * texto. **Se alguém "simplificar" isto para `dangerouslySetInnerHTML`, o
@@ -259,14 +259,14 @@ export function Faq({ origens }: { origens: Origem[] }) {
  * ## `rel` e aba nova
  *
  * `nofollow` porque nada aqui é recomendação nossa: é o endereço que o ato
- * citou e que nós nunca visitamos — a mesma ressalva que o link do edital
+ * citou e que nós nunca visitamos: a mesma ressalva que o link do edital
  * citado carrega por escrito. `noopener` porque com `target="_blank"` a
  * página aberta ganharia `window.opener` sobre a nossa, e `noreferrer` para
  * não contar ao site da banca de qual concurso o clique saiu.
  *
  * Abre em aba nova de propósito: a página do concurso é de pesquisa, com a
  * rolagem e o resto do FAQ no lugar, e o destino é site de terceiro que pode
- * ter mudado desde o ato — trocar a página por um 404 de banca custa mais do
+ * ter mudado desde o ato: trocar a página por um 404 de banca custa mais do
  * que uma aba a mais.
  */
 function TrechoComEnderecos({ texto }: { texto: string }) {
@@ -304,7 +304,7 @@ function TrechoComEnderecos({ texto }: { texto: string }) {
  * no acervo em que o ato foi lido e não respondeu nenhuma das seis; visto na
  * tela, "O que este ato responde" em cima de um bloco cuja única linha é "o
  * ato não responde: ..." é o título prometendo o contrário do que o bloco
- * entrega. Nesses, o título diz o que o bloco tem — a lacuna — e a linha de
+ * entrega. Nesses, o título diz o que o bloco tem (a lacuna) e a linha de
  * apoio sobre o trecho literal sai, porque não há trecho nenhum.
  */
 export function cabecalhoDoFaq(origens: Origem[]): {

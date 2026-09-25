@@ -107,7 +107,7 @@ describe("quantidade", () => {
   it("campo que não veio é ausência, não 'NaN'", () => {
     // O caso real: o app subiu antes do engine, `vagasPcd` chegou
     // `undefined`, e `Intl.NumberFormat().format(undefined)` devolve a string
-    // "NaN" — a busca anunciou "NaN vagas PcD" em cartões de verdade.
+    // "NaN": a busca anunciou "NaN vagas PcD" em cartões de verdade.
     expect(quantidade(undefined)).toBeNull();
     expect(quantidade(null)).toBeNull();
     expect(quantidade(NaN)).toBeNull();

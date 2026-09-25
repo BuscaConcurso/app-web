@@ -4,7 +4,7 @@ import { idDoGtm, scriptDoGtm, urlDoNoscriptDoGtm } from "@/lib/gtm";
 /**
  * Carrega o GTM depois da hidratação (`afterInteractive`), para não disputar
  * o primeiro carregamento com o conteúdo. Sem `NEXT_PUBLIC_GTM_ID` válido não
- * renderiza nada — nem script, nem iframe.
+ * renderiza nada: nem script, nem iframe.
  */
 export function GoogleTagManager() {
   const id = idDoGtm(process.env.NEXT_PUBLIC_GTM_ID);

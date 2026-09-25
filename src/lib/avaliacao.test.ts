@@ -13,7 +13,7 @@ import {
  * O que é testável sem navegador: o clique virando corpo de requisição, o
  * corpo virando pedido, o pedido virando requisição ao engine e a resposta da
  * rota virando frase na tela. O componente em si
- * (`components/concurso/Avaliacao.tsx`) continua sem rede de testes — a suíte
+ * (`components/concurso/Avaliacao.tsx`) continua sem rede de testes: a suíte
  * é Node, sem DOM, e é a quinta vez que isto aparece no relatório.
  */
 
@@ -28,8 +28,8 @@ const CLIQUE = { slug: "trt-2-analista-2026", gostei: "nao" };
 describe("lerPedido", () => {
   it("um clique em 'não gostei' já é um pedido completo, sem comentário", () => {
     // O ponto do recorte: o registro acontece no clique. Se o pedido só
-    // ficasse válido com comentário, quem fecha o modal sem escrever — que é
-    // a maioria — não teria dito nada.
+    // ficasse válido com comentário, quem fecha o modal sem escrever (que é
+    // a maioria) não teria dito nada.
     const pedido = lerPedido(formulario(CLIQUE));
 
     expect(pedido).toEqual({
@@ -67,7 +67,7 @@ describe("lerPedido", () => {
   it("o pedido é o concurso e o voto: item nenhum atravessa", () => {
     // A granularidade nova, cobrada no caminho de entrada. `bloco`,
     // `pergunta` e `ato` eram do recorte por item; uma aba aberta desde antes
-    // da mudança ainda os manda, e o que vale é o voto do concurso — não um
+    // da mudança ainda os manda, e o que vale é o voto do concurso, não um
     // 400 na cara de quem clicou.
     const antiga = lerPedido(
       formulario({
@@ -96,7 +96,7 @@ describe("lerPedido", () => {
 describe("formularioDoPedido", () => {
   it("o que o navegador manda é exatamente o que a rota consegue ler", () => {
     // As duas metades da mesma regra. Se um campo mudar de nome de um lado
-    // só, é aqui que aparece — e não em produção, como um campo que some e
+    // só, é aqui que aparece, e não em produção, como um campo que some e
     // leva o voto junto.
     expect(
       lerPedido(

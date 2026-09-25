@@ -106,11 +106,11 @@ export default async function PaginaDoConcurso(
 
   // Três degraus, e o do meio é o que passou a existir: Concursos > órgão >
   // este concurso. É uma lista só, e `Trilha` desenha a tela e emite o
-  // `BreadcrumbList` a partir dela — ver o componente para o defeito que essa
+  // `BreadcrumbList` a partir dela: ver o componente para o defeito que essa
   // regra guarda. O nível do órgão só pode entrar aqui porque agora ele tem
   // endereço.
   //
-  // O degrau do órgão leva `nomeCurtoDoOrgao` — a sigla quando existe, o nome
+  // O degrau do órgão leva `nomeCurtoDoOrgao`: a sigla quando existe, o nome
   // quando não (36 órgãos do acervo ainda têm por nome o caminho de hierarquia
   // do Diário). Agora o dado estruturado diz o mesmo, que é o que ele existe
   // para fazer; antes ele mandava `orgao.nome` por extenso enquanto a tela
@@ -267,7 +267,7 @@ export default async function PaginaDoConcurso(
             {/* A avaliação do concurso, aqui e em nenhum outro ponto da
                 página: um voto por concurso por pessoa, decisão do parceiro
                 humano. O porquê deste ponto e não do rodapé está medido no
-                comentário do componente — em resumo, é o fim da LEITURA. O
+                comentário do componente: em resumo, é o fim da LEITURA. O
                 que vem abaixo, quando vem, é o ato como saiu no diário: a
                 fonte para conferir, não mais coisa nossa para avaliar. */}
             <Avaliacao slug={concurso.slug} />

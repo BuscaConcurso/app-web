@@ -241,8 +241,8 @@ function Painel({
   prefixo: string;
   /**
    * Duas coisas que a gaveta já faz, e que o painel não deve repetir dentro
-   * dela: o cartão em volta — ela já é um cartão de ponta a ponta, e o de
-   * dentro ficaria branco sobre branco com uma sangria a mais — e o título,
+   * dela: o cartão em volta (ela já é um cartão de ponta a ponta, e o de
+   * dentro ficaria branco sobre branco com uma sangria a mais) e o título,
    * que é o que a barra de topo da gaveta diz. Sem isto a tela mostrava
    * "Filtros" duas vezes, a 40px de distância.
    */
@@ -262,7 +262,7 @@ function Painel({
         <div
           className={
             // Sem o título, sobra só o "Limpar", que vai para a direita do
-            // mesmo jeito — e a fileira inteira some quando não há o que
+            // mesmo jeito, e a fileira inteira some quando não há o que
             // limpar, em vez de deixar uma linha vazia no topo da gaveta.
             emGaveta
               ? `flex items-center justify-end ${ativos > 0 ? "" : "hidden"}`
@@ -341,7 +341,7 @@ export function ColunaFiltros({
 
         **Virou gaveta, e a razão é medida.** Ele era um `details` que expandia
         no fluxo, e a 375px isso custava o seguinte: o painel tem 945,4px de
-        altura — 27 opções em quatro grupos, mais os dois campos de salário —
+        altura (27 opções em quatro grupos, mais os dois campos de salário)
         numa janela de 812px. Ele não cabe na tela de jeito nenhum, então ou
         rola por dentro ou empurra a página. Empurrando, o primeiro resultado
         ia de y=390 para y=1346: com os filtros abertos, nenhum resultado
@@ -357,7 +357,7 @@ export function ColunaFiltros({
         roláveis lado a lado, com a roda do mouse fazendo uma coisa sobre a
         coluna e outra a dois centímetros dali. A gaveta é modal e trava a
         rolagem do fundo, então enquanto ela está aberta existe uma área
-        rolável só na tela — que é o mesmo princípio, e não o contrário dele.
+        rolável só na tela: que é o mesmo princípio, e não o contrário dele.
       */}
       <Gaveta
         className="lg:hidden"

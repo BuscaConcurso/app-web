@@ -13,7 +13,7 @@ import { CONCURSOS } from "@/mocks/concursos";
  * O agrupamento por órgão.
  *
  * O que dá para errar aqui é sempre o mesmo: a agregação afirmar mais do que
- * a lista tem. Por isso quase nenhum teste fixa número — eles conferem o
+ * a lista tem. Por isso quase nenhum teste fixa número: eles conferem o
  * agrupamento contra a própria lista de onde ele saiu, que é o que continua
  * valendo quando o mock mudar.
  */
@@ -32,7 +32,7 @@ const ORGAO: Orgao = {
 function concurso(slug: string, orgao: Partial<Orgao> = {}): ConcursoResumo {
   return {
     slug,
-    titulo: `Conselho Regional de Administração do Rio de Janeiro (CRA-RJ) — Edital nº ${slug}`,
+    titulo: `Conselho Regional de Administração do Rio de Janeiro (CRA-RJ) \u2014 Edital nº ${slug}`,
     tipo: "concurso_publico",
     status: "autorizado",
     orgao: { ...ORGAO, ...orgao },
@@ -108,7 +108,7 @@ describe("acharOrgao", () => {
 
   it("devolve null quando nenhum concurso nomeia o slug", () => {
     // É o que vira 404 na página. Um órgão sem concurso no acervo existe na
-    // tabela do engine — 1.946 com slug contra 466 com concurso na lista — e
+    // tabela do engine (1.946 com slug contra 466 com concurso na lista) e
     // uma página vazia com o nome dele afirmaria que ele não tem concurso.
     expect(acharOrgao([concurso("1")], "nao-existe")).toBeNull();
   });

@@ -11,7 +11,7 @@ export type { Degrau };
  * lista.
  *
  * **É a lição de um defeito que já aconteceu.** A trilha vivia escrita à mão
- * em cada página que tinha uma — duas — e, dentro de cada uma delas, o
+ * em cada página que tinha uma (duas) e, dentro de cada uma delas, o
  * `BreadcrumbList` estruturado era uma segunda lista escrita à mão logo
  * acima. Quando o órgão ganhou endereço próprio e virou degrau, a lista
  * estruturada da página do concurso passou a declarar três degraus e a tela
@@ -33,7 +33,7 @@ export type { Degrau };
  * **O último degrau não é link.** É onde a pessoa já está; `aria-current`
  * diz isso a quem navega por leitor de tela, e o degrau continua sendo um
  * degrau na tela e no dado estruturado. Omitir o item corrente é escolha
- * defensável de trilha, mas não é a escolha aqui — e antes deste componente a
+ * defensável de trilha, mas não é a escolha aqui, e antes deste componente a
  * página do concurso simplesmente não tinha o degrau escrito, o que é outra
  * coisa.
  *

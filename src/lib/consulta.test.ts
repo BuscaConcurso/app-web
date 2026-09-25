@@ -80,12 +80,12 @@ describe("filtrar", () => {
 
   it("busca pelo nome do cargo, que não está no título", () => {
     // É como o acervo do engine é: o título é o cabeçalho do ato publicado
-    // ("Universidade Federal de Pelotas — Edital nº 10/2026") e a palavra que
+    // ("Universidade Federal de Pelotas: Edital nº 10/2026") e a palavra que
     // o candidato digita está no cargo. Nenhum dos 181 títulos do acervo tem
     // "professor"; 105 dos 181 têm um cargo de professor.
     const itens = [
       fixture({
-        titulo: "Universidade Federal de Pelotas — Edital nº 10/2026",
+        titulo: "Universidade Federal de Pelotas \u2014 Edital nº 10/2026",
         nomesDeCargo: ["Professor Visitante Indígena"],
       }),
       fixture({ titulo: "Edital nº 2/2026", nomesDeCargo: ["Auditor fiscal"] }),
@@ -127,7 +127,7 @@ describe("filtrar", () => {
 
   it("acha o concurso multiestadual em cada um dos seus estados", () => {
     // São 7 no acervo, e o do IBGE tem vaga em 23 estados. `uf` é nula neles
-    // por desenho — é o cartão que não pode afirmar um estado só —, e um
+    // por desenho (é o cartão que não pode afirmar um estado só), e um
     // filtro que olhasse `uf` os deixaria fora de todo estado.
     const nacional = fixture({
       titulo: "Censo",
@@ -154,7 +154,7 @@ describe("filtrar", () => {
     const antigo = fixture({ uf: "SP" });
     delete (antigo as Partial<ConcursoResumo>).ufs;
 
-    // Sem `ufs`, ele não casa nenhum estado — mas a lista não quebra, e a
+    // Sem `ufs`, ele não casa nenhum estado, mas a lista não quebra, e a
     // busca por texto continua achando.
     expect(filtrar([antigo], { uf: "SP" }, HOJE)).toHaveLength(0);
     expect(filtrar([antigo], { q: "analista" }, HOJE)).toHaveLength(1);

@@ -3,7 +3,7 @@
  *
  * O texto do Diário chega **sem nenhuma quebra de linha**. Medido em 420 atos
  * de 400 concursos sorteados do acervo em 2026-09-14: mediana de 1.482
- * caracteres, p90 de 9.310, maior com 86.434 — e `\n`, `\r`, `\t` e espaço
+ * caracteres, p90 de 9.310, maior com 86.434, e `\n`, `\r`, `\t` e espaço
  * duplo em **zero** deles. O separador do documento inteiro é um espaço só.
  * Renderizado como um parágrafo, o ato de 86 mil caracteres é uma parede.
  *
@@ -19,7 +19,7 @@
  *
  * Por isso a quebra **não substitui nada**: ela cai *entre* dois caracteres
  * que já existiam, e o espaço que separava o marcador do texto anterior fica
- * onde estava — no fim do parágrafo de cima. A invariante é uma só e está no
+ * onde estava: no fim do parágrafo de cima. A invariante é uma só e está no
  * teste: `partirEmParagrafos(t).map(p => p.texto).join("") === t`.
  *
  * É também por isso que cada parágrafo carrega o seu `inicio`: as posições do
@@ -33,7 +33,7 @@
  *
  * 1. **O marcador vem logo depois de um espaço.** Sem isso `1.2` seria
  *    achado dentro de `Decreto nº 9.508`.
- * 2. **O caractere antes desse espaço é `.`, `;`, `:`, `?` ou `!`** — fim de
+ * 2. **O caractere antes desse espaço é `.`, `;`, `:`, `?` ou `!`**: fim de
  *    frase ou de item. É o que separa o item de verdade da referência no meio
  *    da frase: medido, era esta condição que impedia `Fica divulgado no `
  *    **`ANEXO II`** e `Art. 1º O `**`Anexo II`** de virarem quebra.
@@ -44,7 +44,7 @@
  *
  * O numerado ainda **exige o ponto final** (`3.`, `2.1.`) e no máximo quatro
  * níveis de um ou dois dígitos. Os dois limites são o que mantém fora `1.500`,
- * `12.772/2012`, `R$ 6.180,86` e o ano `2011.` no fim de uma frase — este
+ * `12.772/2012`, `R$ 6.180,86` e o ano `2011.` no fim de uma frase: este
  * último é o perigoso, porque tem ponto, tem espaço e tem maiúscula depois.
  *
  * ## Os dois lados, medidos nos mesmos 420 atos
@@ -56,7 +56,7 @@
  * | dos 46 acima do p90 (8.904), ganham | **43** |
  * | dos caracteres do acervo sorteado, em atos que ganham | **68%** |
  *
- * É o formato que se queria: o ato curto — que não tem o que quebrar — sai
+ * É o formato que se queria: o ato curto (que não tem o que quebrar) sai
  * intacto, e é o ato longo, onde ler dói, que ganha parágrafo. **Nenhum
  * parágrafo é forçado**: não há limite de tamanho nem corte por contagem de
  * caracteres, só marcador. Um ato sem marcador continua sendo um parágrafo,
@@ -84,18 +84,18 @@ export interface Paragrafo {
 
 /**
  * Item e subitem: `3.`, `2.1.`, `3.2.1.`. O ponto final é obrigatório e cada
- * nível tem um ou dois dígitos — é o que deixa `1.500`, `12.772` e `2011.`
+ * nível tem um ou dois dígitos: é o que deixa `1.500`, `12.772` e `2011.`
  * de fora.
  */
 const ITEM = /\d{1,2}(?:\.\d{1,2}){0,3}\./y;
 
 /** `Art. 1º`, `ART. 12`. O número entra no marcador para que a quebra não
- *  caia entre `Art.` e o número dele — era o que acontecia com `Art. 10.`,
+ *  caia entre `Art.` e o número dele: era o que acontecia com `Art. 10.`,
  *  em que o `10.` era lido como item novo. */
 const ARTIGO = /(?:Art|ART)\.\s?\d{1,3}[º°o]?/y;
 
 /** Inciso: `I - `, `VII - `. O travessão faz parte do marcador. */
-const INCISO = /[IVXLCDM]{1,6}\s[-–—]\s/y;
+const INCISO = /[IVXLCDM]{1,6}\s[-–\u2014]\s/y;
 
 /** Alínea: `a) `, `k) `. */
 const ALINEA = /[a-z]\)\s/y;
@@ -106,7 +106,7 @@ const ANEXO = /(?:ANEXO|Anexo)\s(?:[IVXLCDM]{1,5}|\d{1,2})\b/y;
 /** O que precede o espaço para que o que vem depois seja começo de item. */
 const ABERTURA = new Set([".", ";", ":", "?", "!"]);
 
-/** Maiúscula de qualquer alfabeto — o acervo tem `ÊNFASE`, `ÓRGÃO`. */
+/** Maiúscula de qualquer alfabeto: o acervo tem `ÊNFASE`, `ÓRGÃO`. */
 const MAIUSCULA = /\p{Lu}/u;
 
 /**

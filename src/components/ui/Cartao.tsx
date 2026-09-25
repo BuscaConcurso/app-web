@@ -42,7 +42,7 @@ export function Cartao({
  * **O rebaixo é do tom do cartão, não cinza fixo.** O `bg-rebaixada` cinza é o
  * rebaixo do cartão BRANCO; dentro do cartão urgente ou do previsto ele é uma
  * mancha de outra família, e no encerrado chegava a ficar mais CLARO que o
- * fundo — a lista parecia levantada em vez de rebaixada. Cada tom rebaixa com
+ * fundo: a lista parecia levantada em vez de rebaixada. Cada tom rebaixa com
  * o seu próprio `chip`, que é o tom já usado pela etiqueta de situação do
  * mesmo cartão.
  *
@@ -94,7 +94,7 @@ export function Numero({
  *
  * **Sem sigla o selo fica sem conteúdo, e não vira outra coisa.** Decisão do
  * parceiro humano: "quando não houver sigla, exiba square sem sigla ao invés
- * de —".
+ * de um travessão".
  *
  * Vale distinguir isto do defeito que este componente tinha até hoje de
  * manhã, porque a forma na tela é parecida e a causa é oposta. Lá, o selo
@@ -109,7 +109,7 @@ export function Numero({
  * 1. **O alinhamento não se mexe.** A caixa continua `size-10`/`size-11`, e
  *    medido a 375px o título começa no mesmo x (77,42px) com e sem sigla.
  *    Colapsar a caixa puxaria o título para 28,16px e faria a lista dançar
- *    49,26px a cada cartão sem sigla — um em cada três.
+ *    49,26px a cada cartão sem sigla: um em cada três.
  * 2. **Nada é afirmado.** Iniciais tiradas do nome inventariam uma sigla que
  *    ninguém publicou. O nome do órgão está do lado, por extenso, e a linha
  *    de contexto logo abaixo diz a esfera e o estado.

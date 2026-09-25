@@ -6,7 +6,7 @@ describe("emBreve", () => {
     for (const [chave, { titulo, frase }] of Object.entries(RECURSOS_EM_BREVE)) {
       expect(titulo.length, chave).toBeGreaterThan(0);
       expect(frase.length, chave).toBeGreaterThan(0);
-      expect(`${titulo}${frase}`).not.toContain("—");
+      expect(`${titulo}${frase}`).not.toContain("\u2014");
     }
   });
 

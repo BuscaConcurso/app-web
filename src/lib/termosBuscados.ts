@@ -4,7 +4,7 @@
  *
  * É irmão de `ufLembrada.ts` e segue a mesma forma: um `localStorage`
  * embrulhado como origem externa, para ser lido com `useSyncExternalStore`.
- * O motivo está escrito lá por extenso — ler direto na renderização quebra a
+ * O motivo está escrito lá por extenso: ler direto na renderização quebra a
  * hidratação, e ler num efeito traz um piscar. O cache aqui existe pela mesma
  * razão: `getSnapshot` precisa devolver **a mesma referência** entre
  * renderizações, e um `JSON.parse` por chamada devolveria um array novo toda
@@ -18,7 +18,7 @@
  * A busca tem `q` e sete filtros. Guardar a busca inteira preservaria o
  * contexto e teria custado a lista: **medido no acervo de 4.648 concursos, a
  * partir de `?q=analista` existem 17 refinamentos de um clique que ainda
- * devolvem resultado** — 3 situações, 3 escolaridades e 11 bancas, sem contar
+ * devolvem resultado**: 3 situações, 3 escolaridades e 11 bancas, sem contar
  * as 27 UFs. Cada um deles é uma navegação nova com resultado, e portanto uma
  * entrada nova. Como refinar filtro é exatamente o gesto que a coluna de
  * facetas convida a fazer, uma única sessão de busca encheria os dez lugares
@@ -29,7 +29,7 @@
  * sugestão devolve "analista", não "analista em São Paulo, nível superior".
  * Duas coisas aliviam isso. A UF, que é o filtro de longe mais usado, já é
  * lembrada por conta própria em `ufLembrada.ts` e volta preenchida no seletor
- * ao lado — guardá-la de novo aqui seria lembrar a mesma coisa duas vezes. E
+ * ao lado: guardá-la de novo aqui seria lembrar a mesma coisa duas vezes. E
  * o resto dos filtros continua a um clique de distância na coluna, que é onde
  * a pessoa os pôs da primeira vez.
  *
@@ -39,7 +39,7 @@
  *
  * ## Identidade, ordem e limite
  *
- * Dois termos são o mesmo termo quando `normalizar` os iguala — a mesma
+ * Dois termos são o mesmo termo quando `normalizar` os iguala: a mesma
  * função que a busca usa para achar "São Paulo" com "sao paulo". Se os dois
  * acham a mesma coisa, não podem ocupar dois dos dez lugares. Repetir
  * **promove** a entrada existente em vez de criar outra, e a grafia que fica
@@ -198,7 +198,7 @@ export function esquecerTermo(termo: string): void {
 /**
  * A política: o que uma busca que acabou de acontecer faz com a memória.
  *
- * Fica aqui, e não no componente que a chama, porque é a regra do pedido — e
+ * Fica aqui, e não no componente que a chama, porque é a regra do pedido, e
  * regra que dá para errar é regra que precisa de teste. Quem chama só
  * entrega os três fatos.
  *
@@ -211,7 +211,7 @@ export function esquecerTermo(termo: string): void {
  *    perguntar se a busca estava filtrada.
  *
  * 3. **A saída precisa perguntar.** Um termo que já estava guardado e agora
- *    devolve zero deixou de servir — o acervo muda, concurso encerra e sai da
+ *    devolve zero deixou de servir: o acervo muda, concurso encerra e sai da
  *    lista, e uma sugestão morta é exatamente a armadilha que a regra "só
  *    entra o que deu resultado" existe para evitar. Mas `resultados === 0`
  *    **com filtro** não acusa o termo: quem buscou "analista" no Acre recebeu
@@ -227,7 +227,7 @@ export function registrarBusca({
   termo?: string;
   /** Quantos concursos a busca devolveu. Quem sabe isto é a página. */
   resultados: number;
-  /** Se havia algum filtro além do texto — UF, faceta ou faixa de salário. */
+  /** Se havia algum filtro além do texto: UF, faceta ou faixa de salário. */
   filtrada: boolean;
 }): void {
   if (!termo || !limparTermo(termo)) return;

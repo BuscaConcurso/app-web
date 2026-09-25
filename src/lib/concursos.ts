@@ -6,8 +6,8 @@
  * a troca aconteceu aqui dentro e nenhum componente mudou, porque nenhum
  * componente importa mock direto.
  *
- * Tudo o que o buscador faz — filtro, ordenação, paginação, contagem de
- * faceta — continua rodando aqui, sobre o array que `acervo()` devolve. É por
+ * Tudo o que o buscador faz (filtro, ordenação, paginação, contagem de
+ * faceta) continua rodando aqui, sobre o array que `acervo()` devolve. É por
  * isso que a listagem usa `/acervo`, sem duplicar na API as consultas já
  * testadas em `consulta.test.ts` e `concursos.test.ts`.
  */
@@ -50,7 +50,7 @@ export type { ContagensDeFaceta, OpcaoDeFaceta, Pagina } from "./consulta";
 /**
  * Teto de quantos cargos o rodapé mostra, e hoje ele não corta nada: a regra
  * de `cargos.ts` para sozinha em dez. É um limite de forma, medido na
- * fileira do rodapé — dez rótulos ocupam 869px dos 1183 de uma linha a
+ * fileira do rodapé: dez rótulos ocupam 869px dos 1183 de uma linha a
  * 1240px, e três linhas a 375px.
  */
 const LIMITE_DE_CARGOS = 10;
@@ -71,7 +71,7 @@ interface RespostaDeAcervo {
   /** Quantos concursos o engine tem, com dado ou sem. */
   total: number;
   /**
-   * Quantos o engine tem e não mandou porque não têm cargo nem evento — 189
+   * Quantos o engine tem e não mandou porque não têm cargo nem evento: 189
    * de 4.838 na carga de 2026-09-14. A lista traz só quem tem dado, e esta
    * contagem é o que impede a tela de fingir que o acervo tem só o que ela
    * lista. Sai por `avisoDoAcervo()`, aqui embaixo.
@@ -84,11 +84,11 @@ interface RespostaDeAcervo {
    *
    * A repartição existe porque o número sozinho fazia a tela mentir: ela
    * dizia que os que estão fora "entram na lista conforme forem lidos", e
-   * hoje isso não vale para nenhum deles — a fila está vazia.
+   * hoje isso não vale para nenhum deles: a fila está vazia.
    * `acervoIncompletoEmPartes()` (src/lib/rotulos.ts) é quem transforma
    * estes três números em frase, e deixa de fora a parte que estiver zerada.
    *
-   * Opcional no tipo porque um engine mais velho não manda o campo — é o
+   * Opcional no tipo porque um engine mais velho não manda o campo: é o
    * estado normal do mundo, API e app sobem separados. Quem lê valida.
    */
   foraDaLista?: {
@@ -310,7 +310,7 @@ export async function origemDoAcervo(): Promise<OrigemDoAcervo> {
  *
  * Os campos contados são exatamente os que `filtrar` lê (`consulta.ts`):
  * `concurso.uf` para o filtro de estado e `concurso.orgao.esfera` para o de
- * esfera. Contar outro campo — `orgao.uf`, por exemplo — faria a tela
+ * esfera. Contar outro campo (`orgao.uf`, por exemplo) faria a tela
  * prometer um filtro que o filtro não entrega.
  */
 export interface DimensoesDoAcervo {
@@ -337,17 +337,17 @@ async function acervo(): Promise<ConcursoResumo[]> {
 
 /**
  * Quantos concursos do acervo do engine estão fora da lista, e por quê, para
- * a tela dizer isso em vez de calar — ou, pior, em vez de adivinhar.
+ * a tela dizer isso em vez de calar, ou, pior, em vez de adivinhar.
  *
- * `null` quando não há nada a avisar — acervo completo, ou mock. A lista traz
+ * `null` quando não há nada a avisar: acervo completo, ou mock. A lista traz
  * só quem tem cargo ou evento, e sem este aviso uma página que mostra 4.649
- * concursos afirmaria, por omissão, que o acervo tem 4.649 — tem 4.838.
+ * concursos afirmaria, por omissão, que o acervo tem 4.649: tem 4.838.
  *
  * **O aviso carrega a repartição, não só o total.** Um número só descreve
  * quatro mil e tantos concursos como se fossem uma coisa, e eles não são:
  * uns esperam leitura, outros nunca vão entrar porque o ato nem abre
  * concurso, e outros são falha nossa. `acervoIncompletoEmPartes()` é quem
- * decide o que disso vira frase — aqui o trabalho é passar os números
+ * decide o que disso vira frase: aqui o trabalho é passar os números
  * adiante sem perder nenhum.
  *
  * Não custa requisição: lê o mesmo acervo que `acervo()`, guardado no
@@ -479,7 +479,7 @@ export interface Destaques {
   encerrando: ConcursoResumo[];
   abertos: ConcursoResumo[];
   previstos: ConcursoResumo[];
-  /** Os de ato mais recente no Diário — ver `ultimasAtualizacoes`. */
+  /** Os de ato mais recente no Diário: ver `ultimasAtualizacoes`. */
   atualizados: ConcursoResumo[];
   totalAbertos: number;
 }
@@ -591,7 +591,7 @@ export async function facetas(
       // por texto respondia por aproximação: ela varre `textoBuscavel`, que
       // inclui título, banca, cargo e cidade, então "IFPR" também trazia os
       // concursos de quem só cita o IFPR no título, e um órgão sem sigla caía
-      // no nome inteiro — que casa com as unidades dele e com mais nada
+      // no nome inteiro: que casa com as unidades dele e com mais nada
       // previsível. O link aqui promete "os concursos deste órgão", e agora é
       // o slug do órgão que responde, que é a mesma chave que agrupa a
       // página.
@@ -617,12 +617,12 @@ export async function cargosEscolhidos(): Promise<CargoMedido[]> {
 /**
  * Os cargos que viram link no rodapé, medidos no acervo inteiro.
  *
- * Sobre o acervo inteiro, e não sobre os abertos como `facetas()` — e é por
+ * Sobre o acervo inteiro, e não sobre os abertos como `facetas()`, e é por
  * isso que esta lista **não serve para os blocos da home**, que contam
  * "abertos agora". Hoje são 132 abertos em 4.649, e as duas contas foram
  * feitas: a mesma regra medida só nos abertos tem piso 2 e deixa entrar
  * "Alunos", "Curso", "Área" e "Júnior"; e os dez daqui, contados só entre os
- * abertos, dariam 47, 4, 3, 3, 2, 2, 2, 1, 1 e **0** — um link do rodapé
+ * abertos, dariam 47, 4, 3, 3, 2, 2, 2, 1, 1 e **0**: um link do rodapé
  * levando a busca vazia, que é justamente o que não pode acontecer. O rodapé
  * está em toda página e é âncora permanente; lista que encolhe quando as
  * inscrições fecham não serve a isso.
@@ -661,7 +661,7 @@ export async function contagensDeFaceta(
  * os cargos e de onde tudo veio.
  *
  * Rota própria, e não uma busca no acervo, porque o detalhe é o único lugar
- * que precisa de cronograma, cargo, vaga e remuneração — carregar isso para
+ * que precisa de cronograma, cargo, vaga e remuneração: carregar isso para
  * os 181 concursos só para mostrar um seria pagar a lista inteira por página.
  *
  * **Com `BC_API_URL` definida, não há mock** (a mesma regra de `carregar`).

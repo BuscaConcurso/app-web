@@ -1,7 +1,7 @@
 /**
  * Avaliação do concurso: "gostei" e "não gostei" da página inteira.
  *
- * Este arquivo é a parte testável — o que o clique vira, o que vai no corpo da
+ * Este arquivo é a parte testável: o que o clique vira, o que vai no corpo da
  * requisição, o que voltar da rota significa e o que fazer quando a API não
  * responde. Ele não tem diretiva nenhuma (`"use server"`, `"use client"`) de
  * propósito: os dois lados o importam, e é o que permite testá-lo em Node, sem
@@ -10,16 +10,16 @@
  * (`components/concurso/Avaliacao.tsx`) só desenha e faz o `fetch`.
  *
  * **O pedido é o slug e o voto, e mais nada.** Ele já levou `bloco`,
- * `pergunta` e `ato` — o recorte por item, que a granularidade nova reverteu.
+ * `pergunta` e `ato`: o recorte por item, que a granularidade nova reverteu.
  * Quem diz onde está o erro agora é o comentário.
  *
- * **`registrarAvaliacao` só roda no servidor** — é a única função daqui que lê
+ * **`registrarAvaliacao` só roda no servidor**: é a única função daqui que lê
  * `BC_API_URL`. Ela é importada pela rota, nunca pelo componente: o endereço
  * da API do engine não pode aparecer em bundle de navegador (ver o comentário
  * da rota).
  *
  * **Por que o clique vai para o engine e não para um arquivo aqui**: o valor
- * da avaliação é poder cruzá-la com o acervo — qual ato, qual extração o
+ * da avaliação é poder cruzá-la com o acervo: qual ato, qual extração o
  * modelo leu para produzir o que alguém reclamou. Isso só existe do lado do
  * banco, e é lá que a procedência é resolvida, no momento do clique.
  */
@@ -39,7 +39,7 @@ export interface Pedido {
 /**
  * Teto do comentário. Não é hostilidade com quem escreve muito: é que o
  * caminho de escrita é público, sem autenticação, e um campo de texto sem
- * limite é um convite. Dois mil caracteres são umas quinze linhas — o engine
+ * limite é um convite. Dois mil caracteres são umas quinze linhas: o engine
  * recusa acima disso, e o corte aqui evita que a pessoa escreva um texto
  * longo para descobrir depois que ele não coube.
  */
@@ -51,7 +51,7 @@ export const LIMITE_DO_COMENTARIO = 2000;
  * Sobrou pouco a validar desde que o pedido é o slug e o voto: o recorte por
  * item trazia um `bloco` e uma `pergunta` que tinham de combinar entre si, e
  * essa regra era o grosso daqui. O que resta é o mínimo que impede o clique
- * de virar requisição inútil — e continua não substituindo o 422 do serviço
+ * de virar requisição inútil, e continua não substituindo o 422 do serviço
  * nem o `check` do banco.
  *
  * Campo a mais no corpo é ignorado, não recusado: um `bloco` de uma aba que
@@ -85,7 +85,7 @@ export function lerPedido(dados: FormData): Pedido | null {
  *
  * Mora aqui, e não dentro do componente, por dois motivos. O primeiro é que
  * ele e `lerPedido` são as duas metades da mesma regra, e uma metade que muda
- * sem a outra é um campo que some sem ninguém perceber — `avaliacao.test.ts`
+ * sem a outra é um campo que some sem ninguém perceber: `avaliacao.test.ts`
  * fecha o círculo mandando uma pela outra. O segundo é que o componente não
  * precisa saber nomes de campo para desenhar dois botões.
  *
@@ -111,7 +111,7 @@ export function formularioDoPedido(
  * tem autenticação, e inventar login para receber um "não gostei" seria
  * cobrar caro por uma opinião.
  *
- * Ele existe por um motivo só — impedir que dez cliques da mesma pessoa
+ * Ele existe por um motivo só: impedir que dez cliques da mesma pessoa
  * virem dez linhas, o que transformaria a contagem de reclamações em contagem
  * de cliques. Quem limpar os cookies vira outra pessoa para esta base, e isso
  * está assumido: é o preço de não pedir identidade.
@@ -135,7 +135,7 @@ const RESULTADOS: readonly string[] = [
  * O que a resposta de `POST /api/avaliacao` diz que aconteceu.
  *
  * Qualquer coisa que não seja um dos quatro resultados conhecidos é
- * `"falhou"` — corpo vazio, HTML de erro de um proxy no caminho, JSON de outro
+ * `"falhou"`: corpo vazio, HTML de erro de um proxy no caminho, JSON de outro
  * formato. **Nunca `"gravada"` por omissão**: o modo de errar que importa aqui
  * é dizer "obrigado" para quem não teve o clique registrado, e o jeito de não
  * errar assim é exigir que a rota afirme.
@@ -155,7 +155,7 @@ export interface EstadoDaAvaliacao {
   resultado: ResultadoDaAvaliacao | "pedido-invalido" | null;
   /** O que foi clicado, para a tela saber se abre o modal de comentário. */
   gostei: boolean | null;
-  /** Se este envio trazia comentário — o modal fecha quando ele chegou. */
+  /** Se este envio trazia comentário: o modal fecha quando ele chegou. */
   comentou: boolean;
   /**
    * Muda a cada envio. Sem isso, dois cliques iguais seguidos produzem o
@@ -174,8 +174,8 @@ export const ESTADO_INICIAL: EstadoDaAvaliacao = {
 /**
  * Onde a API Nest está ouvindo, incluindo o prefixo `/v1`. Lida a cada
  * chamada, e não uma vez no carregamento do módulo como em `concursos.ts`: é o que permite ao teste
- * exercitar os dois lados — instância sem serviço de avaliação e instância
- * com ele — sem subir servidor nenhum.
+ * exercitar os dois lados (instância sem serviço de avaliação e instância
+ * com ele) sem subir servidor nenhum.
  *
  * Variável ausente é "esta instância não tem onde gravar", e a tela diz
  * isso. Não é o mesmo que falhar, e não pode virar um "obrigado" mentiroso.

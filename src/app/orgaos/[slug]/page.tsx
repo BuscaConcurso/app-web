@@ -16,7 +16,7 @@ import { tomDoConcurso } from "@/lib/situacao";
 /**
  * A página do órgão: o nível acima do concurso.
  *
- * Ela existe porque a hierarquia pedida — órgão acima, concurso abaixo — só
+ * Ela existe porque a hierarquia pedida (órgão acima, concurso abaixo) só
  * é hierarquia se o nível de cima for um lugar. Sem ela, a trilha da página
  * do concurso nomeia o órgão e não leva a lugar nenhum, que é texto com cara
  * de link.
@@ -61,7 +61,7 @@ export async function generateMetadata(
     alternates: { canonical: `/orgaos/${orgao.slug}` },
     // Um órgão de um concurso só tem, nesta página, o cartão de um concurso
     // que já tem página própria e indexada. Duas URLs indexáveis para o mesmo
-    // conteúdo é a duplicata que o `robots` existe para evitar — e é a mesma
+    // conteúdo é a duplicata que o `robots` existe para evitar, e é a mesma
     // regra que `/concursos` aplica à busca por texto livre. O endereço
     // continua valendo, continua sendo seguido, e volta a ser indexável
     // sozinho no dia do segundo concurso: dos 122 órgãos que tinham um só há
@@ -91,7 +91,7 @@ export default async function PaginaDoOrgao(
 
   // A mesma ordem padrão da busca: o que ainda dá para fazer primeiro, o que
   // já encerrou depois. Numa lista que é a história de um órgão, a alternativa
-  // seria a ordem cronológica — e ela poria o edital de 2024 acima do que
+  // seria a ordem cronológica, e ela poria o edital de 2024 acima do que
   // fecha inscrição na semana que vem.
   const ordenados = ordenar(concursos, "encerrando", hoje);
   const paginas = Math.max(Math.ceil(ordenados.length / POR_PAGINA), 1);
@@ -108,7 +108,7 @@ export default async function PaginaDoOrgao(
   const previstos = ordenados.filter((concurso) => tomDoConcurso(concurso, hoje) === "previsto").length;
 
   // Dois degraus: Concursos > este órgão. A mesma lista desenha a tela e o
-  // `BreadcrumbList` — ver `Trilha` para o defeito que essa regra guarda.
+  // `BreadcrumbList`: ver `Trilha` para o defeito que essa regra guarda.
   //
   // O degrau leva `nomeCurtoDoOrgao`, e agora o dado estruturado leva também.
   // Antes ele mandava `orgao.nome` por extenso enquanto a tela mostrava a

@@ -34,7 +34,7 @@ export function enderecoLegivel(url: string): string {
  * Os atos publicados de onde tudo nesta página foi lido, com o texto inteiro.
  *
  * É a parte mais garantida do produto e a que estava guardada sem uso: o
- * texto do ato está no nosso banco, íntegro, com proveniência — 9.274
+ * texto do ato está no nosso banco, íntegro, com proveniência: 9.274
  * documentos e 40,2 milhões de caracteres. Link pode dar 404, o site da
  * Imprensa Nacional pode sair do ar, a janela do INLABS tem 115 dias; o texto
  * não depende de nada disso.
@@ -44,7 +44,7 @@ export function enderecoLegivel(url: string): string {
  * A seção diz isso em vez de deixar a pessoa supor.
  *
  * O texto abre numa gaveta, e **sem JavaScript**: o mecanismo continua sendo o
- * `<details>` nativo. Isso importa mais do que parece — um drawer de
+ * `<details>` nativo. Isso importa mais do que parece: um drawer de
  * biblioteca reverteria a decisão de não depender de script, e com ela o "ver
  * o ato" do cronograma (uma âncora) deixaria de funcionar para quem está sem
  * script, e quem chegasse por link direto encontraria um botão morto. Feito
@@ -57,7 +57,7 @@ export function enderecoLegivel(url: string): string {
  * resolvido enquanto o painel morava neste arquivo: animação nos dois
  * sentidos, Escape, clique fora, o fundo que não rola por baixo, o foco que
  * entra e volta ao gatilho, e `prefers-reduced-motion`. O porquê do mecanismo
- * — e o que se perdeu ao não usar `<dialog>` — está medido no topo daquele
+ * (e o que se perdeu ao não usar `<dialog>`) está medido no topo daquele
  * arquivo. Nada disto mudou o conteúdo: o que a gaveta mostra é o mesmo texto,
  * com os mesmos grifos.
  *
@@ -66,13 +66,13 @@ export function enderecoLegivel(url: string): string {
  * 1.700), porque mostrar era barato. Um painel que se abre sozinho por cima
  * da página não é barato: ele cobre o cronograma e os cargos que a pessoa
  * veio ler. E a uniformidade passou a valer mais que o clique economizado
- * porque o bloco do ato deixou de ser só o texto — ele tem o endereço e a
+ * porque o bloco do ato deixou de ser só o texto: ele tem o endereço e a
  * procedência antes dele, e o texto virou a evidência atrás disso, não a
  * primeira coisa a ler.
  *
  * **O FAQ saiu daqui** e virou bloco próprio (`Faq.tsx`), acima deste. O que
  * ficou é o que ele deixou: o destaque das respostas dentro do texto, que
- * continua sendo feito aqui porque é aqui que o texto está — e agora o link
+ * continua sendo feito aqui porque é aqui que o texto está, e agora o link
  * de cada resposta aponta para **o trecho**, não mais para o ato inteiro.
  *
  * O `id` do `<li>` (`ato-{chave}`) continua onde estava, e é ele que o
@@ -140,7 +140,7 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                 /* O endereço público não está gravado para este ato, e não dá
                    para inventá-lo: o que o motor montava a partir do
                    identificador respondia 404. O texto, quando existe, é o
-                   que torna isso suportável — a publicação fica guardada por
+                   que torna isso suportável: a publicação fica guardada por
                    inteiro. Quando nem o texto existe, só resta dizer isso. */
                 <p className="text-[12px] leading-5 text-tinta-600">
                   O texto deste ato não está guardado.
@@ -150,10 +150,10 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
 
             {origem.editalCitadoUrl && (
               /* Cartão 2: o edital completo, no endereço que o próprio ato
-                 cita. `Concurso.dc.html:189-193`. Não é conferido por nós —
+                 cita. `Concurso.dc.html:189-193`. Não é conferido por nós (
                  nós nunca visitamos este endereço, que saiu do texto de um
                  ato que pode ter meses e de um site de banca que muda de
-                 lugar —, e o rótulo diz isso em vez de prometer uma porta que
+                 lugar), e o rótulo diz isso em vez de prometer uma porta que
                  talvez não abra. */
               <div className="flex flex-col gap-2.5 rounded-[16px] bg-pagina p-5">
                 <div className="flex items-center gap-2.5">
@@ -200,14 +200,14 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
  *
  * O texto do Diário chega sem uma única quebra de linha (zero em 420 atos
  * medidos) e era renderizado como um `<p>`: ler o ato de 86 mil caracteres
- * era percorrer uma parede. A estrutura está lá, como marcador — `3.2.1.`,
- * `Art. 5º`, `II - `, `a)`, `ANEXO I` —, e `lib/leitura.ts` acha onde ela
+ * era percorrer uma parede. A estrutura está lá, como marcador (`3.2.1.`,
+ * `Art. 5º`, `II - `, `a)`, `ANEXO I`), e `lib/leitura.ts` acha onde ela
  * abre. **A regra, os dois lados medidos e o que ficou de fora estão lá**,
  * junto do código que decide, e não aqui.
  *
  * O que importa deste lado: **o texto exibido não muda**. A partição cai
  * entre dois caracteres que já existiam e os `<p>` somados dão o ato
- * caractere por caractere — o que se confere no HTML renderizado, não aqui.
+ * caractere por caractere: o que se confere no HTML renderizado, não aqui.
  *
  * ## E o grifo continua caindo no mesmo lugar
  *
@@ -219,7 +219,7 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
  * ## Cada trecho ganhou endereço
  *
  * Antes, o link do FAQ levava ao `<li>` do ato com a gaveta fechada, e a
- * pessoa procurava o grifo num parágrafo que podia ter 66 mil caracteres — o
+ * pessoa procurava o grifo num parágrafo que podia ter 66 mil caracteres: o
  * grifo existia e ninguém chegava nele. Agora cada marca carrega o `id` das
  * respostas que a produziram, e o link do FAQ abre a gaveta no trecho. O
  * porquê de a âncora bastar, sem script, está em `useAbrirNaAncora`.
@@ -262,7 +262,7 @@ function GavetaDoAto({ origem, texto }: { origem: Origem; texto: string }) {
                     {/* A âncora do trecho. É um elemento **vazio**, e é de
                         propósito: um `<span>` sem conteúdo não acrescenta
                         caractere nenhum ao ato, e uma marca só pode ter um
-                        `id` — enquanto três perguntas respondidas pela mesma
+                        `id`: enquanto três perguntas respondidas pela mesma
                         frase viram uma marca só e precisam de três endereços
                         apontando para cá. O `scroll-mt` é a barra de topo
                         `fixed` da gaveta, medida em 44px, que sem folga
@@ -310,7 +310,7 @@ function faixasDoFaq(origem: Origem): Faixa[] {
  * As posições do banco são deslocamentos no texto inteiro; partir o ato não
  * pode mover o grifo, então cada parágrafo desconta o próprio `inicio`. O que
  * sobra fora dele `destacar` descarta sozinho, por já clampear e exigir
- * `fim > inicio` — inclusive a faixa que atravessa a quebra, que fica
+ * `fim > inicio`: inclusive a faixa que atravessa a quebra, que fica
  * recortada dos dois lados e vira uma marca em cada parágrafo.
  *
  * A âncora é a única coisa que não se recorta: ela é o **começo** do trecho,

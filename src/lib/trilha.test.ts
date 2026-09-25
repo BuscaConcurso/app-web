@@ -9,12 +9,12 @@ import { URL_SITE } from "./site";
  * estruturada declarava três degraus enquanto a tela mostrava dois. Ele só
  * foi possível porque havia duas listas. Aqui há uma, e o que resta a
  * conferir é que a conversão não perca nem invente degrau, e que a forma seja
- * a que o schema.org pede — posição a partir de 1 e `item` absoluto.
+ * a que o schema.org pede: posição a partir de 1 e `item` absoluto.
  */
 const DEGRAUS: Degrau[] = [
   { nome: "Concursos", href: "/concursos" },
   { nome: "CRA-RJ", href: "/orgaos/cra-rj" },
-  { nome: "Conselho Regional de Administração — Edital nº 1/2026", href: "/concursos/edital-1-2026" },
+  { nome: "Conselho Regional de Administração \u2014 Edital nº 1/2026", href: "/concursos/edital-1-2026" },
 ];
 
 describe("trilhaEstruturada", () => {

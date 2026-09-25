@@ -13,7 +13,7 @@ import { CONCURSOS } from "@/mocks/concursos";
  * linha.
  *
  * `BC_API_URL` é lida na carga do módulo, então cada teste precisa de
- * `resetModules()` antes do `import` dinâmico — sem isso, o primeiro teste
+ * `resetModules()` antes do `import` dinâmico: sem isso, o primeiro teste
  * congelaria o valor para todos os outros.
  */
 const API = "http://api.de.teste";
@@ -274,7 +274,7 @@ describe("acervo", () => {
 
   it("a fila vazia de hoje atravessa a fronteira como zero, não como ausência", async () => {
     // O caso que o estado de 2026-09-14 tornou o principal: `naFila: 0` é um
-    // zero VERDADEIRO — a fonte IBADE saiu e com ela os 104 jobs que havia —,
+    // zero VERDADEIRO (a fonte IBADE saiu e com ela os 104 jobs que havia),
     // não um campo que faltou. A diferença aparece na soma: 0 + 138 + 51
     // fecha os 189, então a repartição vale e a frase sai com duas orações.
     vi.stubEnv("BC_API_URL", API);
@@ -392,7 +392,7 @@ describe("acervo", () => {
     expect(links.bancas.map((b) => b.rotulo)).toEqual(["Instituto Brasileiro"]);
     expect(contagens.bancas.map((b) => b.rotulo)).toEqual(["Instituto Brasileiro"]);
     // O link do órgão aponta para a página dele, pela chave que agrupa essa
-    // página — e não mais para `?q=<sigla ou nome>`, que respondia por
+    // página, e não mais para `?q=<sigla ou nome>`, que respondia por
     // aproximação sobre o texto buscável e trazia também quem só cita o órgão
     // no título. O slug vem da rota, como o rótulo: nenhum órgão do engine
     // está em `@/mocks/orgaos`.
@@ -465,7 +465,7 @@ describe("obterDetalhe", () => {
   it("404 vira nulo, e não o mock", async () => {
     // A página mostra "não encontrado" a partir daqui. Cair no mock faria um
     // slug inexistente abrir um concurso de mentira, com nome de órgão de
-    // verdade — o pior dos dois mundos.
+    // verdade: o pior dos dois mundos.
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () => respostaCom({ detail: "x" }, 404)));
 
@@ -672,7 +672,7 @@ describe("dimensoesDoAcervo", () => {
 describe("origem sem endereço", () => {
   it("o detalhe aceita origem sem url e não inventa uma", async () => {
     // O endereço que o motor montava para o Diário respondia 404, e os atos
-    // ingeridos antes do campo novo não têm endereço nenhum — hoje, todo o
+    // ingeridos antes do campo novo não têm endereço nenhum: hoje, todo o
     // acervo. A origem chega assim mesmo: o ato existe.
     vi.stubEnv("BC_API_URL", API);
     vi.stubGlobal("fetch", vi.fn(async () =>

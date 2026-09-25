@@ -134,20 +134,20 @@ export function linhaDeContexto(orgao: {
  * Por que este cartão satisfaz o filtro de estado, em duas partes.
  *
  * `pedido` é o estado que a pessoa pediu, por extenso, e é a afirmação: **há
- * vaga aqui**. `resto` é o que sobra — " · e mais 10 estados" —, e existe
+ * vaga aqui**. ``resto` é o que sobra (" · e mais 10 estados"), e existe
  * para que um órgão nacional na lista de um estado pequeno pare de parecer
  * engano.
  *
  * **O sintoma que isto conserta foi relatado como defeito de filtro, e o
  * filtro está certo.** Quem marcou Amapá recebeu, entre outros,
- * "Universidade Federal do Rio de Janeiro — Edital nº 898/2026", e o cartão
+ * "Universidade Federal do Rio de Janeiro: Edital nº 898/2026", e o cartão
  * não tinha uma letra dizendo Amapá: mostrava o órgão, o edital e uma linha
  * de contexto que diz "Rio de Janeiro". O concurso casa porque tem vaga em
  * Macapá, e a tela calava sobre isso.
  *
  * Medido no acervo de 2026-09-14, somando os 27 filtros de estado: **3.886
  * cartões**. Em **696 deles (18%) o estado pedido não aparece hoje em lugar
- * nenhum do cartão** — 608 de órgão sem UF, onde `linhaDeContexto` diz
+ * nenhum do cartão**: 608 de órgão sem UF, onde `linhaDeContexto` diz
  * "Nacional", e **88 de órgão de outro estado, onde o cartão nomeia um
  * estado diferente do pedido**, que é a classe do relato. **206 (5%) são
  * multiestaduais** e o maior tem 22 UFs.
@@ -160,7 +160,7 @@ export function linhaDeContexto(orgao: {
  * **É o estado, e não a cidade, porque a cidade não é atribuível.**
  * `localidades` é uma lista achatada de nomes escritos pelo ato, sem UF
  * atrás: 17 de 2.760 trazem a sigla no próprio texto. E não dá para ir
- * buscá-la na vaga — nos 42 concursos multiestaduais do acervo, **709 de 709
+ * buscá-la na vaga: nos 42 concursos multiestaduais do acervo, **709 de 709
  * vagas detalhadas têm localidade e `uf` nula**. As duas listas nem sempre
  * falam do mesmo conjunto: o edital MPA nº 3/2026 tem `ufs` sem PA e
  * "Belém" entre as localidades. Escrever "Macapá (AP)" seria a tela
@@ -170,11 +170,11 @@ export function linhaDeContexto(orgao: {
  * **Cabe numa linha, medido e não estimado.** O maior texto que o acervo
  * produz é "Rio Grande do Norte · e mais 21 estados", 39 caracteres, e
  * nenhum dos 3.886 passa disso. Na tela, a 375px, ele ocupa 217px dos
- * 262,4px da linha — uma linha só, sem corte. É a mesma geometria de
+ * 262,4px da linha: uma linha só, sem corte. É a mesma geometria de
  * `cargosDoCartao` (rótulo de largura fixa mais texto), e por isso as duas
  * linhas começam no mesmo x.
  *
- * Devolve `null` quando o estado pedido não está no conjunto — o que o
+ * Devolve `null` quando o estado pedido não está no conjunto: o que o
  * filtro não deixa acontecer, e que um `bc api` sem `ufs` deixaria: sem dado,
  * a linha some em vez de afirmar.
  */
@@ -211,7 +211,7 @@ export function estadoDoCartao(
  * As etiquetas de vagas do cartão da busca: **para quem** as vagas são.
  *
  * A divisão de trabalho com o bloco de números é o desenho inteiro. O bloco
- * é de posições fixas — o rótulo "Vagas" é sempre desenhado —, então ele é o
+ * é de posições fixas (o rótulo "Vagas" é sempre desenhado), então ele é o
  * único lugar da tela onde a ausência de dado consegue aparecer, e é lá que
  * o "quantas" mora. A fileira de etiquetas é de tamanho variável: uma
  * etiqueta que não existe é invisível, e por isso ela só pode carregar
@@ -220,7 +220,7 @@ export function estadoDoCartao(
  *
  * É também por isso que não há etiqueta com o total. Ela apareceria em 922
  * cartões repetindo o número que está três linhas abaixo, e em 602 deles
- * (65%) diria "1 vaga" — uma etiqueta que não separa um cartão de outro.
+ * (65%) diria "1 vaga": uma etiqueta que não separa um cartão de outro.
  *
  * O que as etiquetas acrescentam, medido no acervo de 3.071 concursos:
  * - cadastro de reserva, em 254 cartões. Em 83 deles o cartão perdia o fato
@@ -257,7 +257,7 @@ export function etiquetasDeVagas(
  *
  * `quantidade()` antes de qualquer coisa, e é o ponto todo desta função: o
  * parâmetro chega tipado como `number | null`, mas o tipo é uma promessa
- * sobre o JSON de outro processo — um engine mais velho não manda o campo e
+ * sobre o JSON de outro processo: um engine mais velho não manda o campo e
  * ele chega `undefined`. Sem esta guarda, `numero(undefined)` devolve "NaN" e
  * a busca anuncia **"NaN vagas PcD"**, que foi o que aconteceu em cartões
  * reais. Uma tela que afirma reserva de vaga a partir de campo inexistente é
@@ -284,12 +284,12 @@ function reservadas(quantas: unknown, para: string): string | null {
  * O orçamento vale para o texto INTEIRO, com o " · e mais 12" dentro. É a
  * diferença que importa: orçar só os nomes deixaria o aviso de corte cair
  * fora das linhas visíveis, e aí o cartão voltaria a sumir com cargos em
- * silêncio — justamente o que o aviso existe para impedir.
+ * silêncio: justamente o que o aviso existe para impedir.
  *
  * Contra o acervo, 84 caracteres deixam passar inteira a lista de **2.455
  * dos 2.717** concursos com cargo (90%): 227 cartões ganham o aviso "e mais
  * N" e em 59 o próprio nome é cortado com reticências: a mediana da lista completa é 23
- * caracteres e o p90 é 83. O corte existe para a cauda, e a cauda é real —
+ * caracteres e o p90 é 83. O corte existe para a cauda, e a cauda é real:
  * o maior nome de cargo do acervo tem 290 caracteres sozinho, a maior lista
  * junta dá 3.024, e um concurso tem 91 cargos.
  */
@@ -304,7 +304,7 @@ function avisoDeCorte(quantos: number): string {
  * Os cargos do cartão, que é o que a pessoa de fato digitou na busca.
  *
  * `titulo` não serve para isso: no acervo real ele é o cabeçalho do ato
- * ("Agência Nacional de Saúde Suplementar — Edital nº 22/2026"), e não
+ * ("Agência Nacional de Saúde Suplementar: Edital nº 22/2026"), e não
  * contém o nome do cargo. Sem esta linha, o cartão devolvido por uma busca
  * por "professor" não mostra em lugar nenhum a palavra "professor".
  *
@@ -313,13 +313,13 @@ function avisoDeCorte(quantos: number): string {
  * mais 12" nunca é o pedaço que a tela corta. Sumir com 12 cargos em
  * silêncio faria o cartão descrever um concurso menor do que ele é, e quem
  * procura o 13º concluiria que ele não existe. O `line-clamp-3` da linha
- * ficou como cinto de segurança, não como a regra — uma regra que depende de
+ * ficou como cinto de segurança, não como a regra: uma regra que depende de
  * CSS para ser verdadeira não é uma regra.
  *
  * **Ausência é ausência.** 354 dos 3.071 concursos do acervo não têm cargo
  * nenhum, e nesses a função devolve `informado: false` para a linha existir
  * dizendo que não sabe. A linha é desenhada sempre, de propósito: uma linha
- * que some quando falta dado não consegue mostrar que falta dado — é a mesma
+ * que some quando falta dado não consegue mostrar que falta dado: é a mesma
  * razão pela qual "quantas vagas" mora no bloco de números e não numa
  * etiqueta.
  *
@@ -351,7 +351,7 @@ export function cargosDoCartao(nomes: unknown): {
     if (texto.length <= ORCAMENTO_DE_CARGOS) return { texto, informado: true };
   }
 
-  // Nem o primeiro nome sozinho cabe — 228 nomes do acervo passam de 80
+  // Nem o primeiro nome sozinho cabe: 228 nomes do acervo passam de 80
   // caracteres e o maior tem 290. Aqui o nome é que cede, com reticências
   // próprias: cortar o nome e manter o aviso diz as duas verdades ("este
   // nome continua" e "há mais cargos"), enquanto deixar o nome inteiro
@@ -368,8 +368,8 @@ export function cargosDoCartao(nomes: unknown): {
 /**
  * "TJSP: Analista judiciário", ou só o título quando o órgão não tem sigla.
  *
- * Vive aqui, e não na página, para ter teste: com a sigla nula — o caso de
- * todos os 1.332 órgãos do acervo do engine — a interpolação direta produzia
+ * Vive aqui, e não na página, para ter teste: com a sigla nula (o caso de
+ * todos os 1.332 órgãos do acervo do engine) a interpolação direta produzia
  * ": EDITAL Nº 1, DE 12 DE MAIO DE 2026", com dois-pontos solto, no título da
  * aba, no `og:title` e na trilha estruturada que o buscador lê.
  */
@@ -378,15 +378,15 @@ export function tituloComOrgao(sigla: string | null, titulo: string): string {
 }
 
 /**
- * O título do concurso sem o nome do órgão na frente — para os lugares onde o
+ * O título do concurso sem o nome do órgão na frente: para os lugares onde o
  * órgão **já está ao lado**, e só para eles.
  *
  * O acervo é escrito a partir do ato do diário, e o modelo que o escreve
  * começa o título pelo órgão em **3.078 dos 4.649 concursos**. Com a
  * hierarquia órgão > concurso na tela, isso põe o nome do órgão três vezes na
  * mesma dobra: a trilha (ou o selo), a linha do órgão, e o título. No exemplo
- * que originou este trabalho — `Conselho Regional de Administração do Rio de
- * Janeiro (CRA-RJ) — Edital nº 1` sob `CRA-RJ` — são três.
+ * que originou este trabalho (`Conselho Regional de Administração do Rio de
+ * Janeiro (CRA-RJ): Edital nº 1` sob `CRA-RJ`) são três.
  *
  * **Medido nos 4.649 títulos, renderizados a 375px em Chrome com a fonte e o
  * CSS reais** (o `h1` do detalhe a 304,6px e 21px; o `h3` do cartão a 318,7px
@@ -398,18 +398,18 @@ export function tituloComOrgao(sigla: string | null, titulo: string): string {
  * | `h1` em uma linha só | 186 (4%) | **2.558 (55%)** |
  * | `h1` em quatro linhas ou mais | 1.107 (24%) | 185 (4%) |
  * | `h3`, média de linhas | 2,08 | **1,32** |
- * | títulos que encolhem | — | 2.872 (62%) |
+ * | títulos que encolhem | n/d | 2.872 (62%) |
  *
  * **A regra é lida do dado, e não é uma lista.** Ela tira o prefixo que é o
- * nome ou a sigla **daquele** órgão — os dois campos do registro que veio
- * junto com o concurso —, mais a sigla dele repetida logo em seguida, mais a
+ * nome ou a sigla **daquele** órgão (os dois campos do registro que veio
+ * junto com o concurso), mais a sigla dele repetida logo em seguida, mais a
  * pontuação de junção que sobrar. Nenhum nome de órgão, nenhuma sigla e
  * nenhum formato de título está escrito aqui dentro: um órgão novo no acervo
  * amanhã é tratado hoje. É a exigência permanente deste projeto, e é também o
  * que faz a regra valer para os dois grupos:
  *
  * - **1.571 títulos não começam pelo nome do órgão** e saem intactos. O
- *   acervo tem "PROGESP — Edital nº 106/2026-PROGESP" para a UFRN e
+ *   acervo tem "PROGESP: Edital nº 106/2026-PROGESP" para a UFRN e
  *   "AMAZUL - Amazônia Azul Tecnologias de Defesa S.A." para o Comando da
  *   Marinha; cortar qualquer coisa deles seria adivinhação.
  * - **251 títulos SÃO só o nome do órgão** ("Universidade Federal de Goiás",
@@ -430,7 +430,7 @@ export function tituloComOrgao(sigla: string | null, titulo: string): string {
  *
  * **Onde NÃO usar:** qualquer lugar em que o título aparece sozinho. O
  * `<title>` da aba e o `og:title` passam por `tituloComOrgao`, que só prefixa
- * a sigla nos 3.034 que a têm — nos outros 1.615 o título é tudo o que a
+ * a sigla nos 3.034 que a têm: nos outros 1.615 o título é tudo o que a
  * pessoa recebe, e "Edital nº 1" sem dono não diz nada. E `textoBuscavel`
  * (`consulta.ts`) varre o título **inteiro**, senão quem digita o nome do
  * órgão deixa de achar os concursos dele.
@@ -453,7 +453,7 @@ export function tituloSemOrgao(
     const resto = semPrefixo(titulo, doTitulo, achatar(alvo).texto);
     if (resto === null) continue;
 
-    // A sigla outra vez logo depois do nome — "(CRA-RJ)", "- IFAC", "– UFPE".
+    // A sigla outra vez logo depois do nome: "(CRA-RJ)", "- IFAC", "– UFPE".
     // É o mesmo corte, aplicado ao que sobrou, e continua vindo do registro do
     // órgão e não de um formato reconhecido de fora.
     const final = semPrefixo(resto, achatar(resto), sigla) ?? resto;
@@ -469,8 +469,8 @@ export function tituloSemOrgao(
  * As palavras que os títulos de ato do Diário escrevem em caixa alta e que
  * não são sigla. Medido nos 4.578 títulos de `ultimoAto` do acervo em
  * 2026-09-14: 18.821 ocorrências de palavra em caixa alta, e esta lista cobre
- * 16.268 (86,4%). As 2.553 que sobram são quase todas sigla — DDP, PROGEP,
- * IFAL, UFPI, DPU, GABGEP — e é por isso que a regra é uma lista do que
+ * 16.268 (86,4%). As 2.553 que sobram são quase todas sigla (DDP, PROGEP,
+ * IFAL, UFPI, DPU, GABGEP) e é por isso que a regra é uma lista do que
  * baixar, e não do que manter: palavra que ninguém previu fica como o Diário
  * escreveu, e sigla nenhuma vira "progep".
  */
@@ -525,7 +525,7 @@ export function tituloDoAto(titulo: string): string {
  *
  * **Só a data quando o título do ato é o título do concurso.** O concurso que
  * nasce de um ato só herda o título dele, e a linha repetia, logo abaixo, o
- * texto do próprio cabeçalho — medido na home com o acervo real, no primeiro
+ * texto do próprio cabeçalho: medido na home com o acervo real, no primeiro
  * item da faixa. A comparação é a mesma de `tituloSemOrgao`: sem acento, sem
  * caixa e sem pontuação, porque o Diário escreve "AVISO DE HOMOLOGAÇÃO" e o
  * concurso guarda a mesma frase de outro jeito.
@@ -583,7 +583,7 @@ function achatar(texto: string): { texto: string; corteEm: number[] } {
  * O que sobra de `original` depois de tirar `chave` da frente, ou `null`
  * quando `chave` não é prefixo dele.
  *
- * O casamento precisa terminar em fronteira de palavra — ou o achatado acaba
+ * O casamento precisa terminar em fronteira de palavra: ou o achatado acaba
  * ali, ou o próximo caractere é o espaço que o achatamento pôs no lugar da
  * pontuação. Sem essa condição a sigla "IF" cortaria "IFSP" no meio.
  */
@@ -665,7 +665,7 @@ export function textoDeRodape(concurso: ConcursoDetalhe): string {
 
   // Quando um ato diz onde o edital está, a frase manda a pessoa para lá em
   // vez de deixá-la procurar: é o documento que ela veio buscar. Sem
-  // prometer, porque o endereço é o que o ato afirma e não o que conferimos —
+  // prometer, porque o endereço é o que o ato afirma e não o que conferimos:
   // a ressalva inteira fica ao lado do link, na seção do ato.
   const ondeEstaOEdital = concurso.editalCitadoUrl
     ? " O endereço do edital completo, informado pelo próprio ato, está logo" +
@@ -713,7 +713,7 @@ export function avisoDeFiltroSemDado(
 /**
  * Um pedaço da frase do acervo incompleto: o número e o que dizer dele.
  *
- * Sai partido em dois porque a tela destaca o número e o texto não — e
+ * Sai partido em dois porque a tela destaca o número e o texto não, e
  * porque devolver HTML daqui tiraria a frase do alcance do teste, que é
  * justamente onde ela precisa estar.
  */
@@ -732,11 +732,11 @@ export interface ParteDoAcervoIncompleto {
  * ato, e o cargo, as vagas e o cronograma ainda não foram extraídos do
  * documento. Eles entram na lista conforme forem lidos."* Medido no banco em
  * 2026-09-14, depois da remoção da fonte IBADE, são **189** os concursos
- * fora da lista, todos do Diário — 138 de atos que não abrem concurso e 51
+ * fora da lista, todos do Diário: 138 de atos que não abrem concurso e 51
  * de lacuna nossa. As três afirmações:
  *
  * - *"ainda não foram lidos"* é falso para 138. Foram lidos, deu certo, e
- *   não há o que extrair — o ato é retificação (37), anexo (13),
+ *   não há o que extrair: o ato é retificação (37), anexo (13),
  *   complementar (2) ou "outro" (86).
  * - *"o cargo ... ainda não foi extraído"* sugere, para esses mesmos 138, um
  *   trabalho pendente que não existe. Uma retificação de prazo não tem cargo
@@ -763,7 +763,7 @@ export interface ParteDoAcervoIncompleto {
  * **Quantas cabem, medido na tela e não estimado.** O parágrafo como ele
  * sai deste arquivo, renderizado em Chrome com o CSS e a fonte reais do app
  * (Archivo 13px/21,12px, que é o que `text-sm leading-6` produz aqui), nas
- * quatro larguras em que ele de fato aparece — a home a 1240px, a coluna de
+ * quatro larguras em que ele de fato aparece: a home a 1240px, a coluna de
  * resultados da busca a 1240px e a 1024px (ela divide a faixa com os 288px
  * da coluna de filtros), e o telefone a 375px:
  *
@@ -779,7 +779,7 @@ export interface ParteDoAcervoIncompleto {
  *
  * A coluna "amanhã" é medida com 59 na fila, que é a média de concursos por
  * dia de Diário ingerido com sucesso (5.000 concursos em 85 dias, medido no
- * banco) — o tamanho que a fila tem quando o `tick` da manhã roda, não um
+ * banco): o tamanho que a fila tem quando o `tick` da manhã roda, não um
  * número inventado para a tabela.
  *
  * **O número de partes não é escolhido: é quantas têm conteúdo.** Hoje são
@@ -803,7 +803,7 @@ export interface ParteDoAcervoIncompleto {
  * ficar torta: some a oração inteira, não o número dela. "0 esperam na fila
  * de leitura" gastaria uma linha da tela para não dizer nada, e é
  * exatamente o defeito que a fila vazia de hoje produziria se a lista fosse
- * de tamanho fixo. As partes que sobram continuam somando `semDado` — o que
+ * de tamanho fixo. As partes que sobram continuam somando `semDado`: o que
  * sai é uma parcela de valor zero.
  *
  * **Cada texto começa por locução verbal** ("não vão entrar", "esperam na
@@ -813,7 +813,7 @@ export interface ParteDoAcervoIncompleto {
  * lista, e não vão entrar: ..."). O componente escolhe entre as duas
  * posições; os textos servem às duas.
  *
- * **Devolve lista vazia quando a repartição não fecha** — engine mais velho
+ * **Devolve lista vazia quando a repartição não fecha**: engine mais velho
  * que não manda `foraDaLista`, ou soma que não bate com `semDado`. Aí a tela
  * usa a frase curta, que conta o total e não afirma repartição nenhuma.
  * Conferir a soma, e não a presença dos campos, é de propósito: zero é um
@@ -871,7 +871,7 @@ export function acervoIncompletoEmPartes(aviso: {
  * As seis perguntas do FAQ como o candidato as faria.
  *
  * Perguntas, não rótulos de campo: quem chega nesta página está decidindo se
- * presta, e "Até quando dá para se inscrever?" é o que ele quer saber —
+ * presta, e "Até quando dá para se inscrever?" é o que ele quer saber:
  * `ate_quando` é nome de coluna.
  */
 export const ROTULO_PERGUNTA: Record<FaqPergunta, string> = {

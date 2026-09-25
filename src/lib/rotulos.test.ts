@@ -44,14 +44,14 @@ describe("tituloSemOrgao", () => {
     // órgão, o nome aparecia três vezes na mesma dobra.
     expect(
       tituloSemOrgao(
-        "Conselho Regional de Administração do Rio de Janeiro (CRA-RJ) — Edital nº 1",
+        "Conselho Regional de Administração do Rio de Janeiro (CRA-RJ) \u2014 Edital nº 1",
         CRA,
       ),
     ).toBe("Edital nº 1");
   });
 
   it("tira a sigla quando é ela que abre o título", () => {
-    expect(tituloSemOrgao("CRA-RJ — Edital nº 3/2026", CRA)).toBe(
+    expect(tituloSemOrgao("CRA-RJ \u2014 Edital nº 3/2026", CRA)).toBe(
       "Edital nº 3/2026",
     );
   });
@@ -61,16 +61,16 @@ describe("tituloSemOrgao", () => {
     // devolvesse o texto achatado, a tela mostraria "edital no 9 2026".
     expect(
       tituloSemOrgao(
-        "Universidade Federal da Paraíba - Centro de Ciências Agrárias — Edital nº 9/2026",
+        "Universidade Federal da Paraíba - Centro de Ciências Agrárias \u2014 Edital nº 9/2026",
         { nome: "Universidade Federal da Paraíba", sigla: null },
       ),
-    ).toBe("Centro de Ciências Agrárias — Edital nº 9/2026");
+    ).toBe("Centro de Ciências Agrárias \u2014 Edital nº 9/2026");
   });
 
   it("casa apesar de acento, caixa e pontuação diferentes no cadastro", () => {
     // O ato e o cadastro do órgão discordam nessas três o tempo todo.
     expect(
-      tituloSemOrgao("Prefeitura Municipal de Guimarânia — Edital nº 2", {
+      tituloSemOrgao("Prefeitura Municipal de Guimarânia \u2014 Edital nº 2", {
         nome: "PREFEITURA MUNICIPAL DE GUIMARANIA",
         sigla: null,
       }),
@@ -80,7 +80,7 @@ describe("tituloSemOrgao", () => {
   it("os 1.571 que não começam pelo órgão saem intactos", () => {
     // "PROGESP" é um setor da UFRN, "AMAZUL" uma estatal ligada ao Comando da
     // Marinha. Cortar qualquer coisa deles seria adivinhação.
-    const intacto = "PROGESP — Edital nº 106/2026-PROGESP";
+    const intacto = "PROGESP \u2014 Edital nº 106/2026-PROGESP";
     expect(
       tituloSemOrgao(intacto, {
         nome: "Universidade Federal do Rio Grande do Norte",
@@ -106,17 +106,17 @@ describe("tituloSemOrgao", () => {
     // Sem a fronteira de palavra, a sigla "IF" deixaria "SP - Câmpus Suzano",
     // que é uma afirmação falsa sobre um campus.
     expect(
-      tituloSemOrgao("IFSP - Câmpus Suzano — Edital nº 14/2026", {
+      tituloSemOrgao("IFSP - Câmpus Suzano \u2014 Edital nº 14/2026", {
         nome: "Instituto Federal de Educação, Ciência e Tecnologia de São Paulo",
         sigla: "IF",
       }),
-    ).toBe("IFSP - Câmpus Suzano — Edital nº 14/2026");
+    ).toBe("IFSP - Câmpus Suzano \u2014 Edital nº 14/2026");
   });
 
   it("prefere o nome por extenso à sigla quando os dois casam", () => {
     // Cortar primeiro pela sigla deixaria o nome por extenso para trás.
     expect(
-      tituloSemOrgao("UNIFESP Universidade Federal de São Paulo — Edital nº 1", {
+      tituloSemOrgao("UNIFESP Universidade Federal de São Paulo \u2014 Edital nº 1", {
         nome: "UNIFESP Universidade Federal de São Paulo",
         sigla: "UNIFESP",
       }),
@@ -133,7 +133,7 @@ describe("tituloSemOrgao", () => {
     // É a exigência permanente do projeto. Nada aqui é lista de casos: o que
     // sai da frente é o nome e a sigla DAQUELE órgão, lidos do dado.
     expect(
-      tituloSemOrgao("Instituto Que Não Existe (IQNE) — Edital nº 42", {
+      tituloSemOrgao("Instituto Que Não Existe (IQNE) \u2014 Edital nº 42", {
         nome: "Instituto Que Não Existe",
         sigla: "IQNE",
       }),
@@ -373,7 +373,7 @@ describe("textoDeRodape com o endereço do edital", () => {
  */
 describe("estadoDoCartao", () => {
   it("o multiestadual diz o estado pedido primeiro, e quantos mais tem", () => {
-    // `Universidade Federal do Rio de Janeiro — Edital nº 898/2026`, o cartão
+    // `Universidade Federal do Rio de Janeiro: Edital nº 898/2026`, o cartão
     // do relato: o órgão nomeia o Rio, e o que o filtro casou é o Amapá.
     expect(estadoDoCartao(["AP", "DF", "RJ", "RN", "RS"], "AP")).toEqual({
       pedido: "Amapá",
@@ -460,7 +460,7 @@ describe("etiquetasDeVagas", () => {
 
   it("junta a reserva legal e o cadastro, nesta ordem", () => {
     // O caso mais carregado do acervo: 59 concursos têm PcD e negros, e 83
-    // dos que têm número também têm cadastro de reserva — a etiqueta é o
+    // dos que têm número também têm cadastro de reserva: a etiqueta é o
     // único lugar onde este último fato aparece nesses 83 cartões.
     expect(
       etiquetasDeVagas({ vagasPcd: 21, vagasNegros: 84, cadastroReserva: true }),
@@ -481,12 +481,12 @@ describe("etiquetasDeVagas", () => {
     // O caso que aconteceu de verdade: o app subiu com `vagasPcd` e
     // `vagasNegros` antes de o engine passar a publicá-los. Os campos chegam
     // `undefined`, `Intl.NumberFormat().format(undefined)` devolve "NaN", e a
-    // busca anunciou "NaN vagas PcD" em cartões reais — uma reserva de vaga
+    // busca anunciou "NaN vagas PcD" em cartões reais: uma reserva de vaga
     // afirmada a partir de um campo que não existia.
     //
     // O tipo não protege: `acervo()` faz `await resposta.json()` e anota o
     // resultado com `ConcursoResumo` sem conferir campo nenhum. Por isso o
-    // `as` aqui — ele reproduz exatamente a mentira que o `fetch` conta.
+    // `as` aqui: ele reproduz exatamente a mentira que o `fetch` conta.
     const antigo = {
       vagas: 18,
       cadastroReserva: false,
@@ -520,7 +520,7 @@ describe("etiquetasDeVagas", () => {
 
   it("zero não vira etiqueta, pelo mesmo motivo de não virar número", () => {
     // O engine já manda nulo; se um dia mandar zero, a etiqueta não pode
-    // afirmar "0 vagas PcD" — o ato não reservar nenhuma e o ato não ter
+    // afirmar "0 vagas PcD": o ato não reservar nenhuma e o ato não ter
     // repartido são coisas diferentes, e nenhum ato do acervo diz a
     // primeira.
     expect(etiquetasDeVagas({ ...NADA, vagasPcd: 0, vagasNegros: 0 })).toEqual([]);
@@ -546,7 +546,7 @@ describe("cargosDoCartao", () => {
 
   it("quando corta, diz quantos cortou", () => {
     // Sumir com cargos em silêncio faria o cartão descrever um concurso menor
-    // do que ele é — e quem procura o cargo que sumiu concluiria que ele não
+    // do que ele é, e quem procura o cargo que sumiu concluiria que ele não
     // existe. O acervo tem um concurso com 91 cargos.
     const nomes = Array.from({ length: 91 }, (_, i) => `Cargo número ${i + 1}`);
     const { texto } = cargosDoCartao(nomes);
@@ -561,7 +561,7 @@ describe("cargosDoCartao", () => {
   });
 
   it("nome que não cabe sozinho cede, e o aviso de corte sobrevive", () => {
-    // O maior nome de cargo do acervo tem 290 caracteres — 59 cartões caem
+    // O maior nome de cargo do acervo tem 290 caracteres: 59 cartões caem
     // aqui. Deixar o nome inteiro empurraria "e mais 1" para fora das linhas
     // visíveis e o cartão voltaria a sumir com cargo em silêncio. Cortar o nome
     // diz as duas verdades: este nome continua, e há mais cargos.
@@ -578,7 +578,7 @@ describe("cargosDoCartao", () => {
   it("o texto nunca passa do que cabe em duas linhas, medido a 375px", () => {
     // 84 caracteres: a 375px o maior texto que ainda ocupa uma linha só tem
     // 47, e duas linhas dão folga. É este limite que garante que o aviso não seja ele
-    // próprio a coisa cortada — a honestidade do cartão não pode depender de
+    // próprio a coisa cortada: a honestidade do cartão não pode depender de
     // uma regra de CSS.
     const casos = [
       ["Pedagogo"],
@@ -623,12 +623,12 @@ describe("cargosDoCartao", () => {
  * A frase do acervo incompleto, que é a que já mentiu.
  *
  * Os números são a medição de 2026-09-14 no banco do engine, depois da
- * remoção da fonte IBADE: 4.838 concursos, 4.649 na lista, 189 fora — 138 de
+ * remoção da fonte IBADE: 4.838 concursos, 4.649 na lista, 189 fora: 138 de
  * atos que não abrem concurso, 51 de lacuna nossa, e **zero na fila**. Não
  * são números de exemplo; são a carga que fez a frase antiga ser falsa.
  *
  * A fila zerada é o caso principal destes testes, e não uma borda: é o
- * estado de hoje, e é o estado em que a frase mais facilmente fica torta —
+ * estado de hoje, e é o estado em que a frase mais facilmente fica torta:
  * ou escreve "0 esperam na fila de leitura", ou some com a parcela de um
  * jeito que quebra a soma.
  */
@@ -662,7 +662,7 @@ function frase(aviso: Parameters<typeof acervoIncompletoEmPartes>[0]): string {
 describe("acervoIncompletoEmPartes", () => {
   it("com a fila vazia, a repartição de hoje tem duas partes", () => {
     // O estado real de 2026-09-14. A parte da fila não é escrita porque não
-    // tem conteúdo — e as duas que sobram continuam somando os 189.
+    // tem conteúdo, e as duas que sobram continuam somando os 189.
     const partes = acervoIncompletoEmPartes(HOJE);
 
     expect(partes.map((p) => p.quantos)).toEqual([138, 51]);
@@ -694,7 +694,7 @@ describe("acervoIncompletoEmPartes", () => {
 
   it("qualquer parte pode zerar sem quebrar a soma nem a ordem", () => {
     // As três, uma a uma. A ordem das que sobram não muda, e a soma fecha em
-    // todos os casos — é a invariante que a frase inteira apoia.
+    // todos os casos: é a invariante que a frase inteira apoia.
     const casos = [
       { ...AMANHA, naoAbreConcurso: 0, semDado: 110 },
       { ...AMANHA, naFila: 0, semDado: 189 },
@@ -736,7 +736,7 @@ describe("acervoIncompletoEmPartes", () => {
 
   it("a promessa de entrada automática é feita sobre a fila, e só sobre ela", () => {
     // ESTE é o teste que a frase antiga reprovava. Ela dizia "Eles entram na
-    // lista conforme forem lidos" sobre o total inteiro — com zero na fila no
+    // lista conforme forem lidos" sobre o total inteiro, com zero na fila no
     // dia da medição. A promessa agora tem dono e tamanho.
     const prometem = acervoIncompletoEmPartes(AMANHA).filter((parte) =>
       /entra(m)? quando/.test(parte.texto),
@@ -786,7 +786,7 @@ describe("acervoIncompletoEmPartes", () => {
   it("engine velho, sem a repartição, não vira frase repartida", () => {
     // API e app sobem separados, e o app novo chega antes do engine novo com
     // frequência. Aí os três campos chegam zerados por `avisoDoAcervo()`, a
-    // soma não fecha, e a tela cai na frase curta — em vez de chutar que os
+    // soma não fecha, e a tela cai na frase curta, em vez de chutar que os
     // 189 estão todos na fila.
     //
     // É o caso que a fila zerada de hoje torna sutil: `naFila: 0` sozinho é
@@ -812,7 +812,7 @@ describe("acervoIncompletoEmPartes", () => {
   it("campo que chegou undefined também descarta a repartição", () => {
     // `AvisoDoAcervo` é uma promessa sobre o JSON de outro processo, e o tipo
     // não a cumpre sozinho: sem esta guarda, `naFila` ausente viraria
-    // "NaN esperam na fila de leitura" na tela — o mesmo acidente que
+    // "NaN esperam na fila de leitura" na tela: o mesmo acidente que
     // `quantidade()` existe para impedir no cartão.
     const torto = { ...HOJE, naFila: undefined as unknown as number };
 
@@ -862,7 +862,7 @@ describe("textoDoAto", () => {
     expect(
       textoDoAto(
         { data: "2026-09-14", titulo: "EDITAL IPHAN Nº 10/2026", primeiro: false },
-        "Instituto do Patrimônio Histórico e Artístico Nacional - Iphan — Edital nº 10/2026",
+        "Instituto do Patrimônio Histórico e Artístico Nacional - Iphan \u2014 Edital nº 10/2026",
       ),
     ).toBe("14/09 · Edital IPHAN nº 10/2026");
   });

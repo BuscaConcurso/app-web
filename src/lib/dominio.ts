@@ -54,7 +54,7 @@ export type Uf = (typeof UFS)[number];
 /**
  * Poder ao qual o órgão pertence. Aparece na linha de contexto do cartão
  * ("Estadual · Judiciário · SP") e **não existe no banco do engine**, que só
- * guarda esfera e UF em `orgao` — a API devolve nulo em 100% dos órgãos, e não
+ * guarda esfera e UF em `orgao`: a API devolve nulo em 100% dos órgãos, e não
  * há de onde derivá-lo. Por isso `Orgao.poder` é anulável: o tipo descreve o
  * dado que chega, não o dado que a tela gostaria de ter.
  */
@@ -73,12 +73,12 @@ export type Poder =
  * `sigla`, `esfera` e `poder` são anuláveis porque o acervo do engine não os
  * tem para todo mundo: a regra que recupera a sigla do título do concurso
  * chegou a 129 dos 1.946 órgãos, e `poder` não existe no banco. Os 1.615
- * cartões que seguem sem sigla são recusa deliberada do engine — a sigla
+ * cartões que seguem sem sigla são recusa deliberada do engine: a sigla
  * existe no mundo, mas ele não consegue conferir que ela nomeia aquele órgão,
  * e sigla errada afirma uma falsidade enquanto sigla ausente não afirma nada.
  *
  * A regra do projeto é que campo que o banco não tem chega nulo e nunca
- * inventado — um tipo não anulável sobre um campo nulo em um terço do acervo
+ * inventado: um tipo não anulável sobre um campo nulo em um terço do acervo
  * obrigaria a API a inventar, ou o teste a mentir. Quem exibe trata a
  * ausência; ver `linhaDeContexto` em `rotulos.ts` e `Selo` em
  * `components/ui/Cartao.tsx`.
@@ -93,7 +93,7 @@ export interface Orgao {
   municipio: string | null;
   /**
    * `false` quando ninguém ainda separou o nome do órgão do caminho onde ele
-   * foi publicado — ver `nomeEhCaminho`. Opcional porque o mock não o traz;
+   * foi publicado: ver `nomeEhCaminho`. Opcional porque o mock não o traz;
    * a API do engine manda sempre, e hoje manda `false` em todos os 1.332
    * órgãos do acervo.
    */
@@ -130,14 +130,14 @@ export interface ConcursoResumo {
   /**
    * O que o cartão mostra: a UF quando é uma só, e **nula quando são
    * várias**. É coluna gerada a partir de `ufs` no banco do engine, então as
-   * duas não têm como discordar — um cartão que dissesse "SP" para um
+   * duas não têm como discordar: um cartão que dissesse "SP" para um
    * concurso com vaga em 23 estados mentiria.
    */
   uf: Uf | null;
   /**
    * O que o filtro casa. Publicada porque `uf` sozinha torna os concursos
    * multiestaduais **invisíveis a qualquer estado**: eles têm `uf` nula por
-   * desenho, e são 7 no acervo — o do IBGE tem vaga em 23 estados.
+   * desenho, e são 7 no acervo: o do IBGE tem vaga em 23 estados.
    *
    * O tamanho distingue "não sabemos" (vazia) de "são vários" (mais de um),
    * sem precisar de um terceiro campo.
@@ -150,7 +150,7 @@ export interface ConcursoResumo {
   /** Ano estimado, para concursos ainda sem edital. */
   previstoPara: number | null;
   /**
-   * O total de vagas, e **nulo quando o ato não informou** — 2.149 dos 3.071
+   * O total de vagas, e **nulo quando o ato não informou**: 2.149 dos 3.071
    * concursos do acervo (70%). Nunca zero: a agregação do engine não publica
    * uma soma vazia como número, porque "não sei quantas vagas" e "zero
    * vagas" são afirmações diferentes e só a segunda é uma afirmação do ato.
@@ -161,7 +161,7 @@ export interface ConcursoResumo {
    * pessoas com deficiência e a candidatos negros. Nulas quando o ato não
    * repartiu.
    *
-   * São **recorte** do total, nunca soma a mais — no engine `vagas_total` é
+   * São **recorte** do total, nunca soma a mais: no engine `vagas_total` é
    * sempre `ampla + pcd + negros + outras`. Uma etiqueta de reserva sem um
    * total ao lado não existe no acervo (0 casos em 3.071), e é por isso que
    * ela pode ser lida como parte de um número que o cartão já mostra.
@@ -178,14 +178,14 @@ export interface ConcursoResumo {
    * concurso pelo cargo, que é a primeira coisa que um candidato digita:
    * `titulo` é o cabeçalho do ato publicado, e no acervo do engine nenhum
    * deles contém a palavra "professor" enquanto 105 de 181 concursos têm um
-   * cargo de professor. O cargo inteiro — vagas, requisitos, remuneração —
+   * cargo de professor. O cargo inteiro (vagas, requisitos, remuneração)
    * só vem na página de detalhe.
    */
   nomesDeCargo: string[];
   /**
    * Cidades das vagas, distintas. A cidade do concurso não está no órgão
    * (`orgao.municipio` é nulo em todos os 1.332), está na vaga, escrita pelo
-   * ato — e é a cidade da vaga que o candidato procura.
+   * ato, e é a cidade da vaga que o candidato procura.
    */
   localidades: string[];
   /** Link para o PDF do edital no diário ou no site da banca. */
@@ -193,7 +193,7 @@ export interface ConcursoResumo {
   /**
    * O ato do Diário mais recente do concurso, pela data da edição em que saiu.
    * É o que a faixa "Últimas atualizações" da home ordena. Nulo quando o
-   * concurso não tem nenhum ato com data conhecida — 72 dos 4.650 do acervo.
+   * concurso não tem nenhum ato com data conhecida: 72 dos 4.650 do acervo.
    * A regra de qual ato é esse está em `ULTIMO_ATO`, no `api.py` do engine.
    *
    * **Opcional no tipo, e ausente vale o mesmo que nulo.** Um engine mais
@@ -322,7 +322,7 @@ export interface Cargo {
   evidencia: TrechoDeEvidencia[];
 }
 
-/** `create type faq_pergunta` — as seis perguntas de candidato. */
+/** `create type faq_pergunta`: as seis perguntas de candidato. */
 export type FaqPergunta =
   | "ate_quando"
   | "onde_inscrever"
@@ -338,7 +338,7 @@ export type FaqPergunta =
  * como se inscrever porque não tem como informar. `descartada` é o motor ter
  * recusado o trecho que o modelo devolveu, porque ele não conferiu palavra
  * por palavra com o texto do ato. A tela precisa dizer as duas coisas com
- * palavras diferentes — uma é lacuna do documento, a outra é falha nossa.
+ * palavras diferentes: uma é lacuna do documento, a outra é falha nossa.
  */
 export type SituacaoDaResposta =
   | "respondida"
@@ -375,7 +375,7 @@ export interface Origem {
   /** Identificador do ato na fonte. É o alvo do link vindo do cronograma. */
   chave: string;
   /**
-   * `null` quando a fonte não registrou o endereço público do ato — hoje,
+   * `null` quando a fonte não registrou o endereço público do ato: hoje,
    * todo o acervo. O ato existe e foi publicado; o que falta é o endereço, e
    * a página diz isso em vez de oferecer um link que não abre.
    *
@@ -391,7 +391,7 @@ export interface Origem {
    * O ato inteiro, como saiu publicado. **Não é o edital**: o diário publica
    * o ato ou o extrato dele, e o edital completo com anexos fica na banca.
    *
-   * É o que o produto tem de mais garantido — o texto está no nosso banco,
+   * É o que o produto tem de mais garantido: o texto está no nosso banco,
    * não depende de link nenhum continuar existindo. Vem só na rota de
    * detalhe.
    */
@@ -400,7 +400,7 @@ export interface Origem {
   caracteres: number | null;
   /**
    * As seis perguntas respondidas por **este** ato. Vazia quando ele não foi
-   * lido pelo estágio de FAQ — só edital de abertura é elegível.
+   * lido pelo estágio de FAQ: só edital de abertura é elegível.
    *
    * Fica no ato, e não no concurso, porque a resposta é do documento: um
    * concurso com abertura e retificação pode ter respostas de mais de um, e
@@ -425,7 +425,7 @@ export interface ConcursoDetalhe extends ConcursoResumo {
   cargos: Cargo[];
   origens: Origem[];
   /**
-   * O endereço do edital completo escolhido entre os atos — abertura
+   * O endereço do edital completo escolhido entre os atos: abertura
    * primeiro, depois o mais recente. Mesma ressalva de `Origem`: é o que o
    * ato afirma, não o que nós conferimos.
    */

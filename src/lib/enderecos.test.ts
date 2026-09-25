@@ -3,7 +3,7 @@ import { partirEmEnderecos } from "./enderecos";
 
 /**
  * A invariante que manda em tudo: o texto remontado é idêntico ao original.
- * O trecho é citação literal do ato e tem posição guardada para o grifo — um
+ * O trecho é citação literal do ato e tem posição guardada para o grifo: um
  * caractere de diferença desalinha as duas coisas.
  */
 function juntar(pedacos: { texto: string }[]): string {
@@ -127,7 +127,7 @@ describe("o que a regra preserva", () => {
 
   it("sublinhado no fim não é pontuação de frase e fica", () => {
     // Do acervo: o diário quebrou a URL com um espaço no meio. Não dá para
-    // emendar, e cortar o `_` não tornaria o link melhor — só diferente.
+    // emendar, e cortar o `_` não tornaria o link melhor, só diferente.
     const trecho =
       "no link https://sei.mj.gov.br/sei/externo.php?acao=logar&id_ orgao_acesso=0.";
 

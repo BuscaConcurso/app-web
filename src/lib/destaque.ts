@@ -4,12 +4,12 @@
  * As respostas do FAQ não são prosa do modelo: são pedaços literais do ato,
  * conferidos palavra por palavra, e cada uma diz em que posição do texto
  * começa e termina. Como a página já mostra o ato inteiro, o trecho é
- * destacado no lugar em vez de repetido fora de contexto — o leitor vê a
+ * destacado no lugar em vez de repetido fora de contexto: o leitor vê a
  * resposta na frase que a produziu.
  *
  * O trabalho real é a sobreposição: uma frase só costuma responder mais de
  * uma pergunta. Medido no acervo: 19 pares de trechos aceitos se sobrepõem,
- * e há casos de faixas idênticas — "as inscrições serão realizadas ... no
+ * e há casos de faixas idênticas: "as inscrições serão realizadas ... no
  * endereço eletrônico X" responde ao mesmo tempo "até quando", "onde" e
  * "como". Pintar cada faixa por conta própria produziria marcas aninhadas e
  * texto repetido; unir antes de pintar produz uma marca só.
@@ -18,14 +18,14 @@
  *
  * O ato deixou de ser um parágrafo só (`lib/leitura.ts`), e isto aqui não
  * mudou de forma por causa disso: continua recebendo **um** texto e faixas
- * medidas nesse texto. Quem parte é quem chama — para cada parágrafo, desconta
+ * medidas nesse texto. Quem parte é quem chama: para cada parágrafo, desconta
  * o `inicio` dele das faixas e chama esta função com o resultado.
  *
  * O que faz isso funcionar sem nenhum caso especial é o descarte que já
  * existia: a faixa que cai **antes** do parágrafo encolhe para `{0, 0}` e a
  * que cai **depois** para `{fim, fim}`, e as duas saem no `fim > inicio`. A
  * faixa que atravessa a quebra sobrevive dos dois lados, recortada, e vira
- * uma marca em cada parágrafo — que é o desenho certo, porque `<mark>` não
+ * uma marca em cada parágrafo: que é o desenho certo, porque `<mark>` não
  * pode cruzar `<p>`.
  *
  * A única coisa que o parágrafo obriga quem chama a decidir é a **âncora**:
@@ -68,7 +68,7 @@ interface Marca {
 /**
  * Quebra o texto em pedaços alternando fora e dentro de destaque.
  *
- * Faixa inválida — invertida, vazia, fora do texto — é descartada em vez de
+ * Faixa inválida (invertida, vazia, fora do texto) é descartada em vez de
  * deslocar o resto: a posição vem do banco, e se um dia ela não casar com o
  * texto, o defeito certo é o destaque faltar, não a página mostrar o texto
  * picado no lugar errado.
@@ -136,8 +136,8 @@ export function ancoraDoTrecho(chaveDoAto: string, pergunta: string): string {
  * A faixa vai mesmo virar marca no texto?
  *
  * É a pergunta que o FAQ precisa fazer antes de apontar para a âncora: uma
- * posição que `destacar` descarta — invertida, vazia, fora do texto, ou de um
- * ato cujo texto não está guardado — não produz `<mark>` nenhum, e o link
+ * posição que `destacar` descarta (invertida, vazia, fora do texto, ou de um
+ * ato cujo texto não está guardado) não produz `<mark>` nenhum, e o link
  * cairia num `id` que não existe. Nesse caso o FAQ volta a apontar para o
  * ato inteiro, que é o que ele fazia antes.
  */

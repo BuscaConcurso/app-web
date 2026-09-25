@@ -5,7 +5,7 @@ import type { OrigemDoAcervo } from "@/lib/concursos";
  *
  * Existe por um caso real desta integração: a API do engine foi reiniciada,
  * demorou a subir, e a tela mostrou "Prefeitura de Curitiba, banca AOCP,
- * Curitiba PR" — o mock — sem nenhum sinal. Quem estava olhando, e sabia da
+ * Curitiba PR" (o mock) sem nenhum sinal. Quem estava olhando, e sabia da
  * existência do mock, quase relatou aquilo como dado do acervo. Sem a faixa,
  * uma API fora do ar é indistinguível de um acervo pequeno, e o aviso que
  * existia estava no terminal de quem roda o servidor, não na tela de quem
@@ -14,7 +14,7 @@ import type { OrigemDoAcervo } from "@/lib/concursos";
  * A reserva continua: o app funciona sem o engine, de propósito. O que muda é
  * que ele passa a dizer.
  *
- * Nada aparece quando a origem é a API — página limpa é a afirmação de que o
+ * Nada aparece quando a origem é a API: página limpa é a afirmação de que o
  * dado é real, e ela precisa continuar valendo alguma coisa.
  */
 export function AvisoDeOrigem({ origem }: { origem: OrigemDoAcervo }) {

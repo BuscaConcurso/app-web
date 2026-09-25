@@ -83,7 +83,7 @@ describe("medirCargos", () => {
   /**
    * As três grafias estão todas no acervo: "Matemática" sozinha em 29
    * concursos, "Professor Substituto de Matemática" e "Professor Substituto -
-   * Matemática". A do meio é o que derruba a fidelidade — a disciplina está
+   * Matemática". A do meio é o que derruba a fidelidade: a disciplina está
    * no nome do cargo sem ser o cargo.
    */
   it("recusa a disciplina, que é a área do cargo e não o cargo", () => {
@@ -175,7 +175,7 @@ describe("medirCargos", () => {
    * A garantia que o rodapé precisa: o número ao lado do link é o tamanho da
    * página que o link abre, e nenhum link abre uma busca vazia. Sem isto a
    * medição e o filtro podem divergir em silêncio, e o rodapé vira uma
-   * parede de links para lista vazia — que é pior que rodapé sem cargo.
+   * parede de links para lista vazia: que é pior que rodapé sem cargo.
    */
   it("cada link escolhido devolve exatamente o alcance medido, e nunca zero", () => {
     const acervo = [

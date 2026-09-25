@@ -57,7 +57,7 @@ describe("destacar", () => {
 
   it("faixa inválida some, e o texto continua inteiro", () => {
     // A posição vem do banco. Se um dia ela não casar com o texto, o defeito
-    // certo é o destaque faltar — nunca a página mostrar o ato picado no
+    // certo é o destaque faltar: nunca a página mostrar o ato picado no
     // lugar errado.
     const pedacos = destacar(ATO, [
       { inicio: 10, fim: 5 },
@@ -107,7 +107,7 @@ describe("a âncora do trecho", () => {
 
     const marcas = pedacos.filter((p) => p.destacado);
     expect(marcas).toHaveLength(1);
-    // A ordem é a da união — começo, depois fim —, e não a da entrada. Para o
+    // A ordem é a da união (começo, depois fim), e não a da entrada. Para o
     // que as âncoras fazem, tanto faz: são três `id` no mesmo lugar.
     expect(marcas[0].ancoras).toEqual([
       "ato-1-como_inscrever",

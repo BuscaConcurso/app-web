@@ -4,7 +4,7 @@
  * O revelador: gaveta e menu, escritos uma vez.
  *
  * **A regra, e ela é do parceiro humano: nenhum revelador é escrito no lugar
- * onde ele é usado.** Gaveta, menu, modal — todos moram aqui, em
+ * onde ele é usado.** Gaveta, menu, modal: todos moram aqui, em
  * `components/ui/`, com o comportamento resolvido, e a tela só consome. Se
  * você veio escrever um painel que abre e fecha em `busca/`, `concurso/` ou
  * `layout/`, pare: estenda este arquivo.
@@ -36,16 +36,16 @@
  * | anima ao entrar | sim | sim |
  * | anima ao sair | só com script | sim |
  * | foco preso | não: Tab vaza para o fundo | sim |
- * | foco preso com `inert` no resto | **sim**: Tab morre no `body` | — |
+ * | foco preso com `inert` no resto | **sim**: Tab morre no `body` | n/d |
  * | Escape fecha | não | sim |
  * | trava a rolagem do fundo | não | **não** |
  * | camada de topo do navegador | não | sim |
  *
  * Duas medições decidiram. A primeira: `showModal()` **não** trava a rolagem
- * do fundo — com o modal aberto, uma roda de mouse de 240px rolou a página de
+ * do fundo: com o modal aberto, uma roda de mouse de 240px rolou a página de
  * trás os mesmos 240px que rolaria sem ele. O travamento é JavaScript nos dois
  * caminhos, então não é argumento para nenhum. A segunda: `inert` no resto da
- * página dá ao `<details>` o mesmo foco preso do `<dialog>` — com ele, Tab a
+ * página dá ao `<details>` o mesmo foco preso do `<dialog>`: com ele, Tab a
  * partir do último focável do painel morre no `body` em vez de cair no botão
  * de trás.
  *
@@ -56,14 +56,14 @@
  *
  * 1. **A camada de topo.** O `<dialog>` modal desenha acima de qualquer
  *    `z-index` e não se importa com `transform`, `filter` ou `contain` em
- *    ancestral — que transformam `fixed` num posicionamento relativo ao
+ *    ancestral: que transformam `fixed` num posicionamento relativo ao
  *    ancestral e jogariam a gaveta para dentro da página. Aqui o painel é
  *    `fixed` com `z-index` nosso. Hoje nenhum ancestral cria bloco de
  *    contenção; esta é a nota para quem for pôr um `transform` no `<main>`.
  * 2. **O `::backdrop` de graça.** O fundo escuro aqui é uma `<div>` nossa.
  * 3. **`aria-modal` passa a ser afirmação nossa**, não do navegador. Por isso
  *    ele só é escrito depois da hidratação, quando o `inert` que o sustenta já
- *    está de pé — antes disso seria mentira (ver `aprimorado`).
+ *    está de pé: antes disso seria mentira (ver `aprimorado`).
  * 4. **Sem script a saída não anima.** O navegador para de renderizar o
  *    conteúdo de um `<details>` fechado no mesmo quadro; a entrada anima, a
  *    saída some. É o degrau que o sem-script custa, e ele é pequeno.
@@ -73,9 +73,9 @@
  * `Gaveta` e `Menu` são dois componentes, e não um com uma propriedade de
  * forma, porque **a modalidade é um contrato diferente com quem usa**: um menu
  * que trava a rolagem e prende o foco está errado, e uma gaveta que não faz
- * nem uma coisa nem outra também. O que eles compartilham — abrir, fechar,
+ * nem uma coisa nem outra também. O que eles compartilham (abrir, fechar,
  * Escape, clique fora, foco que entra e volta ao gatilho, movimento
- * respeitado — é `useRevelador`, e está escrito uma vez só. O movimento está
+ * respeitado) é `useRevelador`, e está escrito uma vez só. O movimento está
  * em `globals.css`, em `@keyframes` que as duas formas dividem.
  *
  * **Nenhum dos dois declara `role="menu"`.** O conteúdo é link e botão, e
@@ -98,14 +98,14 @@
  * 2. **O `<details>` de "De onde isto foi lido", em `concurso/Cargos.tsx`.**
  *    Este é o que quase passou despercebido, e vale dizer por que ele fica:
  *    ele não é sobreposição nenhuma. Abre no fluxo, empurrando o conteúdo de
- *    baixo, e é isso que se quer dele — a citação aparece embaixo do cargo a
+ *    baixo, e é isso que se quer dele: a citação aparece embaixo do cargo a
  *    que pertence. Nada do que este módulo resolve tem onde se aplicar ali:
  *    não há fundo para travar, não há fora para clicar, não há foco para
  *    prender e não há camada para escapar. Gaveta o cobriria por cima e Menu o
  *    faria flutuar, e as duas coisas seriam piores do que está.
  *
- *    Se um dia dois lugares precisarem da mesma revelação em fluxo — com
- *    altura animada e `prefers-reduced-motion` —, é aqui que ela nasce, como
+ *    Se um dia dois lugares precisarem da mesma revelação em fluxo (com
+ *    altura animada e `prefers-reduced-motion`), é aqui que ela nasce, como
  *    terceira forma, dividindo `useRevelador` com as outras duas.
  */
 
@@ -137,7 +137,7 @@ function semMovimento() {
  * É o que substitui o foco preso do `<dialog>`: `inert` tira o ramo inteiro da
  * ordem de tabulação e da árvore de acessibilidade, então o leitor de tela
  * também para de encontrar o fundo. Sobe do elemento até o `body` marcando os
- * irmãos de cada degrau, e devolve a função que desfaz — só do que ela marcou,
+ * irmãos de cada degrau, e devolve a função que desfaz: só do que ela marcou,
  * para não apagar um `inert` que já era de outro.
  */
 function inerteAoRedor(elemento: Element): () => void {
@@ -161,7 +161,7 @@ function inerteAoRedor(elemento: Element): () => void {
  *
  * Medido: o `<dialog>` modal do navegador não faz isso sozinho, então é
  * JavaScript de qualquer jeito. A compensação de largura é para a barra de
- * rolagem do desktop — sem ela, esconder o `overflow` alarga a página e a tela
+ * rolagem do desktop: sem ela, esconder o `overflow` alarga a página e a tela
  * inteira dá um pulo lateral ao abrir. A 375px a barra mede 0 e nada é somado.
  */
 function travarRolagem(): () => void {
@@ -202,7 +202,7 @@ function useRevelador({
   /**
    * Falso no servidor e no primeiro render do cliente, verdadeiro depois da
    * hidratação. Separa o que o `<details>` faz sozinho do que só existe com
-   * script — `aria-modal`, por exemplo, não pode ser afirmado enquanto o
+   * script: `aria-modal`, por exemplo, não pode ser afirmado enquanto o
    * `inert` que o sustenta não estiver de pé.
    *
    * É `useSyncExternalStore` e não um `useState` com `useEffect` pelo mesmo
@@ -220,7 +220,7 @@ function useRevelador({
    * Fecha segurando o `open` até a animação de saída terminar.
    *
    * Sem isto o navegador para de renderizar o conteúdo no mesmo quadro e não
-   * há o que animar — é a diferença medida entre fechar com script e sem.
+   * há o que animar: é a diferença medida entre fechar com script e sem.
    * `animationend` é o fim normal; o tempo de segurança cobre a animação que
    * nunca começa (aba em segundo plano), para o painel não ficar preso aberto.
    */
@@ -357,12 +357,12 @@ function useRevelador({
    * ## O que o navegador já faz sozinho, e por isso quase não é script
    *
    * Medido no Chrome 152: navegar para um fragmento cujo alvo está **dentro**
-   * de um `<details>` fechado abre o `<details>` e rola até o alvo — no clique
+   * de um `<details>` fechado abre o `<details>` e rola até o alvo: no clique
    * e também no carregamento direto da página com a âncora, que é o caso de
    * quem recebeu o endereço de outra pessoa. Medido com a geometria daqui, que
    * não é a trivial: com o alvo dentro do painel `fixed` e `overflow-y-auto`,
    * quem rola é o painel (`scrollTop` 1444 com a janela em 0) e o
-   * `scroll-margin-top` do alvo é respeitado — a marca parou exatamente na
+   * `scroll-margin-top` do alvo é respeitado: a marca parou exatamente na
    * folga pedida, 120px do topo, no teste.
    *
    * Então **a gaveta abre no trecho sem JavaScript nenhum**, e é isso que a
@@ -373,11 +373,11 @@ function useRevelador({
    *
    * Ele é rede para o motor que **não** expande: a regra é do HTML, mas nem
    * todo navegador a implementa, e ali o link cairia no vazio. Por isso ele só
-   * age achando a gaveta fechada — se o navegador já abriu, ele já rolou, e um
+   * age achando a gaveta fechada: se o navegador já abriu, ele já rolou, e um
    * segundo `scrollIntoView` só brigaria com o primeiro.
    *
    * O que ele não conserta: sem script **e** num motor que não expande, o
-   * endereço não abre nada. Nesse canto sobra o que já havia — `ato-{chave}`,
+   * endereço não abre nada. Nesse canto sobra o que já havia: `ato-{chave}`,
    * a âncora do cronograma, que leva ao bloco do ato com a gaveta fechada.
    *
    * A lista vem de quem chama porque daqui não dá para descobri-la: o
@@ -432,17 +432,17 @@ const SUMARIO = "cursor-pointer list-none [&::-webkit-details-marker]:hidden";
  *
  * **Por extenso, e em pares.** O Tailwind lê o texto deste arquivo: classe
  * que só existe depois de interpolada não é gerada. Por isso a largura não
- * pode ser uma string montada nem um valor vindo de quem chama — ela é uma
+ * pode ser uma string montada nem um valor vindo de quem chama: ela é uma
  * escolha entre nomes, e cada nome carrega as duas classes literais que
  * precisam casar: a do painel e a da barra de topo, que é `fixed` e se alinha
  * com ele.
  *
  * `larga` é a do documento: o ato publicado e os filtros do celular. A 375px
- * dá 352,5px e sobram 22,5px de página do lado — o bastante para a pessoa ver
+ * dá 352,5px e sobram 22,5px de página do lado: o bastante para a pessoa ver
  * que há algo atrás.
  *
  * `estreita` é a da lista curta, e nasceu com o menu do cabeçalho. Medido: o
- * conteúdo dele — a linha do tema e os dois botões — pede 197px de largura
+ * conteúdo dele (a linha do tema e os dois botões) pede 197px de largura
  * mínima, e numa gaveta de 40rem ele ficaria com três itens perdidos no meio
  * de 640px. A 375px `estreita` dá 304px e deixa 71px de página à mostra.
  */
@@ -467,7 +467,7 @@ const GATILHO_PADRAO =
 /**
  * A gaveta: um painel que entra pela direita, por cima da página.
  *
- * É modal — trava a rolagem do fundo e põe `inert` no resto —, e o
+ * É modal (trava a rolagem do fundo e põe `inert` no resto), e o
  * `<summary>` tem duas caras: o botão que abre e, aberta, a barra de topo do
  * painel, que é o que fecha. As duas são o mesmo elemento porque `<summary>` é
  * o único que alterna um `<details>` sem script: um botão de fechar desenhado
@@ -476,8 +476,8 @@ const GATILHO_PADRAO =
  *
  * **Sempre pela direita.** Não há propriedade de lado, e não é esquecimento:
  * os três consumidores têm o gatilho à direita da tela, e uma segunda direção
- * dobraria as `@keyframes` de `globals.css` — que são o que o revelador existe
- * para não escrever duas vezes — sem mudar nada do que a pessoa vê.
+ * dobraria as `@keyframes` de `globals.css`: que são o que o revelador existe
+ * para não escrever duas vezes, sem mudar nada do que a pessoa vê.
  *
  * ## Dois tipos de gatilho, e por isso duas propriedades
  *
@@ -494,7 +494,7 @@ const GATILHO_PADRAO =
  * A alternativa era um terceiro componente, e ela não se sustenta: o pedido do
  * parceiro humano que trouxe o cabeçalho para cá foi justamente *"menu precisa
  * ser um drawer"*. O que muda entre os dois é o gatilho e a medida, não o
- * comportamento — e comportamento é o que este arquivo guarda.
+ * comportamento, e comportamento é o que este arquivo guarda.
  */
 export function Gaveta({
   rotulo,
@@ -516,12 +516,12 @@ export function Gaveta({
    *
    * Existe porque a gaveta ganhou um segundo tipo de consumidor. No ato
    * publicado o gatilho é a frase "Ler o ato publicado", e o nome do botão sai
-   * dela sozinho — pôr um `aria-label` ali só **trocaria** um nome bom por
+   * dela sozinho: pôr um `aria-label` ali só **trocaria** um nome bom por
    * outro. No cabeçalho o gatilho é um traço de menu e nada mais: sem isto o
    * botão que abre a gaveta não teria nome nenhum.
    *
    * Vale nas duas caras, e é de propósito: aberta, a barra de topo é o mesmo
-   * elemento, e quem a usa põe aqui o mesmo que põe em `titulo` — o nome do
+   * elemento, e quem a usa põe aqui o mesmo que põe em `titulo`: o nome do
    * diálogo e o do botão dizendo a mesma coisa é o que se quer.
    */
   nome?: string;
@@ -550,7 +550,7 @@ export function Gaveta({
       onToggle={aoAlternar}
       /**
        * A modalidade é afirmada no `<details>` inteiro e não no painel, porque
-       * a barra de topo — que é o `<summary>`, que é o botão de fechar —
+       * a barra de topo (que é o `<summary>`, que é o botão de fechar)
        * precisa estar dentro do diálogo.
        */
       role={modal ? "dialog" : undefined}
@@ -566,7 +566,7 @@ export function Gaveta({
           "inline-flex items-center gap-2",
           gatilho,
           // Aberta: a barra de topo do painel. A largura vem de `LARGURA`, que
-          // guarda as classes por extenso — o Tailwind lê o texto do arquivo,
+          // guarda as classes por extenso: o Tailwind lê o texto do arquivo,
           // e classe montada por interpolação não é gerada.
           "group-open:fixed group-open:top-0 group-open:right-0 group-open:z-[60]",
           LARGURA[largura].barra,
@@ -582,7 +582,7 @@ export function Gaveta({
           fechar: um botão tem um nome, não dois. Medido na árvore do Chrome
           152 antes desta linha, com o `aria-label` do cabeçalho por cima do
           texto da barra: `DisclosureTriangle "Entrar, criar conta e tema"
-          description="Entrar, criar conta e tema"` — o nome vinha do rótulo e
+          description="Entrar, criar conta e tema"`: o nome vinha do rótulo e
           o conteúdo virava *descrição*, então o leitor de tela dizia a mesma
           frase duas vezes. Sem `nome`, nada muda: quem manda é o texto.
         */}
@@ -597,13 +597,13 @@ export function Gaveta({
           O fechar.
 
           É um ícone, e **não** um botão: o botão é o `<summary>` inteiro, que
-          é a barra de topo — medida a 375px, 353px de largura por 44px de
+          é a barra de topo: medida a 375px, 353px de largura por 44px de
           altura. O ícone tem 14px e mora no canto direito dela, mas **não é
           ele que fecha**: o `<svg>` é filho do `<summary>`, e o clique em
           qualquer ponto da barra continua fechando. Medido: `elementFromPoint`
           a 8px da borda esquerda da barra devolve o `<summary>`, e o clique
           ali fecha. Vale também sem JavaScript, porque é o `<summary>` que
-          alterna o `<details>` — um botão de fechar de verdade, desenhado
+          alterna o `<details>`: um botão de fechar de verdade, desenhado
           dentro do painel, é exatamente o que este arquivo já recusou.
 
           `aria-hidden` porque ele é decoração. O nome acessível deste botão é
@@ -614,7 +614,7 @@ export function Gaveta({
           `aria-label="Fechar"` aqui **trocaria** o nome do botão e ele
           deixaria de dizer o que revela; um `sr-only` com a palavra devolveria
           ao leitor de tela exatamente o texto que o pedido mandou tirar da
-          tela — e ainda entraria na seleção de quem copia. Nem um nem outro:
+          tela, e ainda entraria na seleção de quem copia. Nem um nem outro:
           só o ícone, calado.
 
           Traço e não preenchimento, como todo ícone deste projeto.
@@ -636,7 +636,7 @@ export function Gaveta({
         O lugar que o gatilho deixou.
 
         Aberta, a barra sai do fluxo (`fixed`), e sem isto a página atrás subia
-        a altura do botão — medido a 375px na busca, 35px, com o primeiro
+        a altura do botão: medido a 375px na busca, 35px, com o primeiro
         resultado saltando de y=390 para y=355 no quadro em que a gaveta abre.
         O salto acontece enquanto o fundo ainda está clareando, então ele é
         visível. Este irmão só existe quando a gaveta está aberta, porque o
@@ -657,13 +657,13 @@ export function Gaveta({
       </span>
 
       {/*
-        O fundo. Escurece o que ficou `inert` — deixar a página acesa e
+        O fundo. Escurece o que ficou `inert`: deixar a página acesa e
         inalcançável seria dizer com a forma o contrário do que o mecanismo faz.
 
         O tom é `escura` e não `tinta-900`. Os dois são #141715 no tema claro,
         mas `tinta-900` é um token de TEXTO e ele inverte no escuro: medido,
         `tinta-900` vira #edefee e o véu de 40% ficava com luminosidade oklab
-        0,95 sobre uma página #121513 — um clarão branco no lugar de uma
+        0,95 sobre uma página #121513: um clarão branco no lugar de uma
         sombra. `escura` é #141715 no claro e #0c0e0d no escuro, que é o que um
         véu precisa ser nos dois.
       */}
@@ -702,8 +702,8 @@ export function Gaveta({
  *
  * **Hoje o único lugar que o usa é a vitrine `/estilo`.** O menu do cabeçalho,
  * que era o consumidor de produto, virou `Gaveta` a pedido do parceiro humano.
- * O argumento acima continua de pé — é ele que decide a próxima vez que
- * alguém for revelar algo curto ancorado no gatilho —, mas fica registrado que
+ * O argumento acima continua de pé (é ele que decide a próxima vez que
+ * alguém for revelar algo curto ancorado no gatilho), mas fica registrado que
  * a forma está sem uso real. Se a próxima revelação curta também vier a ser
  * gaveta, a pergunta a fazer é se esta forma ainda vale a manutenção, e a
  * resposta muda `estilo/page.tsx`, que é quem a mostra.

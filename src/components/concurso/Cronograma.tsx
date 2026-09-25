@@ -18,7 +18,7 @@ import { ROTULO_EVENTO } from "@/lib/rotulos";
  * do link "ver o ato".
  *
  * **Sem aspas, de propósito.** O campo `evidencia` às vezes é o trecho
- * literal do ato e às vezes é a descrição que o modelo fez de onde leu —
+ * literal do ato e às vezes é a descrição que o modelo fez de onde leu:
  * medido no acervo: 279 de 813 evidências (34%) aparecem palavra por palavra
  * no texto do ato, o resto é paráfrase. Aspas afirmariam citação literal em
  * dois terços dos casos em que não há. "Lido de" cobre os dois, e quem quiser
@@ -29,7 +29,7 @@ import { ROTULO_EVENTO } from "@/lib/rotulos";
  * A linha é **ordinal**: os pontos ficam igualmente espaçados e o que a
  * descida diz é "depois", não "quanto depois". Medido no acervo, um eixo em
  * escala de tempo seria inutilizável: a mediana é de **2 eventos** por
- * concurso, 27% têm um só, e as datas vão de 2016 a 2027 — um edital
+ * concurso, 27% têm um só, e as datas vão de 2016 a 2027: um edital
  * publicado em abril e homologado em outubro viraria dois pontos com meio
  * metro de vazio entre eles, e o concurso de 25 eventos (3 no acervo inteiro)
  * viraria um cacho ilegível de pontos grudados. O que a pessoa precisa saber
@@ -40,8 +40,8 @@ import { ROTULO_EVENTO } from "@/lib/rotulos";
  *
  * Passado é um círculo cheio, verde, com um visto branco. Hoje, quando um
  * evento acontece agora, herda a cor de "passado" e o texto vira verde
- * (`text-verde-texto`). O primeiro evento futuro com data — o "próximo
- * marco" — ganha um anel em urucum, cor de prazo curto; os futuros depois
+ * (`text-verde-texto`). O primeiro evento futuro com data (o "próximo
+ * marco") ganha um anel em urucum, cor de prazo curto; os futuros depois
  * dele e os sem data são um anel pontilhado neutro. Quando hoje cai **entre**
  * dois eventos, sem nenhum acontecendo agora (200 dos 4.479 concursos com
  * cronograma), entra uma pílula "HOJE" no meio da linha; quando algum evento
@@ -52,7 +52,7 @@ import { ROTULO_EVENTO } from "@/lib/rotulos";
  * de quem renderiza: ver o comentário lá para o defeito de três horas que
  * isso evita.
  *
- * A ordem é a de `ordenarEventos`, não a que a API mandou — ver lá o porquê.
+ * A ordem é a de `ordenarEventos`, não a que a API mandou: ver lá o porquê.
  */
 export function Cronograma({
   eventos,
@@ -106,8 +106,8 @@ export function Cronograma({
                 <Marcador
                   fase={linha.fase}
                   // "Hoje" no próprio evento é pelo menos tão urgente quanto
-                  // o próximo marco — "as inscrições encerram hoje" não é
-                  // menos premente que "encerram amanhã" — então herda o
+                  // o próximo marco ("as inscrições encerram hoje" não é
+                  // menos premente que "encerram amanhã") então herda o
                   // mesmo anel de urucum, e não o visto verde do passado.
                   destaque={linha.proximoMarco || linha.fase === "hoje"}
                 />
@@ -263,7 +263,7 @@ function MarcaDeHoje({
   const indiceDoProximoMarco = fases.indexOf("futuro");
   const proximoMarco = indiceDoProximoMarco >= 0 ? eventos[indiceDoProximoMarco] : null;
   // Só fala em "faltam N dias para encerrar" quando o próprio próximo marco é
-  // o fim das inscrições — para qualquer outro evento (uma prova, um
+  // o fim das inscrições: para qualquer outro evento (uma prova, um
   // resultado), "encerrar" seria uma afirmação que o ato não fez.
   const dataDoFim =
     proximoMarco?.tipo === "fim_inscricao" ? (proximoMarco.inicio ?? proximoMarco.fim) : null;

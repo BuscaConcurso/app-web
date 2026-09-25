@@ -3,25 +3,25 @@
 /**
  * Os dois botões de avaliação do concurso. Um par por página.
  *
- * **A granularidade é do concurso, e isso é decisão do parceiro humano** —
+ * **A granularidade é do concurso, e isso é decisão do parceiro humano**:
  * "gostei/não gostei é só pro concurso". Ela reverte a anterior, dele
  * também: até aqui havia um par de botões por item (cada resposta do FAQ, os
  * cargos, o cronograma, o órgão), para a reclamação chegar dizendo onde
  * estava o erro. Passou a valer um voto por concurso por pessoa, e quem diz
- * onde é o comentário — por isso ele deixou de perguntar "o que está errado?"
+ * onde é o comentário: por isso ele deixou de perguntar "o que está errado?"
  * e passou a pedir a parte e o conserto (ver o texto do modal, abaixo).
  *
  * O que se perde está dito e não descoberto depois: sem o `bloco`, contar
  * "quantos reclamaram do cronograma" exige alguém ler os comentários. O que
- * se ganha é um voto por página — um denominador comparável entre concursos,
+ * se ganha é um voto por página: um denominador comparável entre concursos,
  * que por item não existia, porque a página sem FAQ tinha menos botões que a
  * com FAQ.
  *
  * **Onde ele fica foi medido, não escolhido por gosto** (400 concursos
  * sorteados do acervo real, altura estimada dos blocos): no fim da página, o
  * controle fica abaixo da dobra em **100%** dos concursos, e a mais de duas
- * telas em 18%; no fim da LEITURA — depois dos cargos e do FAQ, antes do
- * bloco dos atos publicados —, cai para 49% e 12,5%. São os mesmos ~330px de
+ * telas em 18%; no fim da LEITURA (depois dos cargos e do FAQ, antes do
+ * bloco dos atos publicados), cai para 49% e 12,5%. São os mesmos ~330px de
  * diferença em quase toda página, e eles são de apêndice: o bloco dos atos é
  * o documento como saiu no diário, a evidência atrás da leitura, e o texto
  * dele nem abre sem clique. A avaliação fecha o que o modelo produziu; o que
@@ -39,13 +39,13 @@
  * **O clique é `fetch` do navegador, e a página não funciona mais sem
  * JavaScript.** Isto era um `<form>` de verdade apontado para uma Server
  * Action, e o voto registrava com script desligado; **abrir mão disso é
- * decisão do parceiro humano** — "gostei/não gostei precisa ser client side" —
+ * decisão do parceiro humano** ("gostei/não gostei precisa ser client side")
  * e não uma consequência que apareceu no caminho. Sem script, hoje, os botões
  * não fazem nada.
  *
  * O que se ganhou está medido em `app/api/avaliacao/route.ts`: em `next dev` a
  * Server Action re-renderizava a árvore de servidor da rota a cada clique, o
- * que nesta página significava o `layout` buscar `GET /acervo` de novo — 3,6
+ * que nesta página significava o `layout` buscar `GET /acervo` de novo: 3,6
  * MB e uns 700 ms para gravar 152 bytes. Agora o clique é um `POST` à rota do
  * próprio app e mais nada. Em produção o tempo de servidor já era curto, e o
  * que muda é o que se vê: o botão marca no clique, não quando a viagem volta.
@@ -76,7 +76,7 @@ import {
  */
 /**
  * O polegar de `Concurso.dc.html:202-203`, 24×24, espelhado no eixo vertical
- * para o "Não" ser o mesmo traço virado para baixo — como todo ícone deste
+ * para o "Não" ser o mesmo traço virado para baixo: como todo ícone deste
  * projeto, traço e não preenchimento.
  *
  * **O rótulo continua visível ao lado.** Polegar sozinho é ambíguo, e estes
@@ -111,14 +111,14 @@ function Polegar({ paraCima }: { paraCima: boolean }) {
 
 /**
  * O botão escolhido fica marcado. É o que a escolha do parceiro humano
- * compra: a marca aparece no clique, antes da resposta — e sai de novo se a
+ * compra: a marca aparece no clique, antes da resposta, e sai de novo se a
  * resposta disser que não gravou, porque botão marcado sobre clique perdido
  * é a mesma mentira que um "obrigado" sem registro.
  *
  * Não são `ui/Botao`: o "Não, tem erro" marcado precisa de `bg-urucum`, uma
  * quarta cor que nenhuma das cinco variantes do sistema tem, e uma classe
  * extra por cima de uma variante existente não teria como vencer com
- * segurança — as duas são utilitário puro, do mesmo peso, e quem decide
+ * segurança: as duas são utilitário puro, do mesmo peso, e quem decide
  * empate é a ordem das regras no CSS gerado, não a ordem das classes na
  * tag. Os dois estados (marcado e normal) de cada botão moram aqui, por
  * extenso.
@@ -186,7 +186,7 @@ export function Avaliacao({
    * Manda o clique para a rota do próprio app.
    *
    * Nunca levanta. Um "não gostei" que derruba a página do concurso seria a
-   * pior resposta possível a alguém dizendo que a página está errada — e do
+   * pior resposta possível a alguém dizendo que a página está errada, e do
    * lado do cliente isso é ainda mais literal do que era: uma exceção aqui
    * sobe para o limite de erro do React e leva a rota junto.
    */
@@ -200,7 +200,7 @@ export function Avaliacao({
         body: formularioDoPedido(slug, gostei, texto),
       });
       // A rota diz o que aconteceu no corpo, inclusive quando o status não é
-      // 2xx. Corpo que não é JSON — um proxy no caminho, a rota fora do ar —
+      // 2xx. Corpo que não é JSON (um proxy no caminho, a rota fora do ar)
       // cai no `catch` do `json()` e vira `"falhou"`, não "obrigado".
       resultado = resultadoDaResposta(await resposta.json().catch(() => null));
     } catch {
@@ -273,7 +273,7 @@ export function Avaliacao({
       <dialog
         ref={modal}
         /* `backdrop:bg-tinta-900/40` e não `tinta-900`: os dois são #141715 no
-           tema claro, mas `tinta-900` é token de texto e inverte no escuro —
+           tema claro, mas `tinta-900` é token de texto e inverte no escuro:
            lá o véu virava um clarão branco sobre a página quase preta. É o
            mesmo tom do fundo da gaveta, para as duas camadas concordarem. */
         className="m-auto w-[min(32rem,92vw)] rounded-cartao bg-cartao p-6 text-tinta-900 backdrop:bg-tinta-900/40"
@@ -290,7 +290,7 @@ export function Avaliacao({
           {/* A pergunta mudou de forma junto com a granularidade. Ao lado de
               um item, "o que está errado?" já vinha com o onde respondido
               pelo botão em que a pessoa clicou. Ao lado do concurso inteiro
-              ela não vem — então o texto pede as duas coisas, na ordem em que
+              ela não vem: então o texto pede as duas coisas, na ordem em que
               quem for consertar precisa delas: QUAL parte, e o que devia
               estar no lugar. O exemplo no campo é a resposta inteira, com a
               parte nomeada e o valor certo, porque a forma do exemplo é o que
@@ -313,7 +313,7 @@ export function Avaliacao({
             className="w-full rounded-controle bg-rebaixada px-3 py-2 text-[13px] leading-6 text-tinta-900 outline-none focus:ring-2 focus:ring-acao"
           />
           {/* O recibo de fora fica atrás do modal, então o comentário que não
-              gravou precisa dizer isso aqui dentro — senão a janela fica
+              gravou precisa dizer isso aqui dentro: senão a janela fica
               aberta sem explicar por quê. */}
           {estado.comentou && estado.resultado !== "gravada" && (
             <p role="alert" className="text-[12px] text-urucum-texto">
