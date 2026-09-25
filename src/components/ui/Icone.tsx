@@ -55,6 +55,8 @@ export const ICONES = {
   monitor: [{ retangulo: [2, 3, 20, 14, 2] }, { d: "M8 21h8M12 17v4" }],
   fechar: [{ d: "M18 6 6 18M6 6l12 12" }],
   menu: [{ d: "M4 6h16M4 12h16M4 18h16" }],
+  lista: [{ d: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" }],
+  agenda: [{ retangulo: [3, 4, 18, 18, 2] }, { d: "M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4" }],
 } satisfies Record<string, Parte[]>;
 
 export type NomeDoIcone = keyof typeof ICONES;

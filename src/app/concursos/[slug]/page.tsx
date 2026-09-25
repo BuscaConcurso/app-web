@@ -1,33 +1,20 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { connection } from "next/server";
-import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
-import { Etiqueta } from "@/components/ui/Etiqueta";
 import { Secao } from "@/components/ui/Secao";
 import { Trilha, type Degrau } from "@/components/ui/Trilha";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
+import { CabecalhoDoConcurso } from "@/components/concurso/CabecalhoDoConcurso";
 import { Cargos, tituloDosCargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
 import { Faq, cabecalhoDoFaq, temFaq } from "@/components/concurso/Faq";
+import { FatosDoConcurso } from "@/components/concurso/FatosDoConcurso";
 import { obterDetalhe } from "@/lib/concursos";
-import {
-  dataLonga,
-  hojeEmSaoPaulo,
-  moeda,
-  moedaExata,
-  numero,
-  vagasTexto,
-} from "@/lib/formato";
-import {
-  ROTULO_ESCOLARIDADE,
-  linhaDeContexto,
-  textoDeRodape,
-  tituloComOrgao,
-} from "@/lib/rotulos";
+import { fatosDoConcurso } from "@/lib/fatos";
+import { dataLonga, hojeEmSaoPaulo, moeda, vagasTexto } from "@/lib/formato";
+import { textoDeRodape, tituloComOrgao } from "@/lib/rotulos";
 import { nomeCurtoDoOrgao } from "@/lib/orgaos";
-import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
 
 /**
  * Página do concurso, versão reduzida.
@@ -82,8 +69,6 @@ export default async function PaginaDoConcurso(
   const hoje = new Date();
   // A data civil brasileira, para a linha do tempo: ver `hojeEmSaoPaulo`.
   const hojeCivil = hojeEmSaoPaulo(hoje);
-  const tom = tomDoConcurso(concurso, hoje);
-  const estilo = ESTILO_DO_TOM[tom];
 
   // Três degraus, e o do meio é o que passou a existir: Concursos > órgão >
   // este concurso. É uma lista só, e `Trilha` desenha a tela e emite o
@@ -115,11 +100,12 @@ export default async function PaginaDoConcurso(
         o cartão da busca da página: fundo do cartão sobre o cinza da página,
         sem borda e sem sombra.
 
-        **Só o primeiro bloco é pintado pelo tom.** O fundo colorido é o sinal
-        de situação, e a situação é um fato do concurso, não de cada seção:
-        repetir o salmão de "encerra em 3 dias" atrás do cronograma, dos
-        cargos e do ato afirmaria quatro vezes a mesma coisa e gastaria a
-        única cor forte da tela. Cinza por padrão, cor só onde informa.
+        **A cor do tom mora só na pílula de situação, dentro do cabeçalho.**
+        O cabeçalho inteiro é branco, como todo bloco da pilha (desenho novo,
+        Task 12); repetir o salmão de "encerra em 3 dias" atrás dele, do
+        cronograma, dos cargos e do ato afirmaria quatro vezes a mesma coisa e
+        gastaria a única cor forte da tela. Cinza por padrão, cor só onde
+        informa.
 
         Isso também acerta um desencontro que existia: `bg-rebaixada` é o rebaixo
         de dentro do cartão branco, e dentro do cartão `encerrado` ele ficava
@@ -140,88 +126,9 @@ export default async function PaginaDoConcurso(
         órgão e a nota de rodapé) entram na mesma pilha e usam o mesmo vão.
       */}
       <div className="flex flex-col gap-6">
-        <Cartao tom={tom} as="article" className="p-6 sm:p-8">
-          {/*
-            A hierarquia pedida, na ordem em que ela se lê: o órgão acima, o
-            título do concurso como `h1`. Até aqui era o contrário — o `h1`
-            era `orgao.nome` e o título do concurso vinha abaixo, como
-            parágrafo —, e a página dizia que era sobre o órgão quando é sobre
-            um edital dele.
+        <CabecalhoDoConcurso concurso={concurso} hoje={hoje} />
 
-            O nome do órgão leva à página dele, e não repete o `Selo`: o
-            quadrado é a sigla, `aria-hidden`, e esta linha é o nome por
-            extenso, que é o que um leitor de tela ouve.
-          */}
-          <header>
-            <div className="flex items-start gap-4">
-              <Selo sigla={concurso.orgao.sigla} tom={tom} />
-              <div className="min-w-0">
-                <p className="text-sm leading-5 font-medium text-tinta-900">
-                  <Link
-                    href={`/orgaos/${concurso.orgao.slug}`}
-                    className="hover:underline hover:underline-offset-4"
-                  >
-                    {concurso.orgao.nome}
-                  </Link>
-                </p>
-                <p className={`text-sm ${estilo.apoio}`}>
-                  {linhaDeContexto(concurso.orgao)}
-                </p>
-              </div>
-            </div>
-            {/*
-              O `h1` abaixo do bloco do selo, e não recuado ao lado dele. O
-              selo é a sigla do ÓRGÃO, então ele e o nome ao lado são uma
-              afirmação só; o título começa embaixo, na largura inteira do
-              cartão. Medido a 375px no exemplo do parceiro: recuado o título
-              tem 251,8px e ocupa 4 linhas; na largura cheia tem 304,6px e
-              ocupa 3. É também a mesma forma do cartão da busca, o que faz a
-              página e o resultado que leva a ela lerem igual.
-            */}
-            {/* O título INTEIRO do concurso, que foi o pedido explícito do
-                parceiro humano: "o título da página e dos cards precisa ser o
-                título do concurso". Houve um recorte aqui que tirava o nome do
-                órgão da frente — ele ganhava altura (2,91 para 1,66 linha de
-                média) e perdia a coisa pedida. A repetição com o degrau do
-                órgão logo acima é custo aceito, e é decisão dele.
-                Pode sair porque o órgão está duas vezes acima desta linha: na
-                trilha e no bloco do selo. */}
-            <h1 className="mt-4 font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance break-words">
-              {concurso.titulo}
-            </h1>
-          </header>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Etiqueta tom={tom} comPonto>
-              {rotuloDeSituacao(concurso, hoje)}
-            </Etiqueta>
-            {concurso.escolaridades.map((escolaridade) => (
-              <Etiqueta key={escolaridade}>
-                {ROTULO_ESCOLARIDADE[escolaridade]}
-              </Etiqueta>
-            ))}
-            {concurso.banca && <Etiqueta>Banca: {concurso.banca.nome}</Etiqueta>}
-          </div>
-
-          <BlocoDeNumeros tom={tom} className="mt-6 grid-cols-2 sm:grid-cols-4">
-            <Numero rotulo="Vagas">
-              {concurso.vagas === null ? "a definir" : numero(concurso.vagas)}
-            </Numero>
-            <Numero rotulo="Salário até">
-              {concurso.salarioAte === null
-                ? "a definir"
-                : moeda(concurso.salarioAte)}
-            </Numero>
-            <Numero rotulo="Taxa">
-              {concurso.taxaInscricao === null
-                ? "a definir"
-                : moedaExata(concurso.taxaInscricao)}
-            </Numero>
-            <Numero rotulo="Cadastro reserva">
-              {concurso.cadastroReserva ? "sim" : "não"}
-            </Numero>
-          </BlocoDeNumeros>
-        </Cartao>
+        <FatosDoConcurso fatos={fatosDoConcurso(concurso)} />
 
         {/* O cronograma não some quando está vazio: 170 concursos do acervo
             (3,7%) não têm data nenhuma lida, e nesses o bloco é o que diz que
