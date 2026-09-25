@@ -120,10 +120,10 @@ export default async function PaginaDoOrgao(
   ];
 
   return (
-    <div className="px-4 py-8 md:px-[112px] md:py-12">
+    <div className="px-4 pb-8 md:px-[112px] md:pb-12">
       <Trilha degraus={trilha} />
 
-      <div className="mt-4 flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
         {/* O mesmo desenho do cabeçalho do concurso (`CabecalhoDoConcurso`):
             o selo grande, o `h1` e a linha de contexto. O `h1` aqui é o nome
             do órgão, não o de um cargo, e o acervo tem nome de órgão de até
@@ -147,35 +147,39 @@ export default async function PaginaDoOrgao(
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-2">
-            <CartaoDeFato
-              icone="aberto"
-              cor="bg-verde-fundo text-verde-texto"
-              rotulo="ABERTOS"
-              valor={numero(abertos)}
-            />
-            <CartaoDeFato
-              icone="previsto"
-              cor="bg-ouro-fundo text-ouro-sinal-texto"
-              rotulo="PREVISTOS"
-              valor={numero(previstos)}
-            />
-            <CartaoDeFato
-              icone="lista"
-              cor="bg-anil-fundo text-anil-texto"
-              rotulo="CONCURSOS"
-              valor={numero(ordenados.length)}
-            />
-          </div>
-
           {/* A frase antes da lista, e não só o número da caixa "CONCURSOS"
-              acima: com um concurso só (195 dos 466 órgãos), o que a página
+              logo abaixo: com um concurso só (195 dos 466 órgãos), o que a página
               tem a dizer é justamente que ela não é um índice. Ver
               `resumoDoOrgao`. */}
-          <p className="mt-5 text-sm leading-6 text-tinta-600">
+          <p className="mt-5 text-sm leading-6 text-tinta-600 md:mt-6">
             {resumoDoOrgao(ordenados.length)}
           </p>
         </header>
+
+        {/* Os fatos numa grade própria, fora do cartão do cabeçalho, como
+            na página do concurso (`Concurso.dc.html:90`): dentro dele eram
+            cartão sobre cartão, só com a sombra de baixo, e pareciam
+            quebrados. */}
+        <div className="-mt-2 grid grid-cols-3 gap-2 md:gap-3">
+          <CartaoDeFato
+            icone="aberto"
+            cor="bg-verde-fundo text-verde-texto"
+            rotulo="ABERTOS"
+            valor={numero(abertos)}
+          />
+          <CartaoDeFato
+            icone="previsto"
+            cor="bg-ouro-fundo text-ouro-sinal-texto"
+            rotulo="PREVISTOS"
+            valor={numero(previstos)}
+          />
+          <CartaoDeFato
+            icone="lista"
+            cor="bg-anil-fundo text-anil-texto"
+            rotulo="CONCURSOS"
+            valor={numero(ordenados.length)}
+          />
+        </div>
 
         <section>
           <h2 className="sr-only">

@@ -15,7 +15,11 @@ import { NOME_UF, cargosDoCartao, tituloDoAto, tituloSemOrgao } from "@/lib/rotu
  * razão), e o `<div role="row">` da busca e do órgão, que não são tabela de
  * verdade por causa da paginação e dos filtros (`task-15-brief.md`).
  */
-export const COLUNAS_DA_LINHA = "grid-cols-[2.6fr_1.2fr_0.9fr_1fr_1.2fr_150px]";
+// `minmax(0, …)` em cada fração: `fr` sozinho tem mínimo `auto`, e o
+// conteúdo que não quebra (a data com o chip, "a definir") roubava largura
+// da coluna de órgão e cargo.
+export const COLUNAS_DA_LINHA =
+  "grid-cols-[minmax(0,2.6fr)_minmax(0,1.2fr)_minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1.2fr)_150px]";
 
 /**
  * O órgão e o cargo (ou o que existir no lugar dele), coluna 1 da linha e
@@ -129,18 +133,18 @@ export function LinhaConcurso({
         </div>
       </Celula>
 
-      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? "min-w-0" : "px-0"}>
+      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? "min-w-0" : "pr-4"}>
         <span className="flex min-w-0 items-center gap-1.5 text-tinta-600">
           <Icone nome={iconeLocal} tamanho={16} className="shrink-0" />
           <span className="truncate">{textoLocal}</span>
         </span>
       </Celula>
 
-      <Celula role={emGrade ? "cell" : undefined} className={`font-semibold ${emGrade ? "" : "px-0"}`}>
+      <Celula role={emGrade ? "cell" : undefined} className={`font-semibold ${emGrade ? "" : "pr-4"}`}>
         {vagas === null ? <span className="text-tinta-500">a definir</span> : numero(vagas)}
       </Celula>
 
-      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "px-0"}>
+      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "pr-4"}>
         {concurso.salarioAte === null ? (
           <span className="text-tinta-500">a definir</span>
         ) : (
@@ -148,7 +152,7 @@ export function LinhaConcurso({
         )}
       </Celula>
 
-      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "px-0"}>
+      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "pr-4"}>
         {concurso.inscricoesAte && prazo ? (
           <span className="flex items-center gap-2">
             <span className="font-semibold">{dataCurta(concurso.inscricoesAte)}</span>

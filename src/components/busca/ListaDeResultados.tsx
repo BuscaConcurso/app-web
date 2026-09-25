@@ -311,7 +311,7 @@ export function ListaDeResultados({
             </div>
           ) : (
             <div className="mt-4">
-              <ListaDeConcursos itens={resultado.itens} hoje={hoje} ufDoFiltro={consulta.uf} />
+              <ListaDeConcursos itens={resultado.itens} hoje={hoje} ufDoFiltro={consulta.uf} comFiltros />
             </div>
           )}
 
