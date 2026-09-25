@@ -1,3 +1,5 @@
+import { BotaoLink } from "@/components/ui/Botao";
+import { Icone } from "@/components/ui/Icone";
 import { Gaveta } from "@/components/ui/Revelador";
 import {
   ancoraDoTrecho,
@@ -8,6 +10,13 @@ import {
 import type { Origem } from "@/lib/dominio";
 import { dataLonga, numero } from "@/lib/formato";
 import { partirEmParagrafos, type Paragrafo } from "@/lib/leitura";
+
+/** O gatilho fechado da gaveta, com a cara de `BotaoLink secundario md`
+ *  (`ui/Botao.tsx`): a gaveta não pode usar o componente porque `<summary>`
+ *  não é `<a>`, mas o visual é o mesmo. */
+const GATILHO_LER_NA_INTEGRA =
+  "inline-flex h-11 items-center gap-2 rounded-controle bg-rebaixada px-[18px] " +
+  "text-[15px] font-medium text-tinta-900 hover:bg-linha";
 
 /**
  * Os atos publicados de onde tudo nesta página foi lido, com o texto inteiro.
@@ -62,89 +71,113 @@ import { partirEmParagrafos, type Paragrafo } from "@/lib/leitura";
 
 export function AtosPublicados({ origens }: { origens: Origem[] }) {
   return (
-    <ul className="flex flex-col gap-4">
-      {origens.map((origem) => (
-        <li key={origem.chave} id={`ato-${origem.chave}`} className="scroll-mt-4">
-          <div className="text-sm">
-            {origem.url ? (
-              <a
-                href={origem.url}
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-link underline underline-offset-4 hover:text-link-hover"
-              >
-                {origem.titulo ?? origem.url}
-              </a>
-            ) : (
-              <span className="font-medium text-tinta-900">
-                {origem.titulo ?? "Ato sem título registrado"}
-              </span>
-            )}
-            {origem.fonte && (
-              <span className="text-tinta-600"> · {origem.fonte}</span>
+    <div className="flex flex-col gap-[18px]">
+      <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
+        <Icone nome="diario" tamanho={24} className="text-acao" />
+        Fontes
+      </h2>
+
+      <div className="flex flex-col gap-3">
+        {origens.map((origem) => (
+          <div
+            key={origem.chave}
+            id={`ato-${origem.chave}`}
+            className={`grid scroll-mt-4 gap-3 ${
+              origem.editalCitadoUrl ? "sm:grid-cols-2" : "sm:grid-cols-1"
+            }`}
+          >
+            {/* Cartão 1: o ato como saiu no diário, conferido por nós contra
+                o texto que temos guardado. `Concurso.dc.html:184-188`. */}
+            <div className="flex flex-col gap-2.5 rounded-[16px] bg-pagina p-5">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-acao text-acao-texto">
+                  <Icone nome="diario" tamanho={20} />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[12px] font-bold tracking-[0.05em] text-verde-texto">
+                    CONFERIDO POR NÓS
+                  </div>
+                  <div className="text-[16px] font-bold text-tinta-900">
+                    {origem.fonte ? `Ato no ${origem.fonte}` : "Ato no Diário Oficial"}
+                  </div>
+                </div>
+              </div>
+              <p className="text-[14px] leading-[1.5] text-tinta-600">
+                {origem.url ? (
+                  <a
+                    href={origem.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-tinta-900 underline underline-offset-4 hover:text-link"
+                  >
+                    {origem.titulo ?? origem.url}
+                  </a>
+                ) : (
+                  <span className="font-medium text-tinta-900">
+                    {origem.titulo ?? "Ato sem título registrado"}
+                  </span>
+                )}
+                {origem.caracteres !== null && <> · {numero(origem.caracteres)} caracteres</>}
+                {" · coletado em "}
+                {dataLonga(origem.vistoEm.slice(0, 10))}. Pode ser o extrato, não o edital
+                completo.
+              </p>
+              {origem.texto ? (
+                <GavetaDoAto origem={origem} texto={origem.texto} />
+              ) : (
+                /* O endereço público não está gravado para este ato, e não dá
+                   para inventá-lo: o que o motor montava a partir do
+                   identificador respondia 404. O texto, quando existe, é o
+                   que torna isso suportável — a publicação fica guardada por
+                   inteiro. Quando nem o texto existe, só resta dizer isso. */
+                <p className="text-[12px] leading-5 text-tinta-600">
+                  O texto deste ato não está guardado.
+                </p>
+              )}
+            </div>
+
+            {origem.editalCitadoUrl && (
+              /* Cartão 2: o edital completo, no endereço que o próprio ato
+                 cita. `Concurso.dc.html:189-193`. Não é conferido por nós —
+                 nós nunca visitamos este endereço, que saiu do texto de um
+                 ato que pode ter meses e de um site de banca que muda de
+                 lugar —, e o rótulo diz isso em vez de prometer uma porta que
+                 talvez não abra. */
+              <div className="flex flex-col gap-2.5 rounded-[16px] bg-pagina p-5">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-ouro-fundo text-ouro-sinal-texto">
+                    <Icone nome="corrente" tamanho={20} />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-[12px] font-bold tracking-[0.05em] text-ouro-sinal-texto">
+                      INFORMADO PELO ATO · NÃO CONFERIDO
+                    </div>
+                    <div className="text-[16px] font-bold text-tinta-900">Edital completo</div>
+                  </div>
+                </div>
+                <p className="min-w-0 text-[14px] leading-[1.5] break-all text-tinta-600">
+                  Com anexos e programa de provas.{" "}
+                  {origem.editalCitadoUrl.replace(/^https?:\/\//, "")}
+                </p>
+                {/* Sem "no site do {sigla}": este componente só recebe as
+                    origens, não o órgão, então o rótulo fala do documento e
+                    não de quem o publicou. */}
+                <BotaoLink
+                  href={origem.editalCitadoUrl}
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  variante="contorno"
+                  iconeDepois="externo"
+                  className="mt-1 self-start"
+                >
+                  Abrir o edital completo
+                </BotaoLink>
+              </div>
             )}
           </div>
-
-          {origem.url ? (
-            <p className="mt-0.5 text-[12px] leading-5 text-tinta-600">
-              O endereço leva à página do diário em que o ato saiu, que pode
-              trazer outros atos do mesmo dia.
-            </p>
-          ) : (
-            /* O endereço público não está gravado para este ato, e não dá
-               para inventá-lo: o que o motor montava a partir do
-               identificador respondia 404. O texto abaixo é o que torna
-               isso suportável — a publicação está aqui, inteira. */
-            <p className="mt-0.5 text-[12px] leading-5 text-tinta-600">
-              O endereço público deste ato não está registrado, mas o texto
-              publicado está guardado por inteiro, abaixo.
-            </p>
-          )}
-
-          {origem.texto ? (
-            <GavetaDoAto origem={origem} texto={origem.texto} />
-          ) : (
-            <p className="mt-2 text-[12px] leading-5 text-tinta-600">
-              O texto deste ato não está guardado.
-            </p>
-          )}
-
-          {origem.editalCitadoUrl && (
-            /* O endereço do edital completo, dito pelo próprio ato. Fica ao
-               lado do ato que o citou, e não solto no topo da página, porque
-               é a procedência que sustenta o link: foi este documento, desta
-               data, que afirmou isso.
-
-               A ressalva não é decoração. Nós nunca visitamos este endereço:
-               ele saiu do texto de um ato que pode ter meses, e site de
-               banca muda de lugar. Oferecer "leia o edital completo" sem
-               dizer isso seria prometer uma porta que talvez não abra — a
-               mesma classe do link do Diário que dava 404. */
-            <p className="mt-2 text-[13px] leading-5">
-              <span className="text-tinta-600">
-                Este ato informa que o edital completo está em:{" "}
-              </span>
-              <a
-                href={origem.editalCitadoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium break-all text-link underline underline-offset-4 hover:text-link-hover"
-              >
-                {origem.editalCitadoUrl.replace(/^https?:\/\//, "")}
-              </a>
-              <span className="text-tinta-600">
-                {" "}
-                (endereço informado pelo ato, que não conferimos).
-              </span>
-            </p>
-          )}
-
-          <p className="mt-2 text-[11px] text-tinta-500">
-            Coletado do diário em {dataLonga(origem.vistoEm.slice(0, 10))}.
-          </p>
-        </li>
-      ))}
-    </ul>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -187,8 +220,14 @@ function GavetaDoAto({ origem, texto }: { origem: Origem; texto: string }) {
     /* Sem corte no texto: o ato de 99 mil caracteres cabe inteiro na gaveta,
        rolando, sem virar uma página de um quilômetro. */
     <Gaveta
-      className="mt-2.5"
-      rotulo="Ler o ato publicado"
+      className="self-start"
+      gatilho={GATILHO_LER_NA_INTEGRA}
+      rotulo={
+        <span className="inline-flex items-center gap-2">
+          Ler o ato na íntegra
+          <Icone nome="externo" tamanho={15} />
+        </span>
+      }
       titulo="O ato publicado"
       ancoras={faixas.map((faixa) => faixa.ancora as string)}
       apoio={

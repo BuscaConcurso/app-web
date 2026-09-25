@@ -53,8 +53,8 @@
  * O que **não** mudou é o motivo de existir uma rota no meio em vez de o
  * navegador falar com o engine: `BC_API_URL` continua sem chegar ao cliente.
  */
-import { useEffect, useId, useRef, useState } from "react";
-import { Botao } from "@/components/ui/Botao";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Icone } from "@/components/ui/Icone";
 import {
   ESTADO_INICIAL,
   LIMITE_DO_COMENTARIO,
@@ -74,20 +74,37 @@ import {
  * por engano polui a única medida de qualidade que o produto tem. O ícone
  * entra na frente do texto, não no lugar dele.
  */
+/**
+ * O polegar de `Concurso.dc.html:202-203`, 24×24, espelhado no eixo vertical
+ * para o "Não" ser o mesmo traço virado para baixo — como todo ícone deste
+ * projeto, traço e não preenchimento.
+ *
+ * **O rótulo continua visível ao lado.** Polegar sozinho é ambíguo, e estes
+ * dois botões gravam um voto que alimenta a correção do acervo: quem clica
+ * por engano polui a única medida de qualidade que o produto tem. O ícone
+ * entra na frente do texto, não no lugar dele.
+ */
 function Polegar({ paraCima }: { paraCima: boolean }) {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 16 16"
+      viewBox="0 0 24 24"
+      width={17}
+      height={17}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`size-4 shrink-0 ${paraCima ? "" : "-scale-y-100"}`}
+      className="shrink-0"
     >
-      <path d="M4.6 13.8V7.1m0 0 2.6-4.9a1.6 1.6 0 0 1 2.9 1.3L9.3 6.2h3.1a1.5 1.5 0 0 1 1.5 1.8l-.8 4.3a1.6 1.6 0 0 1-1.6 1.3H6.1a1.5 1.5 0 0 1-1.5-1.5Z" />
-      <path d="M4.6 7.1H3.2a1 1 0 0 0-1 1v4.7a1 1 0 0 0 1 1h1.4" />
+      <path
+        d={
+          paraCima
+            ? "M7 10v12M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.8a2 2 0 0 0 1.8-1.1L12 2a3.1 3.1 0 0 1 3 3.9Z"
+            : "M17 14V2M9 18.1 10 14H4.2a2 2 0 0 1-1.9-2.6l2.3-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.8a2 2 0 0 0-1.8 1.1L12 22a3.1 3.1 0 0 1-3-3.9Z"
+        }
+      />
     </svg>
   );
 }
@@ -98,15 +115,44 @@ function Polegar({ paraCima }: { paraCima: boolean }) {
  * resposta disser que não gravou, porque botão marcado sobre clique perdido
  * é a mesma mentira que um "obrigado" sem registro.
  *
- * As duas variantes vêm de `ui/Botao` desde que o controle virou um por
- * página: por item ele era um par de botõezinhos de 26px, uma anotação ao
- * lado do dado, e um tamanho fora dos três do canvas se justificava. Um
- * controle só, no fim da leitura, é um botão de verdade — e os dois estados
- * já existem no sistema, com o mesmo cinza: `fantasma` sem marca,
- * `secundario` marcado.
+ * Não são `ui/Botao`: o "Não, tem erro" marcado precisa de `bg-urucum`, uma
+ * quarta cor que nenhuma das cinco variantes do sistema tem, e uma classe
+ * extra por cima de uma variante existente não teria como vencer com
+ * segurança — as duas são utilitário puro, do mesmo peso, e quem decide
+ * empate é a ordem das regras no CSS gerado, não a ordem das classes na
+ * tag. Os dois estados (marcado e normal) de cada botão moram aqui, por
+ * extenso.
  */
-const MARCADO = "secundario";
-const NORMAL = "fantasma";
+function BotaoDeVoto({
+  marcado,
+  tom,
+  onClick,
+  disabled,
+  children,
+}: {
+  marcado: boolean;
+  tom: "acao" | "urucum";
+  onClick: () => void;
+  disabled: boolean;
+  children: ReactNode;
+}) {
+  const corDeMarcado = tom === "acao" ? "bg-acao text-acao-texto" : "bg-urucum text-acao-texto";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={marcado}
+      className={[
+        "inline-flex h-11 items-center gap-2 rounded-controle px-4 text-[14px] font-semibold transition-colors",
+        "disabled:cursor-not-allowed disabled:bg-rebaixada disabled:text-tinta-500",
+        marcado ? corDeMarcado : "bg-rebaixada text-tinta-900 hover:bg-linha",
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
 
 export function Avaliacao({
   slug,
@@ -174,57 +220,51 @@ export function Avaliacao({
   return (
     // O bloco é próprio, com o mesmo fundo e a mesma sangria dos outros da
     // pilha: por item a avaliação era um rodapezinho de seção, e agora ela é
-    // uma seção. A pergunta fica escrita porque dois botões soltos no fim de
-    // uma página não dizem sobre o que são.
-    <div className={`rounded-cartao bg-cartao px-6 py-5 sm:px-8 ${className ?? ""}`}>
-      <div
-        role="group"
-        aria-labelledby={pergunta}
-        className="flex flex-wrap items-center gap-x-3 gap-y-2"
-      >
-        <p id={pergunta} className="text-sm font-semibold text-tinta-900">
-          O que esta página diz sobre o concurso está certo?
-        </p>
-        <div className="flex items-center gap-1">
-          <Botao
-            type="button"
-            tamanho="sm"
-            variante={escolha === true ? MARCADO : NORMAL}
-            onClick={() => avaliar(true)}
-            disabled={enviando}
-            aria-pressed={escolha === true}
-          >
-            <Polegar paraCima />
-            Gostei
-          </Botao>
-          <Botao
-            type="button"
-            tamanho="sm"
-            variante={escolha === false ? MARCADO : NORMAL}
-            onClick={() => avaliar(false)}
-            disabled={enviando}
-            aria-pressed={escolha === false}
-          >
-            <Polegar paraCima={false} />
-            Não gostei
-          </Botao>
-        </div>
+    // uma seção. `Concurso.dc.html:197-205`.
+    <div
+      className={`flex flex-wrap items-center gap-6 rounded-[22px] bg-cartao px-8 py-6 shadow-cartao ${className ?? ""}`}
+    >
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-anil-fundo text-anil-texto">
+        <Icone nome="revisao" tamanho={24} />
+      </span>
 
-        <p aria-live="polite" className="text-[12px] text-tinta-500">
-          {recibo(estado.resultado, estado.gostei)}
+      <div className="min-w-[220px] flex-1">
+        <p id={pergunta} className="text-[16px] font-bold text-tinta-900">
+          Esta página está certa?
+        </p>
+        {/* O que se avalia é dito, porque muda o que a pessoa responde: não é
+            o concurso que é bom ou ruim, é a leitura que o modelo fez do ato.
+            Sem isto, um "não" poderia querer dizer "não gostei do salário",
+            que não é conserto de nada. */}
+        <p className="mt-0.5 text-[14px] leading-[1.5] text-tinta-600">
+          Tudo acima foi lido do ato por um modelo. Um “não” faz alguém
+          conferir.
         </p>
       </div>
 
-      {/* O que se avalia é dito, porque muda o que a pessoa responde: não é
-          o concurso que é bom ou ruim, é a leitura que o modelo fez do ato.
-          Sem esta linha, "não gostei" pode querer dizer "não gostei do
-          salário", que não é conserto de nada.
-          E nada de "o ato está logo abaixo": há concurso no acervo sem
-          nenhuma origem gravada, e nele o bloco dos atos não existe. */}
-      <p className="mt-1 max-w-[74ch] text-[12px] leading-5 text-tinta-600">
-        Tudo o que está acima foi lido de um ato do diário oficial por um
-        modelo. O que você avalia é essa leitura, e é o “não gostei” que faz
-        alguém conferir.
+      <div role="group" aria-labelledby={pergunta} className="flex items-center gap-2">
+        <BotaoDeVoto
+          marcado={escolha === true}
+          tom="acao"
+          onClick={() => avaliar(true)}
+          disabled={enviando}
+        >
+          <Polegar paraCima />
+          Sim
+        </BotaoDeVoto>
+        <BotaoDeVoto
+          marcado={escolha === false}
+          tom="urucum"
+          onClick={() => avaliar(false)}
+          disabled={enviando}
+        >
+          <Polegar paraCima={false} />
+          Não, tem erro
+        </BotaoDeVoto>
+      </div>
+
+      <p aria-live="polite" className="w-full text-[12px] text-tinta-500">
+        {recibo(estado.resultado, estado.gostei)}
       </p>
 
       <dialog
@@ -256,7 +296,7 @@ export function Avaliacao({
             Qual parte está errada, e o que devia estar no lugar?
           </h2>
           <p className="text-[12px] leading-5 text-tinta-600">
-            O seu “não gostei” já foi registrado. Escrever é opcional, e é o
+            O seu “não” já foi registrado. Escrever é opcional, e é o
             que permite consertar em vez de só contar. Diga de qual parte você
             fala (o cronograma, os cargos, o órgão, uma resposta) e o que o ato
             publicado diz: quem for corrigir precisa achar o erro no documento.

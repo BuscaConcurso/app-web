@@ -57,6 +57,16 @@ export const ICONES = {
   menu: [{ d: "M4 6h16M4 12h16M4 18h16" }],
   lista: [{ d: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" }],
   agenda: [{ retangulo: [3, 4, 18, 18, 2] }, { d: "M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4" }],
+  // O botão "Filtros" da lista de abertos (`Main.dc.html:203`).
+  filtros: [{ d: "M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M2 14h4M10 8h4M18 16h4" }],
+  // Os quatro de baixo entraram com a Task 13 (`Concurso.dc.html:113,150,159,190,199`):
+  // o documento pequeno de "Lido de"/"De onde foi lido" (sem o visto que
+  // `aberto` já tem), a dúvida do bloco "O que o ato responde", a corrente do
+  // cartão "informado pelo ato" e o quadro da avaliação.
+  documento: [{ d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" }, { d: "M14 2v4a2 2 0 0 0 2 2h4" }],
+  duvida: [{ circulo: [12, 12, 10] }, { d: "M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01" }],
+  corrente: [{ d: "M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" }, { d: "M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" }],
+  revisao: [{ d: "M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8h8M7 12h10M7 16h6" }],
 } satisfies Record<string, Parte[]>;
 
 export type NomeDoIcone = keyof typeof ICONES;

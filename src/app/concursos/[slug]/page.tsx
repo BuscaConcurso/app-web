@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { connection } from "next/server";
-import { Secao } from "@/components/ui/Secao";
+import { Icone } from "@/components/ui/Icone";
 import { Trilha, type Degrau } from "@/components/ui/Trilha";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
 import { CabecalhoDoConcurso } from "@/components/concurso/CabecalhoDoConcurso";
-import { Cargos, tituloDosCargos } from "@/components/concurso/Cargos";
+import { Cargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
-import { Faq, cabecalhoDoFaq, temFaq } from "@/components/concurso/Faq";
+import { Faq, temFaq } from "@/components/concurso/Faq";
 import { FatosDoConcurso } from "@/components/concurso/FatosDoConcurso";
 import { obterDetalhe } from "@/lib/concursos";
 import { fatosDoConcurso } from "@/lib/fatos";
@@ -91,7 +91,7 @@ export default async function PaginaDoConcurso(
   ];
 
   return (
-    <div className="mx-auto max-w-[880px] px-4 py-5 sm:px-6">
+    <div className="px-4 py-5 md:px-[112px]">
       <Trilha degraus={trilha} />
 
       {/*
@@ -107,97 +107,104 @@ export default async function PaginaDoConcurso(
         gastaria a única cor forte da tela. Cinza por padrão, cor só onde
         informa.
 
-        Isso também acerta um desencontro que existia: `bg-rebaixada` é o rebaixo
-        de dentro do cartão branco, e dentro do cartão `encerrado` ele ficava
-        mais CLARO que o fundo, então a lista de cargos parecia levantada em
-        vez de rebaixada. Com cada seção no seu bloco branco, o rebaixo volta
-        a rebaixar.
-
         A pilha não inventa um terceiro nível de superfície: continuam sendo
-        página < cartão < bloco, os mesmos três de `globals.css`. O que mudou
-        foi quantos cartões existem, não quantos degraus.
+        página < cartão < bloco, os mesmos três de `globals.css`.
 
-        **O rótulo de cada seção mora fora do seu bloco** (`Secao`), e é por
-        isso que o vão aqui dobrou de 12 para 24px: ele deixou de separar duas
-        caixas e passou a separar um assunto do título do assunto seguinte.
-        Dentro da `Secao`, o título fica a 8px do cartão que ele rotula — um
-        terço do vão de fora, que é o que faz o título pertencer ao bloco de
-        baixo em vez de flutuar entre os dois. Os dois blocos sem título (o do
-        órgão e a nota de rodapé) entram na mesma pilha e usam o mesmo vão.
+        **O rótulo de cada seção passou para DENTRO do seu bloco** (Task 13,
+        `Concurso.dc.html:100-207`): o ícone colorido e o `h2` de 28px moram
+        no mesmo cartão branco do conteúdo, ao contrário do `Secao` do resto
+        do site (título de 40px fora do cartão) — é assim no protótipo da
+        página do concurso, e não no da home.
       */}
       <div className="flex flex-col gap-6">
         <CabecalhoDoConcurso concurso={concurso} hoje={hoje} />
 
         <FatosDoConcurso fatos={fatosDoConcurso(concurso)} />
 
-        {/* O cronograma não some quando está vazio: 170 concursos do acervo
-            (3,7%) não têm data nenhuma lida, e nesses o bloco é o que diz que
-            ninguém achou data — some ele, e a página afirma por omissão que o
-            concurso não tem cronograma. O título fica com o bloco nos dois
-            casos, então não há título órfão. */}
-        <Secao
-          titulo="Cronograma"
-          apoio="Cada data com a procedência: de qual ato publicado ela foi lida."
-        >
-          {concurso.cronograma.length > 0 ? (
-            <Cronograma eventos={concurso.cronograma} hoje={hojeCivil} />
-          ) : (
-            <p className="text-sm text-tinta-600">
-              Nenhuma data foi lida do ato publicado até agora.
-              {concurso.previstoPara
-                ? ` O concurso é de ${concurso.previstoPara}.`
-                : ""}
+        {/* CORPO: `Concurso.dc.html:100-207`. A coluna principal é a pilha de
+            cartões; a lateral é o espaço da Task 14 (o prazo, os alertas, os
+            concursos próximos) — reservado e vazio por ora, para o grid já
+            nascer com a largura final e não pular quando ela for preenchida.
+            Cada painel principal é o próprio elemento com `id` estável
+            ("cronograma", "areas", "perguntas"), que é o que a Task 14 vai
+            precisar para as abas do celular. */}
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="flex min-w-0 flex-col gap-6">
+            {/* O cronograma não some quando está vazio: 170 concursos do
+                acervo (3,7%) não têm data nenhuma lida, e nesses o bloco é o
+                que diz que ninguém achou data — some ele, e a página afirma
+                por omissão que o concurso não tem cronograma. O título fica
+                com o bloco nos dois casos, então não há título órfão. */}
+            <section
+              id="cronograma"
+              className="flex flex-col gap-6 rounded-[22px] bg-cartao p-8 shadow-cartao"
+            >
+              <div>
+                <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
+                  <Icone nome="previsto" tamanho={24} className="text-acao" />
+                  Cronograma
+                </h2>
+                <p className="mt-1.5 text-[15px] text-tinta-600">
+                  Cada data mostra de qual trecho do ato ela foi lida.
+                </p>
+              </div>
+              {concurso.cronograma.length > 0 ? (
+                <Cronograma eventos={concurso.cronograma} hoje={hojeCivil} />
+              ) : (
+                <p className="text-sm text-tinta-600">
+                  Nenhuma data foi lida do ato publicado até agora.
+                  {concurso.previstoPara
+                    ? ` O concurso é de ${concurso.previstoPara}.`
+                    : ""}
+                </p>
+              )}
+            </section>
+
+            {/* Aqui, sim, o bloco inteiro pode não existir — e com ele o
+                título. Um "Áreas e vagas" sobre nada seria o título órfão que
+                o cronograma vazio não é: não há o que dizer sobre cargo que o
+                ato não listou, e a linha de rodapé da página já conta o que
+                falta. */}
+            {concurso.cargos.length > 0 && (
+              <section id="areas" className="rounded-[22px] bg-cartao p-8 shadow-cartao">
+                <Cargos cargos={concurso.cargos} />
+              </section>
+            )}
+
+            {/* O FAQ antes do texto do ato, e não depois: ele é a leitura do
+                documento, e o documento é a evidência atrás dela. Cada
+                resposta tem link para o ato que a produziu, logo abaixo. */}
+            {temFaq(concurso.origens) && (
+              <section id="perguntas" className="rounded-[22px] bg-cartao p-8 shadow-cartao">
+                <Faq origens={concurso.origens} />
+              </section>
+            )}
+
+            {/* A avaliação do concurso, aqui e em nenhum outro ponto da
+                página: um voto por concurso por pessoa, decisão do parceiro
+                humano. O porquê deste ponto e não do rodapé está medido no
+                comentário do componente — em resumo, é o fim da LEITURA. O
+                que vem abaixo, quando vem, é o ato como saiu no diário: a
+                fonte para conferir, não mais coisa nossa para avaliar. */}
+            <Avaliacao slug={concurso.slug} />
+
+            {concurso.origens.length > 0 && (
+              <section className="rounded-[22px] bg-cartao p-8 shadow-cartao">
+                <AtosPublicados origens={concurso.origens} />
+              </section>
+            )}
+
+            {/* O rodapé também é um bloco, com a mesma sangria lateral e
+                menos altura: é uma nota sobre a página, não uma seção dela. */}
+            <p className="rounded-cartao bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600 sm:px-8">
+              {textoDeRodape(concurso)}
             </p>
-          )}
-        </Secao>
+          </div>
 
-        {/* Aqui, sim, o bloco inteiro pode não existir — e com ele o título.
-            Um "Cargos" sobre nada seria o título órfão que o cronograma vazio
-            não é: não há o que dizer sobre cargo que o ato não listou, e a
-            linha de rodapé da página já conta o que falta. */}
-        {concurso.cargos.length > 0 && (
-          <Secao titulo={tituloDosCargos(concurso.cargos)}>
-            <Cargos cargos={concurso.cargos} />
-          </Secao>
-        )}
-
-        {/* O FAQ antes do texto do ato, e não depois: ele é a leitura do
-            documento, e o documento é a evidência atrás dela. Cada resposta
-            tem link para o ato que a produziu, logo abaixo. */}
-        {temFaq(concurso.origens) && (
-          <Secao {...cabecalhoDoFaq(concurso.origens)}>
-            <Faq origens={concurso.origens} />
-          </Secao>
-        )}
-
-        {/* A avaliação do concurso, aqui e em nenhum outro ponto da página:
-            um voto por concurso por pessoa, decisão do parceiro humano. O
-            porquê deste ponto e não do rodapé está medido no comentário do
-            componente — em resumo, é o fim da LEITURA. O que vem abaixo,
-            quando vem, é o ato como saiu no diário: a fonte para conferir,
-            não mais coisa nossa para avaliar. Pôr o controle depois dele o
-            empurraria para baixo da dobra em todos os concursos do acervo,
-            em vez de metade. */}
-        <Avaliacao slug={concurso.slug} />
-
-        {concurso.origens.length > 0 && (
-          <Secao
-            titulo={
-              concurso.origens.length === 1
-                ? "O ato publicado"
-                : "Os atos publicados"
-            }
-            apoio="O ato como saiu no diário oficial, na íntegra. Pode ser o extrato, não o edital completo: o edital com anexos e programa de provas fica no site da banca."
-          >
-            <AtosPublicados origens={concurso.origens} />
-          </Secao>
-        )}
-
-        {/* O rodapé também é um bloco, com a mesma sangria lateral e menos
-            altura: é uma nota sobre a página, não uma seção dela. */}
-        <p className="rounded-cartao bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600 sm:px-8">
-          {textoDeRodape(concurso)}
-        </p>
+          {/* A lateral da Task 14 (o prazo, os alertas, os concursos
+              próximos): vazia por ora, só reservando a coluna. */}
+          <aside className="hidden lg:block" />
+        </div>
       </div>
     </div>
   );

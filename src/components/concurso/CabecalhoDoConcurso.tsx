@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AcoesDoConcurso } from "@/components/concurso/AcoesDoConcurso";
+import { Azulejos, CANTO_DO_CABECALHO } from "@/components/marca/Azulejos";
 import { Selo } from "@/components/ui/Cartao";
 import { Etiqueta } from "@/components/ui/Etiqueta";
 import type { ConcursoDetalhe } from "@/lib/dominio";
@@ -51,13 +52,20 @@ export function CabecalhoDoConcurso({
   return (
     <header className="relative overflow-hidden rounded-painel bg-cartao p-5 shadow-cartao md:px-10 md:py-9">
       {/*
-        O canto de azulejos do protótipo (`Concurso.dc.html:78-85`) pede
+        O canto de azulejos do protótipo (`Concurso.dc.html:80-87`). Pedia
         1216px de header (`Main.dc.html`, sangria de 112px a 1440px) para
-        abrir espaço ao lado do título sem cobri-lo. Esta página é a coluna
-        estreita de `max-w-[880px]` (Task 9), onde esse espaço não existe: um
-        título de duas linhas passaria por baixo do canto. Fica de fora até a
-        Task 13, que muda o container da página para a largura do protótipo.
+        abrir espaço ao lado do título sem cobri-lo — o que só existe desde a
+        Task 13, que trocou o container da página pela largura do protótipo.
+        `hidden lg:grid` porque abaixo disso a coluna de texto já usa a
+        largura inteira do cartão e o canto cobriria o título; o
+        `md:max-w-[760px]` da coluna de texto, logo abaixo, é o que garante
+        que um `h1` de duas linhas a 1440px não passe por baixo dele.
       */}
+      <Azulejos
+        ladrilhos={CANTO_DO_CABECALHO}
+        colunas={3}
+        className="absolute top-0 right-0 hidden h-32 w-48 lg:grid"
+      />
       <div className="flex items-start gap-4 md:gap-8">
         <div className="md:hidden">
           <Selo sigla={concurso.orgao.sigla} tamanho={44} />

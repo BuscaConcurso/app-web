@@ -1,3 +1,4 @@
+import { Icone } from "@/components/ui/Icone";
 import type { EventoDoCronograma } from "@/lib/dominio";
 import {
   faseDoEvento,
@@ -5,11 +6,12 @@ import {
   ordenarEventos,
   type FaseDoEvento,
 } from "@/lib/cronograma";
-import { dataLonga } from "@/lib/formato";
+import { dataLonga, diasAte, paraDataLocal } from "@/lib/formato";
 import { ROTULO_EVENTO } from "@/lib/rotulos";
 
 /**
- * A linha do tempo do concurso, com a procedência de cada data embaixo dela.
+ * A linha do tempo do concurso, com a procedência de cada data embaixo dela:
+ * `Concurso.dc.html:106-131`.
  *
  * A procedência é o ponto. Qualquer site copia uma data de edital; o que este
  * mostra é de onde ela saiu, e o ato inteiro fica na mesma página, a um clique
@@ -34,19 +36,17 @@ import { ROTULO_EVENTO } from "@/lib/rotulos";
  * é a ordem e onde ela está nela; o intervalo está escrito na data, que fica
  * ao lado de cada ponto.
  *
- * A distribuição também é o que dispensa rolagem horizontal e eixo deitado:
- * p90 = 4 eventos, p99 = 8, máximo 25. Vertical, uma linha por evento, cresce
- * sem estourar nada — e a 375px não há coluna fixa nenhuma para estourar.
+ * ## O que o marcador diz
  *
- * ## O que o ponto diz
- *
- * Cheio e cinza é passado; vazado é futuro; verde e maior é o que está
- * acontecendo hoje. O trilho entre um ponto e o próximo herda a cor do de
- * cima, então a parte percorrida do concurso fica mais escura que a que
- * falta. Quando há passado e futuro e nada acontecendo hoje — 200 dos 4.479
- * concursos com cronograma —, entra uma marca de "hoje" no degrau entre os
- * dois; quando algum evento é hoje (39 concursos), o próprio ponto já diz, e
- * a marca cala para não repetir.
+ * Passado é um círculo cheio, verde, com um visto branco. Hoje, quando um
+ * evento acontece agora, herda a cor de "passado" e o texto vira verde
+ * (`text-verde-texto`). O primeiro evento futuro com data — o "próximo
+ * marco" — ganha um anel em urucum, cor de prazo curto; os futuros depois
+ * dele e os sem data são um anel pontilhado neutro. Quando hoje cai **entre**
+ * dois eventos, sem nenhum acontecendo agora (200 dos 4.479 concursos com
+ * cronograma), entra uma pílula "HOJE" no meio da linha; quando algum evento
+ * é hoje (39 concursos), o próprio ponto já diz, e a pílula cala para não
+ * repetir.
  *
  * "Hoje" aqui é data civil brasileira, de `hojeEmSaoPaulo`, e não o relógio
  * de quem renderiza: ver o comentário lá para o defeito de três horas que
@@ -64,16 +64,22 @@ export function Cronograma({
 }) {
   const ordenados = ordenarEventos(eventos);
   const marca = indiceDaMarcaDeHoje(ordenados, hoje);
+  const fases = ordenados.map((evento) => faseDoEvento(evento, hoje));
+  // O "próximo marco": o primeiro evento datado que ainda não chegou. Só ele
+  // ganha o anel de urucum; os futuros depois dele são o anel neutro, para
+  // não gritar duas coisas ao mesmo tempo.
+  const indiceDoProximoMarco = fases.indexOf("futuro");
 
   // Os eventos e, quando ela tem o que separar, a marca de hoje entre dois
   // deles. Uma lista só, para que o trilho saiba quem é o último e pare ali.
   const linhas: (
-    | { chave: string; evento: EventoDoCronograma; fase: FaseDoEvento }
+    | { chave: string; evento: EventoDoCronograma; fase: FaseDoEvento; proximoMarco: boolean }
     | { chave: string; marcaDeHoje: true }
   )[] = ordenados.map((evento, indice) => ({
     chave: `${evento.tipo}-${evento.inicio ?? evento.fim ?? indice}-${indice}`,
     evento,
-    fase: faseDoEvento(evento, hoje),
+    fase: fases[indice],
+    proximoMarco: indice === indiceDoProximoMarco,
   }));
   if (marca !== null) {
     linhas.splice(marca, 0, { chave: "marca-de-hoje", marcaDeHoje: true });
@@ -83,101 +89,98 @@ export function Cronograma({
     <ol className="flex flex-col">
       {linhas.map((linha, indice) => {
         const ultima = indice === linhas.length - 1;
-        // O trilho é desenhado **abaixo** de cada ponto, até a borda de baixo
-        // do item: assim o trecho que liga dois eventos pertence ao de cima e
-        // herda a cor dele, e o último item simplesmente não desenha trecho
-        // nenhum. A alternativa (um trilho só, atrás da lista) não saberia
-        // onde trocar de cor nem onde parar.
-        const trilho =
-          "evento" in linha && linha.fase === "passado"
-            ? "bg-linha"
-            : "bg-linha";
 
         return (
           <li
             key={linha.chave}
-            // `pl-5` abre a calha do trilho; o ponto e o trecho de trilho são
-            // absolutos dentro dela. Nada aqui é item de flex com largura
-            // mínima, que é o que já deu rolagem lateral neste projeto três
-            // vezes.
-            className="relative pb-4 pl-5 last:pb-0"
+            className="flex gap-5"
             {...("marcaDeHoje" in linha ? { "aria-hidden": true } : {})}
           >
-            {!ultima && (
-              <span
-                aria-hidden="true"
-                className={`absolute top-[18px] bottom-0 left-[6px] w-px -translate-x-1/2 ${trilho}`}
-              />
-            )}
+            {/* A coluna do marcador: 28px, como o protótipo, com o trilho
+                (um traço de 2px em `border-linha`, uniforme do início ao
+                fim) descendo por trás dele até o próximo item. */}
+            <div className="flex w-7 shrink-0 flex-col items-center">
+              {"marcaDeHoje" in linha ? (
+                <span className="my-1.5 size-4 shrink-0 rounded-full bg-tinta-900 ring-[5px] ring-rebaixada" />
+              ) : (
+                <Marcador
+                  fase={linha.fase}
+                  // "Hoje" no próprio evento é pelo menos tão urgente quanto
+                  // o próximo marco — "as inscrições encerram hoje" não é
+                  // menos premente que "encerram amanhã" — então herda o
+                  // mesmo anel de urucum, e não o visto verde do passado.
+                  destaque={linha.proximoMarco || linha.fase === "hoje"}
+                />
+              )}
+              {!ultima && (
+                <span aria-hidden="true" className="w-0.5 grow bg-linha" />
+              )}
+            </div>
 
             {"marcaDeHoje" in linha ? (
-              <>
-                <span
-                  aria-hidden="true"
-                  className="absolute top-[5px] left-[6px] size-1.5 -translate-x-1/2 rounded-full bg-acao"
-                />
-                <p className="text-[11px] leading-4 font-semibold tracking-[0.06em] text-verde-texto uppercase">
-                  hoje, {dataLonga(hoje)}
-                </p>
-              </>
+              <MarcaDeHoje eventos={ordenados} fases={fases} hoje={hoje} ultima={ultima} />
             ) : (
-              <>
-                <span
-                  aria-hidden="true"
-                  className={`absolute left-[6px] -translate-x-1/2 rounded-full ${PONTO[linha.fase]}`}
-                />
-                <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
+              <div className={`flex flex-1 flex-wrap items-start justify-between gap-4 ${ultima ? "" : "pb-6"}`}>
+                <div className="min-w-0">
                   <p
                     className={[
-                      "numero w-[13.5rem] shrink-0 text-sm",
-                      linha.fase === "hoje"
-                        ? "font-medium text-verde-texto"
-                        : linha.fase === "passado"
-                          ? "text-tinta-600"
-                          : "text-tinta-900",
+                      "text-[16px] font-bold",
+                      linha.proximoMarco || linha.fase === "hoje"
+                        ? "text-urucum-texto"
+                        : "text-tinta-900",
                     ].join(" ")}
                   >
-                    {quando(linha.evento)}
+                    {ROTULO_EVENTO[linha.evento.tipo]}
+                    {linha.evento.localidades.length > 0 && (
+                      <span className="font-normal text-tinta-600">
+                        {" · "}
+                        {linha.evento.localidades.join(", ")}
+                      </span>
+                    )}
                   </p>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-tinta-900">
-                      {ROTULO_EVENTO[linha.evento.tipo]}
-                      {linha.evento.localidades.length > 0 && (
-                        <span className="font-normal text-tinta-600">
-                          {" · "}
-                          {linha.evento.localidades.join(", ")}
-                        </span>
-                      )}
-                    </p>
-                    {linha.evento.evidencia && (
-                      <p className="mt-0.5 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
-                        <span className="text-tinta-500">Lido de: </span>
-                        {linha.evento.evidencia}
+                  {linha.evento.evidencia ? (
+                    <p className="mt-1 flex items-center gap-1.5 text-[13px] leading-5 text-tinta-600">
+                      <Icone nome="documento" tamanho={14} className="shrink-0" />
+                      <span className="min-w-0">
+                        Lido de: {linha.evento.evidencia}
                         {linha.evento.ato && (
                           <>
                             {" "}
-                            {/* A âncora para o ato que produziu esta data. É o
-                                diferencial do produto e não muda de alvo com o
-                                trilho: o `id` continua no item do ato, dentro
-                                do bloco "Os atos publicados". */}
+                            {/* A âncora para o ato que produziu esta data. É
+                                o diferencial do produto e não muda de alvo
+                                com o trilho: o `id` continua no item do ato,
+                                dentro do bloco "Fontes". */}
                             <a
                               href={`#ato-${linha.evento.ato}`}
-                              className="whitespace-nowrap underline underline-offset-4 hover:text-tinta-900"
+                              className="whitespace-nowrap font-medium text-link underline underline-offset-4 hover:text-link-hover"
                             >
                               ver o ato
                             </a>
                           </>
                         )}
-                      </p>
-                    )}
-                    {linha.evento.observacao && (
-                      <p className="mt-0.5 text-[12px] leading-5 text-tinta-600">
+                      </span>
+                    </p>
+                  ) : (
+                    linha.evento.observacao && (
+                      <p className="mt-1 text-[13px] leading-5 text-tinta-500">
                         {linha.evento.observacao}
                       </p>
-                    )}
-                  </div>
+                    )
+                  )}
                 </div>
-              </>
+                <p
+                  className={[
+                    "numero shrink-0 text-[15px] font-semibold whitespace-nowrap",
+                    linha.fase === "sem-data"
+                      ? "text-tinta-500 italic"
+                      : linha.proximoMarco || linha.fase === "hoje"
+                        ? "text-urucum-texto"
+                        : "text-tinta-600",
+                  ].join(" ")}
+                >
+                  {quando(linha.evento)}
+                </p>
+              </div>
             )}
           </li>
         );
@@ -187,19 +190,93 @@ export function Cronograma({
 }
 
 /**
- * O ponto, por fase. O `top` acompanha o tamanho para que todos os centros
- * caiam na mesma altura da primeira linha de texto (20px de caixa, centro em
- * 10px), e não o topo.
+ * O marcador de 24px de cada evento, pela fase.
  *
- * O vazado do futuro é `bg-cartao` e não transparente: o trilho passa por
- * trás, e um ponto transparente viraria um anel com uma linha no meio.
+ * `destaque` é o próximo marco (o primeiro evento futuro datado) OU um
+ * evento acontecendo hoje: "as inscrições encerram hoje" não é menos urgente
+ * que "encerram amanhã", e os dois levam o mesmo anel de urucum. Só o
+ * passado puro leva o visto verde.
  */
-const PONTO: Record<FaseDoEvento, string> = {
-  passado: "top-[5px] size-2.5 bg-linha",
-  hoje: "top-1 size-3 bg-acao ring-[3px] ring-cartao",
-  futuro: "top-[5px] size-2.5 bg-cartao ring-[1.5px] ring-linha",
-  "sem-data": "top-[7px] size-1.5 bg-linha",
-};
+function Marcador({
+  fase,
+  destaque,
+}: {
+  fase: FaseDoEvento;
+  destaque: boolean;
+}) {
+  if (fase === "passado") {
+    return (
+      <span
+        aria-hidden="true"
+        className="flex size-6 shrink-0 items-center justify-center rounded-full bg-acao text-acao-texto"
+      >
+        <Icone nome="check" tamanho={13} traco={2.6} />
+      </span>
+    );
+  }
+  if (destaque) {
+    return (
+      <span
+        aria-hidden="true"
+        className="size-6 shrink-0 rounded-full border-[2.5px] border-urucum bg-urucum-fundo"
+      />
+    );
+  }
+  // Futuro (sem ser o próximo marco nem hoje) e sem-data: o mesmo anel
+  // pontilhado neutro, porque nenhum dos dois é o que a pessoa precisa olhar
+  // agora.
+  return (
+    <span
+      aria-hidden="true"
+      className="size-6 shrink-0 rounded-full border-2 border-dashed border-linha bg-cartao"
+    />
+  );
+}
+
+/**
+ * A marca de "hoje" quando ela cai entre dois eventos, sem nenhum
+ * acontecendo agora: a pílula "HOJE" e, quando o próximo marco é o fim das
+ * inscrições, quantos dias faltam para ele.
+ *
+ * `bg-tinta-900 text-cartao` e não o dourado do protótipo (`Concurso.
+ * dc.html:121`, `#FCF1CF`/`#5C4500`) porque este segundo tom não é token: o
+ * par que já passa `contraste.test.ts` nos dois temas é `cartao` sobre
+ * `tinta-900`, e é ele que a pílula usa.
+ */
+function MarcaDeHoje({
+  eventos,
+  fases,
+  hoje,
+  ultima,
+}: {
+  eventos: EventoDoCronograma[];
+  fases: FaseDoEvento[];
+  hoje: string;
+  ultima: boolean;
+}) {
+  const indiceDoProximoMarco = fases.indexOf("futuro");
+  const proximoMarco = indiceDoProximoMarco >= 0 ? eventos[indiceDoProximoMarco] : null;
+  // Só fala em "faltam N dias para encerrar" quando o próprio próximo marco é
+  // o fim das inscrições — para qualquer outro evento (uma prova, um
+  // resultado), "encerrar" seria uma afirmação que o ato não fez.
+  const dataDoFim =
+    proximoMarco?.tipo === "fim_inscricao" ? (proximoMarco.inicio ?? proximoMarco.fim) : null;
+  const dias = dataDoFim ? diasAte(dataDoFim, paraDataLocal(hoje)) : null;
+
+  return (
+    <div className={`flex flex-1 items-center gap-3 ${ultima ? "" : "pb-6"}`}>
+      <span className="flex h-[26px] items-center rounded-full bg-tinta-900 px-2.5 text-[12px] font-bold text-cartao">
+        HOJE
+      </span>
+      <span className="numero text-[15px] font-semibold text-tinta-900">
+        {dataLonga(hoje)}
+        {dias !== null && dias > 0 && (
+          <> · falta {dias} {dias === 1 ? "dia" : "dias"} para encerrar</>
+        )}
+      </span>
+    </div>
+  );
+}
 
 /**
  * "18 de maio de 2026", "10/03/2026 a 15/04/2026", ou a verdade quando o ato
@@ -211,6 +288,6 @@ function quando(evento: EventoDoCronograma): string {
     return `${dataLonga(evento.inicio)} a ${dataLonga(evento.fim)}`;
   }
   const data = evento.inicio ?? evento.fim;
-  if (!data) return "sem data no ato";
+  if (!data) return "sem data";
   return evento.hora ? `${dataLonga(data)}, ${evento.hora}` : dataLonga(data);
 }

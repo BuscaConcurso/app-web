@@ -8,7 +8,17 @@
  * hex nos dois temas, claro e escuro.
  */
 
-export type CorDeAzulejo = "verde" | "verdeAzulejo" | "ouro" | "anil" | "papel";
+export type CorDeAzulejo =
+  | "verde"
+  | "verdeAzulejo"
+  | "ouro"
+  | "anil"
+  | "papel"
+  // O sexto, só para o canto do cabeçalho do concurso (Task 13): ladrilho
+  // que não pinta fundo nenhum, para o branco do protótipo (`Concurso.
+  // dc.html:81,84,85`) virar "deixa ver o cartão de baixo" em vez de um hex
+  // fixo — que destoaria do `bg-cartao` escuro no tema escuro.
+  | "transparente";
 
 export type Ladrilho = {
   fundo: CorDeAzulejo;
@@ -21,6 +31,7 @@ const COR: Record<CorDeAzulejo, string> = {
   ouro: "#F2C230",
   anil: "#1D3F8F",
   papel: "#F6F4EE",
+  transparente: "transparent",
 };
 
 /** Hero da home, 4×4, transcrito de `Main.dc.html:83-98` (célula de 112px). */
@@ -57,6 +68,23 @@ export const FAIXA_MARCA: Ladrilho[] = [
   { fundo: "ouro", circulo: { x: "-100%", y: "0%", d: "200%", cor: "verde" } },
   { fundo: "anil", circulo: { x: "25%", y: "25%", d: "50%", cor: "ouro" } },
   { fundo: "verdeAzulejo", circulo: { x: "0%", y: "0%", d: "200%", cor: "papel" } },
+];
+
+/**
+ * O canto do cabeçalho do concurso, 3×2, transcrito de
+ * `Concurso.dc.html:80-87` (célula de 64px). Três dos seis ladrilhos são
+ * "transparente": no protótipo eles são `#FFFFFF` sólido, mas o cabeçalho
+ * real é `bg-cartao` (branco no claro, quase preto no escuro), e um branco
+ * fixo ali viraria um retalho aceso sobre o cartão escuro. Sem fundo, o
+ * ladrilho deixa ver o próprio cartão nos dois temas.
+ */
+export const CANTO_DO_CABECALHO: Ladrilho[] = [
+  { fundo: "transparente", circulo: { x: "0%", y: "0%", d: "0%", cor: "transparente" } },
+  { fundo: "ouro", circulo: { x: "-100%", y: "0%", d: "200%", cor: "verde" } },
+  { fundo: "anil", circulo: { x: "0%", y: "-100%", d: "200%", cor: "papel" } },
+  { fundo: "transparente", circulo: { x: "0%", y: "0%", d: "0%", cor: "transparente" } },
+  { fundo: "transparente", circulo: { x: "0%", y: "0%", d: "0%", cor: "transparente" } },
+  { fundo: "verde", circulo: { x: "31.25%", y: "31.25%", d: "37.5%", cor: "ouro" } },
 ];
 
 export function Azulejos({
