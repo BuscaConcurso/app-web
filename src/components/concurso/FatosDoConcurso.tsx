@@ -55,53 +55,104 @@ export function FatosDoConcurso({ fatos }: { fatos: Fato[] }) {
   );
 }
 
-function CartaoDoFato({ fato }: { fato: Fato }) {
-  const { icone, cor } = CONFIGURACAO[fato.rotulo];
-
+/**
+ * O cartão de um fato, na forma genérica (ícone, cor, rótulo, valor, apoio):
+ * a mesma caixa de `Concurso.dc.html:90-99`, sem depender dos seis rótulos
+ * fixos do concurso. `FatosDoConcurso`, abaixo, é quem resolve `CONFIGURACAO`
+ * e chama esta forma; a página do órgão (`/orgaos/[slug]`), que tem outros
+ * três fatos (abertos, previstos, total), chama-a direto: é a variante que
+ * `task-15-brief.md` pede "sem quebrar a página do concurso", e o motivo de
+ * isto estar separado da tabela fixa de rótulos.
+ */
+export function CartaoDeFato({
+  icone,
+  cor,
+  rotulo,
+  valor,
+  apoio,
+  informado = true,
+}: {
+  icone: NomeDoIcone;
+  cor: string;
+  rotulo: string;
+  valor: string;
+  apoio?: string;
+  informado?: boolean;
+}) {
   return (
     <div className="flex flex-col gap-2.5 rounded-[16px] bg-cartao p-4 shadow-cartao">
       <span className={`flex size-10 shrink-0 items-center justify-center rounded-[12px] ${cor}`}>
         <Icone nome={icone} tamanho={20} />
       </span>
       <div>
-        <div className="text-[11px] font-bold tracking-[0.05em] text-tinta-500">
-          {fato.rotulo}
-        </div>
+        <div className="text-[11px] font-bold tracking-[0.05em] text-tinta-500">{rotulo}</div>
         <div
           className={
-            fato.informado
+            informado
               ? "font-titulo text-[20px] leading-[1.1] font-bold text-tinta-900"
               : "font-titulo text-[15px] leading-[1.25] font-semibold text-tinta-600"
           }
         >
-          {fato.valor}
+          {valor}
         </div>
-        {fato.apoio && <div className="text-[12px] text-tinta-600">{fato.apoio}</div>}
+        {apoio && <div className="text-[12px] text-tinta-600">{apoio}</div>}
       </div>
     </div>
   );
 }
 
-function CartaoDoCelular({ fato }: { fato: Fato }) {
-  const { icone, cor } = CONFIGURACAO[fato.rotulo];
-
+/** A mesma caixa, na forma compacta do celular (`ConcursoMobile.dc.html:43-48`). */
+export function CartaoDeFatoCelular({
+  icone,
+  cor,
+  valor,
+  apoio,
+  informado = true,
+}: {
+  icone: NomeDoIcone;
+  cor: string;
+  valor: string;
+  apoio?: string;
+  informado?: boolean;
+}) {
   return (
     <div className="flex items-center gap-2.5 rounded-[16px] bg-cartao p-3.5 shadow-cartao">
       <span className={`flex size-9 shrink-0 items-center justify-center rounded-[10px] ${cor}`}>
         <Icone nome={icone} tamanho={18} />
       </span>
       <div className="min-w-0">
-        <div
-          className={
-            fato.informado
-              ? "text-[18px] font-bold text-tinta-900"
-              : "text-[15px] font-bold text-tinta-600"
-          }
-        >
-          {fato.valor}
+        <div className={informado ? "text-[18px] font-bold text-tinta-900" : "text-[15px] font-bold text-tinta-600"}>
+          {valor}
         </div>
-        <div className="truncate text-[12px] text-tinta-600">{fato.apoio}</div>
+        {apoio && <div className="truncate text-[12px] text-tinta-600">{apoio}</div>}
       </div>
     </div>
+  );
+}
+
+function CartaoDoFato({ fato }: { fato: Fato }) {
+  const { icone, cor } = CONFIGURACAO[fato.rotulo];
+  return (
+    <CartaoDeFato
+      icone={icone}
+      cor={cor}
+      rotulo={fato.rotulo}
+      valor={fato.valor}
+      apoio={fato.apoio}
+      informado={fato.informado}
+    />
+  );
+}
+
+function CartaoDoCelular({ fato }: { fato: Fato }) {
+  const { icone, cor } = CONFIGURACAO[fato.rotulo];
+  return (
+    <CartaoDeFatoCelular
+      icone={icone}
+      cor={cor}
+      valor={fato.valor}
+      apoio={fato.apoio}
+      informado={fato.informado}
+    />
   );
 }

@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Cartao, Selo } from "@/components/ui/Cartao";
+import { Selo } from "@/components/ui/Cartao";
 import { Paginacao } from "@/components/ui/Paginacao";
 import { Trilha, type Degrau } from "@/components/ui/Trilha";
-import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
+import { CartaoDeFato } from "@/components/concurso/FatosDoConcurso";
+import { ListaDeConcursos } from "@/components/concurso/ListaDeConcursos";
 import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
 import { avisoDoAcervo, obterOrgao } from "@/lib/concursos";
 import { ordenar } from "@/lib/consulta";
 import { nomeCurtoDoOrgao, resumoDoOrgao } from "@/lib/orgaos";
-import { numero } from "@/lib/formato";
+import { hojeCivilEmSaoPaulo, numero } from "@/lib/formato";
 import { linhaDeContexto } from "@/lib/rotulos";
+import { tomDoConcurso } from "@/lib/situacao";
 
 /**
  * A página do órgão: o nível acima do concurso.
@@ -82,7 +84,9 @@ export default async function PaginaDoOrgao(
   if (!encontrado) notFound();
 
   const { orgao, concursos } = encontrado;
-  const hoje = new Date();
+  // Data civil de São Paulo, a mesma de /concursos e /busca: "aberto" e
+  // "urgente" não podem depender do fuso de quem está lendo.
+  const hoje = hojeCivilEmSaoPaulo();
   const aviso = await avisoDoAcervo();
 
   // A mesma ordem padrão da busca: o que ainda dá para fazer primeiro, o que
@@ -93,6 +97,15 @@ export default async function PaginaDoOrgao(
   const paginas = Math.max(Math.ceil(ordenados.length / POR_PAGINA), 1);
   const pagina = Math.min(paginaPedida((await props.searchParams).pagina), paginas);
   const itens = ordenados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+
+  // Os três fatos do cabeçalho: abertos (inclui os urgentes, que também têm
+  // inscrição aberta), previstos e o total, na mesma caixa de
+  // `FatosDoConcurso` (`CartaoDeFato`, a forma genérica dela).
+  const abertos = ordenados.filter((concurso) => {
+    const tom = tomDoConcurso(concurso, hoje);
+    return tom === "aberto" || tom === "urgente";
+  }).length;
+  const previstos = ordenados.filter((concurso) => tomDoConcurso(concurso, hoje) === "previsto").length;
 
   // Dois degraus: Concursos > este órgão. A mesma lista desenha a tela e o
   // `BreadcrumbList` — ver `Trilha` para o defeito que essa regra guarda.
@@ -107,29 +120,62 @@ export default async function PaginaDoOrgao(
   ];
 
   return (
-    <div className="mx-auto max-w-[880px] px-4 py-5 sm:px-6">
+    <div className="px-4 py-8 md:px-[112px] md:py-12">
       <Trilha degraus={trilha} />
 
-      <div className="flex flex-col gap-6">
-        <Cartao as="header" className="p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <Selo sigla={orgao.sigla} />
+      <div className="mt-4 flex flex-col gap-6">
+        {/* O mesmo desenho do cabeçalho do concurso (`CabecalhoDoConcurso`):
+            o selo grande, o `h1` e a linha de contexto. O `h1` aqui é o nome
+            do órgão, não o de um cargo, e o acervo tem nome de órgão de até
+            90 caracteres, então o tamanho fica mais contido que o do
+            concurso (30/48px) para não estourar a 360px. */}
+        <header className="rounded-painel bg-cartao p-5 shadow-cartao md:px-10 md:py-9">
+          <div className="flex items-start gap-4 md:gap-6">
+            <div className="md:hidden">
+              <Selo sigla={orgao.sigla} tamanho={44} />
+            </div>
+            <div className="hidden md:block">
+              <Selo sigla={orgao.sigla} tamanho={72} />
+            </div>
             <div className="min-w-0">
-              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance break-words">
+              <h1 className="font-titulo text-[22px] leading-[1.15] font-bold tracking-[-0.02em] break-words text-balance md:text-[32px] md:leading-[1.1] md:tracking-[-0.025em]">
                 {orgao.nome}
               </h1>
-              <p className="mt-1 text-sm text-tinta-600">
+              <p className="mt-1.5 text-sm text-tinta-600 md:text-[15px]">
                 {linhaDeContexto(orgao)}
               </p>
             </div>
           </div>
-          {/* A frase antes da lista, e não um contador ao lado do título: com
-              um concurso só — 195 dos 466 órgãos — o que a página tem a dizer
-              é justamente que ela não é um índice. Ver `resumoDoOrgao`. */}
+
+          <div className="mt-6 grid grid-cols-3 gap-2">
+            <CartaoDeFato
+              icone="aberto"
+              cor="bg-verde-fundo text-verde-texto"
+              rotulo="ABERTOS"
+              valor={numero(abertos)}
+            />
+            <CartaoDeFato
+              icone="previsto"
+              cor="bg-ouro-fundo text-ouro-sinal-texto"
+              rotulo="PREVISTOS"
+              valor={numero(previstos)}
+            />
+            <CartaoDeFato
+              icone="lista"
+              cor="bg-anil-fundo text-anil-texto"
+              rotulo="CONCURSOS"
+              valor={numero(ordenados.length)}
+            />
+          </div>
+
+          {/* A frase antes da lista, e não só o número da caixa "CONCURSOS"
+              acima: com um concurso só (195 dos 466 órgãos), o que a página
+              tem a dizer é justamente que ela não é um índice. Ver
+              `resumoDoOrgao`. */}
           <p className="mt-5 text-sm leading-6 text-tinta-600">
             {resumoDoOrgao(ordenados.length)}
           </p>
-        </Cartao>
+        </header>
 
         <section>
           <h2 className="sr-only">
@@ -137,19 +183,9 @@ export default async function PaginaDoOrgao(
               ? "O concurso deste órgão"
               : "Os concursos deste órgão"}
           </h2>
-          <ul className="grid gap-2">
-            {itens.map((concurso) => (
-              // `min-w-0` pelo mesmo motivo da busca: item de grid tem
-              // `min-width: auto`, e uma etiqueta que não encolhe estica a
-              // lista e a página inteira.
-              <li key={concurso.slug} className="min-w-0">
-                {/* `semOrgao`: o órgão é o `h1` desta página. Repeti-lo em
-                    cada cartão o escreveria três vezes por cartão — selo,
-                    nome, e nome outra vez dentro do título. */}
-                <CartaoConcurso concurso={concurso} hoje={hoje} semOrgao />
-              </li>
-            ))}
-          </ul>
+          {/* `semOrgao`: o órgão é o `h1` desta página. Repeti-lo em cada
+              linha ou cartão o escreveria de novo, ver `orgaoECargo`. */}
+          <ListaDeConcursos itens={itens} hoje={hoje} semOrgao />
         </section>
 
         {paginas > 1 && (

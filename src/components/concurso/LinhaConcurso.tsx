@@ -1,114 +1,180 @@
-import Link from "next/link";
-import { Cartao, Selo } from "@/components/ui/Cartao";
-import { Etiqueta } from "@/components/ui/Etiqueta";
-import type { ConcursoResumo, UltimoAto } from "@/lib/dominio";
-import { moeda, vagasTexto } from "@/lib/formato";
-import { ROTULO_ESCOLARIDADE, textoDoAto, tituloSemOrgao } from "@/lib/rotulos";
-import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
+import { BotaoLink } from "@/components/ui/Botao";
+import { Selo } from "@/components/ui/Cartao";
+import { BotaoEmBreve } from "@/components/ui/EmBreve";
+import { Icone } from "@/components/ui/Icone";
+import type { ConcursoResumo } from "@/lib/dominio";
+import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
+import { NOME_UF, cargosDoCartao, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos";
 
 /**
- * A versão compacta do cartão, para as faixas da home.
+ * As proporções das colunas de `Main.dc.html:206`
+ * (`2.6fr 1.2fr 0.9fr 1fr 1.2fr 150px`), como grade CSS.
  *
- * Cabe numa linha porque a decisão ali é outra: na faixa de urgência o que
- * importa é o prazo, e na de previstos é saber que existe. O detalhe fica
- * para a lista de resultados.
+ * As duas formas de linha compartilham esta medida: o `<tr>` da home, dentro
+ * de um `<table>` de verdade (que usa `calc()` no `colgroup` para a mesma
+ * razão), e o `<div role="row">` da busca e do órgão, que não são tabela de
+ * verdade por causa da paginação e dos filtros (`task-15-brief.md`).
+ */
+export const COLUNAS_DA_LINHA = "grid-cols-[2.6fr_1.2fr_0.9fr_1fr_1.2fr_150px]";
+
+/**
+ * O órgão e o cargo (ou o que existir no lugar dele), coluna 1 da linha e
+ * cabeçalho do cartão do celular.
  *
- * **O título é o do concurso, e o órgão vai para a linha de apoio.** Era o
- * contrário, e isso tornava dois concursos do mesmo órgão indistinguíveis na
- * mesma faixa (medido na home a 375px: das quatro linhas de "Encerra esta
- * semana", duas eram concursos diferentes da UFU exibindo "Universidade
- * Federal de Uberlândia" nas duas). O `ItemList` estruturado da mesma página
- * já os nomeava separado, então a tela dizia menos que o dado.
+ * `semOrgao` é para a página do órgão: ele já é o `h1` da página, e repetir a
+ * sigla em toda linha da lista dele seria a mesma afirmação duas vezes.
+ */
+export function orgaoECargo(
+  concurso: ConcursoResumo,
+  semOrgao = false,
+): { titulo: string; subtitulo: string } {
+  const cargos = cargosDoCartao(concurso.nomesDeCargo);
+  const edital = tituloDoAto(tituloSemOrgao(concurso.titulo, concurso.orgao));
+  const banca = concurso.banca?.nome && `Banca ${concurso.banca.nome}`;
+
+  if (cargos.informado) {
+    const partes = [!semOrgao && concurso.orgao.sigla, edital, banca].filter(
+      (parte): parte is string => Boolean(parte),
+    );
+    return { titulo: cargos.texto, subtitulo: partes.join(" · ") };
+  }
+
+  if (semOrgao) {
+    const partes = [banca].filter((parte): parte is string => Boolean(parte));
+    return {
+      titulo: edital || "Cargos ainda não informados",
+      subtitulo: partes.length > 0 ? partes.join(" · ") : "Cargos ainda não informados",
+    };
+  }
+
+  const partes = [edital, banca].filter((parte): parte is string => Boolean(parte));
+  return {
+    titulo: concurso.orgao.nome,
+    subtitulo: partes.length > 0 ? partes.join(" · ") : "Cargos ainda não informados",
+  };
+}
+
+/**
+ * O ícone e o texto da coluna "Local".
  *
- * É o mesmo conserto que `CartaoConcurso` recebeu antes ("três cartões
- * seguidos de concursos DIFERENTES diziam Transpetro"), e este componente
- * ficou de fora porque o pedido falava de "página e cards".
+ * `concurso.ufs[0]` e não `concurso.uf`: a lista enxuta de `/busca/<slug>`
+ * (`paraALista`, em `lib/concursos.ts`) não leva `uf`, ninguém a lia antes
+ * desta linha existir, só `ufs`, e os dois concordam sempre (`uf` é
+ * `ufs[0]` quando `ufs` tem um item só).
+ */
+export function localDoConcurso(concurso: ConcursoResumo): {
+  icone: "local" | "globo";
+  texto: string;
+} {
+  return concurso.ufs.length === 1
+    ? { icone: "local", texto: NOME_UF[concurso.ufs[0]] }
+    : { icone: "globo", texto: "Nacional" };
+}
+
+/** O chip curto da coluna "Inscrições até" do desktop: `Main.dc.html:215-260`. */
+export function chipDoPrazo(iso: string, hoje: Date): { texto: string; classe: string } {
+  const dias = diasAte(iso, hoje);
+  if (dias <= 0) return { texto: "hoje", classe: "bg-urucum text-white" };
+  if (dias === 1) return { texto: "amanhã", classe: "bg-urucum-fundo text-urucum-texto" };
+  return { texto: `${dias} dias`, classe: "bg-ouro-fundo text-ouro-sinal-texto" };
+}
+
+/**
+ * A linha de um concurso: `Main.dc.html:208-265`.
  *
- * O título usa `tituloSemOrgao` e não o título inteiro, ao contrário do
- * cartão da busca: aqui não há bloco de órgão nem trilha por perto, mas o
- * órgão está na linha de apoio logo abaixo e o selo está ao lado, e a faixa
- * é desenhada para caber em uma linha, que o título inteiro estoura.
+ * Existe numa forma só, com dois moldes. `as="tr"` é a linha de verdade
+ * dentro do `<table>` da home (`TabelaAbertos`), que a usa para não duplicar
+ * o markup. `as="div"` é `role="row"` solto numa lista, a busca e a página
+ * do órgão, que não são tabela porque têm paginação e filtros por cima, com
+ * as mesmas seis colunas em grade CSS (`COLUNAS_DA_LINHA`) no lugar do
+ * `colgroup`.
  */
 export function LinhaConcurso({
   concurso,
-  acao,
   hoje,
-  ato,
+  as = "tr",
+  semOrgao = false,
 }: {
   concurso: ConcursoResumo;
-  /** O texto do botão muda com a faixa: "Abrir", "Avisar", "Ver". */
-  acao?: string;
-  hoje?: Date;
-  /**
-   * Só na faixa "Últimas atualizações": o motivo de o concurso estar ali. Vira
-   * uma linha com a data da edição e o título do ato, e o selo "Novo" quando
-   * é a primeira aparição do concurso no Diário.
-   */
-  ato?: UltimoAto;
+  hoje: Date;
+  as?: "tr" | "div";
+  /** Só a página do órgão: esconde a sigla da coluna 1, que já é o `h1`. */
+  semOrgao?: boolean;
 }) {
-  const tom = tomDoConcurso(concurso, hoje);
-  const estilo = ESTILO_DO_TOM[tom];
-  const escolaridade = concurso.escolaridades[0];
+  const { titulo, subtitulo } = orgaoECargo(concurso, semOrgao);
+  const vagas = quantidade(concurso.vagas);
+  const { icone: iconeLocal, texto: textoLocal } = localDoConcurso(concurso);
+  const prazo = concurso.inscricoesAte ? chipDoPrazo(concurso.inscricoesAte, hoje) : null;
 
-  const resumo = [
-    concurso.orgao.nome,
-    vagasTexto(concurso.vagas, concurso.cadastroReserva).toLowerCase(),
-    escolaridade ? ROTULO_ESCOLARIDADE[escolaridade].toLowerCase() : null,
-    concurso.salarioAte ? `até ${moeda(concurso.salarioAte)}` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const Raiz = as;
+  const Celula = as === "tr" ? "td" : "div";
+  const emGrade = as === "div";
 
   return (
-    <Cartao
-      tom={tom}
-      as="article"
-      className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3"
+    <Raiz
+      role={emGrade ? "row" : undefined}
+      className={
+        emGrade
+          ? `grid ${COLUNAS_DA_LINHA} h-[88px] items-center gap-4 border-b border-linha-fraca px-5 text-[15px]`
+          : "h-[88px] border-b border-linha-fraca text-[15px]"
+      }
     >
-      <Selo sigla={concurso.orgao.sigla} tom={tom} tamanho="sm" />
-
-      {/* `min-w-0 basis-[16rem]` e não `min-w-[16rem]`, e `wrap-anywhere` no
-          título: um título de ato sem espaço (do tipo
-          "11/2026/SEGAP/COALEP/...") esticava a linha a 1.044px numa tela de
-          360px, medido na faixa "Previstos" da home. `overflow-wrap:
-          anywhere` é o que reduz a largura mínima intrínseca do bloco
-          (`break-word` não reduz), e `min-w-0` deixa o item de flex encolher
-          abaixo dela. A base de 16rem mantém o selo e o botão na mesma linha
-          quando cabe. */}
-      <div className="min-w-0 flex-1 basis-[16rem]">
-        <h3 className="font-titulo text-base leading-6 font-semibold wrap-anywhere">
-          <Link
-            href={`/concursos/${concurso.slug}`}
-            className="hover:underline hover:underline-offset-4"
-          >
-            {tituloSemOrgao(concurso.titulo, concurso.orgao)}
-          </Link>
-        </h3>
-        {ato && (
-          // `truncate` e o título inteiro no `title`: há ato com mais de cem
-          // caracteres de título, e a faixa foi desenhada para uma linha.
-          <p
-            className={`numero mt-1 truncate text-xs ${estilo.apoio}`}
-            title={textoDoAto(ato, concurso.titulo)}
-          >
-            {textoDoAto(ato, concurso.titulo)}
-          </p>
-        )}
-        <div className="mt-1.5 flex flex-wrap items-center gap-2">
-          {ato?.primeiro && <Etiqueta>Novo</Etiqueta>}
-          <Etiqueta tom={tom} comPonto>
-            {rotuloDeSituacao(concurso, hoje)}
-          </Etiqueta>
-          <p className={`numero text-xs ${estilo.apoio}`}>{resumo}</p>
+      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? "min-w-0" : "px-5"}>
+        <div className="flex min-w-0 items-center gap-3.5">
+          <Selo sigla={concurso.orgao.sigla} tamanho={44} />
+          <div className="min-w-0">
+            <div className="truncate font-bold">{titulo}</div>
+            <div className="mt-0.5 truncate text-[13px] text-tinta-600">{subtitulo}</div>
+          </div>
         </div>
-      </div>
+      </Celula>
 
-      <Link
-        href={`/concursos/${concurso.slug}`}
-        className="ml-auto inline-flex h-[30px] items-center rounded-controle bg-tinta-900 px-4 text-[12px] font-semibold text-cartao hover:bg-tinta-600"
-      >
-        {acao ?? "Abrir"}
-      </Link>
-    </Cartao>
+      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? "min-w-0" : "px-0"}>
+        <span className="flex min-w-0 items-center gap-1.5 text-tinta-600">
+          <Icone nome={iconeLocal} tamanho={16} className="shrink-0" />
+          <span className="truncate">{textoLocal}</span>
+        </span>
+      </Celula>
+
+      <Celula role={emGrade ? "cell" : undefined} className={`font-semibold ${emGrade ? "" : "px-0"}`}>
+        {vagas === null ? <span className="text-tinta-500">a definir</span> : numero(vagas)}
+      </Celula>
+
+      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "px-0"}>
+        {concurso.salarioAte === null ? (
+          <span className="text-tinta-500">a definir</span>
+        ) : (
+          <span className="font-bold text-verde-texto">{moeda(concurso.salarioAte)}</span>
+        )}
+      </Celula>
+
+      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "px-0"}>
+        {concurso.inscricoesAte && prazo ? (
+          <span className="flex items-center gap-2">
+            <span className="font-semibold">{dataCurta(concurso.inscricoesAte)}</span>
+            <span className={`flex h-6 items-center rounded-full px-2 text-xs font-bold ${prazo.classe}`}>
+              {prazo.texto}
+            </span>
+          </span>
+        ) : (
+          <span className="text-tinta-500">a definir</span>
+        )}
+      </Celula>
+
+      <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "px-5"}>
+        <div className="flex items-center justify-end gap-1.5">
+          <BotaoEmBreve
+            recurso="salvos"
+            aria-label="Salvar"
+            className="flex size-10 shrink-0 items-center justify-center rounded-controle text-tinta-600 hover:bg-rebaixada"
+          >
+            <Icone nome="salvar" tamanho={18} />
+          </BotaoEmBreve>
+          <BotaoLink href={`/concursos/${concurso.slug}`} variante="contorno" tamanho="sm" iconeDepois="seta">
+            Ver
+          </BotaoLink>
+        </div>
+      </Celula>
+    </Raiz>
   );
 }

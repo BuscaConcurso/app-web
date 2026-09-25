@@ -31,16 +31,23 @@ import {
  * formulário próprio que envia no Enter, com os outros filtros em campos
  * ocultos para não se perderem no caminho.
  */
+/**
+ * O quadradinho de 20px: fica maior no visual novo, mas continua decorativo
+ * (`aria-hidden`) e o quadrado de uma âncora, não uma caixa de seleção de
+ * verdade. Ver o cabeçalho do arquivo para o porquê de não ser um
+ * `<input type="checkbox">`. Marcado, o fundo é `bg-acao` (R7: `acao` é
+ * superfície, não texto).
+ */
 function Quadradinho({ marcado }: { marcado: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={`flex size-[16px] shrink-0 items-center justify-center rounded-[5px] ${
+      className={`flex size-5 shrink-0 items-center justify-center rounded-[6px] ${
         marcado ? "bg-acao" : "bg-linha"
       }`}
     >
       {marcado && (
-        <svg viewBox="0 0 12 12" fill="none" className="size-3 text-white">
+        <svg viewBox="0 0 12 12" fill="none" className="size-3.5 text-white">
           <path
             d="m2.5 6.2 2.3 2.3 4.7-5"
             stroke="currentColor"
@@ -245,7 +252,7 @@ function Painel({
         className={
           emGaveta
             ? "flex flex-col gap-5"
-            : "flex flex-col gap-5 rounded-cartao bg-cartao p-4"
+            : "flex flex-col gap-5 rounded-[20px] bg-cartao p-5 shadow-cartao"
         }
       >
         <div
@@ -279,12 +286,6 @@ function Painel({
         </div>
 
         <Grupo
-          titulo="Situação"
-          dimensao="situacoes"
-          opcoes={contagens.situacoes}
-          consulta={consulta}
-        />
-        <Grupo
           titulo="Escolaridade"
           dimensao="escolaridades"
           opcoes={contagens.escolaridades}
@@ -299,7 +300,7 @@ function Painel({
 
 function CartaoDeAlerta({ total }: { total: number }) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-cartao bg-cartao p-4">
+    <div className="flex flex-col gap-2.5 rounded-[20px] bg-cartao p-5 shadow-cartao">
       <p className="text-sm leading-5 font-semibold">
         Receba estes {numero(total)} concursos por e-mail
       </p>
@@ -396,7 +397,7 @@ export function ColunaFiltros({
           sempre: o filtro que ficou embaixo é inalcançável, porque rolar a
           página não move a coluna. Estático, a coluna sobe junto e o fim do
           painel chega. */}
-      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:flex">
+      <aside className="hidden min-w-0 flex-col gap-2 lg:flex">
         <Painel consulta={consulta} contagens={contagens} prefixo="coluna" />
         <CartaoDeAlerta total={total} />
       </aside>
