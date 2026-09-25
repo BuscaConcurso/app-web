@@ -23,3 +23,13 @@ describe("ITENS_DA_NAV", () => {
     expect(ITENS_DA_NAV.some((item) => item.ativo("/", new URLSearchParams()))).toBe(false);
   });
 });
+
+describe("abas da nav interna", () => {
+  it("são Abertos, Previstos e Diário Oficial, como em Concurso.dc.html", () => {
+    expect(ITENS_DA_NAV.filter((item) => !item.soNaHome).map((item) => item.rotulo)).toEqual([
+      "Abertos",
+      "Previstos",
+      "Diário Oficial",
+    ]);
+  });
+});

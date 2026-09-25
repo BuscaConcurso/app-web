@@ -7,77 +7,55 @@ import { BarraBuscaDoCabecalho } from "@/components/busca/BarraBusca";
 import { Logo } from "@/components/marca/Logo";
 import { BotaoEmBreve, AvisoFlutuante } from "@/components/ui/EmBreve";
 import { Icone } from "@/components/ui/Icone";
-import type { DimensoesDoAcervo } from "@/lib/concursos";
 import { urlAbsoluta } from "@/lib/site";
 import { MenuConta } from "./MenuConta";
 import { BarraUtilitaria } from "./BarraUtilitaria";
 import { GavetaDeNavegacao, NavPrincipal } from "./NavPrincipal";
-import { SoForaDaHome } from "./SoForaDaHome";
 
 /**
- * O cabeçalho: a barra utilitária e, embaixo dela, a nav de 76px do
- * protótipo novo (`Main.dc.html:23-51`).
+ * O cabeçalho: a barra utilitária e, embaixo dela, a nav.
  *
- * `atualizadoEm` chega pronto de `src/app/layout.tsx`: `dataCurta(hojeEmSaoPaulo())`
- * quando o acervo veio da API, `null` quando não. É a `BarraUtilitaria` quem
- * decide se mostra a frase, o cabeçalho só entrega o valor adiante.
+ * `atualizadoEm` chega pronto de `src/app/layout.tsx`: a data quando o
+ * acervo veio da API, `null` quando não. É a `BarraUtilitaria` quem decide se
+ * mostra a frase.
  *
- * A busca compacta (`BarraBuscaDoCabecalho`) some na home, por trás de
- * `SoForaDaHome`: a home tem a busca do herói (fora do escopo desta tarefa),
- * e duas caixas de busca juntas confundiriam qual delas vale.
+ * **Duas navs, conforme a página** (ruling R27):
  *
- * **Uma `<BarraBuscaDoCabecalho>` só, nunca duas montadas ao mesmo tempo**
- * (R15 da revisão). Fora da home ela precisa aparecer em dois lugares
- * diferentes conforme a largura: ao lado das abas a partir de `lg`
- * (`Main.dc.html:48`), numa fileira própria de largura inteira abaixo de
- * `lg` (`Mobile.dc.html:21-27`). A primeira tentativa fez isso com dois
- * `<SoForaDaHome>` (um escondido por `hidden`, o outro visível): os dois
- * ficavam de pé ao mesmo tempo, porque `hidden` só esconde, não desmonta, e
- * a busca tem estado de verdade (o pedido de geolocalização, guardado numa
- * ref por instância) que não pode disparar duas vezes por carga de página.
- * A solução é a mesma caixa, reposicionada por CSS: `<nav>` é `flex-wrap`,
- * a busca nasce com `basis-full` (força a quebra de linha sozinha, depois
- * de logo/alertas/gaveta, que vêm antes na ordem) e vira `lg:flex-1
- * lg:order-2` (encaixa ao lado das abas, mesma ordem delas, resolvida pela
- * posição no código) a partir de `lg`. `min-h-*` no lugar de `h-*` no
- * `<nav>` é o que deixa a caixa crescer quando a fileira de baixo aparece,
- * sem cortar nem sobrepor a borda inferior.
+ * - Na home, `Main.dc.html:34-51`: logo, as cinco abas (com ícone a partir
+ *   de 1440px) ocupando o meio, e o grupo da direita com salvos, alertas e
+ *   Entrar, 8px entre eles. Sem busca: quem busca lá é o herói.
+ * - Nas páginas internas, `Concurso.dc.html:34-56`: logo, a busca compacta
+ *   (até 520px), espaço, três abas em texto, alertas e Entrar.
  *
- * O alerta (`Meus alertas`) fica sempre visível, em qualquer largura
- * (`Mobile.dc.html:25`, `Main.dc.html:48`); salvos e o gatilho de conta
- * continuam só no desktop (`hidden lg:flex`).
+ * Abaixo de `lg` as duas viram o cabeçalho do celular (`Mobile.dc.html:21-25`,
+ * ruling R15): logo, alertas e o menu, em 64px; fora da home a busca desce
+ * para uma fileira própria, de largura inteira. **Uma busca só, nunca duas
+ * montadas**: a mesma caixa é reposicionada por CSS. A `<nav>` é
+ * `flex-wrap`; a busca nasce `order-last basis-full` (quebra para a fileira
+ * de baixo) e vira `lg:order-none lg:flex-1` (volta para o lado da logo).
  *
- * `NavPrincipal` (as abas) e `GavetaDeNavegacao` (a gaveta com os mesmos
- * itens) nunca aparecem juntas: o corte entre elas está em `NavPrincipal.tsx`
- * (`useCorteDaNav`), porque ele muda com a página, e não só com a largura da
- * tela. Fechar a gaveta ao navegar já é comportamento de `Gaveta`
- * (`useRevelador`, `Revelador.tsx`), sem nada extra a escrever aqui.
+ * **Entre 1024 e 1279px a logo é só o símbolo**: com a palavra, a busca das
+ * páginas internas ficava com menos de 100px, e as abas da home não cabiam
+ * na fileira. A partir de 1280px a logo inteira volta.
  *
- * **O cabeçalho do celular na página do concurso** (Task 14,
- * `ConcursoMobile.dc.html:21-27`) é outro, de 60px: voltar, o símbolo da
- * marca, compartilhar e salvar, sem busca nem abas. `usePathname` decide
- * (`naPaginaDoConcurso`, abaixo): `/concursos/<slug>` e não `/concursos`
- * (a lista continua com a nav de sempre), e é por isso que este componente
- * virou `"use client"`: o resto dele (`BarraUtilitaria`, `NavPrincipal`...)
- * não precisa de nada do cliente, só esta escolha precisa. Nessas páginas a
- * nav de 76/16 de sempre não desmonta, só fica `hidden` abaixo de `lg`
- * (`classeDaNav`), e ela volta a aparecer normalmente a partir dali, ao lado
- * da lateral da Task 14.
+ * **O cabeçalho do celular na página do concurso** (`ConcursoMobile.dc.html:21-27`)
+ * é outro, de 60px: voltar, o símbolo da marca, compartilhar e salvar.
+ * `usePathname` decide (`naPaginaDoConcurso`): `/concursos/<slug>` e não
+ * `/concursos`. Nessas páginas a nav de sempre só fica `hidden` abaixo de
+ * `lg`.
  */
-export function Cabecalho({
-  dimensoes,
-  atualizadoEm,
-}: {
-  dimensoes: DimensoesDoAcervo;
-  atualizadoEm: string | null;
-}) {
+export function Cabecalho({ atualizadoEm }: { atualizadoEm: string | null }) {
   const caminho = usePathname();
+  const naHome = caminho === "/";
   const segmentos = caminho.split("/").filter(Boolean);
-  // `/concursos/<slug>`, não `/concursos` (a lista): a lista continua com a
-  // nav de sempre em toda largura.
   const naPaginaDoConcurso = segmentos[0] === "concursos" && segmentos.length > 1;
 
-  const classeDaNav = `${naPaginaDoConcurso ? "hidden lg:flex" : "flex"} min-h-16 flex-wrap items-center gap-x-4 gap-y-2 border-b border-linha bg-cartao px-4 md:min-h-[76px] md:gap-x-10 md:gap-y-3 md:px-[112px]`;
+  const classeDaNav = [
+    naPaginaDoConcurso ? "hidden lg:flex" : "flex",
+    "flex-wrap items-center gap-x-1 border-b border-linha bg-cartao pr-3 pl-4",
+    "md:px-[112px] lg:h-[76px] lg:flex-nowrap lg:gap-x-6",
+    naHome ? "min-[1440px]:gap-x-10" : "min-[1440px]:gap-x-7",
+  ].join(" ");
 
   return (
     <header className="bg-cartao">
@@ -89,50 +67,57 @@ export function Cabecalho({
         <Link
           href="/"
           aria-label="BuscaConcurso, página inicial"
-          className="flex shrink-0 items-center"
+          className="flex h-16 shrink-0 items-center lg:h-auto"
         >
-          <Logo tamanho={36} />
+          <span className="lg:hidden">
+            <Logo tamanho={32} />
+          </span>
+          <span className="hidden lg:block xl:hidden">
+            <Logo variante="simbolo" tamanho={36} />
+          </span>
+          <span className="hidden xl:block">
+            <Logo tamanho={36} />
+          </span>
         </Link>
 
-        <NavPrincipal className="order-2" />
+        {!naHome && (
+          <div className="order-last min-w-0 basis-full pb-3 lg:order-none lg:max-w-[520px] lg:flex-1 lg:basis-auto lg:pb-0">
+            <BarraBuscaDoCabecalho />
+          </div>
+        )}
 
-        {/* O alerta fica visível em toda largura; salvos e a conta são só
-            do desktop (abaixo). */}
-        <BotaoEmBreve
-          recurso="alertas"
-          aria-label="Meus alertas"
-          className="relative order-3 flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
-        >
-          <Icone nome="alerta" tamanho={20} />
-          {/* A bolinha de aviso, `Main.dc.html:48`: sinal só, sem número,
-              porque não há contagem de alerta nenhuma para mostrar ainda. */}
-          <span
-            aria-hidden="true"
-            className="absolute top-[10px] right-[11px] size-2 rounded-full bg-urucum ring-2 ring-cartao"
-          />
-        </BotaoEmBreve>
+        <NavPrincipal className={naHome ? "lg:flex-1" : "lg:ml-auto"} />
 
-        <div className="order-4 hidden items-center gap-2 lg:flex">
+        <div className="ml-auto flex shrink-0 items-center gap-1 lg:ml-0 lg:gap-2">
+          {naHome && (
+            <BotaoEmBreve
+              recurso="salvos"
+              aria-label="Salvos"
+              className="hidden size-11 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada lg:flex"
+            >
+              <Icone nome="salvar" tamanho={20} />
+            </BotaoEmBreve>
+          )}
+
           <BotaoEmBreve
-            recurso="salvos"
-            aria-label="Salvos"
-            className="flex size-11 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
+            recurso="alertas"
+            aria-label="Meus alertas"
+            className="relative flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
           >
-            <Icone nome="salvar" tamanho={20} />
+            <Icone nome="alerta" tamanho={20} />
+            {/* A bolinha de aviso, `Main.dc.html:48`: sinal só, sem número. */}
+            <span
+              aria-hidden="true"
+              className="absolute top-[10px] right-[11px] size-2 rounded-full bg-urucum ring-2 ring-cartao"
+            />
           </BotaoEmBreve>
 
-          <MenuConta />
+          <div className="hidden lg:flex">
+            <MenuConta />
+          </div>
+
+          <GavetaDeNavegacao />
         </div>
-
-        <GavetaDeNavegacao className="order-5" />
-
-        {/* Abaixo de `lg`, `basis-full` força esta caixa (única) a quebrar
-            para a própria linha, depois de logo/alertas/gaveta (ver a
-            docstring acima). A partir de `lg` ela reencolhe e entra na
-            mesma fileira das abas. */}
-        <SoForaDaHome className="order-6 min-w-0 basis-full lg:order-2 lg:flex-1">
-          <BarraBuscaDoCabecalho dimensoes={dimensoes} />
-        </SoForaDaHome>
       </nav>
     </header>
   );

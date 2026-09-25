@@ -22,6 +22,12 @@ export interface ItemDaNav {
   icone: NomeDoIcone;
   href: string;
   ativo: (caminho: string, busca: URLSearchParams) => boolean;
+  /**
+   * Só na nav da home (`Main.dc.html:39-45`). A nav das páginas internas
+   * divide a fileira com a busca compacta e leva três abas em texto
+   * (`Concurso.dc.html:47-49`); a gaveta do celular leva todas.
+   */
+  soNaHome?: boolean;
 }
 
 export const ITENS_DA_NAV = [
@@ -50,11 +56,13 @@ export const ITENS_DA_NAV = [
     icone: "areas",
     href: hrefEmBreve("areas"),
     ativo: (caminho) => caminho === hrefEmBreve("areas"),
+    soNaHome: true,
   },
   {
     rotulo: "Estados",
     icone: "estados",
     href: "/#estados",
     ativo: () => false,
+    soNaHome: true,
   },
 ] satisfies ItemDaNav[];

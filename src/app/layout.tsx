@@ -7,12 +7,7 @@ import { Cabecalho } from "@/components/layout/Cabecalho";
 import { GoogleTagManager } from "@/components/layout/GoogleTagManager";
 import { Rodape } from "@/components/layout/Rodape";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
-import {
-  dimensoesDoAcervo,
-  origemDoAcervo,
-  type DimensoesDoAcervo,
-  type OrigemDoAcervo,
-} from "@/lib/concursos";
+import { origemDoAcervo, type OrigemDoAcervo } from "@/lib/concursos";
 import { dataCurta, hojeEmSaoPaulo } from "@/lib/formato";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 import { SCRIPT_DO_TEMA } from "@/lib/tema";
@@ -170,23 +165,14 @@ export const revalidate = 300;
  * exatamente o que `global-error.tsx` existe para nunca precisar mostrar.
  *
  * Degrada assim: sem faixa de origem (`origem: null`, e o layout nem chega
- * a montar `AvisoDeOrigem`) e com a barra de busca sem contagem nenhuma
- * (`comUf: 0` já é o bastante para `BarraBuscaDoCabecalho` desligar o
- * seletor de estado, ver `BarraBusca.tsx`). Uma página que realmente
+ * a montar `AvisoDeOrigem`) e sem a data de atualização. Uma página que realmente
  * precisa do acervo (a home, `/concursos`, `/busca/<termo>`) continua
  * lançando dela mesma, direto para o `error.tsx` daquela rota: só a leitura
  * feita aqui, para o cabeçalho, é que não pode empacar o site inteiro.
  */
-async function acervoDoLayout(): Promise<{
-  origem: OrigemDoAcervo | null;
-  dimensoes: DimensoesDoAcervo;
-}> {
+async function acervoDoLayout(): Promise<{ origem: OrigemDoAcervo | null }> {
   try {
-    const [origem, dimensoes] = await Promise.all([
-      origemDoAcervo(),
-      dimensoesDoAcervo(),
-    ]);
-    return { origem, dimensoes };
+    return { origem: await origemDoAcervo() };
   } catch (erro) {
     // Sinal do próprio Next (ver o mesmo comentário em `lerAcervoDaApi`,
     // `src/lib/concursos.ts`) não é falha do acervo e segue para cima, sem
@@ -194,16 +180,16 @@ async function acervoDoLayout(): Promise<{
     unstable_rethrow(erro);
     console.error(
       "[layout] acervo indisponível ao montar o cabeçalho; a página segue sem " +
-        "a faixa de origem e sem contagem de estado na busca.",
+        "a faixa de origem.",
       erro,
     );
-    return { origem: null, dimensoes: { total: 0, comUf: 0, comEsfera: 0 } };
+    return { origem: null };
   }
 }
 
 /**
- * `async` por causa de uma leitura só: o acervo que a faixa de origem e a
- * busca do cabeçalho precisam.
+ * `async` por causa de uma leitura só: a origem do acervo, que a faixa de
+ * origem e a data da barra utilitária precisam.
  *
  * Ela fica no layout, e não em cada página, porque é o único lugar onde
  * nenhuma página nova pode esquecer de mostrá-la: a coisa que ela avisa, o
@@ -214,7 +200,7 @@ async function acervoDoLayout(): Promise<{
  * build falha, e sem a variável a faixa diz que é o mock.
  */
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const { origem, dimensoes } = await acervoDoLayout();
+  const { origem } = await acervoDoLayout();
   // `null` fora da API: afirmar "atualizado hoje" sobre o mock seria uma
   // data que a fonte não sustenta. Ver `BarraUtilitaria`, que só mostra a
   // frase quando este valor existe.
@@ -253,7 +239,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               (`acervoDoLayout`): sem origem para dizer, a faixa fica calada
               em vez de afirmar "api" ou "mock" sem ter lido nenhum dos dois. */}
           {origem && <AvisoDeOrigem origem={origem} />}
-          <Cabecalho dimensoes={dimensoes} atualizadoEm={atualizadoEm} />
+          <Cabecalho atualizadoEm={atualizadoEm} />
           <main className="flex-1">{children}</main>
           <Rodape atualizadoEm={atualizadoEm} />
         </SessionProvider>

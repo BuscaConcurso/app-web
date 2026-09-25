@@ -247,7 +247,9 @@ async function verificarGaveta(cdp) {
 
 async function verificarBuscaDoCabecalho(cdp) {
   await largura(cdp, 375);
-  await navegar(cdp, "/");
+  // Na home o cabeçalho não tem busca (quem busca lá é o herói): a busca
+  // compacta só existe nas páginas internas.
+  await navegar(cdp, "/concursos");
   await avaliar(cdp, "window.__semRecarga = true");
   await clicar(cdp, 'header input[name="q"]');
   await cdp.enviar("Input.insertText", { text: "Analista Judiciário" });
