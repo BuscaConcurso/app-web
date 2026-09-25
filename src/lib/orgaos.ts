@@ -18,8 +18,8 @@
  * | achar os concursos de um órgão | 0,066 ms |
  *
  * Uma rota `/orgao/{slug}` trocaria 0,066 ms de CPU por uma segunda ida à
- * API, por SQL novo com junção e agregação — as duas coisas que a revisão da
- * API pegou errando esta semana — e por uma segunda expressão de `TEM_DADO`,
+ * API, por SQL novo com junção e agregação (as duas coisas que a revisão da
+ * API pegou errando esta semana) e por uma segunda expressão de `TEM_DADO`,
  * que é a cláusula que decide quem entra no acervo. É essa última que decide:
  * **a página do órgão precisa listar exatamente o que a busca lista**, e
  * lendo a mesma lista ela não tem como divergir. Duas consultas com a mesma
@@ -27,8 +27,8 @@
  *
  * O que a reutilização custa é honesto dizer: a página do órgão paga os 3,66
  * MB do acervo inteiro para mostrar entre 1 e 209 concursos. É o mesmo preço
- * que a home e a busca já pagam — uma requisição e uma análise por render,
- * pelo `cache` de `carregar()` em `concursos.ts` — e é o preço da arquitetura
+ * que a home e a busca já pagam (uma requisição e uma análise por render,
+ * pelo `cache` de `carregar()` em `concursos.ts`) e é o preço da arquitetura
  * de uma rota só, não um preço novo que esta página inventou.
  */
 import type { ConcursoResumo, Orgao } from "./dominio";
@@ -41,13 +41,13 @@ export interface OrgaoDoAcervo {
 }
 
 /**
- * O nome curto do órgão — a sigla quando existe, o nome por extenso quando
+ * O nome curto do órgão: a sigla quando existe, o nome por extenso quando
  * não.
  *
  * É o que vai no nível de cima da hierarquia (a trilha da página do
  * concurso), onde o espaço é de uma linha. A sigla chega em 3.034 dos 4.649
  * concursos; nos outros 1.615 o nome inteiro é o que há, e cortá-lo em
- * iniciais inventadas afirmaria uma sigla que ninguém publicou — a mesma
+ * iniciais inventadas afirmaria uma sigla que ninguém publicou: a mesma
  * regra do `Selo`.
  */
 export function nomeCurtoDoOrgao(orgao: Pick<Orgao, "sigla" | "nome">): string {
@@ -59,7 +59,7 @@ export function nomeCurtoDoOrgao(orgao: Pick<Orgao, "sigla" | "nome">): string {
  *
  * O registro de órgão sai do primeiro concurso encontrado e não de uma
  * junção: no acervo de 2026-09-14 os 4.649 concursos carregam **zero**
- * registros de órgão divergentes para o mesmo slug — é a mesma linha da
+ * registros de órgão divergentes para o mesmo slug: é a mesma linha da
  * tabela `orgao`, repetida pela junção do `SQL_RESUMO`. Se um dia divergirem,
  * o primeiro é o do concurso mais antigo (`order by c.id` na API), que é uma
  * escolha estável, e não a fusão de dois registros numa terceira coisa que
@@ -67,7 +67,7 @@ export function nomeCurtoDoOrgao(orgao: Pick<Orgao, "sigla" | "nome">): string {
  *
  * Devolve `null` quando nenhum concurso do acervo nomeia este slug. Quem
  * chama trata como 404, e é a resposta certa: o órgão pode existir na tabela
- * — são 1.946 com slug, contra 466 com concurso na lista — mas uma página
+ * (são 1.946 com slug, contra 466 com concurso na lista) mas uma página
  * dele seria uma lista vazia com título, que afirma "este órgão não tem
  * concurso" quando o que há é "nenhum concurso dele foi lido até aqui".
  */
@@ -112,7 +112,7 @@ export function agruparPorOrgao(
 /**
  * A frase que diz o que esta página é, antes de listar.
  *
- * Ela existe por causa dos **195 órgãos de um concurso só** — 42% dos 466.
+ * Ela existe por causa dos **195 órgãos de um concurso só**: 42% dos 466.
  * Uma página que diz "1 concurso" e desenha um cartão é, para quem chegou
  * pela trilha do próprio concurso, uma parada a mais no caminho; a frase é o
  * que a faz dizer o que sabe em vez de fingir um índice.
@@ -120,7 +120,7 @@ export function agruparPorOrgao(
  * **Ela não redireciona, e a medição é o motivo.** Dos 122 órgãos que tinham
  * exatamente um concurso há 30 dias, **36 (30%) têm dois ou mais hoje**; em
  * 365 dias são 57%. Ter um concurso é estado de hoje, não propriedade do
- * órgão — um redirecionamento faria a mesma URL levar a lugares diferentes
+ * órgão: um redirecionamento faria a mesma URL levar a lugares diferentes
  * conforme o dia, e faria a trilha da página do concurso apontar para uma URL
  * que volta para ela mesma.
  */

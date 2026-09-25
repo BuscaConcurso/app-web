@@ -1,33 +1,26 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { connection } from "next/server";
-import { BlocoDeNumeros, Cartao, Numero, Selo } from "@/components/ui/Cartao";
-import { Etiqueta } from "@/components/ui/Etiqueta";
-import { Secao } from "@/components/ui/Secao";
+import { Icone } from "@/components/ui/Icone";
 import { Trilha, type Degrau } from "@/components/ui/Trilha";
+import { AbasDoConcurso } from "@/components/concurso/AbasDoConcurso";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
-import { Cargos, tituloDosCargos } from "@/components/concurso/Cargos";
+import { BarraDeInscricao } from "@/components/concurso/BarraDeInscricao";
+import { CabecalhoDoConcurso } from "@/components/concurso/CabecalhoDoConcurso";
+import { Cargos } from "@/components/concurso/Cargos";
 import { Cronograma } from "@/components/concurso/Cronograma";
-import { Faq, cabecalhoDoFaq, temFaq } from "@/components/concurso/Faq";
-import { obterDetalhe } from "@/lib/concursos";
-import {
-  dataLonga,
-  hojeEmSaoPaulo,
-  moeda,
-  moedaExata,
-  numero,
-  vagasTexto,
-} from "@/lib/formato";
-import {
-  ROTULO_ESCOLARIDADE,
-  linhaDeContexto,
-  textoDeRodape,
-  tituloComOrgao,
-} from "@/lib/rotulos";
+import { Faq, temFaq } from "@/components/concurso/Faq";
+import { FatosDoConcurso } from "@/components/concurso/FatosDoConcurso";
+import { LateralDoConcurso } from "@/components/concurso/LateralDoConcurso";
+import { obterDetalhe, tambemAbertos } from "@/lib/concursos";
+import { fatosDoConcurso, taxaDoConcurso } from "@/lib/fatos";
+import { dataLonga, hojeCivilEmSaoPaulo, hojeEmSaoPaulo, moeda, vagasTexto } from "@/lib/formato";
+import { destinoDaInscricao } from "@/lib/inscricao";
+import { textoDeRodape, tituloComOrgao, tituloSemOrgao } from "@/lib/rotulos";
 import { nomeCurtoDoOrgao } from "@/lib/orgaos";
-import { ESTILO_DO_TOM, rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
+import { tomDoConcurso } from "@/lib/situacao";
+import type { ConcursoResumo } from "@/lib/dominio";
 
 /**
  * Página do concurso, versão reduzida.
@@ -79,19 +72,45 @@ export default async function PaginaDoConcurso(
     permanentRedirect(`/concursos/${encodeURIComponent(concurso.slug)}`);
   }
 
-  const hoje = new Date();
-  // A data civil brasileira, para a linha do tempo: ver `hojeEmSaoPaulo`.
-  const hojeCivil = hojeEmSaoPaulo(hoje);
-  const tom = tomDoConcurso(concurso, hoje);
-  const estilo = ESTILO_DO_TOM[tom];
+  // Quem decide o dia é o dia civil de Brasília,
+  // não o relógio cru do processo (um servidor em UTC vira o dia às 21h de
+  // Brasília, e das 21h à meia-noite a página diria que encerrou o que
+  // encerra hoje). `agora` é o único instante lido; `hoje` (o dia civil, para
+  // tudo que compara data: `tomDoConcurso`, `prazoPorExtenso`,
+  // `periodoDaInscricao`, a folhinha do `Calendario`, `CartaoDeUrgencia` e
+  // `tambemAbertos`) e `hojeCivil` (a mesma data civil, em string, para a
+  // linha do tempo) saem os dois dele, do mesmo jeito que `/concursos` e
+  // `/orgaos/[slug]` já fazem. Formatar `hoje` de novo com `hojeEmSaoPaulo`
+  // seria formatar meia-noite civil já convertida pelo fuso do processo:
+  // com o processo em UTC, meia-noite de Brasília vira 03h, que o fuso de
+  // Brasília ainda lê como o dia anterior, um segundo desvio de fuso em cima
+  // do primeiro.
+  const agora = new Date();
+  const hoje = hojeCivilEmSaoPaulo(agora);
+  const hojeCivil = hojeEmSaoPaulo(agora);
+
+  // "Também abertos no {UF}" da lateral. Não custa requisição nova
+  // (lê o mesmo acervo já guardado em `cache`), mas uma falha aqui não pode
+  // derrubar a página do concurso: o pior desfecho é a lateral sem essa
+  // lista, não um concurso que existe virando erro 500.
+  let tambem: ConcursoResumo[] = [];
+  try {
+    tambem = await tambemAbertos(concurso, hoje);
+  } catch (erro) {
+    console.error(
+      `[concurso] tambemAbertos falhou para ${concurso.slug} (${
+        erro instanceof Error ? erro.message : erro
+      })`,
+    );
+  }
 
   // Três degraus, e o do meio é o que passou a existir: Concursos > órgão >
   // este concurso. É uma lista só, e `Trilha` desenha a tela e emite o
-  // `BreadcrumbList` a partir dela — ver o componente para o defeito que essa
+  // `BreadcrumbList` a partir dela: ver o componente para o defeito que essa
   // regra guarda. O nível do órgão só pode entrar aqui porque agora ele tem
   // endereço.
   //
-  // O degrau do órgão leva `nomeCurtoDoOrgao` — a sigla quando existe, o nome
+  // O degrau do órgão leva `nomeCurtoDoOrgao`: a sigla quando existe, o nome
   // quando não (36 órgãos do acervo ainda têm por nome o caminho de hierarquia
   // do Diário). Agora o dado estruturado diz o mesmo, que é o que ele existe
   // para fazer; antes ele mandava `orgao.nome` por extenso enquanto a tela
@@ -102,136 +121,55 @@ export default async function PaginaDoConcurso(
       nome: nomeCurtoDoOrgao(concurso.orgao),
       href: `/orgaos/${concurso.orgao.slug}`,
     },
-    { nome: concurso.titulo, href: `/concursos/${concurso.slug}` },
+    // O ato sem o órgão ("Edital nº 51/2026"), como em `Concurso.dc.html:60`:
+    // o órgão já é o degrau de cima, e o título inteiro repetia os dois.
+    {
+      nome: tituloSemOrgao(concurso.titulo, concurso.orgao) || concurso.titulo,
+      href: `/concursos/${concurso.slug}`,
+    },
   ];
 
-  return (
-    <div className="mx-auto max-w-[880px] px-4 py-5 sm:px-6">
-      <Trilha degraus={trilha} />
+  // Nula em previsto e encerrado: a `BarraDeInscricao` do celular é a mesma
+  // chamada da lateral (`LateralDoConcurso`), e a lateral não mostra "Ir para
+  // a inscrição" nesses dois tons (previsto vira "Avisar quando abrir",
+  // encerrado não tem CTA nenhum). Sem este corte, a barra fixa do celular
+  // continuaria de pé com "Ver o ato publicado" para um concurso que ainda
+  // nem abriu ou que já fechou, a única leitura possível do endereço que
+  // `destinoDaInscricao` sempre acha quando há edital ou ato publicado.
+  const tomAtual = tomDoConcurso(concurso, hoje);
+  const destino =
+    tomAtual === "previsto" || tomAtual === "encerrado"
+      ? null
+      : destinoDaInscricao(concurso);
 
-      {/*
-        Uma pilha de blocos, e não seções empilhadas por margem dentro de um
-        cartão só. O que separa um bloco do outro é o mesmo degrau que separa
-        o cartão da busca da página: fundo do cartão sobre o cinza da página,
-        sem borda e sem sombra.
-
-        **Só o primeiro bloco é pintado pelo tom.** O fundo colorido é o sinal
-        de situação, e a situação é um fato do concurso, não de cada seção:
-        repetir o salmão de "encerra em 3 dias" atrás do cronograma, dos
-        cargos e do ato afirmaria quatro vezes a mesma coisa e gastaria a
-        única cor forte da tela. Cinza por padrão, cor só onde informa.
-
-        Isso também acerta um desencontro que existia: `bg-bloco` é o rebaixo
-        de dentro do cartão branco, e dentro do cartão `encerrado` ele ficava
-        mais CLARO que o fundo, então a lista de cargos parecia levantada em
-        vez de rebaixada. Com cada seção no seu bloco branco, o rebaixo volta
-        a rebaixar.
-
-        A pilha não inventa um terceiro nível de superfície: continuam sendo
-        página < cartão < bloco, os mesmos três de `globals.css`. O que mudou
-        foi quantos cartões existem, não quantos degraus.
-
-        **O rótulo de cada seção mora fora do seu bloco** (`Secao`), e é por
-        isso que o vão aqui dobrou de 12 para 24px: ele deixou de separar duas
-        caixas e passou a separar um assunto do título do assunto seguinte.
-        Dentro da `Secao`, o título fica a 8px do cartão que ele rotula — um
-        terço do vão de fora, que é o que faz o título pertencer ao bloco de
-        baixo em vez de flutuar entre os dois. Os dois blocos sem título (o do
-        órgão e a nota de rodapé) entram na mesma pilha e usam o mesmo vão.
-      */}
-      <div className="flex flex-col gap-6">
-        <Cartao tom={tom} as="article" className="p-6 sm:p-8">
-          {/*
-            A hierarquia pedida, na ordem em que ela se lê: o órgão acima, o
-            título do concurso como `h1`. Até aqui era o contrário — o `h1`
-            era `orgao.nome` e o título do concurso vinha abaixo, como
-            parágrafo —, e a página dizia que era sobre o órgão quando é sobre
-            um edital dele.
-
-            O nome do órgão leva à página dele, e não repete o `Selo`: o
-            quadrado é a sigla, `aria-hidden`, e esta linha é o nome por
-            extenso, que é o que um leitor de tela ouve.
-          */}
-          <header>
-            <div className="flex items-start gap-4">
-              <Selo sigla={concurso.orgao.sigla} logoUrl={concurso.orgao.logoUrl} tom={tom} />
-              <div className="min-w-0">
-                <p className="text-sm leading-5 font-medium text-tinta-800">
-                  <Link
-                    href={`/orgaos/${concurso.orgao.slug}`}
-                    className="hover:underline hover:underline-offset-4"
-                  >
-                    {concurso.orgao.nome}
-                  </Link>
-                </p>
-                <p className={`text-sm ${estilo.apoio}`}>
-                  {linhaDeContexto(concurso.orgao)}
-                </p>
-              </div>
-            </div>
-            {/*
-              O `h1` abaixo do bloco do selo, e não recuado ao lado dele. O
-              selo é a sigla do ÓRGÃO, então ele e o nome ao lado são uma
-              afirmação só; o título começa embaixo, na largura inteira do
-              cartão. Medido a 375px no exemplo do parceiro: recuado o título
-              tem 251,8px e ocupa 4 linhas; na largura cheia tem 304,6px e
-              ocupa 3. É também a mesma forma do cartão da busca, o que faz a
-              página e o resultado que leva a ela lerem igual.
-            */}
-            {/* O título INTEIRO do concurso, que foi o pedido explícito do
-                parceiro humano: "o título da página e dos cards precisa ser o
-                título do concurso". Houve um recorte aqui que tirava o nome do
-                órgão da frente — ele ganhava altura (2,91 para 1,66 linha de
-                média) e perdia a coisa pedida. A repetição com o degrau do
-                órgão logo acima é custo aceito, e é decisão dele.
-                Pode sair porque o órgão está duas vezes acima desta linha: na
-                trilha e no bloco do selo. */}
-            <h1 className="mt-4 font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] text-balance break-words">
-              {concurso.titulo}
-            </h1>
-          </header>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Etiqueta tom={tom} comPonto>
-              {rotuloDeSituacao(concurso, hoje)}
-            </Etiqueta>
-            {concurso.escolaridades.map((escolaridade) => (
-              <Etiqueta key={escolaridade}>
-                {ROTULO_ESCOLARIDADE[escolaridade]}
-              </Etiqueta>
-            ))}
-            {concurso.banca && <Etiqueta>Banca: {concurso.banca.nome}</Etiqueta>}
-          </div>
-
-          <BlocoDeNumeros tom={tom} className="mt-6 grid-cols-2 sm:grid-cols-4">
-            <Numero rotulo="Vagas">
-              {concurso.vagas === null ? "a definir" : numero(concurso.vagas)}
-            </Numero>
-            <Numero rotulo="Salário até">
-              {concurso.salarioAte === null
-                ? "a definir"
-                : moeda(concurso.salarioAte)}
-            </Numero>
-            <Numero rotulo="Taxa">
-              {concurso.taxaInscricao === null
-                ? "a definir"
-                : moedaExata(concurso.taxaInscricao)}
-            </Numero>
-            <Numero rotulo="Cadastro reserva">
-              {concurso.cadastroReserva ? "sim" : "não"}
-            </Numero>
-          </BlocoDeNumeros>
-        </Cartao>
-
-        {/* O cronograma não some quando está vazio: 170 concursos do acervo
-            (3,7%) não têm data nenhuma lida, e nesses o bloco é o que diz que
-            ninguém achou data — some ele, e a página afirma por omissão que o
-            concurso não tem cronograma. O título fica com o bloco nos dois
-            casos, então não há título órfão. */}
-        <Secao
-          titulo="Cronograma"
-          apoio="Cada data com a procedência: de qual ato publicado ela foi lida."
+  // As abas do celular (`AbasDoConcurso`): cronograma, áreas e
+  // perguntas, cada uma seu próprio painel com `id` estável. Áreas e
+  // perguntas continuam de fora quando não há o que mostrar: a aba não
+  // existe sem o painel dela, do mesmo jeito que a seção não existia sem ele
+  // antes das abas.
+  const paineis = [
+    {
+      id: "cronograma",
+      rotulo: "Cronograma",
+      // O cronograma não some quando está vazio: 170 concursos do acervo
+      // (3,7%) não têm data nenhuma lida, e nesses o bloco é o que diz que
+      // ninguém achou data, some ele, e a página afirma por omissão que o
+      // concurso não tem cronograma. O título fica com o bloco nos dois
+      // casos, então não há título órfão.
+      conteudo: (
+        <section
+          id="cronograma"
+          className="flex flex-col gap-6 rounded-[22px] bg-cartao p-8 shadow-cartao"
         >
+          <div>
+            <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
+              <Icone nome="previsto" tamanho={24} className="text-acao" />
+              Cronograma
+            </h2>
+            <p className="mt-1.5 text-[15px] text-tinta-600">
+              Cada data mostra de qual trecho do ato ela foi lida.
+            </p>
+          </div>
           {concurso.cronograma.length > 0 ? (
             <Cronograma eventos={concurso.cronograma} hoje={hojeCivil} />
           ) : (
@@ -242,56 +180,116 @@ export default async function PaginaDoConcurso(
                 : ""}
             </p>
           )}
-        </Secao>
+        </section>
+      ),
+    },
+    // Aqui, sim, o bloco inteiro pode não existir, e com ele a aba. Um
+    // "Áreas e vagas" sobre nada seria o título órfão que o cronograma vazio
+    // não é: não há o que dizer sobre cargo que o ato não listou, e a linha
+    // de rodapé da página já conta o que falta.
+    ...(concurso.cargos.length > 0
+      ? [
+          {
+            id: "areas",
+            rotulo: `Áreas (${concurso.cargos.length})`,
+            conteudo: (
+              <section id="areas" className="rounded-[22px] bg-cartao p-8 shadow-cartao">
+                <Cargos cargos={concurso.cargos} />
+              </section>
+            ),
+          },
+        ]
+      : []),
+    // O FAQ antes do texto do ato, e não depois: ele é a leitura do
+    // documento, e o documento é a evidência atrás dela. Cada resposta tem
+    // link para o ato que a produziu, logo abaixo.
+    ...(temFaq(concurso.origens)
+      ? [
+          {
+            id: "perguntas",
+            rotulo: "Perguntas",
+            conteudo: (
+              <section id="perguntas" className="rounded-[22px] bg-cartao p-8 shadow-cartao">
+                <Faq origens={concurso.origens} />
+              </section>
+            ),
+          },
+        ]
+      : []),
+  ];
 
-        {/* Aqui, sim, o bloco inteiro pode não existir — e com ele o título.
-            Um "Cargos" sobre nada seria o título órfão que o cronograma vazio
-            não é: não há o que dizer sobre cargo que o ato não listou, e a
-            linha de rodapé da página já conta o que falta. */}
-        {concurso.cargos.length > 0 && (
-          <Secao titulo={tituloDosCargos(concurso.cargos)}>
-            <Cargos cargos={concurso.cargos} />
-          </Secao>
-        )}
-
-        {/* O FAQ antes do texto do ato, e não depois: ele é a leitura do
-            documento, e o documento é a evidência atrás dela. Cada resposta
-            tem link para o ato que a produziu, logo abaixo. */}
-        {temFaq(concurso.origens) && (
-          <Secao {...cabecalhoDoFaq(concurso.origens)}>
-            <Faq origens={concurso.origens} />
-          </Secao>
-        )}
-
-        {/* A avaliação do concurso, aqui e em nenhum outro ponto da página:
-            um voto por concurso por pessoa, decisão do parceiro humano. O
-            porquê deste ponto e não do rodapé está medido no comentário do
-            componente — em resumo, é o fim da LEITURA. O que vem abaixo,
-            quando vem, é o ato como saiu no diário: a fonte para conferir,
-            não mais coisa nossa para avaliar. Pôr o controle depois dele o
-            empurraria para baixo da dobra em todos os concursos do acervo,
-            em vez de metade. */}
-        <Avaliacao slug={concurso.slug} />
-
-        {concurso.origens.length > 0 && (
-          <Secao
-            titulo={
-              concurso.origens.length === 1
-                ? "O ato publicado"
-                : "Os atos publicados"
-            }
-            apoio="O ato como saiu no diário oficial, na íntegra. Pode ser o extrato, não o edital completo: o edital com anexos e programa de provas fica no site da banca."
-          >
-            <AtosPublicados origens={concurso.origens} />
-          </Secao>
-        )}
-
-        {/* O rodapé também é um bloco, com a mesma sangria lateral e menos
-            altura: é uma nota sobre a página, não uma seção dela. */}
-        <p className="rounded-caixa bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600 sm:px-8">
-          {textoDeRodape(concurso)}
-        </p>
+  return (
+    <div className="conteudo pt-5 pb-28 md:pt-0 lg:pb-5">
+      {/* No celular não há trilha (`ConcursoMobile.dc.html`): o cabeçalho de
+          60px já leva o "voltar". O dado estruturado continua no HTML. */}
+      <div className="hidden md:block">
+        <Trilha degraus={trilha} />
       </div>
+
+      {/*
+        Uma pilha de blocos, e não seções empilhadas por margem dentro de um
+        cartão só. O que separa um bloco do outro é o mesmo degrau que separa
+        o cartão da busca da página: fundo do cartão sobre o cinza da página,
+        sem borda e sem sombra.
+
+        **A cor do tom mora só na pílula de situação, dentro do cabeçalho.**
+        O cabeçalho inteiro é branco, como todo bloco da pilha; repetir o salmão de "encerra em 3 dias" atrás dele, do
+        cronograma, dos cargos e do ato afirmaria quatro vezes a mesma coisa e
+        gastaria a única cor forte da tela. Cinza por padrão, cor só onde
+        informa.
+
+        A pilha não inventa um terceiro nível de superfície: continuam sendo
+        página < cartão < bloco, os mesmos três de `globals.css`.
+
+        **O rótulo de cada seção mora DENTRO do seu bloco**
+        (`Concurso.dc.html:100-207`): o ícone colorido e o `h2` de 28px moram
+        no mesmo cartão branco do conteúdo, ao contrário do `Secao` do resto
+        do site (título de 40px fora do cartão): é assim no protótipo da
+        página do concurso, e não no da home.
+      */}
+      <div className="flex flex-col gap-6 lg:gap-10">
+        {/* 16px entre o cabeçalho e os fatos (`Concurso.dc.html:90`), 40px
+            até o corpo (`Concurso.dc.html:101`). */}
+        <div className="flex flex-col gap-4">
+          <CabecalhoDoConcurso concurso={concurso} hoje={hoje} />
+          <FatosDoConcurso fatos={fatosDoConcurso(concurso)} />
+        </div>
+
+        {/* CORPO: `Concurso.dc.html:100-207`. A coluna principal é a pilha de
+            cartões, com cronograma, áreas e perguntas dentro de
+            `AbasDoConcurso` (abas só abaixo de `lg`; todas visíveis dali para
+            cima); a lateral é `LateralDoConcurso` (o prazo, os passos de
+            inscrição, os alertas e "também abertos"). */}
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_392px]">
+          <div className="flex min-w-0 flex-col gap-6">
+            <AbasDoConcurso paineis={paineis} />
+
+            {/* A avaliação do concurso, aqui e em nenhum outro ponto da
+                página: um voto por concurso por pessoa, decisão do parceiro
+                humano. O porquê deste ponto e não do rodapé está medido no
+                comentário do componente: em resumo, é o fim da LEITURA. O
+                que vem abaixo, quando vem, é o ato como saiu no diário: a
+                fonte para conferir, não mais coisa nossa para avaliar. */}
+            <Avaliacao slug={concurso.slug} />
+
+            {concurso.origens.length > 0 && (
+              <section className="rounded-[22px] bg-cartao p-8 shadow-cartao">
+                <AtosPublicados origens={concurso.origens} />
+              </section>
+            )}
+
+            {/* O rodapé também é um bloco, com a mesma sangria lateral e
+                menos altura: é uma nota sobre a página, não uma seção dela. */}
+            <p className="rounded-cartao bg-cartao px-6 py-5 text-sm leading-6 text-tinta-600 sm:px-8">
+              {textoDeRodape(concurso)}
+            </p>
+          </div>
+
+          <LateralDoConcurso concurso={concurso} hoje={hoje} tambem={tambem} />
+        </div>
+      </div>
+
+      <BarraDeInscricao taxa={taxaDoConcurso(concurso)} destino={destino} />
     </div>
   );
 }

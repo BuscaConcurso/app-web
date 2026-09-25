@@ -5,7 +5,7 @@
  * https://gvtechlab.com.br/, copiados sem redesenho: é a marca de outra
  * empresa, e a regra do canvas para a nossa (sem sombra, contorno, gradiente
  * nem inclinação) vale em dobro para a dela. Só aparece no rodapé, que é
- * escuro nos dois temas — o amarelo foi desenhado para fundo escuro.
+ * escuro nos dois temas: o amarelo foi desenhado para fundo escuro.
  */
 export function LogoGvTechLab({
   tamanho = 20,

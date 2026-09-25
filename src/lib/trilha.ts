@@ -5,7 +5,7 @@
  * concurso era escrita à mão em JSX e o `BreadcrumbList` que o buscador lê
  * era escrito à mão logo acima, no mesmo arquivo. Quando o degrau do órgão
  * ganhou endereço, a lista estruturada passou a declarar três degraus e a
- * tela continuou mostrando dois — cada uma dizendo uma hierarquia diferente
+ * tela continuou mostrando dois: cada uma dizendo uma hierarquia diferente
  * do mesmo lugar. Duas listas paralelas divergem; a questão é quando.
  *
  * Então há **uma lista só**: `Degrau[]`. `Trilha`
@@ -15,16 +15,16 @@
  * lugar onde escrever um.
  *
  * O que é dado puro fica aqui, com teste, pelo mesmo motivo de `consulta.ts`
- * e `orgaos.ts`: o que dá para errar é a forma do `BreadcrumbList` — posição
+ * e `orgaos.ts`: o que dá para errar é a forma do `BreadcrumbList` (posição
  * que começa em zero, URL relativa onde o schema pede absoluta, nome que não
- * é o da tela —, e isso não se confere olhando a página.
+ * é o da tela), e isso não se confere olhando a página.
  */
 import { urlAbsoluta } from "./site";
 
 /** Um degrau da trilha: o que a pessoa lê e para onde ele leva. */
 export interface Degrau {
   /**
-   * O texto do degrau. **É o mesmo na tela e no `BreadcrumbList`** — é essa
+   * O texto do degrau. **É o mesmo na tela e no `BreadcrumbList`**: é essa
    * a regra que o defeito de origem quebrou, e é por isso que há um campo só.
    */
   nome: string;
@@ -43,7 +43,7 @@ export interface Degrau {
  *
  * `item` absoluto em **todos** os degraus, o último incluído. O Google
  * permite omitir o `item` do degrau corrente, mas omitir é uma segunda regra
- * para lembrar — e o que temos aqui é justamente o histórico de esquecer a
+ * para lembrar, e o que temos aqui é justamente o histórico de esquecer a
  * segunda regra. O degrau corrente já se identifica por ser o último e por
  * carregar a URL canônica da própria página.
  */

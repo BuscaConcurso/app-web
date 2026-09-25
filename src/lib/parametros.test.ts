@@ -13,6 +13,7 @@ import {
   urlSemFiltros,
   urlSemValor,
   type ConsultaDaUrl,
+  tituloDaListaDeConcursos,
 } from "./parametros";
 
 const VAZIA = CONSULTA_VAZIA;
@@ -240,5 +241,17 @@ describe("quantosFiltros", () => {
 
   it("não conta a busca por texto nem a ordenação", () => {
     expect(quantosFiltros({ ...VAZIA, q: "analista", ordem: "vagas" })).toBe(0);
+  });
+});
+
+describe("tituloDaListaDeConcursos", () => {
+  it("usa a preposição do estado", () => {
+    expect(tituloDaListaDeConcursos({ ...CONSULTA_VAZIA, uf: "RJ" })).toBe(
+      "Concursos públicos no Rio de Janeiro",
+    );
+    expect(
+      tituloDaListaDeConcursos({ ...CONSULTA_VAZIA, situacoes: ["previstos"], uf: "MG" }),
+    ).toBe("Concursos previstos em Minas Gerais");
+    expect(tituloDaListaDeConcursos({ ...CONSULTA_VAZIA, uf: "BA" })).toBe("Concursos públicos na Bahia");
   });
 });

@@ -1,70 +1,90 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Cartao } from "./Cartao";
 import { Rotulo } from "./Etiqueta";
+import { Icone, type NomeDoIcone } from "./Icone";
 import type { Tom } from "@/lib/dominio";
 
 /**
- * Um bloco com o rótulo do lado de fora.
+ * O cabeçalho de seção do desenho novo (`Main.dc.html:128-131`): um rótulo
+ * pequeno e colorido em cima (opcional, com ícone), o título grande de
+ * verdade embaixo, e um link "Ver todos" à direita quando a seção tem uma
+ * página própria.
  *
- * O rótulo morava dentro do cartão, como primeira linha do conteúdo. Enquanto
- * as seções eram parágrafos de um cartão só, isso funcionava: o rótulo era o
- * único sinal de que ali começava outra coisa. Desde que cada seção virou um
- * bloco desenhado, o bloco já diz onde a seção começa, e o rótulo dentro dele
- * passou a competir com o conteúdo em vez de rotulá-lo — dois começos para a
- * mesma coisa.
+ * **`titulo` deixou de ser o rótulo.** Na versão antiga, sem título grande,
+ * `titulo` era desenhado como o próprio rótulo em caixa alta (`Rotulo
+ * as="h2"`). Agora ele é sempre o `<h2>` de 40px; quem quer o rótulo por
+ * cima escreve em `rotulo`. Todo chamador atual só passava `titulo`/`apoio`,
+ * então continua compilando, só ganha o título maior.
  *
- * Fora, ele volta a ser o que é: o nome do que vem abaixo.
+ * `tom` segue opcional e vale para duas coisas: a cor do `rotulo` (o "sinal")
+ * e o `tom` repassado ao `Cartao` de baixo, que hoje não muda o fundo dele
+ * (ver `Cartao.tsx`) mas continua aceito para quem já passa.
  *
- * **As distâncias.** São duas, e a diferença entre elas é o que faz o título
- * pertencer ao bloco de baixo em vez de flutuar entre dois. Medido no Chrome
- * a 375px, na página de detalhe, com o acervo real (a unidade de espaço deste
- * projeto é 3,52px, não 4 — ver `--spacing` em `globals.css` —, então o
- * degrau da escala e o pixel medido não são o mesmo número):
- *
- * | de | para | escala | medido |
- * |---|---|---|---|
- * | rótulo | linha de apoio | `mt-1` | 3,5px |
- * | cabeçalho | o bloco que ele rotula | `mb-2` | 7,0px |
- * | bloco | o rótulo do bloco seguinte | `gap-6` | 21,1px |
- *
- * 7 contra 21 é 1 para 3 exato. É o mínimo que resolve a ambiguidade a olho:
- * com os `gap-3` (10,6px) que separavam os blocos antes, o título teria de
- * grudar a 3,5px do cartão para ficar mais perto dele do que do bloco de
- * cima, e 3,5px abaixo de um texto de 10px em caixa alta lê como erro de
- * margem. O vão entre blocos dobrou por causa disso: ele deixou de separar só
- * caixas e passou a separar assuntos.
- *
- * O mesmo 21 contra 7 está nas colunas de `BlocosSeo`, que seguiram o mesmo
- * caminho — e lá o empate chegou a existir: empilhadas no celular com 7px dos
- * dois lados, o rótulo ficava no meio do caminho entre dois cartões.
- *
- * A largura do cabeçalho segue a da página, não a do conteúdo do cartão: o
- * rótulo começa na sangria da coluna e o conteúdo começa 21px adentro, que é
- * o `p-6` do cartão. É o degrau que mostra que um está por fora do outro.
+ * `nivel` escolhe a tag do título, sem mudar nada visual: `h2` é o padrão,
+ * porque a maioria das seções mora dentro de uma página que já tem o seu
+ * próprio `h1` em outro lugar. `not-found.tsx` e `error.tsx` são a exceção:
+ * ali o `Secao` é o único título da página inteira, e um documento sem `h1`
+ * quebra a hierarquia de quem navega por títulos (leitor de tela, sumário do
+ * navegador).
  */
 export function Secao({
+  rotulo,
+  icone,
+  tom,
   titulo,
   apoio,
-  tom,
+  href,
+  hrefRotulo,
   children,
   className,
+  nivel = "h2",
 }: {
+  /** O rótulo pequeno acima do título, como "POR ÁREA" ou "ÚLTIMA CHAMADA". */
+  rotulo?: ReactNode;
+  /** Ícone de 16px ao lado do rótulo. Sem `rotulo`, não aparece. */
+  icone?: NomeDoIcone;
+  tom?: Tom;
   titulo: ReactNode;
   /** A linha que explica a seção, quando existe. Sai junto com o título. */
   apoio?: ReactNode;
-  tom?: Tom;
+  /** Com endereço, aparece o link "Ver todos" à direita do cabeçalho. */
+  href?: string;
+  /** O texto do link. Padrão "Ver todos". */
+  hrefRotulo?: string;
   children: ReactNode;
   /** O recheio do cartão, quando ele não é o de seção. */
   className?: string;
+  /** A tag do título. Padrão `h2`; `h1` para quem é o título da página. */
+  nivel?: "h1" | "h2";
 }) {
+  const Titulo = nivel;
   return (
     <section>
-      <header className="mb-2">
-        <Rotulo as="h2">{titulo}</Rotulo>
-        {apoio && (
-          <p className="mt-1 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
-            {apoio}
-          </p>
+      <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          {rotulo && (
+            <Rotulo icone={icone} tom={tom} className="mb-2.5">
+              {rotulo}
+            </Rotulo>
+          )}
+          <Titulo className="font-titulo text-[40px] leading-[1.05] font-bold tracking-[-0.03em] break-words">
+            {titulo}
+          </Titulo>
+          {apoio && (
+            <p className="mt-2 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
+              {apoio}
+            </p>
+          )}
+        </div>
+        {href && (
+          <Link
+            href={href}
+            className="flex shrink-0 items-center gap-1.5 text-[15px] font-semibold text-tinta-900 hover:text-verde-texto"
+          >
+            {hrefRotulo ?? "Ver todos"}
+            <Icone nome="seta" tamanho={17} />
+          </Link>
         )}
       </header>
       <Cartao tom={tom} className={className ?? "p-6 sm:p-8"}>

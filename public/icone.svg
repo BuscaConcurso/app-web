@@ -1,10 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
-  <!-- Variante "app" do canvas: caixa 40 com raio 9, símbolo desenhado a 24.
-       Espessuras e raio do símbolo são os do canvas, sem ajuste. -->
-  <rect width="40" height="40" rx="9" fill="#141715"/>
-  <g transform="translate(8 8) scale(0.75)" fill="none">
-    <circle cx="14" cy="14" r="10.4" stroke="#FFFFFF" stroke-width="2.6"/>
-    <path d="M9 10.6h10M9 14h9M9 17.4h6.4" stroke="#F2B705" stroke-width="2" stroke-linecap="round"/>
-    <path d="M21.9 21.9 28.2 28.2" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="10" fill="#0B6B3A"/><path d="M25 0H30A10 10 0 0 1 40 10V15A15 15 0 0 1 25 0Z" fill="#F2C230"/><circle cx="17.5" cy="19.5" r="8" fill="none" stroke="#FFFFFF" stroke-width="4.4"/><path d="M23.3 25.3 30 32" stroke="#FFFFFF" stroke-width="4.4" stroke-linecap="round"/></svg>

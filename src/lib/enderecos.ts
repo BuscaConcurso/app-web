@@ -1,5 +1,5 @@
 /**
- * Achar endereço — URL e e-mail — dentro do trecho do ato, sem tocar no texto.
+ * Achar endereço (URL e e-mail) dentro do trecho do ato, sem tocar no texto.
  *
  * O trecho de uma resposta do FAQ é citação literal do Diário: o motor o
  * confere palavra por palavra contra o documento e `inicioChar`/`fimChar`
@@ -13,7 +13,7 @@
  *
  * Este texto vem de fora: é ato público lido por um modelo e chega aqui como
  * string. Montar marcação com ele e entregar a `dangerouslySetInnerHTML` seria
- * dar ao conteúdo do Diário o poder de escrever HTML na nossa página — é o
+ * dar ao conteúdo do Diário o poder de escrever HTML na nossa página: é o
  * caminho clássico de injeção, e não é hipótese distante: o acervo já mostrou
  * entidade HTML crua (`&amp;lt;`) chegando na tela. Aqui o texto **nunca vira
  * marcação**. Ele é partido em pedaços e quem renderiza cria nós de React, que
@@ -28,7 +28,7 @@
  * Endereço em edital quase nunca vem sozinho: ele está no meio de uma frase e
  * a pontuação da frase encosta nele. Medido no acervo (2.666 trechos aceitos,
  * 652 ocorrências de URL em 635 trechos), **421 das 652 terminam em pontuação
- * do ato** — `.` 200, `,` 178, `)` 20, `>` 12, `;` 4, `_` 4, `?` 2, `:` 1. Uma
+ * do ato**: `.` 200, `,` 178, `)` 20, `>` 12, `;` 4, `_` 4, `?` 2, `:` 1. Uma
  * varredura de `\S+` leva essa pontuação para dentro do `href` e produz dois
  * terços de links quebrados.
  *
@@ -42,7 +42,7 @@
  * delas (`.` 200, `,` 175, `)` 65, `;` 4, `?` 2, `:` 1) e **não deixa nenhuma
  * de fora**: 652 de 652 viram link. Preserva a barra final de 186 delas, as
  * consultas (`?nivel=L&aba=p-lato`), as âncoras (`#b_start=0`) e o `_` que
- * terminou 4 URLs que o diário quebrou com espaço no meio — `_` não é
+ * terminou 4 URLs que o diário quebrou com espaço no meio: `_` não é
  * pontuação de frase, e cortá-lo não tornaria o link melhor. Nos e-mails, 420
  * dos 424 achados com `@` viram `mailto:`; os 4 de fora são os dois que não
  * são endereço.
@@ -52,7 +52,7 @@ export interface PedacoDeEndereco {
   texto: string;
   /**
    * `null` em texto comum. Quando o pedaço é endereço, é para onde o link
-   * aponta — e é a **única** coisa que pode diferir de `texto`: `www.x.br` é
+   * aponta, e é a **única** coisa que pode diferir de `texto`: `www.x.br` é
    * exibido como está e aberto como `https://www.x.br`.
    */
   href: string | null;
@@ -74,20 +74,20 @@ const FECHAMENTOS: Record<string, string> = { ")": "(", "]": "[", "}": "{" };
 /**
  * Um endereço: URL primeiro, e-mail depois.
  *
- * A URL começa em `http://`, `https://` ou `www.` — e só. Domínio nu
+ * A URL começa em `http://`, `https://` ou `www.`, e só. Domínio nu
  * (`ifce.edu.br` solto na frase) fica fora por medida: no acervo ele aparece
  * quase sempre já precedido de `www.` ou de esquema, e reconhecê-lo exigiria
  * apostar que `art. 5º` e `Lei nº 8.112` não são domínios. Um link a menos é
  * menos caro que um link onde não havia endereço.
  *
  * O corpo da URL exclui espaço, aspas e `<>`: no ato esses caracteres
- * **delimitam** o endereço em vez de fazer parte dele — 12 das 652 ocorrências
+ * **delimitam** o endereço em vez de fazer parte dele: 12 das 652 ocorrências
  * vêm escritas `<www.x.br>`, e o `>` some aqui, antes mesmo de aparar.
  * Parêntese e vírgula ficam dentro do achado, e quem decide é `aparar`.
  *
  * No e-mail a validação já está na forma: parte local, `@`, domínio com ponto
  * e TLD de duas letras ou mais. Quem não casa não é endereço e continua texto
- * — é o caso de `concursoanatomia2026@gmail,com`, erro de digitação do órgão
+ * : é o caso de `concursoanatomia2026@gmail,com`, erro de digitação do órgão
  * que está no acervo hoje, e de `@gmail.com` sem parte local. **Nada disso é
  * consertado**: o trecho é citação, e um e-mail que o ato escreveu errado
  * aparece errado, sem virar link que não entrega.
@@ -118,7 +118,7 @@ function aparar(bruto: string): string {
     }
 
     // Fecha-parêntese só cai se estiver sobrando. `http://x/a_(b)` mantém o
-    // seu; `(www.x.br/p)` perde o que é da frase — e `(http://x/a_(b))`
+    // seu; `(www.x.br/p)` perde o que é da frase, e `(http://x/a_(b))`
     // perde um e mantém o outro, que é o caso que uma regra de "sempre
     // apara" erraria.
     const abre = FECHAMENTOS[ultimo];
@@ -144,7 +144,7 @@ function contar(texto: string, caractere: string): number {
  * Depois do corte pode restar `https://` pelado, ou um hospedeiro sem ponto.
  * Link para isso não abre lugar nenhum, e um link que não abre é pior que
  * texto: promete uma porta que não existe. O hospedeiro precisa ser nome de
- * domínio mesmo — letras, dígitos, ponto e hífen, terminando em TLD.
+ * domínio mesmo: letras, dígitos, ponto e hífen, terminando em TLD.
  */
 function hospedeiroServe(url: string): boolean {
   const hospedeiro = url.replace(COM_ESQUEMA, "").split(/[/?#]/)[0];
@@ -154,7 +154,7 @@ function hospedeiroServe(url: string): boolean {
 /**
  * O `href` da URL. O texto exibido continua o do ato; só o destino é montado.
  *
- * `www.x.br` sem esquema não é endereço absoluto para o navegador — sem
+ * `www.x.br` sem esquema não é endereço absoluto para o navegador: sem
  * prefixo ele viraria caminho relativo e abriria `/concursos/www.x.br`. O
  * prefixo é `https://` e não `http://` porque enviar quem clica para texto
  * claro quando o site aceita TLS é rebaixar a conexão à toa; site que só fala
@@ -171,7 +171,7 @@ function hrefDaUrl(url: string): string {
 /**
  * Quebra o texto em pedaços alternando texto comum e endereço.
  *
- * Devolve um pedaço só, sem `href`, quando não há endereço nenhum — e devolve
+ * Devolve um pedaço só, sem `href`, quando não há endereço nenhum, e devolve
  * lista vazia para texto vazio.
  */
 export function partirEmEnderecos(texto: string): PedacoDeEndereco[] {
@@ -187,7 +187,7 @@ export function partirEmEnderecos(texto: string): PedacoDeEndereco[] {
     const bruto = achado[0];
     const inicio = achado.index;
 
-    // Qual das duas formas casou, pelo grupo — e não por procurar `@` no
+    // Qual das duas formas casou, pelo grupo, e não por procurar `@` no
     // achado: `www.x.br/a@b` tem arroba e é URL.
     const eEmail = achado[GRUPO_EMAIL] !== undefined;
     const endereco = eEmail ? bruto : aparar(bruto);

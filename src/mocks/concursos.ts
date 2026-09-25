@@ -580,7 +580,7 @@ function paraResumo(rascunho: Rascunho): ConcursoResumo {
     salarioAte: rascunho.salarioAte ?? null,
     taxaInscricao: rascunho.taxa ?? null,
     escolaridades: rascunho.escolaridades,
-    // A cidade continua vazia de propósito — no mock ela vem do órgão. O
+    // A cidade continua vazia de propósito: no mock ela vem do órgão. O
     // nome do cargo não pode mais ficar vazio: ele é uma linha do cartão
     // agora, e um mock sem cargo nenhum demonstraria só o estado de ausência.
     nomesDeCargo: rascunho.cargos ?? [],

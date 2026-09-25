@@ -46,14 +46,14 @@ export function Paginacao({
           href={hrefDe(pagina - 1)}
           rel="prev"
           aria-label="Página anterior"
-          className={`${QUADRADO} bg-rebaixada text-tinta-800 hover:bg-tinta-200`}
+          className={`${QUADRADO} bg-rebaixada text-tinta-900 hover:bg-linha`}
         >
           ‹
         </LinkDaConsulta>
       ) : (
         <span
           aria-hidden="true"
-          className={`${QUADRADO} bg-rebaixada text-tinta-300`}
+          className={`${QUADRADO} bg-rebaixada text-linha`}
         >
           ‹
         </span>
@@ -71,7 +71,7 @@ export function Paginacao({
           <span
             key={item}
             aria-current="page"
-            className={`${QUADRADO} bg-inverso font-semibold text-inverso-texto`}
+            className={`${QUADRADO} bg-acao text-acao-texto`}
           >
             {item}
           </span>
@@ -80,7 +80,7 @@ export function Paginacao({
             rolarAoTopo
             key={item}
             href={hrefDe(item)}
-            className={`${QUADRADO} bg-rebaixada text-tinta-800 hover:bg-tinta-200`}
+            className={`${QUADRADO} bg-rebaixada text-tinta-900 hover:bg-linha`}
           >
             {item}
           </LinkDaConsulta>
@@ -93,14 +93,14 @@ export function Paginacao({
           href={hrefDe(pagina + 1)}
           rel="next"
           aria-label="Próxima página"
-          className={`${QUADRADO} bg-rebaixada text-tinta-800 hover:bg-tinta-200`}
+          className={`${QUADRADO} bg-rebaixada text-tinta-900 hover:bg-linha`}
         >
           ›
         </LinkDaConsulta>
       ) : (
         <span
           aria-hidden="true"
-          className={`${QUADRADO} bg-rebaixada text-tinta-300`}
+          className={`${QUADRADO} bg-rebaixada text-linha`}
         >
           ›
         </span>

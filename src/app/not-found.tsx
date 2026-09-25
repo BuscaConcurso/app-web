@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Azulejos, MOSAICO_HERO } from "@/components/marca/Azulejos";
 import { BotaoLink } from "@/components/ui/Botao";
-import { Rotulo } from "@/components/ui/Etiqueta";
 import { Secao } from "@/components/ui/Secao";
 import type { Uf } from "@/lib/dominio";
 import { NOME_UF } from "@/lib/rotulos";
@@ -32,25 +32,30 @@ const ESTADOS: Uf[] = ["SP", "RJ", "MG", "BA", "RS", "PR", "DF", "PA"];
 
 export default function NotFound() {
   return (
-    <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 sm:py-14">
-      <div className="rounded-caixa bg-cartao px-6 py-14 text-center sm:py-16">
-        <Rotulo>Erro 404</Rotulo>
-        <h1 className="mt-2 font-titulo text-2xl font-semibold text-tinta-900 sm:text-[28px]">
-          Página não encontrada
-        </h1>
-        <p className="mx-auto mt-3 max-w-[46ch] text-sm leading-6 break-words text-tinta-600">
-          O endereço que você tentou abrir não existe ou mudou de lugar. Use a
-          busca no topo da página ou escolha um destes caminhos.
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <BotaoLink href="/" variante="primario">
-            Ir para a home
-          </BotaoLink>
-          <BotaoLink href="/concursos" variante="secundario">
-            Ver todos os concursos
-          </BotaoLink>
+    <div className="conteudo py-10 sm:py-14">
+      <Secao rotulo="PÁGINA NÃO ENCONTRADA" titulo="Este endereço não existe" nivel="h1">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] lg:items-center">
+          <div className="flex flex-col items-start gap-5">
+            <p className="max-w-[46ch] text-sm leading-6 break-words text-tinta-600">
+              O endereço que você tentou abrir não existe ou mudou de lugar.
+              Use a busca no topo da página ou escolha um destes caminhos.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <BotaoLink href="/" variante="primario">
+                Ir para a home
+              </BotaoLink>
+              <BotaoLink href="/concursos" variante="secundario">
+                Ver todos os concursos
+              </BotaoLink>
+            </div>
+          </div>
+          <Azulejos
+            ladrilhos={MOSAICO_HERO.slice(0, 8)}
+            colunas={4}
+            className="hidden overflow-hidden rounded-[16px] sm:grid"
+          />
         </div>
-      </div>
+      </Secao>
 
       <div className="mt-6">
         <Secao
@@ -62,7 +67,7 @@ export default function NotFound() {
               <li key={uf} className="min-w-0">
                 <Link
                   href={`/concursos?uf=${uf}`}
-                  className="inline-flex min-h-8 max-w-full items-center rounded-controle bg-rebaixada px-3 text-[12px] font-medium text-tinta-800 transition-colors hover:bg-tinta-200"
+                  className="inline-flex min-h-8 max-w-full items-center rounded-controle bg-rebaixada px-3 text-[12px] font-medium text-tinta-900 transition-colors hover:bg-linha"
                 >
                   <span className="min-w-0 break-words">{NOME_UF[uf]}</span>
                 </Link>

@@ -6,8 +6,8 @@
  * a troca aconteceu aqui dentro e nenhum componente mudou, porque nenhum
  * componente importa mock direto.
  *
- * Tudo o que o buscador faz — filtro, ordenação, paginação, contagem de
- * faceta — continua rodando aqui, sobre o array que `acervo()` devolve. É por
+ * Tudo o que o buscador faz (filtro, ordenação, paginação, contagem de
+ * faceta) continua rodando aqui, sobre o array que `acervo()` devolve. É por
  * isso que a listagem usa `/acervo`, sem duplicar na API as consultas já
  * testadas em `consulta.test.ts` e `concursos.test.ts`.
  */
@@ -33,7 +33,7 @@ import {
   type Ordem,
   type Pagina,
 } from "./consulta";
-import { medirCargos, urlDoCargo, type CargoMedido } from "./cargos";
+import { medirCargos, type CargoMedido } from "./cargos";
 import { tomDoConcurso } from "./situacao";
 import { NOME_UF } from "./rotulos";
 import { acharOrgao, agruparPorOrgao, type OrgaoDoAcervo } from "./orgaos";
@@ -46,14 +46,6 @@ export interface Consulta extends Filtro {
 }
 
 export type { ContagensDeFaceta, OpcaoDeFaceta, Pagina } from "./consulta";
-
-/**
- * Teto de quantos cargos o rodapé mostra, e hoje ele não corta nada: a regra
- * de `cargos.ts` para sozinha em dez. É um limite de forma, medido na
- * fileira do rodapé — dez rótulos ocupam 869px dos 1183 de uma linha a
- * 1240px, e três linhas a 375px.
- */
-const LIMITE_DE_CARGOS = 10;
 
 /**
  * Raiz da API Nest, incluindo o prefixo `/v1` e sem barra no fim.
@@ -71,7 +63,7 @@ interface RespostaDeAcervo {
   /** Quantos concursos o engine tem, com dado ou sem. */
   total: number;
   /**
-   * Quantos o engine tem e não mandou porque não têm cargo nem evento — 189
+   * Quantos o engine tem e não mandou porque não têm cargo nem evento: 189
    * de 4.838 na carga de 2026-09-14. A lista traz só quem tem dado, e esta
    * contagem é o que impede a tela de fingir que o acervo tem só o que ela
    * lista. Sai por `avisoDoAcervo()`, aqui embaixo.
@@ -84,11 +76,11 @@ interface RespostaDeAcervo {
    *
    * A repartição existe porque o número sozinho fazia a tela mentir: ela
    * dizia que os que estão fora "entram na lista conforme forem lidos", e
-   * hoje isso não vale para nenhum deles — a fila está vazia.
+   * hoje isso não vale para nenhum deles: a fila está vazia.
    * `acervoIncompletoEmPartes()` (src/lib/rotulos.ts) é quem transforma
    * estes três números em frase, e deixa de fora a parte que estiver zerada.
    *
-   * Opcional no tipo porque um engine mais velho não manda o campo — é o
+   * Opcional no tipo porque um engine mais velho não manda o campo: é o
    * estado normal do mundo, API e app sobem separados. Quem lê valida.
    */
   foraDaLista?: {
@@ -140,9 +132,9 @@ const VALIDADE_DO_ACERVO_S = 300;
 const TEMPO_MAXIMO_DA_LEITURA_MS = 15_000;
 
 /**
- * R4: regra do parceiro humano contra o travessao em qualquer texto visivel
- * do site (acentuacao solta de proposito nesta nota, adiante ela volta).
- * `semTravessao.test.ts` (Task 1) cobre o que esta escrito no proprio
+ * Regra do parceiro humano contra o travessao em qualquer texto visivel do
+ * site (acentuacao solta de proposito nesta nota, adiante ela volta).
+ * `semTravessao.test.ts` cobre o que esta escrito no proprio
  * codigo-fonte, varrendo `src/`; mas titulo de concurso e nome de orgao nao
  * vem do codigo-fonte, vem da API, e o acervo ja mostrou o travessao nos
  * dois campos: "ENFAM", seguido dele, "Edital numero 2". Esta funcao troca
@@ -164,7 +156,7 @@ function normalizarOrgao(orgao: Orgao): Orgao {
 
 /**
  * O título, o nome do órgão, o nome da banca, o nome de cada cargo buscável
- * e o título do último ato: tudo que R4 chama de "título ou nome" no resumo
+ * e o título do último ato: todo "título ou nome" do resumo
  * do concurso. `T extends ConcursoResumo` para que chamar com um
  * `ConcursoDetalhe` devolva um `ConcursoDetalhe` (`cronograma`, `cargos`,
  * `origens` e `editalCitadoUrl` seguem juntos no `...concurso`), sem outra
@@ -247,7 +239,7 @@ const lerAcervoDaApi = lembrarPor(
       if (!Array.isArray(corpo?.concursos)) {
         throw new Error("a resposta não tem a lista `concursos`");
       }
-      // R4: título e nome de órgão sem travessão, aqui e não em cada
+      // Título e nome de órgão sem travessão (`semTravessao`), aqui e não em cada
       // componente. Ver `normalizarNomeacao`, logo abaixo.
       return { ...corpo, concursos: corpo.concursos.map(normalizarResumo), origem: "api" };
     } catch (erro) {
@@ -310,7 +302,7 @@ export async function origemDoAcervo(): Promise<OrigemDoAcervo> {
  *
  * Os campos contados são exatamente os que `filtrar` lê (`consulta.ts`):
  * `concurso.uf` para o filtro de estado e `concurso.orgao.esfera` para o de
- * esfera. Contar outro campo — `orgao.uf`, por exemplo — faria a tela
+ * esfera. Contar outro campo (`orgao.uf`, por exemplo) faria a tela
  * prometer um filtro que o filtro não entrega.
  */
 export interface DimensoesDoAcervo {
@@ -337,17 +329,17 @@ async function acervo(): Promise<ConcursoResumo[]> {
 
 /**
  * Quantos concursos do acervo do engine estão fora da lista, e por quê, para
- * a tela dizer isso em vez de calar — ou, pior, em vez de adivinhar.
+ * a tela dizer isso em vez de calar, ou, pior, em vez de adivinhar.
  *
- * `null` quando não há nada a avisar — acervo completo, ou mock. A lista traz
+ * `null` quando não há nada a avisar: acervo completo, ou mock. A lista traz
  * só quem tem cargo ou evento, e sem este aviso uma página que mostra 4.649
- * concursos afirmaria, por omissão, que o acervo tem 4.649 — tem 4.838.
+ * concursos afirmaria, por omissão, que o acervo tem 4.649: tem 4.838.
  *
  * **O aviso carrega a repartição, não só o total.** Um número só descreve
  * quatro mil e tantos concursos como se fossem uma coisa, e eles não são:
  * uns esperam leitura, outros nunca vão entrar porque o ato nem abre
  * concurso, e outros são falha nossa. `acervoIncompletoEmPartes()` é quem
- * decide o que disso vira frase — aqui o trabalho é passar os números
+ * decide o que disso vira frase: aqui o trabalho é passar os números
  * adiante sem perder nenhum.
  *
  * Não custa requisição: lê o mesmo acervo que `acervo()`, guardado no
@@ -450,6 +442,8 @@ export function paraALista(itens: ConcursoResumo[]): ConcursoResumo[] {
           poder: concurso.orgao.poder,
           uf: concurso.orgao.uf,
           municipio: concurso.orgao.municipio,
+          // O selo do cartão desenha o logo oficial quando há um revisado.
+          logoUrl: concurso.orgao.logoUrl,
         },
         banca: concurso.banca,
         ufs: concurso.ufs,
@@ -479,7 +473,7 @@ export interface Destaques {
   encerrando: ConcursoResumo[];
   abertos: ConcursoResumo[];
   previstos: ConcursoResumo[];
-  /** Os de ato mais recente no Diário — ver `ultimasAtualizacoes`. */
+  /** Os de ato mais recente no Diário: ver `ultimasAtualizacoes`. */
   atualizados: ConcursoResumo[];
   totalAbertos: number;
 }
@@ -531,8 +525,15 @@ export interface LinkDeFaceta {
  * Os links internos dos blocos de SEO da home. São âncoras de verdade para
  * `/concursos?uf=SP`, não botões com JavaScript, porque o valor delas é
  * exatamente serem rastreáveis.
+ *
+ * `ufs` é o limite de UFs no resultado (padrão 12, como sempre foi). O mapa
+ * da home passa `{ ufs: 27 }` porque precisa de todas, mesmo as com zero
+ * abertos, para desenhar a grade inteira.
  */
-export async function facetas(hoje: Date = new Date()): Promise<{
+export async function facetas(
+  hoje: Date = new Date(),
+  { ufs: limiteUfs = 12 }: { ufs?: number } = {},
+): Promise<{
   ufs: LinkDeFaceta[];
   bancas: LinkDeFaceta[];
   orgaos: LinkDeFaceta[];
@@ -568,7 +569,7 @@ export async function facetas(hoje: Date = new Date()): Promise<{
     [...mapa.entries()].sort((a, b) => b[1] - a[1]).slice(0, limite);
 
   return {
-    ufs: maisFrequentes(porUf, 12).map(([uf, total]) => ({
+    ufs: maisFrequentes(porUf, limiteUfs).map(([uf, total]) => ({
       rotulo: NOME_UF[uf],
       href: `/concursos?uf=${uf}`,
       total,
@@ -584,7 +585,7 @@ export async function facetas(hoje: Date = new Date()): Promise<{
       // por texto respondia por aproximação: ela varre `textoBuscavel`, que
       // inclui título, banca, cargo e cidade, então "IFPR" também trazia os
       // concursos de quem só cita o IFPR no título, e um órgão sem sigla caía
-      // no nome inteiro — que casa com as unidades dele e com mais nada
+      // no nome inteiro: que casa com as unidades dele e com mais nada
       // previsível. O link aqui promete "os concursos deste órgão", e agora é
       // o slug do órgão que responde, que é a mesma chave que agrupa a
       // página.
@@ -608,37 +609,6 @@ export async function cargosEscolhidos(): Promise<CargoMedido[]> {
 }
 
 /**
- * Os cargos que viram link no rodapé, medidos no acervo inteiro.
- *
- * Sobre o acervo inteiro, e não sobre os abertos como `facetas()` — e é por
- * isso que esta lista **não serve para os blocos da home**, que contam
- * "abertos agora". Hoje são 132 abertos em 4.649, e as duas contas foram
- * feitas: a mesma regra medida só nos abertos tem piso 2 e deixa entrar
- * "Alunos", "Curso", "Área" e "Júnior"; e os dez daqui, contados só entre os
- * abertos, dariam 47, 4, 3, 3, 2, 2, 2, 1, 1 e **0** — um link do rodapé
- * levando a busca vazia, que é justamente o que não pode acontecer. O rodapé
- * está em toda página e é âncora permanente; lista que encolhe quando as
- * inscrições fecham não serve a isso.
- *
- * A regra de agrupamento está em `cargos.ts`, com a medição que a sustenta.
- * Aqui só entra o que é desta camada: de onde vem o acervo, e o corte de
- * quantos links o rodapé mostra.
- *
- * Não custa requisição nova: lê o acervo que o layout e a página já leram,
- * guardado no render por `cache` e no processo por `lerAcervoDaApi`.
- */
-export async function cargosEmDestaque(
-  limite = LIMITE_DE_CARGOS,
-): Promise<LinkDeFaceta[]> {
-  const escolhidos = await cargosEscolhidos();
-  return escolhidos.slice(0, limite).map((cargo) => ({
-    rotulo: cargo.rotulo,
-    href: urlDoCargo(cargo),
-    total: cargo.alcance,
-  }));
-}
-
-/**
  * Quantos resultados cada opção da coluna traria, sobre o acervo inteiro. A
  * regra está em `contarFacetas` (consulta.ts).
  */
@@ -654,11 +624,11 @@ export async function contagensDeFaceta(
  * os cargos e de onde tudo veio.
  *
  * Rota própria, e não uma busca no acervo, porque o detalhe é o único lugar
- * que precisa de cronograma, cargo, vaga e remuneração — carregar isso para
+ * que precisa de cronograma, cargo, vaga e remuneração: carregar isso para
  * os 181 concursos só para mostrar um seria pagar a lista inteira por página.
  *
- * **Com `BC_API_URL` definida, não há mock** (a mesma regra de `carregar`,
- * R3). 404 da API é resposta: o slug não existe e a página mostra não
+ * **Com `BC_API_URL` definida, não há mock** (a mesma regra de `carregar`).
+ * 404 da API é resposta: o slug não existe e a página mostra não
  * encontrado. Qualquer outra falha (rede, 5xx, resposta sem concurso, mais de
  * `TEMPO_MAXIMO_DA_LEITURA_MS`) lança, e a página de erro aparece. Cair no
  * mock aqui fazia todo slug real que o mock não tem virar 404 com `noindex`
@@ -688,7 +658,7 @@ export async function obterDetalhe(
       if (typeof corpo?.slug !== "string") {
         throw new Error("a resposta não tem um concurso");
       }
-      // R4: mesmo corte de `lerAcervoDaApi`, para o detalhe.
+      // O mesmo corte do travessão de `lerAcervoDaApi`, para o detalhe.
       return normalizarDetalhe(corpo);
     } catch (erro) {
       unstable_rethrow(erro);
@@ -734,4 +704,26 @@ export async function obterOrgao(slug: string): Promise<OrgaoDoAcervo | null> {
 /** Todos os órgãos do acervo, do maior para o menor. Alimenta o sitemap. */
 export async function listarOrgaos(): Promise<OrgaoDoAcervo[]> {
   return agruparPorOrgao(await acervo());
+}
+
+/**
+ * "Também abertos em {UF}" na página do concurso: outros concursos com
+ * inscrição aberta na mesma UF, sem o próprio, mais perto de encerrar
+ * primeiro.
+ *
+ * A UF é a do cartão quando existe, e a primeira de `ufs` quando o concurso é
+ * multiestadual (`uf` nula por desenho nesse caso, ver `dominio.ts`). Sem UF
+ * nenhuma não há o que comparar, e a função devolve lista vazia em vez de
+ * inventar um "também aberto" nacional.
+ */
+export async function tambemAbertos(
+  concurso: ConcursoResumo,
+  hoje: Date = new Date(),
+  limite = 3,
+): Promise<ConcursoResumo[]> {
+  const uf = concurso.uf ?? concurso.ufs[0];
+  if (!uf) return [];
+  return ordenar(filtrar(await acervo(), { situacoes: ["abertas"], uf }, hoje), "encerrando", hoje)
+    .filter((c) => c.slug !== concurso.slug)
+    .slice(0, limite);
 }

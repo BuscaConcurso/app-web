@@ -8,7 +8,7 @@
  * A regra do pedido é que **só entra termo que deu resultado**, e quem sabe
  * se deu resultado é a página: `resultado.total` sai de `listarConcursos`, do
  * lado do servidor, depois que a busca já aconteceu. A barra recebe `q` e
- * `uf` por propriedade e não faz ideia do desfecho — ela renderiza igual
+ * `uf` por propriedade e não faz ideia do desfecho: ela renderiza igual
  * tendo a busca devolvido 4.648 concursos ou nenhum.
  *
  * Havia dois caminhos. O primeiro era dar à `BarraBusca` uma propriedade
@@ -20,8 +20,8 @@
  *
  * O segundo, que é este: **um componente que não desenha nada e só registra**.
  * A barra fica com um papel só, o de ler a memória e sugerir; este fica com o
- * outro, o de escrever. Quem os une é a página, que é onde os dois fatos —
- * a consulta e o total — estão na mesma linha.
+ * outro, o de escrever. Quem os une é a página, que é onde os dois fatos (
+ * a consulta e o total) estão na mesma linha.
  *
  * A política em si (o que entra, o que sai, o que é o mesmo termo) não está
  * aqui: está em `registrarBusca`, em `src/lib/termosBuscados.ts`, porque
@@ -54,7 +54,7 @@ export function RegistroDaBusca({
   termo?: string;
   /** Quantos concursos a busca devolveu, antes da paginação. */
   resultados: number;
-  /** Se havia filtro além do texto — UF, faceta ou faixa de salário. */
+  /** Se havia filtro além do texto: UF, faceta ou faixa de salário. */
   filtrada: boolean;
 }) {
   useEffect(() => {

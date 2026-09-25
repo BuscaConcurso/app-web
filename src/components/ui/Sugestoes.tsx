@@ -17,19 +17,19 @@
  *
  * O `Menu` é um `<details>` cujo gatilho é o `<summary>`: quem abre é o
  * elemento que recebe o foco, e o foco fica nele enquanto o painel está
- * aberto. Um combobox é o contrário — **quem abre é o campo de texto, e o
+ * aberto. Um combobox é o contrário: **quem abre é o campo de texto, e o
  * foco não sai dele em momento nenhum**. A pessoa continua digitando com a
  * lista aberta, as setas andam pela lista sem mover o cursor de texto, e a
  * opção ativa é anunciada por `aria-activedescendant`, que é justamente o
  * mecanismo que existe para mover a seleção sem mover o foco. Pôr um
  * `<summary>` entre o campo e a lista significaria ou um segundo elemento
  * focável dentro da cápsula, ou um `<summary>` que o campo abre por baixo do
- * pano — e os dois quebram a coisa que o `<details>` compra, que é abrir e
+ * pano, e os dois quebram a coisa que o `<details>` compra, que é abrir e
  * fechar sem JavaScript.
  *
  * E não há sem-script a preservar aqui: a lista vem do `localStorage`, que
  * só existe com script. Sem JavaScript a barra continua sendo o mesmo
- * `<form method="get">` de sempre, sem nada a mais e sem nada a menos — a
+ * `<form method="get">` de sempre, sem nada a mais e sem nada a menos: a
  * sugestão é aprimoramento, não requisito, e é por isso que ela não pode
  * emprestar o esqueleto que o resto da página usa para funcionar sem script.
  *
@@ -37,7 +37,7 @@
  * `role="menu"`, porque `role="menu"` obrigaria a navegação por setas e
  * tabindex rotativo que não temos"*. Um `role="listbox"` obriga ao mesmo, e
  * um pouco mais. Ajustar o `Menu` para ter as duas naturezas seria dar a ele
- * um segundo contrato de foco e de teclado para um consumidor só — que é
+ * um segundo contrato de foco e de teclado para um consumidor só: que é
  * exatamente o teste que aquele arquivo usa para recusar formas novas:
  * *"acrescentar uma forma nova ao revelador para um consumidor só não é
  * compartilhar, é mudar de lugar"*.
@@ -52,10 +52,10 @@
  * |---|---|---|
  * | ↓ | desce uma opção, dando a volta | abre na primeira |
  * | ↑ | sobe uma opção, dando a volta | abre na última |
- * | Home / End | primeira / última | — |
+ * | Home / End | primeira / última | n/d |
  * | Enter | busca a opção ativa | submete o que está escrito |
- * | Esc | fecha, sem submeter e sem limpar | — |
- * | Tab | fecha e segue | — |
+ * | Esc | fecha, sem submeter e sem limpar | n/d |
+ * | Tab | fecha e segue | n/d |
  *
  * **Enter sem opção ativa submete o formulário**, que é o que a barra sempre
  * fez. Abrir a lista ao focar não pode custar nada a quem chegou para digitar
@@ -243,12 +243,12 @@ export function useSugestoes({
        * relação com o que está sendo digitado agora, e deixá-los abertos por
        * cima do primeiro resultado enquanto a pessoa escreve é atrapalhar
        * quem só quer digitar e enviar. Some ao primeiro caractere e volta se
-       * o campo esvaziar — ou na hora, com a seta para baixo.
+       * o campo esvaziar, ou na hora, com a seta para baixo.
        */
       onInput: (evento) => setAberta(evento.currentTarget.value === ""),
       /**
        * `relatedTarget` nulo é "o foco não foi para lugar nenhum", que é o
-       * que acontece ao clicar no vão da própria barra — e aí a barra devolve
+       * que acontece ao clicar no vão da própria barra, e aí a barra devolve
        * o foco ao campo no clique, então fechar seria um pisca-pisca. Quando
        * o foco vai para algum lugar (o seletor, o botão, outra coisa da
        * página), a lista fecha.
@@ -281,7 +281,7 @@ function Relogio() {
       strokeWidth="1.4"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="size-3.5 shrink-0 text-tinta-400"
+      className="size-3.5 shrink-0 text-tinta-500"
     >
       <circle cx="8" cy="8" r="6" />
       <path d="M8 4.6V8l2.2 1.6" />
@@ -323,12 +323,12 @@ export function Sugestoes({
        * 375px dão 332px e cabem inteiras sem rolagem interna (com `20rem` a
        * décima ficava 12px cortada); os `60vh` são o teto de quem está num
        * aparelho baixo, em paisagem, onde dez linhas não caberiam de jeito
-       * nenhum — aí ela rola por dentro.
+       * nenhum: aí ela rola por dentro.
        */
       className={[
         "absolute top-full right-0 left-0 z-30 mt-2",
         "max-h-[min(60vh,22rem)] overflow-y-auto overscroll-contain",
-        "rounded-caixa bg-cartao p-1.5",
+        "rounded-cartao bg-cartao p-1.5",
       ].join(" ")}
     >
       {itens.map((item, indice) => (
@@ -340,14 +340,14 @@ export function Sugestoes({
           /**
            * O foco não sai do campo: num combobox a opção não é focável, e o
            * `mousedown` que não é impedido tira o foco de onde ele tem de
-           * ficar — e, de quebra, fecharia a lista antes do clique chegar.
+           * ficar, e, de quebra, fecharia a lista antes do clique chegar.
            */
           onMouseDown={(evento) => evento.preventDefault()}
           onMouseMove={() => aoApontar(indice)}
           onClick={() => aoEscolher(indice)}
           className={[
             "flex cursor-pointer items-center gap-2 rounded-controle px-2.5 py-2",
-            "text-sm text-tinta-800",
+            "text-sm text-tinta-900",
             indice === ativo ? "bg-rebaixada" : "",
           ].join(" ")}
         >

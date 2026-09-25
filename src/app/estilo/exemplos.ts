@@ -1,12 +1,14 @@
 import type { Cargo, Origem } from "@/lib/dominio";
+import type { TomDaEtiqueta } from "@/components/ui/Etiqueta";
+import type { NomeDoIcone } from "@/components/ui/Icone";
 
 /**
  * Os exemplos de `Cargos`, `Faq` e `AtosPublicados` na vitrine.
  *
  * ## Por que existe um arquivo de exemplo, e não uma chamada
  *
- * A vitrine é uma página do app e não pode falar com a API nem com o banco —
- * e, mesmo que pudesse, não deveria: `obterDetalhe` sem `BC_API_URL` devolve
+ * A vitrine é uma página do app e não pode falar com a API nem com o banco,
+ * e mesmo que pudesse não deveria: `obterDetalhe` sem `BC_API_URL` devolve
  * `cargos: []` e `origens: []`, porque o mock é um acervo de resumos e não
  * tem ato nem cargo. Sem isto aqui, os três componentes não aparecem em lugar
  * nenhum do app quando se desenha contra o mock, que é o modo padrão.
@@ -23,7 +25,7 @@ import type { Cargo, Origem } from "@/lib/dominio";
  * `fimChar` são deslocamentos dentro de `Origem.texto`; mexer num caractere
  * do texto move o grifo para outra frase, e o exemplo passaria a mentir sobre
  * o componente. **Se alguém editar o texto de um ato daqui, as posições têm
- * de sair junto** — ou, melhor, copie outro ato inteiro do acervo.
+ * de sair junto**, ou, melhor, copie outro ato inteiro do acervo.
  *
  * Os nomes próprios que aparecem (o reitor que assina, a banca contratada)
  * saíram publicados no Diário Oficial da União, que é onde estes atos moram.
@@ -32,13 +34,13 @@ import type { Cargo, Origem } from "@/lib/dominio";
  */
 
 /**
- * O ato que responde — CRA-AM, edital nº 1/2026, 1.481 caracteres.
+ * O ato que responde: CRA-AM, edital nº 1/2026, 1.481 caracteres.
  *
  * Escolhido por um detalhe que nenhum teste de Node mostra: **três das quatro
  * respostas saem da mesma frase**, na mesma posição (660) ou dentro dela. É o
- * caso que `lib/destaque.ts` descreve — "as inscrições serão realizadas … no
+ * caso que `lib/destaque.ts` descreve: "as inscrições serão realizadas … no
  * endereço eletrônico X" responde ao mesmo tempo "até quando", "onde" e
- * "como" —, e no navegador ele tem de virar **uma** marca amarela com **três**
+ * "como", e no navegador ele tem de virar **uma** marca amarela com **três**
  * `id` dentro, e não três marcas aninhadas com o texto repetido. Os três links
  * do FAQ caem todos nessa marca.
  *
@@ -108,7 +110,7 @@ export const ATO_QUE_RESPONDE: Origem = {
 };
 
 /**
- * O ato com descarte, e o único que se parte em parágrafos — edital nº
+ * O ato com descarte, e o único que se parte em parágrafos: edital nº
  * 110/2026, 1.867 caracteres.
  *
  * Duas coisas, e as duas só se veem no navegador:
@@ -127,7 +129,7 @@ export const ATO_QUE_RESPONDE: Origem = {
  *    E é o que prova que a partição não move o grifo: as posições do FAQ são
  *    deslocamentos no texto inteiro, cada parágrafo desconta o seu `inicio`
  *    antes de pintar, e aqui as três respostas caem nos parágrafos 0, 2 e 5.
- *    Se a conta estivesse errada, o amarelo apareceria na frase vizinha —
+ *    Se a conta estivesse errada, o amarelo apareceria na frase vizinha,
  *    visível de longe, e invisível para a suíte.
  */
 export const ATO_COM_DESCARTE: Origem = {
@@ -192,7 +194,7 @@ export const ATO_COM_DESCARTE: Origem = {
 };
 
 /**
- * O ato que não responde nenhuma — IFB Ceilândia, edital nº 11/2026, 639
+ * O ato que não responde nenhuma: IFB Ceilândia, edital nº 11/2026, 639
  * caracteres.
  *
  * Duas coisas de uma vez, e as duas são estados que quebram:
@@ -271,20 +273,20 @@ export const ATO_QUE_NAO_RESPONDE: Origem = {
  * Seis cargos do acervo, um por ramo que `Cargos` tem de aguentar. A ordem é
  * a do mais completo ao mais vazio, que é a ordem em que a degradação se lê:
  *
- * 1. **UTFPR** — tudo preenchido, com taxa de inscrição (a etiqueta que só
+ * 1. **UTFPR**: tudo preenchido, com taxa de inscrição (a etiqueta que só
  *    251 cargos em 700 concursos produzem) e remuneração em faixa.
- * 2. **UFRPE** — o mesmo, com `codigo` ao lado do nome e um requisito de
+ * 2. **UFRPE**: o mesmo, com `codigo` ao lado do nome e um requisito de
  *    cinco formações, que é o que faz a lista de requisitos quebrar linha.
- * 3. **UFMT** — vaga e requisito, **sem remuneração**: o campo diz "não
+ * 3. **UFMT**: vaga e requisito, **sem remuneração**: o campo diz "não
  *    informada no ato" em vez de sumir. É a maioria do acervo, e é o estado
  *    que a docstring do componente chama de comum.
- * 4. **UFBA** — uma vaga com `ampla: 0` e `pcd: 1`. É o defeito que já
+ * 4. **UFBA**: uma vaga com `ampla: 0` e `pcd: 1`. É o defeito que já
  *    aconteceu: a repartição só aparecia com duas ou mais categorias, e esta
  *    vaga saía como "Salvador: 1 vaga", escondendo que a única vaga é
  *    reservada. Aqui ela tem de sair como "Salvador: 1 vaga (PCD: 1)".
- * 5. **PROGESP** — `total: 0` com `cadastroReserva`, que não é "nenhuma
+ * 5. **PROGESP**: `total: 0` com `cadastroReserva`, que não é "nenhuma
  *    vaga": tem de sair "sem vaga imediata (cadastro reserva)".
- * 6. **COREN-PI** — nome e nada mais. Sem escolaridade, sem área, sem vaga,
+ * 6. **COREN-PI**: nome e nada mais. Sem escolaridade, sem área, sem vaga,
  *    sem remuneração e sem evidência: o `<details>` do "de onde isto foi
  *    lido" não existe, e as duas linhas de `<dl>` dizem o que falta.
  */
@@ -539,3 +541,145 @@ export const CARGOS_DE_PROVA: Cargo[] = [
     "evidencia": []
   }
 ];
+
+/**
+ * Os dados da marca e dos tokens, para a parte de cima da vitrine. Fica separado do resto do arquivo, que é o acervo congelado dos
+ * blocos de concurso: isto aqui não vem do acervo, é o próprio sistema de
+ * desenho, transcrito de `docs/prototipo/Logo.dc.html`.
+ */
+
+/**
+ * As seis cores fixas da marca, com o hex exatamente como está no protótipo.
+ *
+ * A amostra pinta pelo TOKEN (`classe`), não pelo hex: por isso "Verde Noite"
+ * e "Papel" mudam de valor no escuro (`faixa` e `pagina` têm tom próprio lá),
+ * enquanto o hex ao lado é sempre o valor claro documentado no protótipo. É a
+ * mesma regra do resto do site, componente só usa token; o hex aqui é dado
+ * exibido como texto, não cor aplicada por fora do token.
+ */
+export const PALETA_DE_MARCA: {
+  nome: string;
+  hex: string;
+  classe: string;
+  uso: string;
+  comBorda?: boolean;
+}[] = [
+  { nome: "Verde Mata", hex: "#0B6B3A", classe: "bg-verde", uso: "Ação e marca" },
+  { nome: "Verde Noite", hex: "#0A4D2E", classe: "bg-faixa", uso: "Faixas de destaque" },
+  { nome: "Ouro", hex: "#F2C230", classe: "bg-ouro", uso: "Uma chamada por tela" },
+  { nome: "Anil", hex: "#1D3F8F", classe: "bg-anil", uso: "Links e informação" },
+  { nome: "Urucum", hex: "#B8401F", classe: "bg-urucum", uso: "Prazo curto" },
+  {
+    nome: "Papel",
+    hex: "#F6F4EE",
+    classe: "bg-pagina",
+    uso: "Fundo, como o edital",
+    comBorda: true,
+  },
+];
+
+/**
+ * A tabela dos tons de sinal: o par fundo/texto que `Etiqueta` usa por trás
+ * de cada `tom`, o mesmo em `Cargos`, `Faq` e nos cartões de concurso. Os
+ * nomes dos tokens (`fundo`/`texto`) são texto, não classe: é o que se lê na
+ * tabela, mas o tom que pinta é `tom`, passado à própria `Etiqueta`.
+ */
+export const TONS_DE_SINAL: {
+  nome: string;
+  tom: TomDaEtiqueta;
+  fundo: string;
+  texto: string;
+}[] = [
+  { nome: "Verde", tom: "verde", fundo: "verde-fundo", texto: "verde-texto" },
+  { nome: "Anil", tom: "anil", fundo: "anil-fundo", texto: "anil-texto" },
+  { nome: "Ouro", tom: "ouro", fundo: "ouro-fundo", texto: "ouro-sinal-texto" },
+  { nome: "Urucum", tom: "urucum", fundo: "urucum-fundo", texto: "urucum-texto" },
+  { nome: "Neutro", tom: "neutro", fundo: "rebaixada", texto: "tinta-600" },
+];
+
+/**
+ * O nome de cada ícone de `ICONES`, em português e com acento: a caixa de
+ * 52px da vitrine mostra o símbolo com este rótulo embaixo, e não a chave
+ * crua do objeto (`lupaDocumento`, `diario`).
+ */
+export const ROTULO_ICONE: Record<NomeDoIcone, string> = {
+  busca: "Busca",
+  tribunais: "Tribunais",
+  policia: "Polícia",
+  educacao: "Educação",
+  saude: "Saúde",
+  fiscal: "Fiscal",
+  estatais: "Estatais",
+  forcas: "Forças Armadas",
+  prefeituras: "Prefeituras",
+  conselhos: "Conselhos",
+  tecnologia: "Tecnologia",
+  administrativo: "Administrativo",
+  ambiente: "Ambiente",
+  salario: "Salário",
+  vagas: "Vagas",
+  pessoa: "Pessoa",
+  prazo: "Prazo",
+  local: "Local",
+  banca: "Banca",
+  diario: "Diário Oficial",
+  aberto: "Aberto",
+  previsto: "Previsto",
+  homologado: "Homologado",
+  alerta: "Alerta",
+  salvar: "Salvar",
+  areas: "Áreas",
+  estados: "Estados",
+  entrar: "Entrar",
+  seta: "Seta",
+  externo: "Link externo",
+  abaixo: "Abrir abaixo",
+  acima: "Abrir acima",
+  voltar: "Voltar",
+  mira: "Mira",
+  lupaDocumento: "Buscar no ato",
+  ciclo: "Atualizar",
+  ordenar: "Ordenar",
+  contraste: "Contraste",
+  compartilhar: "Compartilhar",
+  check: "Concluído",
+  relogio: "Relógio",
+  recibo: "Recibo",
+  globo: "Site",
+  sol: "Tema claro",
+  lua: "Tema escuro",
+  monitor: "Tema do sistema",
+  fechar: "Fechar",
+  menu: "Menu",
+  lista: "Lista",
+  agenda: "Agenda",
+  filtros: "Filtros",
+  email: "E-mail",
+  documento: "Documento",
+  duvida: "Dúvida",
+  corrente: "Vínculo",
+  revisao: "Revisão",
+};
+
+/**
+ * A cor de fundo da caixa de cada ícone, para os doze ícones de área que
+ * `Logo.dc.html:74-85` já pinta em cor (o resto cai em neutro, o mesmo
+ * cinza que o protótipo usa para os ícones de metadado). Sem entrada aqui,
+ * a vitrine usa "neutro" por padrão.
+ */
+export const CATEGORIA_DO_ICONE: Partial<
+  Record<NomeDoIcone, "verde" | "anil" | "ouro" | "urucum">
+> = {
+  tribunais: "verde",
+  policia: "anil",
+  educacao: "ouro",
+  saude: "urucum",
+  fiscal: "verde",
+  estatais: "anil",
+  forcas: "anil",
+  prefeituras: "ouro",
+  conselhos: "verde",
+  tecnologia: "anil",
+  administrativo: "urucum",
+  ambiente: "verde",
+};

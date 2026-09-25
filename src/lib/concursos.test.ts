@@ -5,11 +5,13 @@ import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import {
   contagensDeFaceta,
   contarConcursos,
+  facetas,
   listarConcursos,
   normalizarDetalhe,
   normalizarResumo,
   paraALista,
   semTravessao,
+  tambemAbertos,
 } from "./concursos";
 import type { ConcursoDetalhe, Escolaridade } from "./dominio";
 import type { Situacao } from "./consulta";
@@ -139,13 +141,13 @@ describe("paraALista", () => {
 });
 
 /**
- * R4: o parceiro humano proíbe o travessão em qualquer texto visível, e
+ * O parceiro humano proíbe o travessão em qualquer texto visível, e
  * título e nome de órgão vêm da API, não do código-fonte. Por isso
  * `semTravessao.test.ts` (que varre `src/`) não os alcança. Estes testes
  * cobrem o corte isolado e o limite em que ele entra, `normalizarResumo` e
  * `normalizarDetalhe`.
  */
-describe("semTravessao (R4)", () => {
+describe("semTravessao", () => {
   it(`troca "${TRAVESSAO}" por " - ", com um espaço de cada lado`, () => {
     expect(semTravessao(`ENFAM ${TRAVESSAO} Edital nº 2`)).toBe("ENFAM - Edital nº 2");
   });
@@ -160,7 +162,7 @@ describe("semTravessao (R4)", () => {
   });
 });
 
-describe("normalizarResumo / normalizarDetalhe (R4)", () => {
+describe("normalizarResumo / normalizarDetalhe, sem travessão", () => {
   it("tira o travessão do título, do nome do órgão, da banca, do cargo e do último ato ao moldar o resumo", () => {
     const sujo = {
       ...CONCURSOS[0],
@@ -251,5 +253,35 @@ describe("normalizarResumo / normalizarDetalhe (R4)", () => {
     expect(limpo.origens[0].titulo).toBe("Edital - 2026");
     expect(limpo.origens[0].texto).toBe(detalheSujo.origens[0].texto);
     expect(limpo.origens[0].faq[0].trecho).toBe(detalheSujo.origens[0].faq[0].trecho);
+  });
+});
+
+describe("tambemAbertos", () => {
+  it("mesma UF, abertos, sem o próprio, no máximo 3", async () => {
+    const base = (await listarConcursos({ situacoes: ["abertas"] }, HOJE)).itens.find((c) => c.uf);
+    if (!base) return;
+    const outros = await tambemAbertos(base, HOJE);
+    expect(outros.length).toBeLessThanOrEqual(3);
+    for (const c of outros) {
+      expect(c.slug).not.toBe(base.slug);
+      expect(c.ufs.includes(base.uf!) || c.uf === base.uf).toBe(true);
+    }
+  });
+});
+
+describe("facetas", () => {
+  it("devolve todas as UFs com aberto quando o limite é 27", async () => {
+    const { ufs } = await facetas(HOJE, { ufs: 27 });
+    const padrao = await facetas(HOJE);
+    expect(ufs.length).toBeGreaterThanOrEqual(padrao.ufs.length);
+    expect(padrao.ufs.length).toBeLessThanOrEqual(12);
+  });
+
+  it("respeita um limite menor que o padrão", async () => {
+    // O mock tem 11 UFs com aberto: um limite ignorado devolveria as 11, não
+    // 1. Esse é o caso que pega a assinatura antiga (`facetas(hoje)`, que
+    // aceita e descarta o segundo argumento em silêncio).
+    const { ufs: uma } = await facetas(HOJE, { ufs: 1 });
+    expect(uma).toHaveLength(1);
   });
 });

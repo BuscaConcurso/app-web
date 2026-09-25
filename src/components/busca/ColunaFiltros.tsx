@@ -31,16 +31,23 @@ import {
  * formulário próprio que envia no Enter, com os outros filtros em campos
  * ocultos para não se perderem no caminho.
  */
+/**
+ * O quadradinho de 20px: fica maior no visual novo, mas continua decorativo
+ * (`aria-hidden`) e o quadrado de uma âncora, não uma caixa de seleção de
+ * verdade. Ver o cabeçalho do arquivo para o porquê de não ser um
+ * `<input type="checkbox">`. Marcado, o fundo é `bg-acao` (`acao` é
+ * superfície, não texto).
+ */
 function Quadradinho({ marcado }: { marcado: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={`flex size-[16px] shrink-0 items-center justify-center rounded-[5px] ${
-        marcado ? "bg-acao" : "bg-tinta-200"
+      className={`flex size-5 shrink-0 items-center justify-center rounded-[6px] ${
+        marcado ? "bg-acao" : "bg-linha"
       }`}
     >
       {marcado && (
-        <svg viewBox="0 0 12 12" fill="none" className="size-3 text-white">
+        <svg viewBox="0 0 12 12" fill="none" className="size-3.5 text-white">
           <path
             d="m2.5 6.2 2.3 2.3 4.7-5"
             stroke="currentColor"
@@ -70,7 +77,7 @@ function Grupo({
   return (
     <div className="flex flex-col gap-2.5">
       <Rotulo>{titulo}</Rotulo>
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col">
         {opcoes.map((opcao) => {
           const marcado = marcados.includes(opcao.valor);
           return (
@@ -80,7 +87,7 @@ function Grupo({
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcado ? "remover filtro" : "filtrar"
                 }`}
-                className="-mx-1.5 flex items-center gap-2.5 rounded-controle px-1.5 py-1 text-sm text-tinta-800 transition-colors hover:bg-rebaixada"
+                className="-mx-1.5 flex min-h-[42px] items-center gap-2.5 rounded-controle px-1.5 text-sm text-tinta-900 transition-colors hover:bg-rebaixada"
               >
                 <Quadradinho marcado={marcado} />
                 <span className={marcado ? "font-medium text-tinta-900" : ""}>
@@ -105,6 +112,10 @@ function GrupoDeBancas({
   opcoes: OpcaoDeFaceta[];
   consulta: ConsultaDaUrl;
 }) {
+  // Sem banca nenhuma no resultado, o grupo não aparece: o título sozinho,
+  // sem opção embaixo, parecia um filtro quebrado.
+  if (opcoes.length === 0) return null;
+
   return (
     <div className="flex flex-col gap-2.5">
       <Rotulo>Banca</Rotulo>
@@ -118,10 +129,10 @@ function GrupoDeBancas({
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcada ? "remover filtro" : "filtrar"
                 }`}
-                className={`inline-block rounded-controle px-2.5 py-1.5 text-[12px] transition-colors ${
+                className={`inline-flex min-h-[42px] items-center rounded-controle px-3 text-[13px] transition-colors ${
                   marcada
                     ? "bg-acao font-medium text-acao-texto hover:bg-acao-hover"
-                    : "bg-rebaixada text-tinta-800 hover:bg-tinta-200"
+                    : "bg-rebaixada text-tinta-900 hover:bg-linha"
                 }`}
               >
                 {opcao.rotulo}
@@ -174,7 +185,7 @@ function FaixaDeSalario({
   prefixo: string;
 }) {
   const campo =
-    "h-[34px] w-full rounded-controle bg-rebaixada px-2.5 text-[12px] " +
+    "h-[42px] w-full min-w-0 rounded-controle bg-rebaixada px-3 text-[14px] " +
     "text-tinta-900 outline-none placeholder:text-tinta-500 " +
     "focus:bg-cartao focus:ring-2 focus:ring-acao numero";
 
@@ -195,7 +206,7 @@ function FaixaDeSalario({
           placeholder="R$ 0"
           className={campo}
         />
-        <span className="shrink-0 text-[12px] text-tinta-600">a</span>
+        <span className="shrink-0 text-[13px] text-tinta-600">a</span>
         <label htmlFor={`${prefixo}-salario-max`} className="sr-only">
           Salário máximo
         </label>
@@ -211,7 +222,7 @@ function FaixaDeSalario({
       </div>
       <button
         type="submit"
-        className="h-9 rounded-controle bg-rebaixada text-[12px] font-semibold text-tinta-900 transition-colors hover:bg-tinta-200"
+        className="h-[42px] rounded-controle bg-rebaixada text-[14px] font-semibold text-tinta-900 transition-colors hover:bg-linha"
       >
         Aplicar faixa
       </button>
@@ -230,8 +241,8 @@ function Painel({
   prefixo: string;
   /**
    * Duas coisas que a gaveta já faz, e que o painel não deve repetir dentro
-   * dela: o cartão em volta — ela já é um cartão de ponta a ponta, e o de
-   * dentro ficaria branco sobre branco com uma sangria a mais — e o título,
+   * dela: o cartão em volta (ela já é um cartão de ponta a ponta, e o de
+   * dentro ficaria branco sobre branco com uma sangria a mais) e o título,
    * que é o que a barra de topo da gaveta diz. Sem isto a tela mostrava
    * "Filtros" duas vezes, a 40px de distância.
    */
@@ -245,13 +256,13 @@ function Painel({
         className={
           emGaveta
             ? "flex flex-col gap-5"
-            : "flex flex-col gap-5 rounded-caixa bg-cartao p-4"
+            : "flex flex-col gap-5 rounded-[20px] bg-cartao p-5 shadow-cartao"
         }
       >
         <div
           className={
             // Sem o título, sobra só o "Limpar", que vai para a direita do
-            // mesmo jeito — e a fileira inteira some quando não há o que
+            // mesmo jeito, e a fileira inteira some quando não há o que
             // limpar, em vez de deixar uma linha vazia no topo da gaveta.
             emGaveta
               ? `flex items-center justify-end ${ativos > 0 ? "" : "hidden"}`
@@ -279,12 +290,6 @@ function Painel({
         </div>
 
         <Grupo
-          titulo="Situação"
-          dimensao="situacoes"
-          opcoes={contagens.situacoes}
-          consulta={consulta}
-        />
-        <Grupo
           titulo="Escolaridade"
           dimensao="escolaridades"
           opcoes={contagens.escolaridades}
@@ -299,7 +304,7 @@ function Painel({
 
 function CartaoDeAlerta({ total }: { total: number }) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-caixa bg-cartao p-4">
+    <div className="flex flex-col gap-2.5 rounded-[20px] bg-cartao p-5 shadow-cartao">
       <p className="text-sm leading-5 font-semibold">
         Receba estes {numero(total)} concursos por e-mail
       </p>
@@ -336,7 +341,7 @@ export function ColunaFiltros({
 
         **Virou gaveta, e a razão é medida.** Ele era um `details` que expandia
         no fluxo, e a 375px isso custava o seguinte: o painel tem 945,4px de
-        altura — 27 opções em quatro grupos, mais os dois campos de salário —
+        altura (27 opções em quatro grupos, mais os dois campos de salário)
         numa janela de 812px. Ele não cabe na tela de jeito nenhum, então ou
         rola por dentro ou empurra a página. Empurrando, o primeiro resultado
         ia de y=390 para y=1346: com os filtros abertos, nenhum resultado
@@ -352,12 +357,12 @@ export function ColunaFiltros({
         roláveis lado a lado, com a roda do mouse fazendo uma coisa sobre a
         coluna e outra a dois centímetros dali. A gaveta é modal e trava a
         rolagem do fundo, então enquanto ela está aberta existe uma área
-        rolável só na tela — que é o mesmo princípio, e não o contrário dele.
+        rolável só na tela: que é o mesmo princípio, e não o contrário dele.
       */}
       <Gaveta
         className="lg:hidden"
         titulo="Filtros"
-        gatilho="h-10 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 transition-colors hover:bg-tinta-200"
+        gatilho="h-10 rounded-controle bg-rebaixada px-3.5 text-sm font-semibold text-tinta-900 transition-colors hover:bg-linha"
         apoio={
           ativos > 0 ? <span className="numero">· {ativos}</span> : undefined
         }
@@ -396,7 +401,7 @@ export function ColunaFiltros({
           sempre: o filtro que ficou embaixo é inalcançável, porque rolar a
           página não move a coluna. Estático, a coluna sobe junto e o fim do
           painel chega. */}
-      <aside className="hidden w-[288px] shrink-0 flex-col gap-2 lg:flex">
+      <aside className="hidden min-w-0 flex-col gap-2 lg:flex">
         <Painel consulta={consulta} contagens={contagens} prefixo="coluna" />
         <CartaoDeAlerta total={total} />
       </aside>

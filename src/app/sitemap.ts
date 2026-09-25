@@ -17,7 +17,7 @@ import { urlAbsoluta } from "@/lib/site";
  * maior: pôr as duas URLs é oferecer duas entradas para o mesmo conteúdo. A
  * página continua existindo, continua sendo seguida a partir da trilha do
  * concurso e do rodapé da home, e entra aqui sozinha no dia do segundo
- * concurso — dos 122 órgãos que tinham um só há 30 dias, 36 (30%) já têm dois
+ * concurso: dos 122 órgãos que tinham um só há 30 dias, 36 (30%) já têm dois
  * ou mais. O corte é medido no acervo a cada geração, não escrito à mão.
  */
 const MINIMO_DE_CONCURSOS_NO_MAPA = 2;

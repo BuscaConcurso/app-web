@@ -3,7 +3,7 @@
  * um cai em relação a hoje.
  *
  * Fica aqui, e não no componente, porque é a única parte da linha do tempo
- * que dá para provar sem navegador — a suíte deste repositório é Node sem
+ * que dá para provar sem navegador: a suíte deste repositório é Node sem
  * DOM. O componente desenha; este módulo decide.
  */
 import type { EventoDoCronograma } from "./dominio";
@@ -11,8 +11,8 @@ import type { EventoDoCronograma } from "./dominio";
 /**
  * A data que representa o evento na linha, e a data em que ele termina.
  *
- * São duas porque o acervo tem evento só com `fim` — `pagamento_taxa` com
- * `inicio: null` e `fim: "2026-06-29"` aparece 86 vezes — e evento com faixa,
+ * São duas porque o acervo tem evento só com `fim`: `pagamento_taxa` com
+ * `inicio: null` e `fim: "2026-06-29"` aparece 86 vezes, e evento com faixa,
  * como `pedido_isencao` de 09/06 a 18/06. Um ponto na linha precisa de um
  * começo para se posicionar e de um fim para saber se já passou.
  */
@@ -36,7 +36,7 @@ function termino(evento: EventoDoCronograma): string | null {
  * A lista antiga confiava na ordem da API e dizia, em comentário, que era
  * "por data, com o que não tem data no fim". Medido no acervo inteiro, não
  * é: em **18 dos 4.479 concursos com cronograma** a sequência não sobe. A
- * causa é sempre a mesma, e é uma divergência de chave — a API ordena por
+ * causa é sempre a mesma, e é uma divergência de chave: a API ordena por
  * `inicio`, e a tela mostra `inicio ?? fim`, então todo evento com `inicio`
  * nulo e `fim` preenchido era empurrado para o fim da lista com uma data
  * visível no meio do período. Numa lista isso passava; numa linha do tempo é
@@ -48,7 +48,7 @@ function termino(evento: EventoDoCronograma): string | null {
  * o ato não disse.
  *
  * **Empate fica como a API mandou.** São 547 pares consecutivos com a mesma
- * data, em 451 concursos — "prova prática" e "prova de títulos" no mesmo dia,
+ * data, em 451 concursos: "prova prática" e "prova de títulos" no mesmo dia,
  * "resultado final" e "convocação" no mesmo dia. `Array.prototype.sort` é
  * estável desde a ES2019, então a ordem relativa do empate é a que veio do
  * motor, que leu o ato na sequência em que ele está escrito.
@@ -91,8 +91,8 @@ export function faseDoEvento(
 }
 
 /**
- * O índice onde entra a marca de "hoje" — o degrau entre o que já aconteceu e
- * o que ainda vai acontecer —, ou `null` quando ela não teria o que separar.
+ * O índice onde entra a marca de "hoje" (o degrau entre o que já aconteceu e
+ * o que ainda vai acontecer), ou `null` quando ela não teria o que separar.
  *
  * Só aparece quando existem os dois lados. Medido no acervo: 200 dos 4.479
  * concursos com cronograma (4,5%) têm passado e futuro ao mesmo tempo; 90,1%

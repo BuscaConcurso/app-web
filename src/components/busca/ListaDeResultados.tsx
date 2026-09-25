@@ -1,9 +1,12 @@
 import Link from "next/link";
+import type { ItemDeAba } from "@/components/ui/Abas";
 import { ColunaFiltros } from "@/components/busca/ColunaFiltros";
 import { LinkDaConsulta } from "@/components/busca/LinkDaConsulta";
 import { RegistroDaBusca } from "@/components/busca/RegistroDaBusca";
-import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
+import { ListaDeConcursos } from "@/components/concurso/ListaDeConcursos";
 import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
+import { Rotulo } from "@/components/ui/Etiqueta";
+import type { NomeDoIcone } from "@/components/ui/Icone";
 import { Paginacao } from "@/components/ui/Paginacao";
 import type {
   AvisoDoAcervo,
@@ -11,7 +14,7 @@ import type {
   DimensoesDoAcervo,
   Pagina,
 } from "@/lib/concursos";
-import { ORDENS } from "@/lib/consulta";
+import { ORDENS, SITUACOES, type Situacao } from "@/lib/consulta";
 import { chipsAtivos } from "@/lib/filtrosAtivos";
 import { numero } from "@/lib/formato";
 import {
@@ -20,6 +23,126 @@ import {
   type ConsultaDaUrl,
 } from "@/lib/parametros";
 import { avisoDeFiltroSemDado } from "@/lib/rotulos";
+import type { Tom } from "@/lib/dominio";
+
+/** Os rótulos curtos da aba de situação: cabem numa aba a 360px, ao contrário
+ * de `SITUACOES` (`lib/consulta.ts`), que é o texto do chip e do rótulo do
+ * filtro (mais longo, "Inscrições abertas") e continua o mesmo. */
+const ROTULO_DA_ABA: Record<string, string> = {
+  abertas: "Abertas",
+  previstos: "Previstos",
+  encerrados: "Encerrados",
+};
+
+/** `OpcaoDeFaceta.valor` é `string` (o mesmo tipo serve escolaridade e banca);
+ * esta função é que garante, sem `as`, que o valor é mesmo uma `Situacao`
+ * antes de entrar num campo que só aceita as três. */
+function ehSituacao(valor: string): valor is Situacao {
+  return valor in SITUACOES;
+}
+
+/**
+ * O mesmo trilho de `Abas` (`Main.dc.html:195-200`), com `LinkDaConsulta` no
+ * lugar do `next/link` que `Abas` usa por dentro.
+ *
+ * Não dá para usar `Abas` direto aqui: em `/busca/<slug>` filtrar por
+ * situação precisa continuar sendo `history.pushState`, e não uma navegação
+ * de verdade. É a mesma razão de existir de `LinkDaConsulta` (buscar de novo
+ * o RSC do termo a cada clique, só para trocar a query, media 144 KB gzip
+ * para "professor"). Todo item aqui tem `href`, então não há o ramo de botão
+ * sem link que `Abas` também desenha.
+ */
+function TrilhoDeSituacao({ rotulo, itens }: { rotulo: string; itens: ItemDeAba[] }) {
+  return (
+    <div aria-label={rotulo} className="inline-flex items-center gap-1 rounded-[12px] bg-rebaixada p-1">
+      {itens.map((item) => (
+        <LinkDaConsulta
+          key={item.id}
+          href={item.href ?? "#"}
+          aria-current={item.ativo ? "page" : undefined}
+          className={`flex h-8 items-center justify-center gap-1.5 rounded-[9px] px-3 text-[13px] transition-colors ${
+            item.ativo
+              ? "bg-cartao font-semibold text-tinta-900 shadow-aba"
+              : "font-medium text-tinta-600 hover:text-tinta-900"
+          }`}
+        >
+          {item.rotulo}
+        </LinkDaConsulta>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * As situações como abas, no topo da lista (`Main.dc.html:195-200`, o mesmo
+ * trilho de escolaridade da home). Clicar numa aba troca a situação por só
+ * ela (é o que o `href` de cada uma pede, sempre um valor só), e "Todas"
+ * volta a nenhuma. É a mesma simplificação que a home já faz para
+ * escolaridade.
+ *
+ * **Marcar, porém, não é o mesmo que "só uma pode estar marcada".** A coluna
+ * de filtros continua permitindo mais de uma situação ao mesmo tempo (é
+ * multiescolha, um quadradinho por opção, e a URL aceita `?situacao=` várias
+ * vezes), e os chips de `chipsAtivos` já mostram cada uma. Com duas
+ * situações na URL e só a aba de uma marcada (ou nenhuma), o trilho dizia
+ * "nenhum filtro" ou "só este" enquanto a lista de baixo respondia por dois.
+ * Por isso `ativo` aqui é "esta situação está entre as da
+ * URL", não "é a única": toda aba cujo valor apareça em `consulta.situacoes`
+ * fica marcada, e "Todas" só quando a lista está vazia.
+ */
+export function abasDeSituacao(consulta: ConsultaDaUrl, contagens: ContagensDeFaceta): ItemDeAba[] {
+  const total = contagens.situacoes.reduce((soma, opcao) => soma + opcao.total, 0);
+  const nenhuma = consulta.situacoes.length === 0;
+
+  return [
+    {
+      id: "todas",
+      rotulo: (
+        <>
+          Todas <span className="text-tinta-500">{numero(total)}</span>
+        </>
+      ),
+      href: urlDaBusca(consulta, { situacoes: [], pagina: 1 }),
+      ativo: nenhuma,
+    },
+    ...contagens.situacoes
+      .filter((opcao): opcao is typeof opcao & { valor: Situacao } => ehSituacao(opcao.valor))
+      .map((opcao) => {
+        const valor = opcao.valor;
+        return {
+          id: valor,
+          rotulo: (
+            <>
+              {ROTULO_DA_ABA[valor] ?? opcao.rotulo}{" "}
+              <span className="text-tinta-500">{numero(opcao.total)}</span>
+            </>
+          ),
+          href: urlDaBusca(consulta, { situacoes: [valor], pagina: 1 }),
+          ativo: consulta.situacoes.includes(valor),
+        };
+      }),
+  ];
+}
+
+/**
+ * O rótulo acima do título da lista. "BUSCA" para quem digitou um termo; sem
+ * termo, o rótulo diz a situação filtrada. Antes era sempre "INSCRIÇÕES
+ * ABERTAS", inclusive em cima de "Concursos previstos" e da lista inteira.
+ */
+export function rotuloDaLista(consulta: ConsultaDaUrl): {
+  texto: string;
+  icone: NomeDoIcone;
+  tom?: Tom | "anil";
+} {
+  if (consulta.q) return { texto: "BUSCA", icone: "busca", tom: "anil" };
+  if (consulta.situacoes.length === 1) {
+    const [situacao] = consulta.situacoes;
+    if (situacao === "abertas") return { texto: "INSCRIÇÕES ABERTAS", icone: "aberto", tom: "aberto" };
+    if (situacao === "previstos") return { texto: "PREVISTOS", icone: "previsto", tom: "previsto" };
+    return { texto: "ENCERRADOS", icone: "lista" };
+  }
+  return { texto: "CONCURSOS", icone: "lista" };
+}
 
 /**
  * A lista de uma busca: título, contagem, ordenação, chips, cartões,
@@ -51,6 +174,7 @@ export function ListaDeResultados({
   // O chip do termo não conta como filtro: com `q`, `chipsAtivos` sempre o
   // devolve, e contar só `chips.length` nunca daria zero numa busca.
   const soOTermo = chips.every((chip) => chip.chave === "q");
+  const rotulo = rotuloDaLista(consulta);
 
   return (
     <>
@@ -72,14 +196,14 @@ export function ListaDeResultados({
         filtrada={!soOTermo}
       />
 
-      <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-start">
+      <div className="conteudo grid gap-6 py-12 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
         <ColunaFiltros
           consulta={consulta}
           contagens={contagens}
           total={resultado.total}
         />
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-end justify-between gap-4">
             {/* `min-w-0` para o `break-words` do `h1` ter efeito: item de flex
                 tem `min-width: auto`, e `overflow-wrap: break-word` não muda a
@@ -91,10 +215,13 @@ export function ListaDeResultados({
                 acervo, do tipo que se cola na busca) dava 36px de rolagem
                 lateral. */}
             <div className="min-w-0">
-              <h1 className="font-titulo text-[21px] leading-8 font-semibold tracking-[-0.01em] break-words">
+              <Rotulo icone={rotulo.icone} tom={rotulo.tom} className="mb-2.5">
+                {rotulo.texto}
+              </Rotulo>
+              <h1 className="font-titulo text-[26px] leading-[1.08] font-bold tracking-[-0.025em] break-words md:text-[40px] md:leading-[1.05] md:tracking-[-0.03em]">
                 {titulo}
               </h1>
-              <p className="mt-1 text-[12px] text-tinta-600">
+              <p className="mt-2 text-[12px] text-tinta-600">
                 <strong className="numero font-medium text-tinta-900">
                   {numero(resultado.total)}
                 </strong>{" "}
@@ -124,14 +251,20 @@ export function ListaDeResultados({
                   aria-current={chave === consulta.ordem ? "true" : undefined}
                   className={`rounded-controle px-3 py-1.5 text-[12px] font-medium transition-colors ${
                     chave === consulta.ordem
-                      ? "bg-inverso text-inverso-texto"
-                      : "bg-rebaixada text-tinta-800 hover:bg-tinta-200"
+                      ? "bg-tinta-900 text-cartao"
+                      : "bg-rebaixada text-tinta-900 hover:bg-linha"
                   }`}
                 >
                   {ORDENS[chave]}
                 </LinkDaConsulta>
               ))}
             </nav>
+          </div>
+
+          {/* As situações, em aba, no topo da lista: `ColunaFiltros` não tem
+              mais o grupo de checkbox de situação, que "virou" isto. */}
+          <div className="mt-4 overflow-x-auto">
+            <TrilhoDeSituacao rotulo="Situação" itens={abasDeSituacao(consulta, contagens)} />
           </div>
 
           {chips.length > 0 && (
@@ -162,7 +295,7 @@ export function ListaDeResultados({
           )}
 
           {resultado.itens.length === 0 ? (
-            <div className="mt-5 rounded-caixa bg-cartao px-6 py-12 text-center">
+            <div className="mt-5 rounded-cartao bg-cartao px-6 py-12 text-center">
               {/* Sem filtro nenhum, o zero é do termo, e sugerir tirar o
                   estado ou a escolaridade seria mandar mexer no que não
                   está marcado. */}
@@ -196,26 +329,9 @@ export function ListaDeResultados({
               </Link>
             </div>
           ) : (
-            <ul className="mt-4 grid gap-2 xl:grid-cols-2">
-              {resultado.itens.map((concurso) => (
-                // `min-w-0`: item de grid tem `min-width: auto`, que vale o
-                // min-content do conteúdo, então uma etiqueta que se recusa
-                // a encolher (`whitespace-nowrap`) estica a célula, a lista e
-                // a página. Medido a 375px: 2 dos 15 nomes de banca do acervo
-                // passam dos 319px úteis da fileira e davam scroll horizontal
-                // na busca. O corte é da `Etiqueta`; aqui é só a licença para
-                // encolher.
-                <li key={concurso.slug} className="min-w-0">
-                  {/* `ufDoFiltro` só aqui: é a busca que faz a pergunta
-                      "por que este veio", e é só ela que tem a resposta. */}
-                  <CartaoConcurso
-                    concurso={concurso}
-                    hoje={hoje}
-                    ufDoFiltro={consulta.uf}
-                  />
-                </li>
-              ))}
-            </ul>
+            <div className="mt-4">
+              <ListaDeConcursos itens={resultado.itens} hoje={hoje} ufDoFiltro={consulta.uf} comFiltros />
+            </div>
           )}
 
           {resultado.paginas > 1 && (

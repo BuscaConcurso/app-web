@@ -1,14 +1,29 @@
 import type { ReactNode } from "react";
+import { Botao } from "@/components/ui/Botao";
 import { ApiError } from "@/lib/auth/api";
+
+/**
+ * As peças pequenas que `PublicAuthScreens` e `AccountScreen` compartilham,
+ * no visual novo: `Botao` de verdade para os botões, `Campo`/`Selecao` de
+ * verdade para os campos (importados direto onde o formulário mora, não
+ * daqui). O que sobra aqui é o que não tem componente próprio ainda: o
+ * título da tela e o aviso de erro/sucesso.
+ */
 
 export function AuthTitle({ children }: { children: ReactNode }) {
   return (
-    <h1 className="font-titulo text-[26px] leading-tight text-tinta-900">
+    <h1 className="font-titulo text-[28px] leading-tight font-bold tracking-[-0.02em] text-tinta-900">
       {children}
     </h1>
   );
 }
 
+/**
+ * O aviso de erro ou sucesso. Tons de sinal de verdade (`verde`/`urucum`),
+ * não `rebaixada` neutro para o sucesso: um formulário que deu certo é
+ * informação boa, e a etiqueta e o resto do sistema já usam `verde-fundo`
+ * para dizer isso.
+ */
 export function Alert({
   children,
   success = false,
@@ -20,9 +35,7 @@ export function Alert({
     <div
       role="alert"
       className={`rounded-controle px-4 py-3 text-sm ${
-        success
-          ? "bg-bloco text-tinta-800"
-          : "bg-urgente text-vermelho-800"
+        success ? "bg-verde-fundo text-verde-texto" : "bg-urucum-fundo text-urucum-texto"
       }`}
     >
       {children}
@@ -30,58 +43,28 @@ export function Alert({
   );
 }
 
-export function FieldError({ children }: { children?: string }) {
-  return children ? (
-    <p className="mt-1 text-xs text-vermelho-800">{children}</p>
-  ) : null;
-}
-
-export const inputClass =
-  "h-10 w-full rounded-controle bg-rebaixada px-3 text-sm text-tinta-900 outline-none transition-colors placeholder:text-tinta-500 focus:bg-cartao focus:ring-2 focus:ring-acao";
-
-export function FormField({
-  id,
-  label,
-  error,
-  children,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-tinta-800">
-        {label}
-      </label>
-      {children}
-      <FieldError>{error}</FieldError>
-    </div>
-  );
-}
-
+/**
+ * O botão de enviar: `primario`, `lg`, largura total, o mesmo em todo o
+ * formulário de autenticação. Nenhum chamador jamais
+ * pediu a variante secundária que existia aqui antes, então ela saiu.
+ */
 export function SubmitButton({
   children,
   pending,
-  variant = "primary",
 }: {
   children: ReactNode;
   pending?: boolean;
-  variant?: "primary" | "secondary";
 }) {
   return (
-    <button
+    <Botao
       type="submit"
+      variante="primario"
+      tamanho="lg"
       disabled={pending}
-      className={`h-10 w-full rounded-controle px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-        variant === "primary"
-          ? "bg-acao text-acao-texto hover:bg-acao-hover"
-          : "bg-rebaixada text-tinta-900 hover:bg-tinta-200"
-      }`}
+      className="w-full"
     >
       {pending ? "Aguarde…" : children}
-    </button>
+    </Botao>
   );
 }
 

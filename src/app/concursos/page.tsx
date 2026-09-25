@@ -10,10 +10,10 @@ import { hojeCivilEmSaoPaulo } from "@/lib/formato";
 import {
   filtroDaConsulta,
   lerConsulta,
+  tituloDaListaDeConcursos,
   urlDaBusca,
   type ConsultaDaUrl,
 } from "@/lib/parametros";
-import { NOME_UF, ROTULO_ESCOLARIDADE } from "@/lib/rotulos";
 
 /**
  * Busca.
@@ -24,30 +24,12 @@ import { NOME_UF, ROTULO_ESCOLARIDADE } from "@/lib/rotulos";
  * próprio e deixa o botão de voltar do navegador funcionar como as pessoas
  * esperam.
  */
-function tituloDaBusca(consulta: ConsultaDaUrl): string {
-  const partes: string[] = [];
-
-  if (consulta.q) partes.push(consulta.q);
-  else if (consulta.escolaridades.length === 1) {
-    partes.push(
-      `Concursos de nível ${ROTULO_ESCOLARIDADE[consulta.escolaridades[0]].toLowerCase()}`,
-    );
-  } else if (consulta.situacoes.length === 1) {
-    const [situacao] = consulta.situacoes;
-    if (situacao === "previstos") partes.push("Concursos previstos");
-    else if (situacao === "encerrados") partes.push("Concursos encerrados");
-    else partes.push("Concursos com inscrições abertas");
-  } else partes.push("Concursos públicos");
-
-  if (consulta.uf) partes.push(`em ${NOME_UF[consulta.uf]}`);
-  return partes.join(" ");
-}
 
 export async function generateMetadata(
   props: PageProps<"/concursos">,
 ): Promise<Metadata> {
   const consulta = lerConsulta(await props.searchParams);
-  const titulo = tituloDaBusca(consulta);
+  const titulo = tituloDaListaDeConcursos(consulta);
 
   return {
     title: titulo,
@@ -91,16 +73,14 @@ export default async function BuscaDeConcursos(
   ]);
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 py-5 sm:px-6">
-      <ListaDeResultados
-        consulta={consulta}
-        titulo={tituloDaBusca(consulta)}
-        resultado={resultado}
-        contagens={contagens}
-        aviso={aviso}
-        dimensoes={dimensoes}
-        hoje={hoje}
-      />
-    </div>
+    <ListaDeResultados
+      consulta={consulta}
+      titulo={tituloDaListaDeConcursos(consulta)}
+      resultado={resultado}
+      contagens={contagens}
+      aviso={aviso}
+      dimensoes={dimensoes}
+      hoje={hoje}
+    />
   );
 }

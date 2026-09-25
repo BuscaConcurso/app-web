@@ -3,15 +3,17 @@ import type { ComponentProps, ReactNode } from "react";
 /**
  * Campo de texto e seleção.
  *
- * Sem borda, como tudo aqui: o campo em repouso é um rebaixo cinza dentro do
- * cartão branco. No foco ele fica branco e ganha um anel, que é o que
- * substitui a borda para quem navega por teclado. No erro, o fundo salmão
- * carrega o aviso e o anel vermelho confirma.
+ * Sem borda de verdade: o campo é branco (`bg-cartao`, como o resto do
+ * desenho novo) com um traço de 1px por dentro (`shadow-[inset...]`, a cor
+ * `contorno`), e não uma borda de caixa que mudaria a largura do conteúdo. No
+ * foco ganha o anel verde, que é o que substitui o traço para quem navega por
+ * teclado. No erro, o fundo salmão carrega o aviso e o anel vermelho
+ * confirma.
  */
 const CONTROLE =
-  "h-10 w-full rounded-controle px-3 text-sm text-tinta-900 " +
+  "h-11 w-full rounded-controle px-3 text-sm text-tinta-900 " +
   "placeholder:text-tinta-500 outline-none transition-colors " +
-  "focus:bg-cartao focus:ring-2 focus:ring-acao";
+  "focus:ring-2 focus:ring-acao";
 
 function Envelope({
   etiqueta,
@@ -30,7 +32,7 @@ function Envelope({
         <label
           htmlFor={para}
           className={`text-xs font-semibold ${
-            erro ? "text-vermelho-800" : "text-tinta-800"
+            erro ? "text-urucum-texto" : "text-tinta-900"
           }`}
         >
           {etiqueta}
@@ -38,7 +40,7 @@ function Envelope({
       )}
       {children}
       {erro && (
-        <p id={`${para}-erro`} className="text-xs text-vermelho-800">
+        <p id={`${para}-erro`} className="text-xs text-urucum-texto">
           {erro}
         </p>
       )}
@@ -65,7 +67,9 @@ export function Campo({
         aria-describedby={erro ? `${id}-erro` : undefined}
         className={[
           CONTROLE,
-          erro ? "bg-urgente ring-2 ring-vermelho" : "bg-rebaixada",
+          erro
+            ? "bg-urucum-fundo shadow-[inset_0_0_0_1px_var(--color-urucum)]"
+            : "bg-cartao shadow-[inset_0_0_0_1px_var(--color-contorno)]",
           className,
         ]
           .filter(Boolean)
@@ -105,7 +109,9 @@ export function Selecao({
           className={[
             CONTROLE,
             "cursor-pointer appearance-none pr-9",
-            erro ? "bg-urgente ring-2 ring-vermelho" : "bg-rebaixada",
+            erro
+              ? "bg-urucum-fundo shadow-[inset_0_0_0_1px_var(--color-urucum)]"
+              : "bg-cartao shadow-[inset_0_0_0_1px_var(--color-contorno)]",
             className,
           ]
             .filter(Boolean)

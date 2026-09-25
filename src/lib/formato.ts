@@ -51,7 +51,7 @@ export function dataPorExtenso(iso: string): string {
  * inscrição é data civil do Brasil, e o relógio de quem renderiza não é: um
  * servidor em UTC vira o dia às 21h de Brasília, e das 21h à meia-noite a
  * página diria que encerrou ontem o que encerra hoje. É o defeito de três
- * horas que este projeto já teve — três horas por dia em que a tela mentia.
+ * horas que este projeto já teve: três horas por dia em que a tela mentia.
  *
  * Devolve string e não `Date` de propósito: toda data do domínio já é
  * `AAAA-MM-DD`, e nesse formato a comparação lexicográfica É a comparação
@@ -139,13 +139,30 @@ export function numero(valor: number): string {
 }
 
 /**
+ * A soma de uma lista de quantidades que podem faltar, ou `null` quando
+ * nenhuma delas é conhecida.
+ *
+ * Existe para o número "vagas previstas" da faixa de números da home: os
+ * concursos previstos raramente têm vaga informada (o ato ainda não saiu),
+ * e uma soma com `null` tratado como zero afirmaria "0 vagas previstas"
+ * quando a resposta certa é "não sabemos". Só quando todo mundo é `null` a
+ * soma também é `null`; um `null` isolado no meio da lista é ignorado, não
+ * zera o total.
+ */
+export function somaOuNull(valores: (number | null)[]): number | null {
+  const conhecidos = valores.filter((valor): valor is number => valor !== null);
+  if (conhecidos.length === 0) return null;
+  return conhecidos.reduce((total, valor) => total + valor, 0);
+}
+
+/**
  * A quantidade, se for mesmo uma quantidade; `null` em qualquer outro caso.
  *
  * Existe porque o tipo `ConcursoResumo` é uma promessa sobre o JSON de outro
  * processo, e o JSON não a cumpre sozinho: `acervo()` faz `await
  * resposta.json()` e anota o resultado com o tipo, sem conferir campo nenhum.
- * Um engine mais velho — que é o estado normal do mundo, porque API e app
- * sobem separados e a versão do app pode chegar antes — simplesmente não
+ * Um engine mais velho (que é o estado normal do mundo, porque API e app
+ * sobem separados e a versão do app pode chegar antes) simplesmente não
  * manda o campo, ele chega `undefined`, e `Intl.NumberFormat().format(
  * undefined)` devolve a string **"NaN"**.
  *
@@ -153,7 +170,7 @@ export function numero(valor: number): string {
  * erro não é cosmético. A tela afirmou uma reserva de vagas a partir de um
  * campo que não existia, num produto cujo contrato inteiro é não afirmar o
  * que o ato não disse. Campo que não veio é ausência de dado, e ausência de
- * dado não vira texto com valor dentro — vira nada.
+ * dado não vira texto com valor dentro: vira nada.
  */
 export function quantidade(valor: unknown): number | null {
   return typeof valor === "number" && Number.isFinite(valor) ? valor : null;

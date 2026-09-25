@@ -13,7 +13,7 @@
 import { UFS, type Escolaridade, type Esfera, type Uf } from "./dominio";
 import { ORDENS, SITUACOES, type Filtro, type Ordem, type Situacao } from "./consulta";
 import { slugDaBusca } from "./enderecoDaBusca";
-import { ROTULO_ESCOLARIDADE, ROTULO_ESFERA } from "./rotulos";
+import { ROTULO_ESCOLARIDADE, ROTULO_ESFERA, noEstado } from "./rotulos";
 import { BANCAS } from "@/mocks/bancas";
 
 export type Parametros = Record<string, string | string[] | undefined>;
@@ -253,4 +253,27 @@ export function quantosFiltros(consulta: ConsultaDaUrl): number {
     (consulta.salarioMin ? 1 : 0) +
     (consulta.salarioMax ? 1 : 0)
   );
+}
+
+/**
+ * O título de `/concursos` pela consulta: "Concursos previstos no Rio de
+ * Janeiro", com a preposição que cada estado pede (`noEstado`).
+ */
+export function tituloDaListaDeConcursos(consulta: ConsultaDaUrl): string {
+  const partes: string[] = [];
+
+  if (consulta.q) partes.push(consulta.q);
+  else if (consulta.escolaridades.length === 1) {
+    partes.push(
+      `Concursos de nível ${ROTULO_ESCOLARIDADE[consulta.escolaridades[0]].toLowerCase()}`,
+    );
+  } else if (consulta.situacoes.length === 1) {
+    const [situacao] = consulta.situacoes;
+    if (situacao === "previstos") partes.push("Concursos previstos");
+    else if (situacao === "encerrados") partes.push("Concursos encerrados");
+    else partes.push("Concursos com inscrições abertas");
+  } else partes.push("Concursos públicos");
+
+  if (consulta.uf) partes.push(noEstado(consulta.uf));
+  return partes.join(" ");
 }

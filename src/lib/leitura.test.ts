@@ -108,7 +108,7 @@ describe("o que a regra recusa, e é por isso que ela existe", () => {
     intacto("A sessão começa às 14.30 horas do mesmo dia.");
     // Aqui o `01.` é o valor de "Nº Vagas" e não abre nada, embora venha
     // depois de `:` e de um espaço. Quem abre é o `d)`, que é alínea de
-    // verdade — as duas decisões no mesmo pedaço de texto real.
+    // verdade: as duas decisões no mesmo pedaço de texto real.
     expect(partirEmParagrafos("c) Nº Vagas: 01. d) Localização: Alfenas-MG.")).toEqual([
       { texto: "c) Nº Vagas: 01. ", inicio: 0 },
       { texto: "d) Localização: Alfenas-MG.", inicio: 17 },
@@ -116,7 +116,7 @@ describe("o que a regra recusa, e é por isso que ela existe", () => {
   });
 
   it("anexo e artigo citados no meio da frase", () => {
-    // Sem a condição de abertura, estes dois quebravam — foi o que a medição
+    // Sem a condição de abertura, estes dois quebravam: foi o que a medição
     // nos 420 atos mostrou primeiro.
     intacto("Fica divulgado no ANEXO II deste Edital o resultado final.");
     intacto("O Anexo II do Edital nº 12/2026 fica retificado.");

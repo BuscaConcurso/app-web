@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Literata } from "next/font/google";
+import { Bricolage_Grotesque, Public_Sans } from "next/font/google";
 import { unstable_rethrow } from "next/navigation";
 import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
@@ -7,35 +7,53 @@ import { Cabecalho } from "@/components/layout/Cabecalho";
 import { GoogleTagManager } from "@/components/layout/GoogleTagManager";
 import { Rodape } from "@/components/layout/Rodape";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
-import {
-  dimensoesDoAcervo,
-  origemDoAcervo,
-  type DimensoesDoAcervo,
-  type OrigemDoAcervo,
-} from "@/lib/concursos";
+import { origemDoAcervo, type OrigemDoAcervo } from "@/lib/concursos";
+import { dataCurta, hojeEmSaoPaulo } from "@/lib/formato";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 import { SCRIPT_DO_TEMA } from "@/lib/tema";
 import { SessionProvider } from "@/lib/auth/session";
 
 /**
- * Literata em título e Archivo em todo o resto, número incluído.
+ * Bricolage Grotesque em título e Public Sans em todo o resto, número
+ * incluído.
  *
- * As duas são variáveis, então uma família cobre todos os pesos que o canvas
- * usa sem baixar um arquivo por peso. `next/font` as autohospeda, o que tira
- * a requisição para o Google e o deslocamento de layout que vem com ela.
+ * `weight` lista só os pesos que o protótipo usa (500 a 800 no título, 400 a
+ * 700 na interface), em vez do intervalo variável inteiro que as duas
+ * famílias oferecem: menos peso para baixar, sem faltar nenhum peso que a
+ * tela pede. `next/font` as autohospeda, o que tira a requisição para o
+ * Google e o deslocamento de layout que vem com ela.
  *
- * Duas famílias e não três: os números usam as figuras tabulares do próprio
- * Archivo, e a família a menos é uma requisição a menos no primeiro carregamento.
+ * `axes: ["opsz"]` no Bricolage: o protótipo carrega
+ * `Bricolage+Grotesque:opsz,wght@12..96,500..800` (o eixo óptico junto do
+ * peso), e sem pedir o eixo aqui o `next/font` baixa só `wght`, e o navegador
+ * usa o tamanho óptico padrão do arquivo (pensado para texto pequeno) em
+ * qualquer tamanho de fonte, inclusive nos 68px do título do herói. Esse
+ * corte óptico errado é mais largo por letra que o desenho pensado para
+ * título grande, e foi o que fez "Encontre seu concurso." quebrar em duas
+ * linhas em vez de uma a 1440px: a mesma string, no mesmo espaço, é mais
+ * larga com o eixo óptico errado.
+ *
+ * `weight: "variable"` e não a lista de pesos: o próprio `next/font` recusa
+ * `axes` junto de uma lista fixa de pesos ("Axes can only be defined for
+ * variable fonts when the weight property is nonexistent or set to
+ * `variable`", erro visto ao tentar). Com `"variable"`, o arquivo inteiro
+ * (peso e ótica) desce de uma vez, e cada peso usado no CSS (`font-medium` a
+ * `font-extrabold`) continua funcionando: é o navegador que amostra o eixo
+ * `wght` do arquivo variável a partir do `font-weight` de cada utilitário,
+ * em vez do `next/font` gerar uma `@font-face` fixa por peso.
  */
-const literata = Literata({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin", "latin-ext"],
-  variable: "--fonte-literata",
+  weight: "variable",
+  axes: ["opsz"],
+  variable: "--fonte-bricolage",
   display: "swap",
 });
 
-const archivo = Archivo({
+const publicSans = Public_Sans({
   subsets: ["latin", "latin-ext"],
-  variable: "--fonte-archivo",
+  weight: ["400", "500", "600", "700"],
+  variable: "--fonte-public-sans",
   display: "swap",
 });
 
@@ -140,29 +158,20 @@ export const revalidate = 300;
  * embrulha `loading.js`, `not-found.js`, `page.js` e os `layout.js` abaixo
  * dele, não o próprio `layout.tsx` raiz (doc lida antes de escrever este
  * arquivo, em `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/error.md`).
- * Sob a regra R3 de `concursos.ts`, a API fora do ar sem leitura boa
+ * Pela regra de `concursos.ts` (com `BC_API_URL` não há mock), a API fora do ar sem leitura boa
  * guardada lança, e sem este envoltório essa falha bateria direto na
  * página padrão do Next, sem identidade nenhuma e sem link de volta:
  * exatamente o que `global-error.tsx` existe para nunca precisar mostrar.
  *
  * Degrada assim: sem faixa de origem (`origem: null`, e o layout nem chega
- * a montar `AvisoDeOrigem`) e com a barra de busca sem contagem nenhuma
- * (`comUf: 0` já é o bastante para `BarraBuscaDoCabecalho` desligar o
- * seletor de estado, ver `BarraBusca.tsx`). Uma página que realmente
+ * a montar `AvisoDeOrigem`) e sem a data de atualização. Uma página que realmente
  * precisa do acervo (a home, `/concursos`, `/busca/<termo>`) continua
  * lançando dela mesma, direto para o `error.tsx` daquela rota: só a leitura
  * feita aqui, para o cabeçalho, é que não pode empacar o site inteiro.
  */
-async function acervoDoLayout(): Promise<{
-  origem: OrigemDoAcervo | null;
-  dimensoes: DimensoesDoAcervo;
-}> {
+async function acervoDoLayout(): Promise<{ origem: OrigemDoAcervo | null }> {
   try {
-    const [origem, dimensoes] = await Promise.all([
-      origemDoAcervo(),
-      dimensoesDoAcervo(),
-    ]);
-    return { origem, dimensoes };
+    return { origem: await origemDoAcervo() };
   } catch (erro) {
     // Sinal do próprio Next (ver o mesmo comentário em `lerAcervoDaApi`,
     // `src/lib/concursos.ts`) não é falha do acervo e segue para cima, sem
@@ -170,16 +179,16 @@ async function acervoDoLayout(): Promise<{
     unstable_rethrow(erro);
     console.error(
       "[layout] acervo indisponível ao montar o cabeçalho; a página segue sem " +
-        "a faixa de origem e sem contagem de estado na busca.",
+        "a faixa de origem.",
       erro,
     );
-    return { origem: null, dimensoes: { total: 0, comUf: 0, comEsfera: 0 } };
+    return { origem: null };
   }
 }
 
 /**
- * `async` por causa de uma leitura só: o acervo que a faixa de origem e a
- * busca do cabeçalho precisam.
+ * `async` por causa de uma leitura só: a origem do acervo, que a faixa de
+ * origem e a data da barra utilitária precisam.
  *
  * Ela fica no layout, e não em cada página, porque é o único lugar onde
  * nenhuma página nova pode esquecer de mostrá-la: a coisa que ela avisa, o
@@ -190,7 +199,11 @@ async function acervoDoLayout(): Promise<{
  * build falha, e sem a variável a faixa diz que é o mock.
  */
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const { origem, dimensoes } = await acervoDoLayout();
+  const { origem } = await acervoDoLayout();
+  // `null` fora da API: afirmar "atualizado hoje" sobre o mock seria uma
+  // data que a fonte não sustenta. Ver `BarraUtilitaria`, que só mostra a
+  // frase quando este valor existe.
+  const atualizadoEm = origem === "api" ? dataCurta(hojeEmSaoPaulo()) : null;
 
   return (
     // `suppressHydrationWarning` é o que faltava para o aviso "A tree hydrated
@@ -207,7 +220,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     // mostrou o diff apontando para `data-tema` no `<html>`.
     <html
       lang="pt-BR"
-      className={`${literata.variable} ${archivo.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${publicSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -225,9 +238,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               (`acervoDoLayout`): sem origem para dizer, a faixa fica calada
               em vez de afirmar "api" ou "mock" sem ter lido nenhum dos dois. */}
           {origem && <AvisoDeOrigem origem={origem} />}
-          <Cabecalho dimensoes={dimensoes} />
+          <Cabecalho atualizadoEm={atualizadoEm} />
           <main className="flex-1">{children}</main>
-          <Rodape />
+          <Rodape atualizadoEm={atualizadoEm} />
         </SessionProvider>
       </body>
     </html>

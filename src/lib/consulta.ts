@@ -63,7 +63,7 @@ export function normalizar(texto: string): string {
 
 /**
  * O texto que a busca varre. Exportado porque `cargos.ts` mede, no acervo, o
- * que cada link do rodapé devolveria — e medir contra outro texto que não
+ * que cada link do rodapé devolveria, e medir contra outro texto que não
  * este faria a contagem ao lado do link discordar da página que ele abre.
  */
 export function textoBuscavel(concurso: ConcursoResumo): string {
@@ -98,7 +98,7 @@ export function termosDaBusca(q: string): string[] {
  *
  * Recebe o texto já normalizado e os termos já separados, e não o concurso e
  * a busca, porque quem mede dezenas de termos contra o acervo inteiro
- * (`cargos.ts`) precisa pagar cada normalização uma vez só — eram 181 mil
+ * (`cargos.ts`) precisa pagar cada normalização uma vez só: eram 181 mil
  * chamadas de `normalizar` e 50 ms a mais por página. Que a medição e o
  * filtro entrem pela mesma porta é o que garante que o número ao lado do
  * link seja o tamanho da lista que ele abre.
@@ -139,7 +139,7 @@ export function filtrar(
     // Casa contra o CONJUNTO de estados, não contra o valor único que o
     // cartão mostra. `concurso.uf` é nula quando o concurso tem vaga em mais
     // de um estado, e comparar com ela deixava os multiestaduais fora de
-    // todo filtro — o concurso do IBGE, com vaga em 23 estados, não aparecia
+    // todo filtro: o concurso do IBGE, com vaga em 23 estados, não aparecia
     // em nenhum deles.
     //
     // `?? []` porque um `bc api` de versão anterior não manda `ufs`: sem a
@@ -148,7 +148,7 @@ export function filtrar(
     if (filtro.uf && !(concurso.ufs ?? []).includes(filtro.uf)) return false;
 
     if (!vazia(filtro.esferas)) {
-      // Órgão sem esfera não casa com nenhuma esfera pedida — continua fora,
+      // Órgão sem esfera não casa com nenhuma esfera pedida: continua fora,
       // que é o que já acontecia quando o campo era declarado não anulável e
       // chegava nulo assim mesmo. Hoje isso é todo o acervo do engine, e o
       // aviso disso está em `/diagnostico`.

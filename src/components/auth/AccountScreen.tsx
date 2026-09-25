@@ -7,14 +7,15 @@ import type { FormEvent } from "react";
 import { ApiError, authApi, meApi } from "@/lib/auth/api";
 import type { OAuthIdentity } from "@/lib/auth/api";
 import { useSession, withSession } from "@/lib/auth/session";
+import { Botao } from "@/components/ui/Botao";
+import { Campo } from "@/components/ui/Campo";
+import { Rotulo } from "@/components/ui/Etiqueta";
 import { OAuthButtons } from "./PublicAuthScreens";
 import {
   Alert,
-  FormField,
   SubmitButton,
   errorMessage,
   fieldErrors,
-  inputClass,
 } from "./AuthUi";
 
 function Section({
@@ -27,8 +28,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-6 border-t border-tinta-200 pt-7 first:border-0 first:pt-0">
-      <h2 className="mb-5 font-titulo text-xl text-tinta-900">{title}</h2>
+    <section id={id} className="scroll-mt-6 border-t border-linha pt-7 first:border-0 first:pt-0">
+      <h2 className="mb-5 font-titulo text-xl font-bold text-tinta-900">{title}</h2>
       {children}
     </section>
   );
@@ -66,12 +67,23 @@ function ProfileSection() {
     <Section id="perfil" title="Perfil">
       {message && <Alert success={message.success}>{message.text}</Alert>}
       <form className="mt-4 flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
-        <FormField id="name" label="Nome" error={errors.name}>
-          <input id="name" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} className={inputClass} />
-        </FormField>
-        <FormField id="phone" label="Telefone (opcional)" error={errors.phone}>
-          <input id="phone" type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className={inputClass} />
-        </FormField>
+        <Campo
+          id="name"
+          etiqueta="Nome"
+          autoComplete="name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          erro={errors.name}
+        />
+        <Campo
+          id="phone"
+          etiqueta="Telefone (opcional)"
+          type="tel"
+          autoComplete="tel"
+          value={phone}
+          onChange={(event) => setPhone(event.target.value)}
+          erro={errors.phone}
+        />
         <SubmitButton pending={pending}>Salvar perfil</SubmitButton>
       </form>
     </Section>
@@ -121,12 +133,22 @@ function PasswordSection() {
     <Section id="senha" title="Senha">
       {message && <Alert success={message.success}>{message.text}</Alert>}
       <form className="mt-4 flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
-        <FormField id="current-password" label="Senha atual">
-          <input id="current-password" type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} className={inputClass} />
-        </FormField>
-        <FormField id="new-password" label="Nova senha">
-          <input id="new-password" type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} className={inputClass} />
-        </FormField>
+        <Campo
+          id="current-password"
+          etiqueta="Senha atual"
+          type="password"
+          autoComplete="current-password"
+          value={currentPassword}
+          onChange={(event) => setCurrentPassword(event.target.value)}
+        />
+        <Campo
+          id="new-password"
+          etiqueta="Nova senha"
+          type="password"
+          autoComplete="new-password"
+          value={newPassword}
+          onChange={(event) => setNewPassword(event.target.value)}
+        />
         <SubmitButton pending={pending}>Alterar senha</SubmitButton>
       </form>
     </Section>
@@ -166,12 +188,22 @@ function EmailSection() {
       {message && <Alert success={message.success}>{message.text}</Alert>}
       {session.profile?.hasPassword ? (
         <form className="mt-4 flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
-          <FormField id="new-email" label="Novo e-mail">
-            <input id="new-email" type="email" autoComplete="email" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} className={inputClass} />
-          </FormField>
-          <FormField id="email-password" label="Senha atual">
-            <input id="email-password" type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} className={inputClass} />
-          </FormField>
+          <Campo
+            id="new-email"
+            etiqueta="Novo e-mail"
+            type="email"
+            autoComplete="email"
+            value={newEmail}
+            onChange={(event) => setNewEmail(event.target.value)}
+          />
+          <Campo
+            id="email-password"
+            etiqueta="Senha atual"
+            type="password"
+            autoComplete="current-password"
+            value={currentPassword}
+            onChange={(event) => setCurrentPassword(event.target.value)}
+          />
           <SubmitButton pending={pending}>Solicitar troca</SubmitButton>
         </form>
       ) : (
@@ -240,19 +272,19 @@ function ProvidersSection() {
           <p className="text-sm text-tinta-600">Nenhum provedor vinculado.</p>
         )}
         {identities.map((identity) => (
-          <div key={identity.provider} className="flex items-center justify-between gap-3 rounded-controle bg-bloco p-3">
+          <div key={identity.provider} className="flex items-center justify-between gap-3 rounded-controle bg-rebaixada p-3">
             <div className="min-w-0">
-              <p className="text-sm font-semibold capitalize text-tinta-900">{identity.provider}</p>
+              <p className="text-sm font-semibold text-tinta-900 capitalize">{identity.provider}</p>
               <p className="truncate text-xs text-tinta-500">{identity.email}</p>
             </div>
-            <button type="button" onClick={() => void unlink(identity.provider)} className="text-xs font-semibold text-vermelho-800 underline">
+            <button type="button" onClick={() => void unlink(identity.provider)} className="text-xs font-semibold text-urucum-texto underline">
               Desvincular
             </button>
           </div>
         ))}
       </div>
       <div className="mt-5">
-        <p className="mb-3 text-sm font-semibold text-tinta-800">Vincular outro provedor</p>
+        <p className="mb-3 text-sm font-semibold text-tinta-900">Vincular outro provedor</p>
         <OAuthButtons mode="link" returnTo="/conta#provedores" />
       </div>
     </Section>
@@ -284,9 +316,16 @@ function SessionsSection() {
       <p className="mb-4 text-sm text-tinta-600">
         Encerra o acesso desta conta em todos os navegadores e dispositivos.
       </p>
-      <button type="button" disabled={pending} onClick={() => void logoutAll()} className="h-10 w-full rounded-controle bg-rebaixada px-4 text-sm font-semibold text-tinta-900 hover:bg-tinta-200 disabled:opacity-60">
+      <Botao
+        type="button"
+        variante="secundario"
+        tamanho="lg"
+        className="w-full"
+        disabled={pending}
+        onClick={() => void logoutAll()}
+      >
         {pending ? "Encerrando…" : "Sair de todos os dispositivos"}
-      </button>
+      </Botao>
     </Section>
   );
 }
@@ -312,10 +351,12 @@ export function AccountScreen() {
   return (
     <div className="mx-auto w-full max-w-[760px] px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-verde-700">Sua conta</p>
-        <h1 className="font-titulo text-[32px] leading-tight text-tinta-900">Conta e segurança</h1>
+        <Rotulo tom="verde" className="mb-2">Sua conta</Rotulo>
+        <h1 className="font-titulo text-[32px] leading-tight font-bold tracking-[-0.02em] text-tinta-900">
+          Conta e segurança
+        </h1>
       </header>
-      <div className="flex flex-col gap-8 rounded-caixa bg-cartao p-6 sm:p-8">
+      <div className="flex flex-col gap-8 rounded-painel bg-cartao p-6 shadow-cartao sm:p-8">
         <ProfileSection />
         <PasswordSection />
         <EmailSection />

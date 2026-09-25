@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { Icone, type NomeDoIcone } from "@/components/ui/Icone";
 import {
   assinarTema,
   definirTema,
@@ -21,36 +22,72 @@ import {
  * `useSyncExternalStore`: no servidor o instantâneo é "sistema" e no cliente é
  * o que o script do `head` já escreveu, sem divergência de hidratação.
  */
-const OPCOES: { tema: Tema; rotulo: string; caminho: React.ReactNode }[] = [
-  {
-    tema: "claro",
-    rotulo: "Tema claro",
-    caminho: (
-      <>
-        <circle cx="8" cy="8" r="3.1" />
-        <path d="M8 1.4v1.7M8 12.9v1.7M1.4 8h1.7M12.9 8h1.7M3.3 3.3l1.2 1.2M11.5 11.5l1.2 1.2M12.7 3.3l-1.2 1.2M4.5 11.5l-1.2 1.2" />
-      </>
-    ),
-  },
-  {
-    tema: "escuro",
-    rotulo: "Tema escuro",
-    caminho: <path d="M13.4 9.6A5.9 5.9 0 0 1 6.4 2.6a5.9 5.9 0 1 0 7 7Z" />,
-  },
+const OPCOES: {
+  tema: Tema;
+  icone: NomeDoIcone;
+  rotulo: string;
+  rotuloCompacto: string;
+}[] = [
+  { tema: "claro", icone: "sol", rotulo: "Tema claro", rotuloCompacto: "Tema claro" },
+  { tema: "escuro", icone: "lua", rotulo: "Tema escuro", rotuloCompacto: "Tema escuro" },
   {
     tema: "sistema",
+    icone: "monitor",
     rotulo: "Seguir o sistema",
-    caminho: (
-      <>
-        <rect x="1.9" y="2.6" width="12.2" height="8.4" rx="1.6" />
-        <path d="M5.7 13.4h4.6" />
-      </>
-    ),
+    rotuloCompacto: "Tema do sistema",
   },
 ];
 
-export function SeletorDeTema({ className }: { className?: string }) {
+/**
+ * A versão compacta, para a barra utilitária (`Main.dc.html:27`): três
+ * ícones de 15px em `text-utilitaria-texto`, sem pílula cinza (que não lê
+ * sobre o fundo escuro da barra) e sem rótulo visível, só `aria-label`.
+ */
+function SeletorCompacto({ atual, className }: { atual: Tema; className?: string }) {
+  return (
+    <div
+      role="group"
+      aria-label="Tema"
+      className={`flex items-center ${className ?? ""}`}
+    >
+      {OPCOES.map((opcao) => {
+        const ativo = opcao.tema === atual;
+        // O botão é um quadrado de 36px, a altura inteira da barra
+        // utilitária (ver o alvo de toque em `BarraUtilitaria.tsx`); o
+        // círculo de 28px de dentro é só o desenho.
+        return (
+          <button
+            key={opcao.tema}
+            type="button"
+            onClick={() => definirTema(opcao.tema)}
+            aria-pressed={ativo}
+            aria-label={opcao.rotuloCompacto}
+            className="group/tema flex size-9 items-center justify-center text-utilitaria-texto"
+          >
+            <span
+              className={`flex size-7 items-center justify-center rounded-full transition-colors ${
+                ativo ? "bg-utilitaria-texto/15" : "group-hover/tema:bg-utilitaria-texto/10"
+              }`}
+            >
+              <Icone nome={opcao.icone} tamanho={15} />
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function SeletorDeTema({
+  className,
+  compacto = false,
+}: {
+  className?: string;
+  compacto?: boolean;
+}) {
   const atual = useSyncExternalStore(assinarTema, temaAtual, temaNoServidor);
+
+  if (compacto) return <SeletorCompacto atual={atual} className={className} />;
 
   return (
     <div
@@ -72,21 +109,10 @@ export function SeletorDeTema({ className }: { className?: string }) {
             className={`flex size-7 items-center justify-center rounded-full transition-colors ${
               ativo
                 ? "bg-cartao text-tinta-900"
-                : "text-tinta-400 hover:text-tinta-800"
+                : "text-tinta-500 hover:text-tinta-900"
             }`}
           >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-4"
-            >
-              {opcao.caminho}
-            </svg>
+            <Icone nome={opcao.icone} tamanho={16} />
             <span className="sr-only">{opcao.rotulo}</span>
           </button>
         );

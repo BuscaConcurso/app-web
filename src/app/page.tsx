@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
-import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
-import { LinhaConcurso } from "@/components/concurso/LinhaConcurso";
-import { AcervoIncompleto, BlocoAlerta } from "@/components/home/BlocoAlerta";
-import { BlocosSeo } from "@/components/home/BlocosSeo";
+import { Areas } from "@/components/home/Areas";
+import { BlocoAlerta } from "@/components/home/BlocoAlerta";
+import { ComoFunciona } from "@/components/home/ComoFunciona";
+import { EncerramSemana } from "@/components/home/EncerramSemana";
 import { Hero } from "@/components/home/Hero";
-import { Secao } from "@/components/home/Secao";
+import { Numeros } from "@/components/home/Numeros";
+import { PorEstado } from "@/components/home/PorEstado";
+import { TabelaAbertos } from "@/components/home/TabelaAbertos";
+import { VemAiEDou } from "@/components/home/VemAiEDou";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import {
   avisoDoAcervo,
-  cargosEmDestaque,
   dimensoesDoAcervo,
   facetas,
   obterDestaques,
 } from "@/lib/concursos";
-import { dataLonga } from "@/lib/formato";
+import { hojeCivilEmSaoPaulo, somaOuNull } from "@/lib/formato";
 import { tituloSemOrgao } from "@/lib/rotulos";
 import { DESCRICAO_SITE, NOME_SITE, urlAbsoluta } from "@/lib/site";
 
@@ -23,23 +25,19 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-function isoDeHoje(hoje: Date): string {
-  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-  const dia = String(hoje.getDate()).padStart(2, "0");
-  return `${hoje.getFullYear()}-${mes}-${dia}`;
-}
-
 /** ISR de cinco minutos, o mesmo tempo da leitura do acervo (`concursos.ts`). */
 export const revalidate = 300;
 
 export default async function Home() {
-  const hoje = new Date();
-  const [destaques, { ufs, bancas, orgaos }, aviso, dimensoes, cargos] = await Promise.all([
+  // O dia civil de São Paulo, não o relógio cru do processo: tudo que
+  // decide por dia (destaques, facetas, "encerra hoje", a tabela) lê daqui.
+  // Um servidor em UTC viraria o dia às 21h de Brasília.
+  const hoje = hojeCivilEmSaoPaulo();
+  const [destaques, { ufs, bancas, orgaos }, aviso, dimensoes] = await Promise.all([
     obterDestaques(hoje),
-    facetas(hoje),
+    facetas(hoje, { ufs: 27 }),
     avisoDoAcervo(),
     dimensoesDoAcervo(),
-    cargosEmDestaque(8),
   ]);
 
   /**
@@ -74,93 +72,29 @@ export default async function Home() {
 
       <Hero
         totalAbertos={destaques.totalAbertos}
-        atualizadoEm={dataLonga(isoDeHoje(hoje))}
-        dimensoes={dimensoes}
-        ufs={ufs}
-        cargos={cargos}
+        destaque={destaques.encerrando[0] ?? destaques.abertos[0] ?? null}
+        novoAto={destaques.atualizados[0] ?? null}
       />
 
-      {destaques.encerrando.length > 0 && (
-        <Secao
-          titulo="Encerra esta semana"
-          apoio="Inscrições que fecham nos próximos sete dias."
-          href="/concursos?situacao=abertas"
-          hrefRotulo="Ver tudo que está aberto"
-        >
-          <ul className="grid gap-2">
-            {destaques.encerrando.map((concurso) => (
-              <li key={concurso.slug} className="min-w-0">
-                <LinhaConcurso concurso={concurso} hoje={hoje} acao="Abrir" />
-              </li>
-            ))}
-          </ul>
-        </Secao>
-      )}
+      <Numeros
+        totalAbertos={destaques.totalAbertos}
+        vagasPrevistas={somaOuNull(destaques.previstos.map((concurso) => concurso.vagas))}
+        atosLidos={aviso?.total ?? dimensoes.total}
+      />
 
-      <Secao
-        titulo="Inscrições abertas agora"
-        apoio="Ordenado por quem fecha primeiro."
-        href="/concursos?situacao=abertas"
-        hrefRotulo={`Ver os ${destaques.totalAbertos} abertos`}
-      >
-        <ul className="grid gap-2 lg:grid-cols-2">
-          {destaques.abertos.map((concurso) => (
-            // `min-w-0` pelo mesmo motivo da lista da busca: item de grid não
-            // encolhe abaixo do min-content sem isto, e o mesmo cartão está
-            // aqui.
-            <li key={concurso.slug} className="min-w-0">
-              <CartaoConcurso concurso={concurso} hoje={hoje} />
-            </li>
-          ))}
-        </ul>
-      </Secao>
+      <Areas />
 
-      {destaques.atualizados.length > 0 && (
-        <Secao
-          titulo="Últimas atualizações"
-          apoio="Concursos com ato novo no Diário Oficial da União, do mais recente para o mais antigo."
-        >
-          <ul className="grid gap-2">
-            {destaques.atualizados.map((concurso) => (
-              <li key={concurso.slug} className="min-w-0">
-                <LinhaConcurso
-                  concurso={concurso}
-                  hoje={hoje}
-                  acao="Ver"
-                  ato={concurso.ultimoAto ?? undefined}
-                />
-              </li>
-            ))}
-          </ul>
-        </Secao>
-      )}
+      <EncerramSemana concursos={destaques.encerrando} hoje={hoje} />
 
-      {destaques.previstos.length > 0 && (
-        <Secao
-          titulo="Previstos"
-          apoio="Autorizados ou com banca definida, ainda sem edital publicado."
-          href="/concursos?situacao=previstos"
-          hrefRotulo="Ver todos os previstos"
-        >
-          <ul className="grid gap-2">
-            {destaques.previstos.map((concurso) => (
-              <li key={concurso.slug} className="min-w-0">
-                <LinhaConcurso concurso={concurso} hoje={hoje} acao="Avisar" />
-              </li>
-            ))}
-          </ul>
-        </Secao>
-      )}
+      <TabelaAbertos concursos={destaques.abertos} total={destaques.totalAbertos} hoje={hoje} />
 
-      {aviso && (
-        <section className="mx-auto max-w-[1240px] px-4 pb-5 sm:px-6">
-          <AcervoIncompleto aviso={aviso} />
-        </section>
-      )}
+      <PorEstado ufs={ufs} orgaos={orgaos} bancas={bancas} />
+
+      <VemAiEDou previstos={destaques.previstos} atualizados={destaques.atualizados} hoje={hoje} />
+
+      <ComoFunciona aviso={aviso} />
 
       <BlocoAlerta totalAbertos={destaques.totalAbertos} />
-
-      <BlocosSeo bancas={bancas} orgaos={orgaos} />
     </>
   );
 }

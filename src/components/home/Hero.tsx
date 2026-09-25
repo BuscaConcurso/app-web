@@ -1,182 +1,163 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Rotulo } from "@/components/ui/Etiqueta";
-import type { DimensoesDoAcervo, LinkDeFaceta } from "@/lib/concursos";
+import { BuscaDoHero } from "./BuscaDoHero";
+import { Mosaico } from "./Mosaico";
+import { CLASSE_CHIP_DO_HERO, PertoDeMim } from "./PertoDeMim";
+import { Icone } from "@/components/ui/Icone";
+import type { ConcursoResumo } from "@/lib/dominio";
 import { numero } from "@/lib/formato";
-import { Ilustracao } from "./Ilustracao";
 
 /**
- * Os atalhos que valem sempre: escolaridade e busca por texto, que o acervo
- * responde hoje.
- */
-const ATALHOS = [
-  { rotulo: "Nível superior", href: "/concursos?escolaridade=superior" },
-  { rotulo: "Nível médio", href: "/concursos?escolaridade=medio" },
-  { rotulo: "Nível médio técnico", href: "/concursos?escolaridade=medio_tecnico" },
-  { rotulo: "Nível fundamental", href: "/concursos?escolaridade=fundamental" },
-  { rotulo: "Tribunais", href: "/busca/tribunal" },
-  { rotulo: "Polícia", href: "/busca/policia" },
-];
-
-/**
- * Os atalhos de esfera, que só aparecem quando algum órgão do acervo tem
- * esfera.
+ * Embrulha um chip do herói para reordená-lo e/ou escondê-lo por breakpoint,
+ * sem tocar na classe do chip em si (`CLASSE_CHIP_DO_HERO`, de
+ * `PertoDeMim.tsx`, que é `"use client"`).
  *
- * Aqui esconder é a resposta certa, e é diferente do seletor de estado: um
- * atalho não é um controle que a pessoa foi procurar, é uma sugestão nossa.
- * Sugerir um caminho que leva a uma lista vazia é mandar alguém para um beco;
- * não sugerir não afirma nada.
+ * **Por que um embrulho, e não `${CLASSE_CHIP_DO_HERO}` numa string só:**
+ * um valor que atravessa a fronteira de cliente para um Server Component
+ * (este arquivo não tem `"use client"`) só é utilizável passado por
+ * referência direta (`className={CLASSE_CHIP_DO_HERO}`, como o primeiro
+ * chip abaixo faz). Qualquer operação que o transforme em texto (template
+ * string, `.replace()`, `.join()`) aciona o mecanismo de referência de
+ * cliente do React/Next por baixo, e em vez da classe o navegador recebe o
+ * texto de uma função de erro (`"Attempted to call ... from the server"`),
+ * sem nenhum estilo de pílula. Foi exatamente esse bug que apareceu na
+ * primeira versão desta correção, com `` `order-3 ${CLASSE_CHIP_DO_HERO}` ``.
+ *
+ * **Por que não um `<span className="hidden lg:contents">`** (a primeira
+ * ideia, e a que gerava o cabeçalho do concurso): `display: contents` tira o
+ * embrulho da árvore de caixas, e um elemento sem caixa não tem `order` para
+ * aplicar: quem precisaria do `order` é o próprio `<Link>` lá dentro, e
+ * escrevê-lo nele exigiria mexer na classe do chip de novo. Aqui o embrulho
+ * FICA como caixa (`inline-flex`), e é ele que recebe `hidden`/`order`; o
+ * `self-start` evita que o `align-items: stretch` padrão da fileira estique
+ * o embrulho (sem altura própria) e descentralize o chip lá dentro.
  */
-const ATALHOS_DE_ESFERA = [
-  { rotulo: "Federais", href: "/concursos?esfera=federal" },
-  { rotulo: "Prefeituras", href: "/concursos?esfera=municipal" },
-];
-
-/**
- * Um atalho do acesso rápido. `max-w-full` e o rótulo com `min-w-0
- * break-words`: um chip é item de flex, e sem isso um nome comprido não
- * encolhe e estica a página no celular (a mesma armadilha documentada em
- * `Etiqueta` e em `BlocosSeo`).
- */
-function Chip({
-  href,
-  rotulo,
-  total,
+function EmbrulhoDoChip({
+  ordem,
+  soDesktop = false,
+  children,
 }: {
-  href: string;
-  rotulo: string;
-  total?: number;
+  ordem?: string;
+  soDesktop?: boolean;
+  children: ReactNode;
 }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-controle bg-rebaixada px-3 text-[12px] font-medium text-tinta-800 transition-colors hover:bg-tinta-200"
-    >
-      <span className="min-w-0 break-words">{rotulo}</span>
-      {total !== undefined && (
-        <span className="numero text-tinta-600">{numero(total)}</span>
-      )}
-    </Link>
-  );
+  // `soDesktop`: só `hidden lg:inline-flex`, nunca os dois junto com um
+  // `inline-flex` incondicional à parte: é a mesma classe de exibição dos
+  // dois lados (`hidden` e `inline-flex`, mesmo peso), e ficaria de novo ao
+  // sabor da ordem de geração do Tailwind, como o bug desta correção.
+  const exibicao = soDesktop ? "hidden lg:inline-flex" : "inline-flex";
+  const classes = [exibicao, "self-start", ordem].filter(Boolean).join(" ");
+  return <span className={classes}>{children}</span>;
 }
 
 /**
- * Uma fileira do acesso rápido: o rótulo acima no celular e à esquerda a
- * partir de `sm`, numa coluna de largura fixa para os chips das três
- * fileiras começarem na mesma vertical.
- */
-function Fileira({ titulo, children }: { titulo: string; children: ReactNode }) {
-  return (
-    <nav
-      aria-label={titulo}
-      className="grid gap-2 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-4"
-    >
-      <Rotulo as="h3" className="sm:pt-2">
-        {titulo}
-      </Rotulo>
-      <ul className="flex min-w-0 flex-wrap gap-2">{children}</ul>
-    </nav>
-  );
-}
-
-/**
- * O topo da home.
+ * O topo da home: o herói verde com a busca, o mosaico de azulejos com o
+ * concurso em destaque, e (fora daqui, logo abaixo) a faixa de números.
  *
- * **A caixa de busca saiu daqui.** Ela mora no cabeçalho de toda página, e
- * repetir a mesma barra logo abaixo seria dizer a mesma coisa duas vezes na
- * primeira tela. O que sobra ao topo é a hierarquia nova: o que o site é
- * (o título e o número de concursos abertos) e, logo abaixo, o acesso rápido
- * por estado, por cargo e pelos recortes fixos. As faixas de concursos vêm
- * depois, como antes.
+ * `Main.dc.html:54-79` no desktop, o começo de `Mobile.dc.html` no celular.
+ * As duas telas têm textos diferentes de propósito (o parágrafo do celular é
+ * mais curto, os chips mudam de rótulo): em vez de um texto só tentando
+ * servir aos dois tamanhos, cada marcação mora aqui, e o CSS decide qual
+ * aparece (`md:hidden`/`hidden md:inline`), sem duplicar o componente.
  *
- * O acesso rápido é um cartão só, sem borda nem sombra: o degrau de
- * `pagina` para `cartao` é a separação, e dentro dele as fileiras se separam
- * por espaço. Os estados sobem dos blocos do fim da página para cá porque
- * "concurso no meu estado" é a pergunta mais comum de quem chega, e agora
- * que a barra não ocupa o meio da tela ela tem espaço na primeira dobra.
+ * **Server component.** A busca em si (`BuscaDoHero`) e o chip "Perto de
+ * mim" (`PertoDeMim`) são filhos clientes, porque dependem de memória do
+ * navegador; o resto do herói é HTML estático, e é por isso que
+ * `Hero.test.ts` consegue renderizar isto com `renderToStaticMarkup`, sem
+ * hidratar nada.
  */
 export function Hero({
   totalAbertos,
-  atualizadoEm,
-  dimensoes,
-  ufs,
-  cargos,
+  destaque,
+  novoAto,
 }: {
   totalAbertos: number;
-  atualizadoEm: string;
-  dimensoes: DimensoesDoAcervo;
-  /** Os estados com mais concursos abertos, de `facetas`. */
-  ufs: LinkDeFaceta[];
-  /** Os cargos mais frequentes do acervo, de `cargosEmDestaque`. */
-  cargos: LinkDeFaceta[];
+  /** O concurso do cartão flutuante. `null` não desenha o cartão. */
+  destaque: ConcursoResumo | null;
+  /** O concurso do último ato do Diário. `null` não desenha a pílula. */
+  novoAto: ConcursoResumo | null;
 }) {
-  const atalhos =
-    dimensoes.comEsfera > 0 ? [...ATALHOS, ...ATALHOS_DE_ESFERA] : ATALHOS;
-
   return (
-    <section className="mx-auto max-w-[1240px] px-4 pt-7 pb-5 sm:px-6 sm:pt-10">
-      <div className="flex items-center justify-between gap-10">
-        <div className="min-w-0">
-          <h1 className="max-w-[20ch] font-titulo text-[27px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance sm:text-[36px]">
-            Concursos públicos abertos, em um lugar só
+    // A faixa verde vai de ponta a ponta; o conteúdo mora no `conteudo`
+    // (`globals.css`). Em fileira (texto de 700px e o mosaico) só a partir de
+    // `lg`: abaixo disso a coluna de 700px não cabe ao lado de nada. O
+    // mosaico entra em `xl`, onde o `conteudo` já tem os 1216px do artboard.
+    <section className="overflow-hidden bg-faixa text-white">
+      <div className="conteudo flex flex-col gap-4 py-7 md:py-10 lg:min-h-[620px] lg:flex-row lg:gap-10 lg:py-0 xl:gap-16">
+        <div className="relative flex flex-col gap-4 lg:w-[700px] lg:shrink-0 lg:justify-center lg:gap-6 lg:pb-10">
+          {/* O sol dourado que só aparece no celular (`Mobile.dc.html:29`);
+              no desktop o mosaico de azulejos já cumpre o papel decorativo. */}
+          <span
+            aria-hidden="true"
+            className="absolute -top-[60px] -right-[60px] size-[120px] rounded-full bg-ouro md:hidden"
+          />
+
+          <div className="inline-flex h-[30px] items-center gap-2 self-start rounded-full bg-white/10 pr-3.5 pl-1.5 text-[13px] text-faixa-texto lg:h-[34px] lg:gap-2.5 lg:pr-3.5 lg:pl-2 lg:text-sm">
+            <span className="flex h-5 items-center rounded-full bg-ouro px-1.5 text-[11px] font-bold text-ouro-texto lg:h-[22px] lg:px-2 lg:text-xs">
+              {numero(totalAbertos)}
+            </span>
+            <span className="lg:hidden">abertos hoje</span>
+            <span className="hidden lg:inline">concursos com inscrição aberta hoje</span>
+          </div>
+
+          <h1 className="font-titulo text-[40px] leading-[1.04] font-bold tracking-[-0.035em] md:text-[52px] lg:text-[68px] lg:leading-[1.02]">
+            Encontre seu concurso.
+            <br className="hidden lg:block" />
+            <span className="lg:hidden"> </span>
+            <span className="text-ouro">Direto do edital.</span>
           </h1>
-          <p className="mt-3 max-w-[56ch] text-[14px] leading-6 text-tinta-600 text-pretty">
-            Hoje são{" "}
-            <strong className="numero font-semibold text-tinta-900">
-              {numero(totalAbertos)} concursos com inscrição aberta
-            </strong>
-            . Buscamos os editais direto nas bancas e nos diários oficiais,
-            extraímos cargo, vaga, salário e prazo de cada um, e guardamos o
-            link para o documento original.
+
+          <p className="text-base leading-[1.5] text-faixa-texto lg:max-w-[580px] lg:text-[19px] lg:leading-[1.55]">
+            <span className="lg:hidden">
+              Cargo, vagas, salário e prazo, com o link para o documento original.
+            </span>
+            <span className="hidden lg:inline">
+              Lemos todo dia os editais das bancas e dos diários oficiais e mostramos cargo,
+              vagas, salário e prazo, com o link para o documento original.
+            </span>
           </p>
-          <p className="mt-2 text-xs text-tinta-500">
-            Acervo atualizado em {atualizadoEm}.
-          </p>
+
+          <BuscaDoHero />
+
+          {/*
+            A ordem muda por breakpoint (`order-*`), e não só o que aparece:
+            no celular é prazo, perto de mim, salário (`Mobile.dc.html`); no
+            desktop é prazo, salário, escolaridade, perto de mim
+            (`Main.dc.html:72-77`). O prazo não leva `order` porque o padrão
+            (0) já o deixa na frente dos outros três, que levam 2, 3 e 4.
+          */}
+          <div className="flex flex-wrap gap-2">
+            <Link href="/concursos?situacao=abertas" className={CLASSE_CHIP_DO_HERO}>
+              <Icone nome="prazo" tamanho={16} />
+              <span className="lg:hidden">Encerram na semana</span>
+              <span className="hidden lg:inline">Encerram esta semana</span>
+            </Link>
+            <EmbrulhoDoChip ordem="order-3 lg:order-2">
+              <Link
+                href="/concursos?situacao=abertas&salarioMin=10000"
+                className={CLASSE_CHIP_DO_HERO}
+              >
+                <Icone nome="salario" tamanho={16} />
+                <span className="lg:hidden">+ R$ 10 mil</span>
+                <span className="hidden lg:inline">Acima de R$ 10 mil</span>
+              </Link>
+            </EmbrulhoDoChip>
+            <EmbrulhoDoChip ordem="order-3" soDesktop>
+              <Link
+                href="/concursos?situacao=abertas&escolaridade=medio"
+                className={CLASSE_CHIP_DO_HERO}
+              >
+                <Icone nome="educacao" tamanho={16} />
+                Nível médio
+              </Link>
+            </EmbrulhoDoChip>
+            <EmbrulhoDoChip ordem="order-2 lg:order-4">
+              <PertoDeMim />
+            </EmbrulhoDoChip>
+          </div>
         </div>
 
-        {/* Só a partir do desktop: no celular o espaço vertical vale mais
-            para o acesso rápido do que para um desenho. */}
-        <Ilustracao className="hidden w-[210px] shrink-0 lg:block" />
-      </div>
-
-      <div className="mt-6 rounded-caixa bg-cartao p-4 sm:p-5">
-        <h2 className="font-titulo text-[18px] leading-7 font-semibold tracking-[-0.01em]">
-          Acesso rápido
-        </h2>
-        {/* As duas contagens medem coisas diferentes, e o chip sozinho não
-            diria qual: o estado conta os abertos agora (`facetas`), o cargo
-            conta o acervo inteiro (`cargosEmDestaque`, ver o porquê lá). */}
-        <p className="mt-0.5 text-[12px] leading-5 text-tinta-600">
-          Nos estados, o número é de concursos abertos agora; nos cargos, de
-          concursos no acervo.
-        </p>
-        <div className="mt-4 grid gap-4">
-          {ufs.length > 0 && (
-            <Fileira titulo="Por estado">
-              {ufs.map((uf) => (
-                <li key={uf.href} className="max-w-full">
-                  <Chip href={uf.href} rotulo={uf.rotulo} total={uf.total} />
-                </li>
-              ))}
-            </Fileira>
-          )}
-          {cargos.length > 0 && (
-            <Fileira titulo="Por cargo">
-              {cargos.map((cargo) => (
-                <li key={cargo.href} className="max-w-full">
-                  <Chip href={cargo.href} rotulo={cargo.rotulo} total={cargo.total} />
-                </li>
-              ))}
-            </Fileira>
-          )}
-          <Fileira titulo="Atalhos">
-            {atalhos.map((atalho) => (
-              <li key={atalho.href} className="max-w-full">
-                <Chip href={atalho.href} rotulo={atalho.rotulo} />
-              </li>
-            ))}
-          </Fileira>
-        </div>
+        <Mosaico destaque={destaque} novoAto={novoAto} />
       </div>
     </section>
   );

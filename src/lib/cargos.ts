@@ -2,7 +2,7 @@
  * Quais cargos viram link, decidido por medição do acervo.
  *
  * O nome do cargo é a primeira coisa que um candidato digita, e é a dimensão
- * que faltava nos links internos — havia estado, órgão e banca. O problema é
+ * que faltava nos links internos: havia estado, órgão e banca. O problema é
  * que o nome não é um cadastro: ele foi lido do texto do ato por um modelo, e
  * chega fragmentado. No acervo de 2026-09-14 são 3.247 nomes distintos em
  * 4.649 concursos, e os quinze mais frequentes trazem SEIS variações de
@@ -14,7 +14,7 @@
  * **Pegar os N mais frequentes, portanto, produz um rodapé ruim.** Pegar de
  * uma lista escrita à mão produz um rodapé que envelhece sem ninguém
  * perceber. O que este arquivo faz é medir, no acervo que está no ar, o que
- * cada link geraria — e recusar por número.
+ * cada link geraria, e recusar por número.
  *
  * Quatro regras, cada uma com uma vítima medida (o relatório delas sai em
  * `recusados`, e `cargos.test.ts` cobra as duas listas):
@@ -29,7 +29,7 @@
  *    acervo dobrar.
  * 3. **Fidelidade de pelo menos 0,8.** De tudo que o link devolve, quatro em
  *    cada cinco precisam ter um cargo com aquele termo na cabeça. É o que
- *    recusa "Técnico" (0,46 — quase tudo que volta é "Professor do Ensino
+ *    recusa "Técnico" (0,46, quase tudo que volta é "Professor do Ensino
  *    Básico, Técnico e Tecnológico"), "Assistente" (0,53, que é "Professor
  *    Assistente"), "Matemática" e "Física" (a disciplina do professor, não o
  *    cargo) e "Educação" (0,07). A medida separa as duas nuvens com folga: o
@@ -38,7 +38,7 @@
  * 4. **Um link por cabeça de família.** A variação de maior alcance
  *    representa a família e as outras saem. É o que reduz as seis variações
  *    de professor a uma, e o que impede "Assistente em Administração" e
- *    "Assistente Administrativo" — a mesma coisa escrita de dois jeitos — de
+ *    "Assistente Administrativo" (a mesma coisa escrita de dois jeitos) de
  *    ocuparem duas linhas.
  *
  * Mais uma recusa, que não é sobre frequência: termo que é rótulo de
@@ -83,7 +83,7 @@ const ESCOLARIDADES = new Set(
  */
 function partesDoNome(bruto: string): string[] {
   return bruto
-    .split(/\s[-–—]\s|[:;/]/)
+    .split(/\s[-–\u2014]\s|[:;/]/)
     .map((parte) => parte.trim())
     .filter(Boolean);
 }
@@ -128,14 +128,14 @@ interface Candidato {
  *
  * Duas passadas, e a primeira existe para a segunda ser barata. A primeira lê
  * só os nomes de cargo, que são curtos, e conta a família de cada prefixo. A
- * segunda é a cara — normaliza o texto buscável de cada concurso e testa cada
- * candidato contra ele — e por isso só roda para quem a primeira deixou
+ * segunda é a cara: normaliza o texto buscável de cada concurso e testa cada
+ * candidato contra ele, e por isso só roda para quem a primeira deixou
  * passar.
  *
  * O corte da primeira passada **não perde nada**: quem sobrevive às regras
  * tem `familia = fidelidade × alcance ≥ 0,8 × piso`, então um candidato com
  * família menor que isso já estaria recusado. É um limite demonstrado, não um
- * teto arbitrário — hoje ele leva os 8.900 prefixos distintos a 37
+ * teto arbitrário: hoje ele leva os 8.900 prefixos distintos a 37
  * candidatos.
  */
 export function medirCargos(acervo: ConcursoResumo[]): CargosDoAcervo {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { Azulejos, MOSAICO_HERO } from "@/components/marca/Azulejos";
 import { Botao, BotaoLink } from "@/components/ui/Botao";
-import { Rotulo } from "@/components/ui/Etiqueta";
+import { Secao } from "@/components/ui/Secao";
 
 /**
  * A tela de erro do site inteiro: o limite de erro que o Next chama quando
@@ -39,25 +40,30 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 sm:py-14">
-      <div className="rounded-caixa bg-cartao px-6 py-14 text-center sm:py-16">
-        <Rotulo>Erro</Rotulo>
-        <h1 className="mt-2 font-titulo text-2xl font-semibold text-tinta-900 sm:text-[28px]">
-          Algo deu errado ao carregar esta página
-        </h1>
-        <p className="mx-auto mt-3 max-w-[46ch] text-sm leading-6 break-words text-tinta-600">
-          O acervo pode estar fora do ar por um instante. Tente de novo em
-          alguns segundos, ou volte para a home enquanto isso.
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <Botao variante="primario" onClick={() => retry()}>
-            Tentar de novo
-          </Botao>
-          <BotaoLink href="/" variante="secundario">
-            Ir para a home
-          </BotaoLink>
+    <div className="conteudo py-10 sm:py-14">
+      <Secao rotulo="ALGO DEU ERRADO" titulo="Algo deu errado ao carregar esta página" nivel="h1">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] lg:items-center">
+          <div className="flex flex-col items-start gap-5">
+            <p className="max-w-[46ch] text-sm leading-6 break-words text-tinta-600">
+              O acervo pode estar fora do ar por um instante. Tente de novo em
+              alguns segundos, ou volte para a home enquanto isso.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Botao variante="primario" onClick={() => retry()}>
+                Tentar de novo
+              </Botao>
+              <BotaoLink href="/" variante="secundario">
+                Ir para a home
+              </BotaoLink>
+            </div>
+          </div>
+          <Azulejos
+            ladrilhos={MOSAICO_HERO.slice(0, 8)}
+            colunas={4}
+            className="hidden overflow-hidden rounded-[16px] sm:grid"
+          />
         </div>
-      </div>
+      </Secao>
     </div>
   );
 }
