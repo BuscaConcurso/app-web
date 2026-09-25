@@ -46,7 +46,7 @@ export function FatosDoConcurso({ fatos }: { fatos: Fato[] }) {
       </div>
 
       {/* Tablet e desktop: os seis, ícone em cima do texto. */}
-      <div className="hidden gap-2 md:grid md:grid-cols-3 xl:grid-cols-6">
+      <div className="hidden gap-3 md:grid md:grid-cols-3 xl:grid-cols-6">
         {fatos.map((fato) => (
           <CartaoDoFato key={fato.rotulo} fato={fato} />
         ))}
@@ -80,22 +80,24 @@ export function CartaoDeFato({
   informado?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-[16px] bg-cartao p-4 shadow-cartao">
+    // `Concurso.dc.html:90-99`: padding 18, raio 18, 10px entre o ícone e o
+    // texto, valor em Bricolage 28px (22px quando o ato não informa).
+    <div className="flex min-w-0 flex-col gap-2.5 rounded-cartao bg-cartao p-[18px] shadow-cartao">
       <span className={`flex size-10 shrink-0 items-center justify-center rounded-[12px] ${cor}`}>
         <Icone nome={icone} tamanho={20} />
       </span>
-      <div>
-        <div className="text-[11px] font-bold tracking-[0.05em] text-tinta-500">{rotulo}</div>
+      <div className="min-w-0">
+        <div className="text-[12px] font-bold tracking-[0.05em] text-tinta-500">{rotulo}</div>
         <div
-          className={
+          className={`break-words ${
             informado
-              ? "font-titulo text-[20px] leading-[1.1] font-bold text-tinta-900"
-              : "font-titulo text-[15px] leading-[1.25] font-semibold text-tinta-600"
-          }
+              ? "font-titulo text-[28px] leading-[1.1] font-bold text-tinta-900"
+              : "font-titulo text-[22px] leading-[1.25] font-semibold text-tinta-500"
+          }`}
         >
           {valor}
         </div>
-        {apoio && <div className="text-[12px] text-tinta-600">{apoio}</div>}
+        {apoio && <div className="text-[13px] text-tinta-600">{apoio}</div>}
       </div>
     </div>
   );

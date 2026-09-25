@@ -173,9 +173,9 @@ function CabecalhoDoPrazo({
     const estilo = ESTILO_DO_PRAZO[tomDoCalendario(concurso.inscricoesAte, hoje)];
     return (
       <div className={`flex items-center gap-3.5 px-6 py-[22px] ${estilo.fundo}`}>
-        <Calendario iso={concurso.inscricoesAte} hoje={hoje} tamanho="lg" />
+        <Calendario iso={concurso.inscricoesAte} hoje={hoje} sobreOTom />
         <div>
-          <div className={`font-titulo text-[26px] leading-none font-bold tracking-[-0.02em] ${estilo.texto}`}>
+          <div className={`font-titulo text-[24px] leading-[1.2] font-bold tracking-[-0.02em] ${estilo.texto}`}>
             {prazo.titulo}
           </div>
           <div className={`mt-1 text-sm ${estilo.texto}`}>{prazo.detalhe}</div>

@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { DadosEstruturados } from "./DadosEstruturados";
+import { Icone } from "./Icone";
 import { trilhaEstruturada, type Degrau } from "@/lib/trilha";
 
 export type { Degrau };
@@ -36,26 +37,13 @@ export type { Degrau };
  * página do concurso simplesmente não tinha o degrau escrito, o que é outra
  * coisa.
  *
- * **`flex-wrap` com `min-w-0`, e corte em cada degrau.** Medido a 375px
- * contra o acervo de 2026-09-14: o título mais longo tem 208 caracteres e o
- * nome de órgão mais longo, 169. A trilha da página do órgão era um bloco de
- * texto simples e, medida, nenhum dos 466 órgãos a fazia empurrar a página —
- * texto em bloco quebra sozinho no espaço, e o maior pedaço sem espaço do
- * acervo tem 27 caracteres. O que ela fazia era crescer: seis órgãos davam
- * uma trilha de três ou quatro linhas de 12px, uma delas com 72px de altura
- * antes do `h1`. O corte em `40ch` resolve os dois casos com a mesma regra —
- * em flex, onde um item que não encolhe estica a página; e em bloco, onde ele
- * empilha linhas.
+ * **A forma é a de `Concurso.dc.html:57-61`**: 60px de altura, 14px, os
+ * degraus em `link` sem sublinhado, o separador um chevron de 14px e o
+ * degrau corrente em `tinta-900`.
  *
- * **O separador tem 2px de cada lado, e é padding e não espaço de texto.**
- * É pedido do parceiro humano. O separador era `<span> / </span>`, com os
- * espaços literais valendo a largura do espaço da fonte — 3,03px no Archivo a
- * 12px, medido, e outro valor a cada corpo ou família. A escala de espaço
- * deste projeto tem `--spacing: 0.22rem`, então `px-0.5` dá 1,76px e `px-1`
- * dá 3,52px: **nenhum degrau da escala cai em 2px**. Como o pedido é um
- * número medido na tela e não uma proporção da escala, vai valor arbitrário,
- * que é a única forma de o elemento renderizado medir exatamente 2px dos dois
- * lados. Fica registrado que ele sai da escala de propósito.
+ * **`flex-wrap` com `min-w-0`, e corte em cada degrau.** O título mais longo
+ * do acervo tem 208 caracteres e o nome de órgão mais longo, 169: sem o corte
+ * em `40ch` um degrau desses empilharia linhas ou esticaria a página a 360px.
  */
 export function Trilha({ degraus }: { degraus: Degrau[] }) {
   if (degraus.length === 0) return null;
@@ -66,14 +54,11 @@ export function Trilha({ degraus }: { degraus: Degrau[] }) {
 
       <nav
         aria-label="Trilha"
-        className="mb-5 flex min-w-0 flex-wrap items-baseline text-[14px] text-tinta-600"
+        className="flex min-h-[60px] min-w-0 flex-wrap items-center gap-x-2 gap-y-1 py-2 text-[14px] text-tinta-600"
       >
         {degraus.map((degrau, indice) => {
           const corrente = indice === degraus.length - 1;
-          // `inline-block` + `align-bottom`: `truncate` precisa de uma caixa
-          // com largura para cortar, e a linha de base de uma caixa cortada
-          // desalinharia do separador sem o `align-bottom`.
-          const corte = "inline-block max-w-[40ch] truncate align-bottom";
+          const corte = "max-w-[40ch] min-w-0 truncate";
 
           return (
             // `Fragment` e não uma caixa por degrau: o separador e o degrau
@@ -81,22 +66,14 @@ export function Trilha({ degraus }: { degraus: Degrau[] }) {
             // por par em vez de quebrar entre eles.
             <Fragment key={degrau.href}>
               {indice > 0 && (
-                <span aria-hidden="true" className="px-[2px] text-tinta-500">
-                  /
-                </span>
+                <Icone nome="voltar" tamanho={14} className="shrink-0 rotate-180 text-tinta-500" />
               )}
               {corrente ? (
-                <span
-                  aria-current="page"
-                  className={`${corte} font-semibold text-tinta-900`}
-                >
+                <span aria-current="page" className={`${corte} text-tinta-900`}>
                   {degrau.nome}
                 </span>
               ) : (
-                <Link
-                  href={degrau.href}
-                  className={`${corte} underline underline-offset-4 hover:text-tinta-900`}
-                >
+                <Link href={degrau.href} className={`${corte} text-link hover:text-link-hover`}>
                   {degrau.nome}
                 </Link>
               )}

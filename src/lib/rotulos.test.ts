@@ -355,11 +355,11 @@ describe("textoDeRodape com o endereço do edital", () => {
     });
     const sem = textoDeRodape(BASE);
 
-    expect(com).toContain("está logo abaixo");
+    expect(com).toContain("está logo acima, na seção Fontes");
     // Sem endereço, a frase continua dizendo onde procurar em geral, em vez
     // de apontar para uma seção que não vai ter link nenhum.
     expect(sem).toContain("site da banca");
-    expect(sem).not.toContain("logo abaixo");
+    expect(sem).not.toContain("logo acima");
   });
 });
 

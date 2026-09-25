@@ -92,10 +92,17 @@ export function Calendario({
   iso,
   hoje,
   tamanho = "md",
+  sobreOTom = false,
 }: {
   iso: string;
   hoje: Date;
   tamanho?: "md" | "lg";
+  /**
+   * Quando o calendário mora sobre um fundo já no tom do prazo (o topo da
+   * lateral do concurso), a caixa é `cartao` em vez do fundo tingido
+   * (`Concurso.dc.html:213`): tinta sobre tinta, o dia sumia.
+   */
+  sobreOTom?: boolean;
 }) {
   const [, mes, dia] = iso.split("-");
   const estilo = ESTILO[tomDoCalendario(iso, hoje)];
@@ -103,7 +110,7 @@ export function Calendario({
   return (
     <div
       aria-hidden="true"
-      className={`flex shrink-0 flex-col items-center overflow-hidden rounded-[12px] ${estilo.caixa} ${
+      className={`flex shrink-0 flex-col items-center overflow-hidden rounded-[12px] ${sobreOTom ? "bg-cartao" : estilo.caixa} ${
         lg ? "h-[72px] w-16" : "h-[60px] w-14"
       }`}
     >

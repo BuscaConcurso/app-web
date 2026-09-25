@@ -56,70 +56,82 @@ export function CabecalhoDoConcurso({
   const ics = icsDoPrazo(concurso, urlAbsoluta(`/concursos/${concurso.slug}`));
 
   return (
-    <header className="relative overflow-hidden rounded-painel bg-cartao p-5 shadow-cartao md:px-10 md:py-9">
+    // Abaixo de `md` o cabeçalho não é cartão (`ConcursoMobile.dc.html:29-35`):
+    // mora direto na página, com o selo e a linha do órgão numa fileira e o
+    // título embaixo, em largura inteira. A partir de `md` é o cartão de
+    // `Concurso.dc.html:63-88`, com o selo de 72px numa coluna própria.
+    <header className="relative flex flex-col gap-3.5 md:flex-row md:items-start md:gap-8 md:overflow-hidden md:rounded-painel md:bg-cartao md:px-10 md:py-9 md:shadow-cartao">
       {/*
-        O canto de azulejos do protótipo (`Concurso.dc.html:80-87`). Pedia
-        1216px de header (`Main.dc.html`, sangria de 112px a 1440px) para
-        abrir espaço ao lado do título sem cobri-lo — o que só existe desde a
-        Task 13, que trocou o container da página pela largura do protótipo.
-        `hidden lg:grid` porque abaixo disso a coluna de texto já usa a
-        largura inteira do cartão e o canto cobriria o título; o
-        `md:max-w-[760px]` da coluna de texto, logo abaixo, é o que garante
-        que um `h1` de duas linhas a 1440px não passe por baixo dele.
+        O canto de azulejos do protótipo (`Concurso.dc.html:80-87`). `hidden
+        lg:grid` porque abaixo disso a coluna de texto já usa a largura
+        inteira do cartão e o canto cobriria o título; o `md:max-w-[760px]`
+        da coluna de texto é o que garante que um `h1` de duas linhas a
+        1440px não passe por baixo dele.
       */}
       <Azulejos
         ladrilhos={CANTO_DO_CABECALHO}
         colunas={3}
+        papelDaPagina
         className="absolute top-0 right-0 hidden h-32 w-48 lg:grid"
       />
-      <div className="flex items-start gap-4 md:gap-8">
-        <div className="md:hidden">
-          <Selo sigla={concurso.orgao.sigla} tamanho={44} />
+
+      <div className="flex items-center gap-2.5 md:hidden">
+        <Selo sigla={concurso.orgao.sigla} tamanho={44} />
+        <div className="min-w-0 text-[13px] leading-[1.35] text-tinta-600">
+          <Link href={`/orgaos/${concurso.orgao.slug}`} className="hover:underline hover:underline-offset-4">
+            {concurso.orgao.nome}
+          </Link>
+          {" · "}
+          {ato}
         </div>
-        <div className="hidden md:block">
-          <Selo sigla={concurso.orgao.sigla} tamanho={72} />
+      </div>
+      <div className="hidden md:block">
+        <Selo sigla={concurso.orgao.sigla} tamanho={72} />
+      </div>
+
+      {/* `max-w-[760px]` no md+: o teto de largura da coluna de texto do
+          protótipo, para o título e a linha do órgão não esticarem até a
+          borda do cartão. */}
+      <div className="flex min-w-0 grow flex-col gap-3.5 md:max-w-[760px] md:gap-3">
+        {/* No celular as etiquetas vêm depois do título
+            (`ConcursoMobile.dc.html:31-35`); no desktop, antes. */}
+        <div className="order-2 flex flex-wrap items-center gap-1.5 md:order-none">
+          <Etiqueta tom={tom} comPonto grande>
+            {situacao}
+          </Etiqueta>
+          {concurso.orgao.esfera && (
+            <Etiqueta icone="estatais" grande>{ROTULO_ESFERA[concurso.orgao.esfera]}</Etiqueta>
+          )}
+          {concurso.uf && <Etiqueta icone="local" grande>{NOME_UF[concurso.uf]}</Etiqueta>}
+          {area && <Etiqueta icone="areas" grande>{area}</Etiqueta>}
         </div>
 
-        {/* `max-w-[760px]` no md+: o teto de largura da coluna de texto do
-            protótipo, para o título e a linha do órgão não esticarem até a
-            borda do cartão. */}
-        <div className="flex min-w-0 grow flex-col gap-3 md:max-w-[760px]">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Etiqueta tom={tom} comPonto>
-              {situacao}
-            </Etiqueta>
-            {concurso.orgao.esfera && (
-              <Etiqueta icone="estatais">{ROTULO_ESFERA[concurso.orgao.esfera]}</Etiqueta>
-            )}
-            {concurso.uf && <Etiqueta icone="local">{NOME_UF[concurso.uf]}</Etiqueta>}
-            {area && <Etiqueta icone="areas">{area}</Etiqueta>}
-          </div>
+        <h1 className="order-1 font-titulo text-[30px] leading-[1.08] font-bold tracking-[-0.03em] break-words text-balance md:order-none md:text-[48px] md:leading-[1.04] md:tracking-[-0.035em]">
+          {titulo}
+        </h1>
 
-          <h1 className="font-titulo text-[30px] leading-[1.08] font-bold tracking-[-0.03em] break-words text-balance md:text-[48px] md:leading-[1.04] md:tracking-[-0.035em]">
-            {titulo}
-          </h1>
+        <div className="order-3 hidden text-[17px] leading-[1.5] text-tinta-600 md:order-none md:block">
+          <Link href={`/orgaos/${concurso.orgao.slug}`} className="hover:underline hover:underline-offset-4">
+            {concurso.orgao.nome}
+          </Link>
+          {" · "}
+          {ato}
+        </div>
 
-          <div className="text-[17px] leading-[1.5] text-tinta-600">
-            <Link href={`/orgaos/${concurso.orgao.slug}`} className="hover:underline hover:underline-offset-4">
-              {concurso.orgao.nome}
-            </Link>
-            {" · "}
-            {ato}
-          </div>
+        <div className={ics ? "order-4 md:order-none md:mt-2" : "hidden md:mt-2 md:block"}>
+          <AcoesDoConcurso slug={concurso.slug} titulo={titulo} ics={ics} />
+        </div>
 
-          <div className="mt-2">
-            <AcoesDoConcurso slug={concurso.slug} titulo={titulo} ics={ics} />
-          </div>
-
-          {prazo && concurso.inscricoesAte && (
+        {prazo && concurso.inscricoesAte && (
+          <div className="order-5 md:order-none">
             <CartaoDeUrgencia
               prazo={prazo}
               inscricoesAte={concurso.inscricoesAte}
               periodo={periodo}
               hoje={hoje}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </header>
   );

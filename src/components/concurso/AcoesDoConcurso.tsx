@@ -5,8 +5,9 @@ import { Icone } from "@/components/ui/Icone";
 import { urlAbsoluta } from "@/lib/site";
 import { useCompartilhar } from "./useCompartilhar";
 
-const CLASSE_DO_BOTAO =
-  "inline-flex h-[42px] items-center gap-2 rounded-controle bg-rebaixada px-[14px] text-sm font-semibold text-tinta-900 hover:bg-linha";
+const FORMA_DO_BOTAO =
+  "h-[42px] items-center gap-2 rounded-controle bg-rebaixada px-[14px] text-sm font-semibold text-tinta-900 hover:bg-linha";
+const CLASSE_DO_BOTAO = `inline-flex ${FORMA_DO_BOTAO}`;
 
 /**
  * As três ações do cabeçalho: `Concurso.dc.html:70-73`. Salvar não existe
@@ -41,13 +42,18 @@ export function AcoesDoConcurso({
     URL.revokeObjectURL(url);
   }
 
+  // No celular Salvar e Compartilhar já moram no cabeçalho de 60px
+  // (`ConcursoMobile.dc.html:21-27`); repetidos aqui, eram dois botões iguais
+  // na mesma tela. Fica só "Pôr na agenda", que não tem outro lugar.
+  const soNoDesktop = `hidden md:inline-flex ${FORMA_DO_BOTAO}`;
+
   return (
     <div className="flex flex-wrap gap-2">
-      <BotaoEmBreve recurso="salvos" className={CLASSE_DO_BOTAO}>
+      <BotaoEmBreve recurso="salvos" className={soNoDesktop}>
         <Icone nome="salvar" tamanho={17} />
         Salvar
       </BotaoEmBreve>
-      <button type="button" onClick={compartilhar} className={CLASSE_DO_BOTAO}>
+      <button type="button" onClick={compartilhar} className={soNoDesktop}>
         <Icone nome="compartilhar" tamanho={17} />
         Compartilhar
       </button>

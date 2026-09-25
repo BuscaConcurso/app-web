@@ -145,7 +145,7 @@ export function Cronograma({
                         Lido de: {linha.evento.evidencia}
                         {linha.evento.ato && (
                           <>
-                            {" "}
+                            {" · "}
                             {/* A âncora para o ato que produziu esta data. É
                                 o diferencial do produto e não muda de alvo
                                 com o trilho: o `id` continua no item do ato,

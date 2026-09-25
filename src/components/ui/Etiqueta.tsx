@@ -64,40 +64,54 @@ export function Etiqueta({
   tom,
   icone,
   comPonto = false,
+  grande = false,
   className,
 }: {
   children: ReactNode;
   /** Sem tom, a etiqueta é neutra. Aceita a cor nova ou a situação de sempre. */
   tom?: Tom | TomDaEtiqueta;
-  /** Ícone de 12px antes do texto. */
+  /** Ícone de 12px antes do texto (14px na grande). */
   icone?: NomeDoIcone;
   comPonto?: boolean;
+  /**
+   * A do cabeçalho do concurso (`Concurso.dc.html:67-70`): a partir de `md`,
+   * 28px, 13px, ícone de 14px e ponto de 7px; a de situação em 700 e as
+   * neutras em `tinta-900`. No celular fica no tamanho de sempre.
+   */
+  grande?: boolean;
   className?: string;
 }) {
-  const cor = CORES[resolverTom(tom)];
+  const tomResolvido = resolverTom(tom);
+  const cor = CORES[tomResolvido];
+  const chip =
+    grande && tomResolvido === "neutro" ? "bg-rebaixada text-tinta-900" : cor.chip;
 
   return (
     <span
       className={[
-        "inline-flex h-[26px] items-center gap-1.5 rounded-full px-[9px]",
+        grande
+          ? `inline-flex h-[26px] items-center gap-1.5 rounded-full px-[9px] text-xs md:h-7 md:px-2.5 md:text-[13px] ${
+              comPonto ? "font-bold" : "font-semibold"
+            }`
+          : "inline-flex h-[26px] items-center gap-1.5 rounded-full px-[9px] text-xs font-semibold",
         // `max-w-full` é o que impede uma etiqueta sozinha de esticar a
         // página. Medido a 375px, onde a fileira tem 319px úteis: 2 dos 15
         // nomes de banca do acervo passam disso sozinhos (366px e 325px, com
         // `whitespace-nowrap`), e os 2 cartões correspondentes davam scroll
         // horizontal na busca. Uma fileira `flex-wrap` quebra em linhas, mas
         // não quebra um item que se recusa a encolher.
-        "max-w-full text-xs font-semibold whitespace-nowrap",
-        cor.chip,
+        "max-w-full whitespace-nowrap",
+        chip,
         className,
       ]
         .filter(Boolean)
         .join(" ")}
     >
-      {icone && <Icone nome={icone} tamanho={12} />}
+      {icone && <Icone nome={icone} tamanho={grande ? 14 : 12} />}
       {comPonto && (
         <span
           aria-hidden="true"
-          className={`size-1.5 shrink-0 rounded-full ${cor.ponto}`}
+          className={`${grande ? "size-[7px]" : "size-1.5"} shrink-0 rounded-full ${cor.ponto}`}
         />
       )}
       {/*

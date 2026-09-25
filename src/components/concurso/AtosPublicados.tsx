@@ -1,4 +1,3 @@
-import { BotaoLink } from "@/components/ui/Botao";
 import { Icone } from "@/components/ui/Icone";
 import { Gaveta } from "@/components/ui/Revelador";
 import {
@@ -11,12 +10,25 @@ import type { Origem } from "@/lib/dominio";
 import { dataLonga, numero } from "@/lib/formato";
 import { partirEmParagrafos, type Paragrafo } from "@/lib/leitura";
 
-/** O gatilho fechado da gaveta, com a cara de `BotaoLink secundario md`
- *  (`ui/Botao.tsx`): a gaveta não pode usar o componente porque `<summary>`
- *  não é `<a>`, mas o visual é o mesmo. */
+/** O gatilho fechado da gaveta: o link "Ler o ato na íntegra →" de
+ *  `Concurso.dc.html:187`, em 44px de altura para o alvo de toque. */
 const GATILHO_LER_NA_INTEGRA =
-  "inline-flex h-11 items-center gap-2 rounded-controle bg-rebaixada px-[18px] " +
-  "text-[15px] font-medium text-tinta-900 hover:bg-linha";
+  "inline-flex h-11 items-center gap-1.5 text-[14px] font-semibold text-link hover:text-link-hover";
+
+/**
+ * O endereço do edital como se lê (`Concurso.dc.html:191`): domínio e
+ * caminho, sem protocolo, sem a query e sem a barra final. A query de um
+ * site de banca ("?acao=concursos_andamento&tipo=9") não diz nada a quem lê e
+ * quebrava o cartão em três linhas; o link de verdade continua no botão.
+ */
+export function enderecoLegivel(url: string): string {
+  try {
+    const endereco = new URL(url);
+    return `${endereco.host}${endereco.pathname}`.replace(/\/+$/, "");
+  } catch {
+    return url.replace(/^https?:\/\//, "");
+  }
+}
 
 /**
  * Os atos publicados de onde tudo nesta página foi lido, com o texto inteiro.
@@ -155,23 +167,22 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                     <div className="text-[16px] font-bold text-tinta-900">Edital completo</div>
                   </div>
                 </div>
-                <p className="min-w-0 text-[14px] leading-[1.5] break-all text-tinta-600">
+                <p className="min-w-0 text-[14px] leading-[1.5] text-tinta-600">
                   Com anexos e programa de provas.{" "}
-                  {origem.editalCitadoUrl.replace(/^https?:\/\//, "")}
+                  <span className="wrap-anywhere">{enderecoLegivel(origem.editalCitadoUrl)}</span>
                 </p>
                 {/* Sem "no site do {sigla}": este componente só recebe as
                     origens, não o órgão, então o rótulo fala do documento e
                     não de quem o publicou. */}
-                <BotaoLink
+                <a
                   href={origem.editalCitadoUrl}
                   target="_blank"
                   rel="nofollow noopener noreferrer"
-                  variante="contorno"
-                  iconeDepois="externo"
-                  className="mt-1 self-start"
+                  className="inline-flex h-11 items-center gap-1.5 self-start text-[14px] font-semibold text-link hover:text-link-hover"
                 >
                   Abrir o edital completo
-                </BotaoLink>
+                  <Icone nome="externo" tamanho={15} />
+                </a>
               </div>
             )}
           </div>
@@ -223,18 +234,13 @@ function GavetaDoAto({ origem, texto }: { origem: Origem; texto: string }) {
       className="self-start"
       gatilho={GATILHO_LER_NA_INTEGRA}
       rotulo={
-        <span className="inline-flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5">
           Ler o ato na íntegra
-          <Icone nome="externo" tamanho={15} />
+          <Icone nome="seta" tamanho={15} />
         </span>
       }
       titulo="O ato publicado"
       ancoras={faixas.map((faixa) => faixa.ancora as string)}
-      apoio={
-        origem.caracteres !== null ? (
-          <>· {numero(origem.caracteres)} caracteres</>
-        ) : undefined
-      }
     >
       <div className="flex max-w-[78ch] flex-col gap-3">
         {partirEmParagrafos(texto).map((paragrafo) => (

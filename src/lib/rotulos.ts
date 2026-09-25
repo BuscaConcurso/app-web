@@ -652,7 +652,7 @@ export function textoDeRodape(concurso: ConcursoDetalhe): string {
   // a ressalva inteira fica ao lado do link, na seção do ato.
   const ondeEstaOEdital = concurso.editalCitadoUrl
     ? " O endereço do edital completo, informado pelo próprio ato, está logo" +
-      " abaixo, na seção do ato publicado."
+      " acima, na seção Fontes."
     : " O edital completo, com anexos, programa de provas e eventuais" +
       " retificações, sai no site da banca; confira sempre lá antes de se" +
       " inscrever.";

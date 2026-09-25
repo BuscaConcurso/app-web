@@ -263,7 +263,10 @@ export function Avaliacao({
         </BotaoDeVoto>
       </div>
 
-      <p aria-live="polite" className="w-full text-[12px] text-tinta-500">
+      {/* `empty:absolute`: vazio, o recibo sai do fluxo do `flex-wrap` (que
+          abria uma fileira de 24px embaixo dos botões) sem sair da árvore de
+          acessibilidade, onde a região viva precisa estar antes do texto. */}
+      <p aria-live="polite" className="w-full text-[12px] text-tinta-500 empty:absolute">
         {recibo(estado.resultado, estado.gostei)}
       </p>
 
@@ -321,14 +324,14 @@ export function Avaliacao({
             <button
               type="button"
               onClick={() => modal.current?.close()}
-              className="rounded-controle px-3 py-1.5 text-[12px] font-medium text-tinta-600 hover:bg-rebaixada"
+              className="min-h-11 rounded-controle px-4 text-[14px] font-medium text-tinta-600 hover:bg-rebaixada"
             >
               Fechar sem escrever
             </button>
             <button
               type="submit"
               disabled={enviando}
-              className="rounded-controle bg-acao px-3 py-1.5 text-[12px] font-semibold text-acao-texto hover:bg-acao-hover disabled:bg-rebaixada disabled:text-tinta-500"
+              className="min-h-11 rounded-controle bg-acao px-4 text-[14px] font-semibold text-acao-texto hover:bg-acao-hover disabled:bg-rebaixada disabled:text-tinta-500"
             >
               Enviar
             </button>

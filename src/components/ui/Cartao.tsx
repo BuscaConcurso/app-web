@@ -146,8 +146,12 @@ export function Selo({
 
   const lado =
     typeof tamanho === "number" ? tamanho : tamanho === "sm" ? 40 : 44;
-  const base =
-    "flex shrink-0 items-center justify-center text-center leading-none rounded-[12px]";
+  // O selo grande do cabeçalho do concurso (`Concurso.dc.html:64`): 72px,
+  // raio de 18px e a sigla em Bricolage 17px. Os menores seguem com 12px.
+  const grande = lado >= 72;
+  const base = `flex shrink-0 items-center justify-center text-center leading-none ${
+    grande ? "rounded-[18px]" : "rounded-[12px]"
+  }`;
 
   const fundo = tom
     ? {
@@ -176,13 +180,18 @@ export function Selo({
     );
   }
 
-  // Siglas do acervo vão de 2 a 8 letras. Acima de 4, o corpo cai para 9px e
+  // Siglas do acervo vão de 2 a 8 letras. No selo grande, até 6 cabem em
+  // 17px (UFRRJ, `Concurso.dc.html:64`) e acima disso caem para 13px. Nos
+  // outros, acima de 4 o corpo cai para 9px e
   // quebra em duas linhas (`wrap-anywhere`, porque "UNIPAMPA" não tem hífen
   // nem barra por onde o navegador quebraria sozinho); é o piso que ainda se
   // lê sem estourar a caixa. Até 4, 12px numa caixa de 44px ou mais, 11px
   // numa caixa menor.
-  const corpo =
-    letras.length > 4
+  const corpo = grande
+    ? letras.length > 6
+      ? "font-titulo text-[13px] wrap-anywhere"
+      : "font-titulo text-[17px]"
+    : letras.length > 4
       ? "text-[9px] wrap-anywhere"
       : lado >= 44
         ? "text-xs"

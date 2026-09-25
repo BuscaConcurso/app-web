@@ -90,12 +90,23 @@ export const CANTO_DO_CABECALHO: Ladrilho[] = [
 export function Azulejos({
   ladrilhos,
   colunas,
+  papelDaPagina = false,
   className,
 }: {
   ladrilhos: Ladrilho[];
   colunas: number;
+  /**
+   * O papel dos círculos vira a cor da página (`--color-pagina`) em vez do
+   * #F6F4EE fixo. É o canto do cabeçalho do concurso: lá o círculo claro do
+   * ladrilho anil "morde" o canto do cartão e deixa ver a página por trás
+   * (`Concurso.dc.html:83`). Com o hex fixo, no escuro ele virava um quarto
+   * de disco claro sobre a página escura.
+   */
+  papelDaPagina?: boolean;
   className?: string;
 }) {
+  const cor = (nome: CorDeAzulejo) =>
+    papelDaPagina && nome === "papel" ? "var(--color-pagina)" : COR[nome];
   return (
     <div
       aria-hidden="true"
@@ -115,7 +126,7 @@ export function Azulejos({
               top: ladrilho.circulo.y,
               width: ladrilho.circulo.d,
               height: ladrilho.circulo.d,
-              background: COR[ladrilho.circulo.cor],
+              background: cor(ladrilho.circulo.cor),
             }}
           />
         </div>

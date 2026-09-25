@@ -17,7 +17,7 @@ import { obterDetalhe, tambemAbertos } from "@/lib/concursos";
 import { fatosDoConcurso } from "@/lib/fatos";
 import { dataLonga, hojeCivilEmSaoPaulo, hojeEmSaoPaulo, moeda, vagasTexto } from "@/lib/formato";
 import { destinoDaInscricao } from "@/lib/inscricao";
-import { textoDeRodape, tituloComOrgao } from "@/lib/rotulos";
+import { textoDeRodape, tituloComOrgao, tituloSemOrgao } from "@/lib/rotulos";
 import { nomeCurtoDoOrgao } from "@/lib/orgaos";
 import { tomDoConcurso } from "@/lib/situacao";
 import type { ConcursoResumo } from "@/lib/dominio";
@@ -121,7 +121,12 @@ export default async function PaginaDoConcurso(
       nome: nomeCurtoDoOrgao(concurso.orgao),
       href: `/orgaos/${concurso.orgao.slug}`,
     },
-    { nome: concurso.titulo, href: `/concursos/${concurso.slug}` },
+    // O ato sem o órgão ("Edital nº 51/2026"), como em `Concurso.dc.html:60`:
+    // o órgão já é o degrau de cima, e o título inteiro repetia os dois.
+    {
+      nome: tituloSemOrgao(concurso.titulo, concurso.orgao) || concurso.titulo,
+      href: `/concursos/${concurso.slug}`,
+    },
   ];
 
   // Nula em previsto e encerrado: a `BarraDeInscricao` do celular é a mesma
@@ -214,8 +219,12 @@ export default async function PaginaDoConcurso(
   ];
 
   return (
-    <div className="px-4 pt-5 pb-28 md:px-[112px] lg:pb-5">
-      <Trilha degraus={trilha} />
+    <div className="px-4 pt-5 pb-28 md:px-[112px] md:pt-0 lg:pb-5">
+      {/* No celular não há trilha (`ConcursoMobile.dc.html`): o cabeçalho de
+          60px já leva o "voltar". O dado estruturado continua no HTML. */}
+      <div className="hidden md:block">
+        <Trilha degraus={trilha} />
+      </div>
 
       {/*
         Uma pilha de blocos, e não seções empilhadas por margem dentro de um
@@ -239,17 +248,20 @@ export default async function PaginaDoConcurso(
         do site (título de 40px fora do cartão) — é assim no protótipo da
         página do concurso, e não no da home.
       */}
-      <div className="flex flex-col gap-6">
-        <CabecalhoDoConcurso concurso={concurso} hoje={hoje} />
-
-        <FatosDoConcurso fatos={fatosDoConcurso(concurso)} />
+      <div className="flex flex-col gap-6 lg:gap-10">
+        {/* 16px entre o cabeçalho e os fatos (`Concurso.dc.html:90`), 40px
+            até o corpo (`Concurso.dc.html:101`). */}
+        <div className="flex flex-col gap-4">
+          <CabecalhoDoConcurso concurso={concurso} hoje={hoje} />
+          <FatosDoConcurso fatos={fatosDoConcurso(concurso)} />
+        </div>
 
         {/* CORPO: `Concurso.dc.html:100-207`. A coluna principal é a pilha de
             cartões, com cronograma, áreas e perguntas dentro de
             `AbasDoConcurso` (abas só abaixo de `lg`; todas visíveis dali para
             cima); a lateral é `LateralDoConcurso` (o prazo, os passos de
             inscrição, os alertas e "também abertos"). */}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_392px]">
           <div className="flex min-w-0 flex-col gap-6">
             <AbasDoConcurso paineis={paineis} />
 
