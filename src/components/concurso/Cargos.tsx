@@ -173,7 +173,10 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
         </h2>
         <label
           htmlFor={idDoFiltro}
-          className="flex h-11 w-full items-center gap-2 rounded-controle bg-rebaixada px-3 sm:w-[280px]"
+          // O anel de foco é da caixa arredondada, não do campo: o do campo
+          // era um retângulo dentro da pílula (o mesmo arranjo da busca do
+          // cabeçalho, `BarraBusca.tsx`).
+          className="flex h-11 w-full items-center gap-2 rounded-controle bg-rebaixada px-3 outline-acao outline-offset-2 has-[input:focus]:outline-2 sm:w-[280px]"
         >
           <Icone nome="busca" tamanho={17} className="shrink-0 text-tinta-600" />
           <span className="sr-only">Filtrar áreas</span>
@@ -183,6 +186,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
             value={filtro}
             onChange={(evento) => setFiltro(evento.target.value)}
             placeholder="Filtrar áreas"
+            data-sem-anel=""
             className="min-w-0 grow border-0 bg-transparent text-[15px] text-tinta-900 outline-none placeholder:text-tinta-500"
           />
         </label>

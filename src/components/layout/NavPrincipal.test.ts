@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { ITENS_DA_NAV } from "./NavPrincipal";
+// De `./itensDaNav` e não de `./NavPrincipal`: este importa a sessão, que
+// exige `NEXT_PUBLIC_BC_API_URL` ao carregar.
+import { ITENS_DA_NAV } from "./itensDaNav";
 
 const ativo = (rotulo: string, caminho: string, busca = "") =>
   ITENS_DA_NAV.find((item) => item.rotulo === rotulo)!.ativo(caminho, new URLSearchParams(busca));

@@ -14,8 +14,9 @@ import { hrefEmBreve } from "@/lib/emBreve";
  * Vitest não aplica essa fronteira, e é por isso que o teste passava mesmo
  * com o bug: ele só prova a regra da aba ativa, não o limite cliente/servidor.
  *
- * `NavPrincipal.tsx` reexporta este módulo, então quem só conhece aquele
- * arquivo (como `NavPrincipal.test.ts`) continua importando de lá.
+ * `NavPrincipal.tsx` reexporta este módulo. O teste (`NavPrincipal.test.ts`)
+ * importa daqui: `NavPrincipal.tsx` carrega a sessão, que exige
+ * `NEXT_PUBLIC_BC_API_URL` só para ser importada.
  */
 export interface ItemDaNav {
   rotulo: string;

@@ -6,6 +6,7 @@ import { RegistroDaBusca } from "@/components/busca/RegistroDaBusca";
 import { ListaDeConcursos } from "@/components/concurso/ListaDeConcursos";
 import { AcervoIncompleto } from "@/components/home/BlocoAlerta";
 import { Rotulo } from "@/components/ui/Etiqueta";
+import type { NomeDoIcone } from "@/components/ui/Icone";
 import { Paginacao } from "@/components/ui/Paginacao";
 import type {
   AvisoDoAcervo,
@@ -22,6 +23,7 @@ import {
   type ConsultaDaUrl,
 } from "@/lib/parametros";
 import { avisoDeFiltroSemDado } from "@/lib/rotulos";
+import type { Tom } from "@/lib/dominio";
 
 /** Os rótulos curtos da aba de situação: cabem numa aba a 360px, ao contrário
  * de `SITUACOES` (`lib/consulta.ts`), que é o texto do chip e do rótulo do
@@ -123,6 +125,26 @@ export function abasDeSituacao(consulta: ConsultaDaUrl, contagens: ContagensDeFa
 }
 
 /**
+ * O rótulo acima do título da lista. "BUSCA" para quem digitou um termo; sem
+ * termo, o rótulo diz a situação filtrada. Antes era sempre "INSCRIÇÕES
+ * ABERTAS", inclusive em cima de "Concursos previstos" e da lista inteira.
+ */
+export function rotuloDaLista(consulta: ConsultaDaUrl): {
+  texto: string;
+  icone: NomeDoIcone;
+  tom?: Tom | "anil";
+} {
+  if (consulta.q) return { texto: "BUSCA", icone: "busca", tom: "anil" };
+  if (consulta.situacoes.length === 1) {
+    const [situacao] = consulta.situacoes;
+    if (situacao === "abertas") return { texto: "INSCRIÇÕES ABERTAS", icone: "aberto", tom: "aberto" };
+    if (situacao === "previstos") return { texto: "PREVISTOS", icone: "previsto", tom: "previsto" };
+    return { texto: "ENCERRADOS", icone: "lista" };
+  }
+  return { texto: "CONCURSOS", icone: "lista" };
+}
+
+/**
  * A lista de uma busca: título, contagem, ordenação, chips, cartões,
  * paginação e o aviso do acervo, com a coluna de filtros ao lado.
  *
@@ -152,10 +174,7 @@ export function ListaDeResultados({
   // O chip do termo não conta como filtro: com `q`, `chipsAtivos` sempre o
   // devolve, e contar só `chips.length` nunca daria zero numa busca.
   const soOTermo = chips.every((chip) => chip.chave === "q");
-  // O rótulo do cabeçalho: "BUSCA" para quem digitou um termo, "INSCRIÇÕES
-  // ABERTAS" para quem chegou por filtro ou por `/concursos` puro, a mesma
-  // dupla de rótulos que a home usa para a tabela de abertos.
-  const ehBusca = Boolean(consulta.q);
+  const rotulo = rotuloDaLista(consulta);
 
   return (
     <>
@@ -196,8 +215,8 @@ export function ListaDeResultados({
                 acervo, do tipo que se cola na busca) dava 36px de rolagem
                 lateral. */}
             <div className="min-w-0">
-              <Rotulo icone={ehBusca ? "busca" : "aberto"} tom={ehBusca ? "anil" : "aberto"} className="mb-2.5">
-                {ehBusca ? "BUSCA" : "INSCRIÇÕES ABERTAS"}
+              <Rotulo icone={rotulo.icone} tom={rotulo.tom} className="mb-2.5">
+                {rotulo.texto}
               </Rotulo>
               <h1 className="font-titulo text-[26px] leading-[1.08] font-bold tracking-[-0.025em] break-words md:text-[40px] md:leading-[1.05] md:tracking-[-0.03em]">
                 {titulo}

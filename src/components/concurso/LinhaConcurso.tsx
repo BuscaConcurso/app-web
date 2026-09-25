@@ -171,7 +171,7 @@ export function LinhaConcurso({
         {concurso.inscricoesAte && prazo ? (
           <span className="flex items-center gap-2">
             <span className="font-semibold">{dataCurta(concurso.inscricoesAte)}</span>
-            <span className={`flex h-6 items-center rounded-full px-2 text-xs font-bold ${prazo.classe}`}>
+            <span className={`flex h-6 shrink-0 items-center rounded-full px-2 text-xs font-bold whitespace-nowrap ${prazo.classe}`}>
               {prazo.texto}
             </span>
           </span>

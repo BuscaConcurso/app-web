@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Icone } from "@/components/ui/Icone";
 import { Gaveta } from "@/components/ui/Revelador";
+import { useSession } from "@/lib/auth/session";
 import { ITENS_DA_NAV } from "./itensDaNav";
 import { SeletorDeTema } from "./SeletorDeTema";
 
@@ -88,6 +89,10 @@ export function NavPrincipal({ className }: { className?: string }) {
  * ao navegar já é comportamento de `Gaveta` (`useRevelador`, `Revelador.tsx`).
  */
 export function GavetaDeNavegacao({ className }: { className?: string }) {
+  // Abaixo de `lg` o botão "Entrar" do cabeçalho some (só cabem logo,
+  // alertas e menu, `Mobile.dc.html:21-25`), e sem esta linha a gaveta era o
+  // único caminho que faltava: no celular não havia como entrar na conta.
+  const logado = useSession().status === "authenticated";
   return (
     <Gaveta
       rotulo={<Icone nome="menu" tamanho={20} />}
@@ -108,6 +113,16 @@ export function GavetaDeNavegacao({ className }: { className?: string }) {
             {item.rotulo}
           </Link>
         ))}
+      </div>
+
+      <div className="mt-4 border-t border-linha pt-4">
+        <Link
+          href={logado ? "/conta" : "/entrar"}
+          className="flex h-11 items-center gap-3 rounded-controle px-3 text-[15px] font-semibold text-tinta-900 hover:bg-rebaixada"
+        >
+          <Icone nome="entrar" tamanho={18} />
+          {logado ? "Minha conta" : "Entrar"}
+        </Link>
       </div>
 
       <div className="mt-4 flex items-center justify-between border-t border-linha pt-4">

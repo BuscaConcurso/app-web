@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { abasDeSituacao } from "./ListaDeResultados";
+import { abasDeSituacao, rotuloDaLista } from "./ListaDeResultados";
 import type { ContagensDeFaceta } from "@/lib/concursos";
 import { CONSULTA_VAZIA, type ConsultaDaUrl } from "@/lib/parametros";
 
@@ -57,5 +57,19 @@ describe("abasDeSituacao", () => {
     const abas = abasDeSituacao(comSituacoes(["abertas", "previstos"]), CONTAGENS);
     const todas = abas.find((aba) => aba.id === "todas");
     expect(todas?.href).not.toContain("situacao=");
+  });
+});
+
+describe("rotuloDaLista", () => {
+  it("diz a situação filtrada, e não sempre \"inscrições abertas\"", () => {
+    expect(rotuloDaLista(comSituacoes(["abertas"])).texto).toBe("INSCRIÇÕES ABERTAS");
+    expect(rotuloDaLista(comSituacoes(["previstos"])).texto).toBe("PREVISTOS");
+    expect(rotuloDaLista(comSituacoes(["encerrados"])).texto).toBe("ENCERRADOS");
+    expect(rotuloDaLista(comSituacoes([])).texto).toBe("CONCURSOS");
+    expect(rotuloDaLista(comSituacoes(["abertas", "previstos"])).texto).toBe("CONCURSOS");
+  });
+
+  it("com termo é busca", () => {
+    expect(rotuloDaLista({ ...comSituacoes(["previstos"]), q: "professor" }).texto).toBe("BUSCA");
   });
 });
