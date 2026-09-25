@@ -166,7 +166,7 @@ export function LinhaConcurso({
           <BotaoEmBreve
             recurso="salvos"
             aria-label="Salvar"
-            className="flex size-10 shrink-0 items-center justify-center rounded-controle text-tinta-600 hover:bg-rebaixada"
+            className="flex size-[42px] shrink-0 items-center justify-center rounded-controle text-tinta-600 hover:bg-rebaixada"
           >
             <Icone nome="salvar" tamanho={18} />
           </BotaoEmBreve>

@@ -73,12 +73,22 @@ function TrilhoDeSituacao({ rotulo, itens }: { rotulo: string; itens: ItemDeAba[
 
 /**
  * As situações como abas, no topo da lista (`Main.dc.html:195-200`, o mesmo
- * trilho de escolaridade da home). Ao contrário da coluna de filtros, que é
- * múltipla escolha, um quadradinho por opção, a aba é de escolha única:
- * clicar em "Abertas" troca a situação por só ela, e "Todas" volta a nenhuma.
- * É a mesma simplificação que a home já faz para escolaridade.
+ * trilho de escolaridade da home). Clicar numa aba troca a situação por só
+ * ela (é o que o `href` de cada uma pede, sempre um valor só), e "Todas"
+ * volta a nenhuma. É a mesma simplificação que a home já faz para
+ * escolaridade.
+ *
+ * **Marcar, porém, não é o mesmo que "só uma pode estar marcada".** A coluna
+ * de filtros continua permitindo mais de uma situação ao mesmo tempo (é
+ * multiescolha, um quadradinho por opção, e a URL aceita `?situacao=` várias
+ * vezes), e os chips de `chipsAtivos` já mostram cada uma. Com duas
+ * situações na URL e só a aba de uma marcada (ou nenhuma), o trilho dizia
+ * "nenhum filtro" ou "só este" enquanto a lista de baixo respondia por dois,
+ * Ruling R26. Por isso `ativo` aqui é "esta situação está entre as da
+ * URL", não "é a única": toda aba cujo valor apareça em `consulta.situacoes`
+ * fica marcada, e "Todas" só quando a lista está vazia.
  */
-function abasDeSituacao(consulta: ConsultaDaUrl, contagens: ContagensDeFaceta): ItemDeAba[] {
+export function abasDeSituacao(consulta: ConsultaDaUrl, contagens: ContagensDeFaceta): ItemDeAba[] {
   const total = contagens.situacoes.reduce((soma, opcao) => soma + opcao.total, 0);
   const nenhuma = consulta.situacoes.length === 0;
 
@@ -96,19 +106,19 @@ function abasDeSituacao(consulta: ConsultaDaUrl, contagens: ContagensDeFaceta): 
     ...contagens.situacoes
       .filter((opcao): opcao is typeof opcao & { valor: Situacao } => ehSituacao(opcao.valor))
       .map((opcao) => {
-      const valor = opcao.valor;
-      return {
-        id: valor,
-        rotulo: (
-          <>
-            {ROTULO_DA_ABA[valor] ?? opcao.rotulo}{" "}
-            <span className="text-tinta-500">{numero(opcao.total)}</span>
-          </>
-        ),
-        href: urlDaBusca(consulta, { situacoes: [valor], pagina: 1 }),
-        ativo: !nenhuma && consulta.situacoes.length === 1 && consulta.situacoes[0] === valor,
-      };
-    }),
+        const valor = opcao.valor;
+        return {
+          id: valor,
+          rotulo: (
+            <>
+              {ROTULO_DA_ABA[valor] ?? opcao.rotulo}{" "}
+              <span className="text-tinta-500">{numero(opcao.total)}</span>
+            </>
+          ),
+          href: urlDaBusca(consulta, { situacoes: [valor], pagina: 1 }),
+          ativo: consulta.situacoes.includes(valor),
+        };
+      }),
   ];
 }
 
