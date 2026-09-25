@@ -276,4 +276,12 @@ describe("facetas", () => {
     expect(ufs.length).toBeGreaterThanOrEqual(padrao.ufs.length);
     expect(padrao.ufs.length).toBeLessThanOrEqual(12);
   });
+
+  it("respeita um limite menor que o padrão", async () => {
+    // O mock tem 11 UFs com aberto: um limite ignorado devolveria as 11, não
+    // 1. Esse é o caso que pega a assinatura antiga (`facetas(hoje)`, que
+    // aceita e descarta o segundo argumento em silêncio).
+    const { ufs: uma } = await facetas(HOJE, { ufs: 1 });
+    expect(uma).toHaveLength(1);
+  });
 });
