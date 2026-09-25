@@ -13,14 +13,14 @@ import {
 } from "@/lib/auth/api";
 import { useSession, withSession } from "@/lib/auth/session";
 import { safeReturnTo } from "@/lib/auth/return-to";
+import { Botao } from "@/components/ui/Botao";
+import { Campo } from "@/components/ui/Campo";
 import {
   Alert,
   AuthTitle,
-  FormField,
   SubmitButton,
   errorMessage,
   fieldErrors,
-  inputClass,
 } from "./AuthUi";
 
 const linkClass = "text-sm font-medium text-link underline hover:text-link-hover";
@@ -74,19 +74,21 @@ export function OAuthButtons({
     <div className="flex flex-col gap-3">
       {error && <Alert>{error}</Alert>}
       {(["google", "linkedin"] as const).map((provider) => (
-        <button
+        <Botao
           key={provider}
           type="button"
+          variante="contorno"
+          tamanho="lg"
+          className="w-full"
           disabled={Boolean(pending)}
           onClick={() => void start(provider)}
-          className="h-10 rounded-controle bg-rebaixada px-4 text-sm font-semibold text-tinta-900 transition-colors hover:bg-linha disabled:opacity-60"
         >
           {pending === provider
             ? "Abrindo…"
             : `${VERBO_DO_OAUTH[mode]} com ${
                 provider === "google" ? "Google" : "LinkedIn"
               }`}
-        </button>
+        </Botao>
       ))}
     </div>
   );
@@ -149,39 +151,39 @@ export function LoginScreen({ returnTo }: { returnTo?: string }) {
       {error && <Alert>{error}</Alert>}
       {success && <Alert success>{success}</Alert>}
       {canResend && (
-        <button
+        <Botao
           type="button"
-          onClick={() => void resend()}
+          variante="secundario"
+          tamanho="lg"
+          className="w-full"
           disabled={pending}
-          className="h-10 rounded-controle bg-rebaixada px-4 text-sm font-semibold"
+          onClick={() => void resend()}
         >
           Reenviar e-mail de confirmação
-        </button>
+        </Botao>
       )}
       <form className="flex flex-col gap-4" onSubmit={(event) => void submit(event)} noValidate>
-        <FormField id="email" label="E-mail" error={errors.email}>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            className={inputClass}
-          />
-        </FormField>
-        <FormField id="password" label="Senha" error={errors.password}>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={inputClass}
-          />
-        </FormField>
+        <Campo
+          id="email"
+          etiqueta="E-mail"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          erro={errors.email}
+        />
+        <Campo
+          id="password"
+          etiqueta="Senha"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          erro={errors.password}
+        />
         <SubmitButton pending={pending}>Entrar</SubmitButton>
       </form>
-      <div className="flex items-center gap-3 text-xs uppercase text-tinta-500">
+      <div className="flex items-center gap-3 text-xs text-tinta-500 uppercase">
         <span className="h-px flex-1 bg-linha" />
         ou
         <span className="h-px flex-1 bg-linha" />
@@ -257,23 +259,23 @@ export function RegisterScreen() {
       {error && <Alert>{error}</Alert>}
       <form className="flex flex-col gap-4" onSubmit={(event) => void submit(event)} noValidate>
         {fields.map((field) => (
-          <FormField key={field.key} id={field.key} label={field.label} error={errors[field.key]}>
-            <input
-              id={field.key}
-              type={field.type}
-              autoComplete={field.autoComplete}
-              value={form[field.key]}
-              onChange={(event) => setForm({ ...form, [field.key]: event.target.value })}
-              className={inputClass}
-            />
-          </FormField>
+          <Campo
+            key={field.key}
+            id={field.key}
+            etiqueta={field.label}
+            type={field.type}
+            autoComplete={field.autoComplete}
+            value={form[field.key]}
+            onChange={(event) => setForm({ ...form, [field.key]: event.target.value })}
+            erro={errors[field.key]}
+          />
         ))}
         <p className="text-xs text-tinta-500">
           Use pelo menos 10 caracteres e evite senhas comuns.
         </p>
         <SubmitButton pending={pending}>Criar conta</SubmitButton>
       </form>
-      <div className="flex items-center gap-3 text-xs uppercase text-tinta-500">
+      <div className="flex items-center gap-3 text-xs text-tinta-500 uppercase">
         <span className="h-px flex-1 bg-linha" />
         ou
         <span className="h-px flex-1 bg-linha" />
@@ -314,16 +316,14 @@ export function ForgotPasswordScreen() {
         </Alert>
       ) : (
         <form className="flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
-          <FormField id="email" label="E-mail">
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className={inputClass}
-            />
-          </FormField>
+          <Campo
+            id="email"
+            etiqueta="E-mail"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
           <SubmitButton pending={pending}>Enviar instruções</SubmitButton>
         </form>
       )}
@@ -372,12 +372,22 @@ export function ResetPasswordScreen({ token }: { token?: string }) {
         </>
       ) : (
         <form className="flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
-          <FormField id="password" label="Nova senha">
-            <input id="password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className={inputClass} />
-          </FormField>
-          <FormField id="confirmation" label="Confirmar nova senha">
-            <input id="confirmation" type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className={inputClass} />
-          </FormField>
+          <Campo
+            id="password"
+            etiqueta="Nova senha"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <Campo
+            id="confirmation"
+            etiqueta="Confirmar nova senha"
+            type="password"
+            autoComplete="new-password"
+            value={confirmation}
+            onChange={(event) => setConfirmation(event.target.value)}
+          />
           <SubmitButton pending={pending}>Redefinir senha</SubmitButton>
         </form>
       )}
