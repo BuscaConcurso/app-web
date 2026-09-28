@@ -206,7 +206,7 @@ function useRevelador({
    * `inert` que o sustenta não estiver de pé.
    *
    * É `useSyncExternalStore` e não um `useState` com `useEffect` pelo mesmo
-   * motivo de `SeletorDeTema`: o instantâneo do servidor e o do cliente são
+   * motivo de `ControlesDeAcessibilidade`: o instantâneo do servidor e o do cliente são
    * dois valores declarados, e não um estado que muda logo depois de montar.
    * O assinante não faz nada porque nada disto volta atrás.
    */
@@ -442,7 +442,7 @@ const SUMARIO = "cursor-pointer list-none [&::-webkit-details-marker]:hidden";
  * que há algo atrás.
  *
  * `estreita` é a da lista curta, e nasceu com o menu do cabeçalho. Medido: o
- * conteúdo dele (a linha do tema e os dois botões) pede 197px de largura
+ * conteúdo dele (os controles de acessibilidade e os botões) pede 197px de largura
  * mínima, e numa gaveta de 40rem ele ficaria com três itens perdidos no meio
  * de 640px. A 375px `estreita` dá 304px e deixa 71px de página à mostra.
  */
@@ -461,7 +461,7 @@ export type LarguraDaGaveta = keyof typeof LARGURA;
 
 /** O gatilho fechado da gaveta, quando quem chama não manda outro. */
 const GATILHO_PADRAO =
-  "rounded-controle bg-rebaixada px-3 py-1.5 text-[12px] font-semibold " +
+  "rounded-controle bg-rebaixada px-3 py-1.5 text-[0.75rem] font-semibold " +
   "text-tinta-900 transition-colors hover:bg-linha";
 
 /**
@@ -572,7 +572,7 @@ export function Gaveta({
           LARGURA[largura].barra,
           "group-open:h-auto group-open:justify-between group-open:rounded-none",
           "group-open:border-b group-open:border-linha group-open:bg-cartao",
-          "group-open:px-5 group-open:py-3.5 group-open:text-[12px]",
+          "group-open:px-5 group-open:py-3.5 group-open:text-[0.75rem]",
           "group-open:font-semibold group-open:text-tinta-900",
           "group-open:hover:bg-cartao",
         ].join(" ")}
@@ -660,11 +660,9 @@ export function Gaveta({
         O fundo. Escurece o que ficou `inert`: deixar a página acesa e
         inalcançável seria dizer com a forma o contrário do que o mecanismo faz.
 
-        O tom é `veu` e não `tinta-900`. Os dois são #141715 no tema claro,
-        mas `tinta-900` é um token de TEXTO e inverte no escuro (lá ele é
-        quase branco), e o véu de 40% virava um clarão sobre a página escura
-        no lugar de uma sombra. `veu` não inverte: #141715 no claro, #000000
-        no escuro.
+        O tom é `veu` e não `tinta-900`: `tinta-900` é um token de TEXTO, e
+        o véu tem papel próprio. #141715 no claro, #000000 no alto
+        contraste.
       */}
       <div
         aria-hidden="true"

@@ -68,11 +68,11 @@ export function Secao({
               {rotulo}
             </Rotulo>
           )}
-          <Titulo className="font-titulo text-[40px] leading-[1.05] font-bold tracking-[-0.03em] break-words">
+          <Titulo className="font-titulo text-[2.5rem] leading-[1.05] font-bold tracking-[-0.03em] break-words">
             {titulo}
           </Titulo>
           {apoio && (
-            <p className="mt-2 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
+            <p className="mt-2 max-w-[70ch] text-[0.75rem] leading-5 text-tinta-600">
               {apoio}
             </p>
           )}
@@ -80,7 +80,7 @@ export function Secao({
         {href && (
           <Link
             href={href}
-            className="flex shrink-0 items-center gap-1.5 text-[15px] font-semibold text-tinta-900 hover:text-verde-texto"
+            className="flex shrink-0 items-center gap-1.5 text-[0.9375rem] font-semibold text-tinta-900 hover:text-verde-texto"
           >
             {hrefRotulo ?? "Ver todos"}
             <Icone nome="seta" tamanho={17} />

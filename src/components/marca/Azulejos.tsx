@@ -5,7 +5,7 @@
  * protótipo (`docs/prototipo/Main.dc.html` e `docs/prototipo/Logo.dc.html`).
  *
  * As cinco cores são arte fixa de Athos Bulcão e não tokens: valem o mesmo
- * hex nos dois temas, claro e escuro.
+ * hex no claro e no alto contraste.
  */
 
 export type CorDeAzulejo =
@@ -17,7 +17,7 @@ export type CorDeAzulejo =
   // O sexto, só para o canto do cabeçalho do concurso: ladrilho
   // que não pinta fundo nenhum, para o branco do protótipo (`Concurso.
   // dc.html:81,84,85`) virar "deixa ver o cartão de baixo" em vez de um hex
-  // fixo, que destoaria do `bg-cartao` escuro no tema escuro.
+  // fixo, que destoaria se `bg-cartao` mudasse de tom.
   | "transparente";
 
 export type Ladrilho = {
@@ -74,9 +74,8 @@ export const FAIXA_MARCA: Ladrilho[] = [
  * O canto do cabeçalho do concurso, 3×2, transcrito de
  * `Concurso.dc.html:80-87` (célula de 64px). Três dos seis ladrilhos são
  * "transparente": no protótipo eles são `#FFFFFF` sólido, mas o cabeçalho
- * real é `bg-cartao` (branco no claro, quase preto no escuro), e um branco
- * fixo ali viraria um retalho aceso sobre o cartão escuro. Sem fundo, o
- * ladrilho deixa ver o próprio cartão nos dois temas.
+ * real é `bg-cartao`, e um branco fixo ali viraria um retalho de outro tom
+ * se o cartão mudasse. Sem fundo, o ladrilho deixa ver o próprio cartão.
  */
 export const CANTO_DO_CABECALHO: Ladrilho[] = [
   { fundo: "transparente", circulo: { x: "0%", y: "0%", d: "0%", cor: "transparente" } },
@@ -99,8 +98,8 @@ export function Azulejos({
    * O papel dos círculos vira a cor da página (`--color-pagina`) em vez do
    * #F6F4EE fixo. É o canto do cabeçalho do concurso: lá o círculo claro do
    * ladrilho anil "morde" o canto do cartão e deixa ver a página por trás
-   * (`Concurso.dc.html:83`). Com o hex fixo, no escuro ele virava um quarto
-   * de disco claro sobre a página escura.
+   * (`Concurso.dc.html:83`). Com o hex fixo, no alto contraste (página
+   * branca) ele virava um quarto de disco bege sobre o branco.
    */
   papelDaPagina?: boolean;
   className?: string;

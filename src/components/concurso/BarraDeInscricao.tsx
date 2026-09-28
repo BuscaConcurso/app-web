@@ -35,8 +35,8 @@ export function BarraDeInscricao({
   return (
     <div className="sticky bottom-0 z-10 -mx-4 flex items-center gap-2.5 bg-cartao px-4 pt-3 pb-6 shadow-[0_-1px_0_var(--color-linha),0_-12px_30px_rgb(15_31_23/0.08)] md:-mx-8 lg:hidden">
       <div className="shrink-0">
-        <div className="text-[12px] text-tinta-600">Taxa</div>
-        <div className="text-[17px] font-bold text-tinta-900">
+        <div className="text-[0.75rem] text-tinta-600">Taxa</div>
+        <div className="text-[1.0625rem] font-bold text-tinta-900">
           {taxa ?? "Não informada"}
         </div>
       </div>

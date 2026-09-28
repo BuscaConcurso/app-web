@@ -57,7 +57,7 @@ export function TabelaAbertos({
           <div className="mb-2.5 hidden md:block">
             <Rotulo icone="aberto" tom="aberto">INSCRIÇÕES ABERTAS</Rotulo>
           </div>
-          <h2 className="font-titulo text-[26px] leading-[1.08] font-bold tracking-[-0.025em] md:text-[40px] md:leading-[1.05] md:tracking-[-0.03em]">
+          <h2 className="font-titulo text-[1.625rem] leading-[1.08] font-bold tracking-[-0.025em] md:text-[2.5rem] md:leading-[1.05] md:tracking-[-0.03em]">
             {numero(total)} concursos abertos agora
           </h2>
         </div>
@@ -71,7 +71,7 @@ export function TabelaAbertos({
           cabem e a de órgão e cargo encolhia até sobrar uma letra; ali ficam
           os cartões do celular. */}
       <div className="hidden overflow-hidden rounded-[20px] bg-cartao shadow-tabela xl:block">
-        <div className="flex h-[72px] items-center gap-3 border-b border-linha-fraca px-5">
+        <div className="flex h-[4.5rem] items-center gap-3 border-b border-linha-fraca px-5">
           <Abas rotulo="Escolaridade" itens={abas(total)} />
           <div className="flex-grow" />
           <BotaoLink href={HREF_ABERTOS} variante="secundario" icone="ordenar" iconeDepois="abaixo">
@@ -126,7 +126,7 @@ export function TabelaAbertos({
           </tbody>
         </table>
 
-        <div className="flex h-[72px] items-center justify-between px-5 text-sm text-tinta-600">
+        <div className="flex h-[4.5rem] items-center justify-between px-5 text-sm text-tinta-600">
           <span>
             Mostrando {numero(concursos.length)} de {numero(total)} · ordenados pelo prazo
           </span>

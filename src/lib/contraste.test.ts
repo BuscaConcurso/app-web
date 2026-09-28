@@ -3,13 +3,15 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { lerCor, razaoDeContraste, sobre, temasDoCss, type Tokens } from "./contraste";
 
-const { claro, escuro, escuroDoSistema } = temasDoCss(
+const { claro, altoContraste } = temasDoCss(
   readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8"),
 );
 
 /** WCAG AA. Texto grande (3:1) não aparece: nenhum par abaixo depende dele. */
 const TEXTO = 4.5;
 const NAO_TEXTO = 3;
+/** WCAG AAA, o piso de texto no modo de alto contraste. */
+const TEXTO_ALTO = 7;
 
 const SUPERFICIES = ["pagina", "cartao", "rebaixada"];
 
@@ -52,15 +54,9 @@ const PARES: Par[] = [
   { texto: "rodape-suave", fundo: "rodape", minimo: TEXTO },
   // Não texto: a superfície do botão primário, o anel de foco e os ícones.
   //
-  // Por que "acao" não entra nos pares de texto: é matematicamente
-  // impossível ter "acao" como texto a 4.5:1 e o par abaixo, `acao-texto` (branco fixo) sobre
-  // `acao`, no escuro: `acao-texto` fixa o teto de luminância de `acao` em
-  // 0,183 (para o branco ler 4.5:1), e o piso para `acao` como texto de
-  // 4.5:1 sobre `cartao` escuro é 0,234, maior que o teto. Nenhum valor de
-  // `acao` cumpre as duas ao mesmo tempo. Então `acao` é só superfície (botão, anel de foco, ponto do cronograma,
-  // marcador do filtro), e todo lugar do código que usava `text-acao` como
-  // cor de letra passou para `verde-texto` (par de texto logo acima). Só os
-  // dois pares de não-texto abaixo ficaram para `acao`.
+  // `acao` é só superfície (botão, anel de foco, ponto do cronograma,
+  // marcador do filtro): texto verde usa `verde-texto`, que tem par de texto
+  // logo acima. Por isso `acao` só aparece nos pares de não-texto abaixo.
   { texto: "acao", fundo: "cartao", minimo: NAO_TEXTO },
   { texto: "acao", fundo: "pagina", minimo: NAO_TEXTO },
   { texto: "ouro", fundo: "faixa", minimo: NAO_TEXTO },
@@ -73,8 +69,8 @@ const PARES: Par[] = [
   { texto: "contorno", fundo: "cartao", minimo: 1.3 },
   // `tinta-900`/`cartao` ocupam o lugar dos antigos `inverso`/`inverso-texto`,
   // como par de leitura direta, e não só um alias, porque
-  // `MenuConta.tsx` e o seletor de tema usam a combinação como superfície
-  // de contraste máximo (filtro ativo, ícone marcado).
+  // `MenuConta.tsx` usa a combinação como superfície de contraste máximo
+  // (filtro ativo, ícone marcado).
   { texto: "cartao", fundo: "tinta-900", minimo: TEXTO },
   { texto: "cartao", fundo: "tinta-600", minimo: TEXTO },
 ];
@@ -100,24 +96,27 @@ describe("razaoDeContraste", () => {
 });
 
 describe("tokens de globals.css", () => {
-  it("o escuro do sistema é o mesmo escuro da escolha explícita", () => {
-    expect(escuroDoSistema).toEqual(escuro);
-  });
-
-  it("todo token dos pares existe nos dois temas", () => {
+  it("todo token dos pares existe nos dois modos", () => {
     const nomes = new Set(PARES.flatMap(({ texto, fundo }) => [texto, fundo]));
     for (const nome of nomes) {
       expect(claro[nome], nome).toBeDefined();
-      expect(escuro[nome], nome).toBeDefined();
+      expect(altoContraste[nome], nome).toBeDefined();
     }
   });
 
-  for (const [tema, tokens] of [["claro", claro], ["escuro", escuro]] as const) {
-    it(`no tema ${tema}, todo par usado passa do mínimo AA`, () => {
-      const falhas = PARES.filter((par) => razao(tokens, par) < par.minimo).map(
-        (par) => `${par.texto} sobre ${par.fundo}: ${razao(tokens, par).toFixed(2)} < ${par.minimo}`,
-      );
-      expect(falhas).toEqual([]);
-    });
-  }
+  it("no tema claro, todo par usado passa do mínimo AA", () => {
+    const falhas = PARES.filter((par) => razao(claro, par) < par.minimo).map(
+      (par) => `${par.texto} sobre ${par.fundo}: ${razao(claro, par).toFixed(2)} < ${par.minimo}`,
+    );
+    expect(falhas).toEqual([]);
+  });
+
+  it("no alto contraste, todo par de texto passa de 7:1 (AAA) e o resto do mínimo AA", () => {
+    const minimo = (par: Par) => (par.minimo === TEXTO ? TEXTO_ALTO : par.minimo);
+    const falhas = PARES.filter((par) => razao(altoContraste, par) < minimo(par)).map(
+      (par) =>
+        `${par.texto} sobre ${par.fundo}: ${razao(altoContraste, par).toFixed(2)} < ${minimo(par)}`,
+    );
+    expect(falhas).toEqual([]);
+  });
 });

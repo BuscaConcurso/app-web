@@ -56,7 +56,7 @@ export function LateralDoConcurso({
               dias do período já passaram" embaixo de "Inscrições encerradas". */}
           {prazo && periodo && concurso.inscricoesDe && concurso.inscricoesAte && (
             <div className="flex flex-col gap-2">
-              <div className="flex justify-between text-[13px] text-tinta-600">
+              <div className="flex justify-between text-[0.8125rem] text-tinta-600">
                 <span>Abriu {dataCurta(concurso.inscricoesDe)}</span>
                 <span>Fecha {dataCurta(concurso.inscricoesAte)}</span>
               </div>
@@ -74,7 +74,7 @@ export function LateralDoConcurso({
                   style={{ width: `${periodo.fracao * 100}%` }}
                 />
               </div>
-              <p className="text-[13px] text-tinta-600">
+              <p className="text-[0.8125rem] text-tinta-600">
                 {periodo.passados} de {periodo.total} dias do período já passaram
               </p>
             </div>
@@ -102,7 +102,7 @@ export function LateralDoConcurso({
                 >
                   {destino.rotulo}
                 </BotaoLink>
-                <p className="-mt-2 text-center text-[13px] leading-[1.45] text-tinta-600">
+                <p className="-mt-2 text-center text-[0.8125rem] leading-[1.45] text-tinta-600">
                   Você vai para o {destino.host}, endereço lido do ato.
                 </p>
               </>
@@ -181,7 +181,7 @@ function CabecalhoDoPrazo({
       <div className={`flex items-center gap-3.5 px-6 py-[22px] ${estilo.fundo}`}>
         <Calendario iso={concurso.inscricoesAte} hoje={hoje} sobreOTom />
         <div>
-          <div className={`font-titulo text-[24px] leading-[1.2] font-bold tracking-[-0.02em] ${estilo.texto}`}>
+          <div className={`font-titulo text-[1.5rem] leading-[1.2] font-bold tracking-[-0.02em] ${estilo.texto}`}>
             {prazo.titulo}
           </div>
           <div className={`mt-1 text-sm ${estilo.texto}`}>{prazo.detalhe}</div>
@@ -205,7 +205,7 @@ function CabecalhoDoPrazo({
       <span className={`flex size-14 shrink-0 items-center justify-center rounded-[12px] ${icone}`}>
         <Icone nome="previsto" tamanho={26} />
       </span>
-      <div className={`font-titulo text-[24px] leading-none font-bold tracking-[-0.02em] ${texto}`}>{titulo}</div>
+      <div className={`font-titulo text-[1.5rem] leading-none font-bold tracking-[-0.02em] ${texto}`}>{titulo}</div>
     </div>
   );
 }

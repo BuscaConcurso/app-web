@@ -84,22 +84,15 @@ function blocoApos(css: string, abertura: RegExp): string {
 }
 
 /**
- * Os dois temas como o navegador os resolve: o escuro só sobrescreve, então
- * o que ele não declara (o amarelo, por exemplo) é o do claro. O escuro
- * aparece duas vezes em `globals.css`, na escolha explícita e dentro da
- * media query do "sistema", e é por isso que os dois são devolvidos.
+ * Os dois modos de cor como o navegador os resolve: o alto contraste só
+ * sobrescreve, então o que ele não declara (o ouro, por exemplo) é o do
+ * claro.
  */
 export function temasDoCss(css: string): {
   claro: Tokens;
-  escuro: Tokens;
-  escuroDoSistema: Tokens;
+  altoContraste: Tokens;
 } {
   const claro = tokensDe(blocoApos(css, /@theme\s*\{/));
-  const escuro = tokensDe(blocoApos(css, /:root\[data-tema="escuro"\]/));
-  const escuroDoSistema = tokensDe(blocoApos(css, /:root\[data-tema="sistema"\]/));
-  return {
-    claro,
-    escuro: { ...claro, ...escuro },
-    escuroDoSistema: { ...claro, ...escuroDoSistema },
-  };
+  const altoContraste = tokensDe(blocoApos(css, /:root\[data-contraste="alto"\]\s*\{/));
+  return { claro, altoContraste: { ...claro, ...altoContraste } };
 }

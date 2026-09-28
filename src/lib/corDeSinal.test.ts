@@ -4,8 +4,7 @@ import { describe, expect, it } from "vitest";
 
 /**
  * `urucum`, `verde` e `anil` puros são cores de SUPERFÍCIE (fundo de botão,
- * ponto, barra). Como texto eles não passam 4.5:1 no tema escuro, onde o
- * fundo escurece e eles não clareiam: o texto dessas cores usa os tokens
+ * ponto, barra), e não são medidas como texto: o texto dessas cores usa os tokens
  * `-texto` (`text-urucum-texto`, `text-verde-texto`, `text-anil-texto`),
  * medidos em `contraste.test.ts`.
  *

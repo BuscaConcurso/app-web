@@ -129,7 +129,7 @@ export function Cronograma({
                 <div className="min-w-0 grow basis-[220px]">
                   <p
                     className={[
-                      "text-[16px] font-bold",
+                      "text-[1rem] font-bold",
                       linha.proximoMarco || linha.fase === "hoje"
                         ? "text-urucum-texto"
                         : "text-tinta-900",
@@ -144,7 +144,7 @@ export function Cronograma({
                     )}
                   </p>
                   {linha.evento.evidencia ? (
-                    <p className="mt-1 flex items-center gap-1.5 text-[13px] leading-5 text-tinta-600">
+                    <p className="mt-1 flex items-center gap-1.5 text-[0.8125rem] leading-5 text-tinta-600">
                       <Icone nome="documento" tamanho={14} className="shrink-0" />
                       <span className="min-w-0">
                         Lido de: {linha.evento.evidencia}
@@ -167,7 +167,7 @@ export function Cronograma({
                     </p>
                   ) : (
                     linha.evento.observacao && (
-                      <p className="mt-1 text-[13px] leading-5 text-tinta-500">
+                      <p className="mt-1 text-[0.8125rem] leading-5 text-tinta-500">
                         {linha.evento.observacao}
                       </p>
                     )
@@ -175,7 +175,7 @@ export function Cronograma({
                 </div>
                 <p
                   className={[
-                    "numero shrink-0 text-[15px] font-semibold whitespace-nowrap",
+                    "numero shrink-0 text-[0.9375rem] font-semibold whitespace-nowrap",
                     linha.fase === "sem-data"
                       ? "text-tinta-500 italic"
                       : linha.proximoMarco || linha.fase === "hoje"
@@ -246,7 +246,7 @@ function Marcador({
  * `bg-ouro-fundo text-ouro-sinal-texto`, o dourado do protótipo
  * (`Concurso.dc.html:121`, `#FCF1CF`/`#5C4500`) pelos tokens mais próximos:
  * é o mesmo par que a etiqueta "previsto" já usa, e passa `contraste.test.ts`
- * nos dois temas (uma versão anterior usava `bg-tinta-900 text-cartao`, sem
+ * nos dois modos de cor (uma versão anterior usava `bg-tinta-900 text-cartao`, sem
  * ouro nenhum, e destoava do protótipo).
  */
 function MarcaDeHoje({
@@ -271,10 +271,10 @@ function MarcaDeHoje({
 
   return (
     <div className={`flex flex-1 items-center gap-3 ${ultima ? "" : "pb-6"}`}>
-      <span className="flex h-[26px] items-center rounded-full bg-ouro-fundo px-2.5 text-[12px] font-bold text-ouro-sinal-texto">
+      <span className="flex h-[1.625rem] items-center rounded-full bg-ouro-fundo px-2.5 text-[0.75rem] font-bold text-ouro-sinal-texto">
         HOJE
       </span>
-      <span className="numero text-[15px] font-semibold text-tinta-900">
+      <span className="numero text-[0.9375rem] font-semibold text-tinta-900">
         {dataLonga(hoje)}
         {dias !== null && dias > 0 && (
           <> · falta {dias} {dias === 1 ? "dia" : "dias"} para encerrar</>

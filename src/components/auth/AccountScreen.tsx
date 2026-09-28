@@ -342,17 +342,17 @@ export function AccountScreen() {
 
   if (session.status !== "authenticated" || !session.profile) {
     return (
-      <div className="mx-auto max-w-[760px] px-4 py-12 text-sm text-tinta-600">
+      <div className="mx-auto max-w-[47.5rem] px-4 py-12 text-sm text-tinta-600">
         Carregando sua conta…
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-[760px] px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-[47.5rem] px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-8">
         <Rotulo tom="verde" className="mb-2">Sua conta</Rotulo>
-        <h1 className="font-titulo text-[32px] leading-tight font-bold tracking-[-0.02em] text-tinta-900">
+        <h1 className="font-titulo text-[2rem] leading-tight font-bold tracking-[-0.02em] text-tinta-900">
           Conta e segurança
         </h1>
       </header>

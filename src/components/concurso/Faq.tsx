@@ -104,12 +104,12 @@ export function Faq({ origens }: { origens: Origem[] }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
+        <h2 className="flex items-center gap-2.5 font-titulo text-[1.75rem] leading-none font-bold tracking-[-0.025em]">
           <Icone nome="duvida" tamanho={24} className="text-link" />
           {cabecalho.titulo}
         </h2>
         {cabecalho.apoio && (
-          <p className="mt-1.5 text-[15px] text-tinta-600">{cabecalho.apoio}</p>
+          <p className="mt-1.5 text-[0.9375rem] text-tinta-600">{cabecalho.apoio}</p>
         )}
       </div>
 
@@ -127,7 +127,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
               open={indice === 0}
               className="group rounded-[14px] bg-cartao shadow-[inset_0_0_0_1px_var(--color-linha-fraca)] open:bg-rebaixada"
             >
-              <summary className="flex h-14 cursor-pointer list-none items-center gap-3.5 px-[18px] text-[16px] font-bold text-tinta-900 [&::-webkit-details-marker]:hidden">
+              <summary className="flex h-14 cursor-pointer list-none items-center gap-3.5 px-[18px] text-[1rem] font-bold text-tinta-900 [&::-webkit-details-marker]:hidden">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-anil-fundo text-anil-texto">
                   <Icone nome={ICONE_DA_PERGUNTA[resposta.pergunta]} tamanho={17} />
                 </span>
@@ -156,7 +156,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
                     o fim da URL ficava cortado. A quebra em qualquer ponto é
                     feia numa URL e é a única alternativa a esconder o
                     endereço, que é justamente a resposta. */}
-                <blockquote className="max-w-[74ch] border-l-[3px] border-acao pl-4 text-[15px] leading-[1.6] wrap-anywhere text-tinta-900">
+                <blockquote className="max-w-[74ch] border-l-[3px] border-acao pl-4 text-[0.9375rem] leading-[1.6] wrap-anywhere text-tinta-900">
                   “<TrechoComEnderecos texto={resposta.trecho ?? ""} />”
                 </blockquote>
                 {/* O caminho de volta ao documento. Agora que o FAQ é um
@@ -177,7 +177,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
                       ? `#${ancoraDoTrecho(origem.chave, resposta.pergunta)}`
                       : `#ato-${origem.chave}`
                   }
-                  className="inline-flex w-fit items-center gap-1 text-[13px] font-semibold text-link hover:text-link-hover"
+                  className="inline-flex w-fit items-center gap-1 text-[0.8125rem] font-semibold text-link hover:text-link-hover"
                 >
                   {varios && origem.titulo
                     ? `ver em: ${origem.titulo}`
@@ -191,7 +191,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
       )}
 
       {ausentes.length > 0 && (
-        <div className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-dashed border-contorno px-[18px] py-3.5 text-[14px] text-tinta-600">
+        <div className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-dashed border-contorno px-[18px] py-3.5 text-[0.875rem] text-tinta-600">
           <Icone nome="duvida" tamanho={18} className="shrink-0" />
           <p>
             <strong className="font-semibold text-tinta-900">
@@ -216,7 +216,7 @@ export function Faq({ origens }: { origens: Origem[] }) {
            modelo devolveu não existia no ato palavra por palavra, então não
            virou resposta, e quem lê fica sabendo que existe essa régua, em
            vez de ver um silêncio igual ao da lacuna. */
-        <p className="max-w-[74ch] text-[12px] leading-5 text-tinta-600">
+        <p className="max-w-[74ch] text-[0.75rem] leading-5 text-tinta-600">
           {descartadas === 1
             ? "Uma resposta foi descartada"
             : `${descartadas} respostas foram descartadas`}{" "}

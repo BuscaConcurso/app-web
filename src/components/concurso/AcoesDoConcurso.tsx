@@ -6,7 +6,7 @@ import { urlAbsoluta } from "@/lib/site";
 import { useCompartilhar } from "./useCompartilhar";
 
 const FORMA_DO_BOTAO =
-  "h-[42px] items-center gap-2 rounded-controle bg-rebaixada px-[14px] text-sm font-semibold text-tinta-900 hover:bg-linha";
+  "h-[2.625rem] items-center gap-2 rounded-controle bg-rebaixada px-[14px] text-sm font-semibold text-tinta-900 hover:bg-linha";
 const CLASSE_DO_BOTAO = `inline-flex ${FORMA_DO_BOTAO}`;
 
 /**

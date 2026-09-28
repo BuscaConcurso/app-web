@@ -552,7 +552,7 @@ export const CARGOS_DE_PROVA: Cargo[] = [
  * As seis cores fixas da marca, com o hex exatamente como está no protótipo.
  *
  * A amostra pinta pelo TOKEN (`classe`), não pelo hex: por isso "Verde Noite"
- * e "Papel" mudam de valor no escuro (`faixa` e `pagina` têm tom próprio lá),
+ * e "Papel" mudam de valor no alto contraste (`faixa` e `pagina` têm tom próprio lá),
  * enquanto o hex ao lado é sempre o valor claro documentado no protótipo. É a
  * mesma regra do resto do site, componente só usa token; o hex aqui é dado
  * exibido como texto, não cor aplicada por fora do token.
@@ -646,9 +646,6 @@ export const ROTULO_ICONE: Record<NomeDoIcone, string> = {
   relogio: "Relógio",
   recibo: "Recibo",
   globo: "Site",
-  sol: "Tema claro",
-  lua: "Tema escuro",
-  monitor: "Tema do sistema",
   fechar: "Fechar",
   menu: "Menu",
   lista: "Lista",

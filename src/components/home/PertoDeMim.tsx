@@ -23,7 +23,7 @@ import {
 
 /** A mesma cápsula dos outros atalhos do herói, `Main.dc.html:72-77`. */
 export const CLASSE_CHIP_DO_HERO =
-  "inline-flex h-[38px] items-center gap-2 rounded-full bg-white/10 px-3.5 text-sm font-medium text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]";
+  "inline-flex h-[2.375rem] items-center gap-2 rounded-full bg-white/10 px-3.5 text-sm font-medium text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]";
 
 /** Para onde vai a lista de abertos do estado, ou a de todo o Brasil. */
 export function destinoPertoDeMim(uf: Uf | null): string {

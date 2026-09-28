@@ -54,7 +54,7 @@ function resolverTom(tom: Tom | TomDaEtiqueta | undefined): TomDaEtiqueta {
 /**
  * Etiqueta.
  *
- * A pílula do desenho novo: `h-[26px]`, `rounded-full`, cor só quando o tom
+ * A pílula do desenho novo: `h-[1.625rem]`, `rounded-full`, cor só quando o tom
  * pede (o ponto de 6px de antes, ou o ícone de 12px, ou o fundo inteiro da
  * pílula). Sem tom, é a cinza neutra que serve para escolaridade, banca e
  * qualquer outro metadado.
@@ -90,10 +90,10 @@ export function Etiqueta({
     <span
       className={[
         grande
-          ? `inline-flex h-[26px] items-center gap-1.5 rounded-full px-[9px] text-xs md:h-7 md:px-2.5 md:text-[13px] ${
+          ? `inline-flex h-[1.625rem] items-center gap-1.5 rounded-full px-[9px] text-xs md:h-7 md:px-2.5 md:text-[0.8125rem] ${
               comPonto ? "font-bold" : "font-semibold"
             }`
-          : "inline-flex h-[26px] items-center gap-1.5 rounded-full px-[9px] text-xs font-semibold",
+          : "inline-flex h-[1.625rem] items-center gap-1.5 rounded-full px-[9px] text-xs font-semibold",
         // `max-w-full` é o que impede uma etiqueta sozinha de esticar a
         // página. Medido a 375px, onde a fileira tem 319px úteis: 2 dos 15
         // nomes de banca do acervo passam disso sozinhos (366px e 325px, com
@@ -160,7 +160,7 @@ export function Rotulo({
   return (
     <Tag
       className={[
-        "inline-flex items-center gap-2 text-[13px] font-bold tracking-[0.06em] uppercase",
+        "inline-flex items-center gap-2 text-[0.8125rem] font-bold tracking-[0.06em] uppercase",
         cor,
         className,
       ]

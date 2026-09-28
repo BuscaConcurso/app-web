@@ -20,7 +20,7 @@ import { tomDoConcurso } from "@/lib/situacao";
 // conteúdo que não quebra (a data com o chip, "a definir") roubava largura
 // da coluna de órgão e cargo.
 export const COLUNAS_DA_LINHA =
-  "grid-cols-[minmax(0,2.6fr)_minmax(0,1.2fr)_minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1.2fr)_150px]";
+  "grid-cols-[minmax(0,2.6fr)_minmax(0,1.2fr)_minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1.2fr)_9.375rem]";
 
 /**
  * O órgão e o cargo (ou o que existir no lugar dele), coluna 1 da linha e
@@ -136,8 +136,8 @@ export function LinhaConcurso({
       role={emGrade ? "row" : undefined}
       className={
         emGrade
-          ? `grid ${COLUNAS_DA_LINHA} h-[88px] items-center gap-4 border-b border-linha-fraca px-5 text-[15px]`
-          : "h-[88px] border-b border-linha-fraca text-[15px]"
+          ? `grid ${COLUNAS_DA_LINHA} h-[5.5rem] items-center gap-4 border-b border-linha-fraca px-5 text-[0.9375rem]`
+          : "h-[5.5rem] border-b border-linha-fraca text-[0.9375rem]"
       }
     >
       <Celula role={emGrade ? "cell" : undefined} className={emGrade ? "min-w-0" : "px-5"}>
@@ -149,7 +149,7 @@ export function LinhaConcurso({
           />
           <div className="min-w-0">
             <div className="truncate font-bold">{titulo}</div>
-            <div className="mt-0.5 truncate text-[13px] text-tinta-600">{subtitulo}</div>
+            <div className="mt-0.5 truncate text-[0.8125rem] text-tinta-600">{subtitulo}</div>
           </div>
         </div>
       </Celula>

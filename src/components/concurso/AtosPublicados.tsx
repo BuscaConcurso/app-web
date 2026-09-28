@@ -13,7 +13,7 @@ import { partirEmParagrafos, type Paragrafo } from "@/lib/leitura";
 /** O gatilho fechado da gaveta: o link "Ler o ato na íntegra →" de
  *  `Concurso.dc.html:187`, em 44px de altura para o alvo de toque. */
 const GATILHO_LER_NA_INTEGRA =
-  "inline-flex h-11 items-center gap-1.5 text-[14px] font-semibold text-link hover:text-link-hover";
+  "inline-flex h-11 items-center gap-1.5 text-[0.875rem] font-semibold text-link hover:text-link-hover";
 
 /**
  * O endereço do edital como se lê (`Concurso.dc.html:191`): domínio e
@@ -84,7 +84,7 @@ export function enderecoLegivel(url: string): string {
 export function AtosPublicados({ origens }: { origens: Origem[] }) {
   return (
     <div className="flex flex-col gap-[18px]">
-      <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
+      <h2 className="flex items-center gap-2.5 font-titulo text-[1.75rem] leading-none font-bold tracking-[-0.025em]">
         <Icone nome="diario" tamanho={24} className="text-acao" />
         Fontes
       </h2>
@@ -106,15 +106,15 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                   <Icone nome="diario" tamanho={20} />
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[12px] font-bold tracking-[0.05em] text-verde-texto">
+                  <div className="text-[0.75rem] font-bold tracking-[0.05em] text-verde-texto">
                     CONFERIDO POR NÓS
                   </div>
-                  <div className="text-[16px] font-bold text-tinta-900">
+                  <div className="text-[1rem] font-bold text-tinta-900">
                     {origem.fonte ? `Ato no ${origem.fonte}` : "Ato no Diário Oficial"}
                   </div>
                 </div>
               </div>
-              <p className="text-[14px] leading-[1.5] text-tinta-600">
+              <p className="text-[0.875rem] leading-[1.5] text-tinta-600">
                 {origem.url ? (
                   <a
                     href={origem.url}
@@ -142,7 +142,7 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                    identificador respondia 404. O texto, quando existe, é o
                    que torna isso suportável: a publicação fica guardada por
                    inteiro. Quando nem o texto existe, só resta dizer isso. */
-                <p className="text-[12px] leading-5 text-tinta-600">
+                <p className="text-[0.75rem] leading-5 text-tinta-600">
                   O texto deste ato não está guardado.
                 </p>
               )}
@@ -161,13 +161,13 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                     <Icone nome="corrente" tamanho={20} />
                   </span>
                   <div className="min-w-0">
-                    <div className="text-[12px] font-bold tracking-[0.05em] text-ouro-sinal-texto">
+                    <div className="text-[0.75rem] font-bold tracking-[0.05em] text-ouro-sinal-texto">
                       INFORMADO PELO ATO · NÃO CONFERIDO
                     </div>
-                    <div className="text-[16px] font-bold text-tinta-900">Edital completo</div>
+                    <div className="text-[1rem] font-bold text-tinta-900">Edital completo</div>
                   </div>
                 </div>
-                <p className="min-w-0 text-[14px] leading-[1.5] text-tinta-600">
+                <p className="min-w-0 text-[0.875rem] leading-[1.5] text-tinta-600">
                   Com anexos e programa de provas.{" "}
                   <span className="wrap-anywhere">{enderecoLegivel(origem.editalCitadoUrl)}</span>
                 </p>
@@ -178,7 +178,7 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                   href={origem.editalCitadoUrl}
                   target="_blank"
                   rel="nofollow noopener noreferrer"
-                  className="inline-flex h-11 items-center gap-1.5 self-start text-[14px] font-semibold text-link hover:text-link-hover"
+                  className="inline-flex h-11 items-center gap-1.5 self-start text-[0.875rem] font-semibold text-link hover:text-link-hover"
                 >
                   Abrir o edital completo
                   <Icone nome="externo" tamanho={15} />
@@ -250,7 +250,7 @@ function GavetaDoAto({ origem, texto }: { origem: Origem; texto: string }) {
                endereço de banca dentro do texto corrido, e a URL mais longa
                do acervo tem 143 caracteres. É a quebra em qualquer ponto ou a
                rolagem horizontal a 375px, onde o painel mede 352,5px. */
-            className="text-[13px] leading-6 wrap-anywhere text-tinta-900"
+            className="text-[0.8125rem] leading-6 wrap-anywhere text-tinta-900"
           >
             {destacar(paragrafo.texto, faixasDoParagrafo(faixas, paragrafo)).map(
               (pedaco, indice) =>

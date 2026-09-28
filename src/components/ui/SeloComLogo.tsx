@@ -10,7 +10,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
  * do selo com sigla no mesmo tamanho (`Selo` em `Cartao.tsx`): trocar de
  * face não move o título ao lado nem muda o contorno.
  *
- * Fundo branco nos dois temas (`bg-logo-fundo`, que o escuro não inverte):
+ * Fundo sempre branco (`bg-logo-fundo`, que nem o alto contraste troca):
  * logo oficial é desenhado para fundo claro. `alt` vazio porque o nome do
  * órgão está escrito ao lado, e o leitor de tela não ganha nada ouvindo o
  * nome duas vezes.

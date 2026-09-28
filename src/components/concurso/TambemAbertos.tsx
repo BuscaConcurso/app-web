@@ -30,7 +30,7 @@ export function TambemAbertos({
 
   return (
     <div className="flex flex-col gap-1 rounded-[22px] bg-cartao p-6 shadow-cartao">
-      <div className="mb-2 flex items-center gap-2 text-[12px] font-bold tracking-[0.05em] text-tinta-500">
+      <div className="mb-2 flex items-center gap-2 text-[0.75rem] font-bold tracking-[0.05em] text-tinta-500">
         <Icone nome="local" tamanho={16} />
         TAMBÉM ABERTOS {noEstado(uf).toUpperCase()}
       </div>
@@ -51,7 +51,7 @@ export function TambemAbertos({
             <div className="truncate text-sm font-bold">
               {concurso.nomesDeCargo[0] ?? tituloSemOrgao(concurso.titulo, concurso.orgao)}
             </div>
-            <div className="truncate text-[13px] text-tinta-600">
+            <div className="truncate text-[0.8125rem] text-tinta-600">
               {detalheDoConcurso(concurso)}
               {concurso.inscricoesAte ? ` · até ${dataCurta(concurso.inscricoesAte)}` : ""}
             </div>

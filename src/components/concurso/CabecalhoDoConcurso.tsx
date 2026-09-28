@@ -66,7 +66,7 @@ export function CabecalhoDoConcurso({
       {/*
         O canto de azulejos do protótipo (`Concurso.dc.html:80-87`). `hidden
         lg:grid` porque abaixo disso a coluna de texto já usa a largura
-        inteira do cartão e o canto cobriria o título; o `md:max-w-[760px]`
+        inteira do cartão e o canto cobriria o título; o `md:max-w-[47.5rem]`
         da coluna de texto é o que garante que um `h1` de duas linhas a
         1440px não passe por baixo dele.
       */}
@@ -83,7 +83,7 @@ export function CabecalhoDoConcurso({
           logoUrl={concurso.orgao.logoUrl}
           tamanho={44}
         />
-        <div className="min-w-0 text-[13px] leading-[1.35] text-tinta-600">
+        <div className="min-w-0 text-[0.8125rem] leading-[1.35] text-tinta-600">
           <Link href={`/orgaos/${concurso.orgao.slug}`} className="hover:underline hover:underline-offset-4">
             {concurso.orgao.nome}
           </Link>
@@ -99,10 +99,10 @@ export function CabecalhoDoConcurso({
         />
       </div>
 
-      {/* `max-w-[760px]` no md+: o teto de largura da coluna de texto do
+      {/* `max-w-[47.5rem]` no md+: o teto de largura da coluna de texto do
           protótipo, para o título e a linha do órgão não esticarem até a
           borda do cartão. */}
-      <div className="flex min-w-0 grow flex-col gap-3.5 md:max-w-[760px] md:gap-3">
+      <div className="flex min-w-0 grow flex-col gap-3.5 md:max-w-[47.5rem] md:gap-3">
         {/* No celular as etiquetas vêm depois do título
             (`ConcursoMobile.dc.html:31-35`); no desktop, antes. */}
         <div className="order-2 flex flex-wrap items-center gap-1.5 md:order-none">
@@ -127,11 +127,11 @@ export function CabecalhoDoConcurso({
           {area && <Etiqueta icone="areas" grande>{area}</Etiqueta>}
         </div>
 
-        <h1 className="order-1 font-titulo text-[30px] leading-[1.08] font-bold tracking-[-0.03em] break-words text-balance md:order-none md:text-[48px] md:leading-[1.04] md:tracking-[-0.035em]">
+        <h1 className="order-1 font-titulo text-[1.875rem] leading-[1.08] font-bold tracking-[-0.03em] break-words text-balance md:order-none md:text-[3rem] md:leading-[1.04] md:tracking-[-0.035em]">
           {titulo}
         </h1>
 
-        <div className="order-3 hidden text-[17px] leading-[1.5] text-tinta-600 md:order-none md:block">
+        <div className="order-3 hidden text-[1.0625rem] leading-[1.5] text-tinta-600 md:order-none md:block">
           <Link href={`/orgaos/${concurso.orgao.slug}`} className="hover:underline hover:underline-offset-4">
             {concurso.orgao.nome}
           </Link>
@@ -184,10 +184,10 @@ function CartaoDeUrgencia({
           <Icone nome="prazo" tamanho={22} />
         </span>
         <div>
-          <div className={`font-titulo text-[22px] leading-none font-bold tracking-[-0.02em] ${estilo.texto}`}>
+          <div className={`font-titulo text-[1.375rem] leading-none font-bold tracking-[-0.02em] ${estilo.texto}`}>
             {prazo.titulo}
           </div>
-          <div className={`mt-1 text-[13px] ${estilo.texto}`}>{prazo.detalhe}</div>
+          <div className={`mt-1 text-[0.8125rem] ${estilo.texto}`}>{prazo.detalhe}</div>
         </div>
       </div>
       {periodo && (

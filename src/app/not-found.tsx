@@ -67,7 +67,7 @@ export default function NotFound() {
               <li key={uf} className="min-w-0">
                 <Link
                   href={`/concursos?uf=${uf}`}
-                  className="inline-flex min-h-8 max-w-full items-center rounded-controle bg-rebaixada px-3 text-[12px] font-medium text-tinta-900 transition-colors hover:bg-linha"
+                  className="inline-flex min-h-8 max-w-full items-center rounded-controle bg-rebaixada px-3 text-[0.75rem] font-medium text-tinta-900 transition-colors hover:bg-linha"
                 >
                   <span className="min-w-0 break-words">{NOME_UF[uf]}</span>
                 </Link>

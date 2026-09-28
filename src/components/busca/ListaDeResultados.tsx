@@ -60,7 +60,7 @@ function TrilhoDeSituacao({ rotulo, itens }: { rotulo: string; itens: ItemDeAba[
           key={item.id}
           href={item.href ?? "#"}
           aria-current={item.ativo ? "page" : undefined}
-          className={`flex h-8 items-center justify-center gap-1.5 rounded-[9px] px-3 text-[13px] transition-colors ${
+          className={`flex h-8 items-center justify-center gap-1.5 rounded-[9px] px-3 text-[0.8125rem] transition-colors ${
             item.ativo
               ? "bg-cartao font-semibold text-tinta-900 shadow-aba"
               : "font-medium text-tinta-600 hover:text-tinta-900"
@@ -218,10 +218,10 @@ export function ListaDeResultados({
               <Rotulo icone={rotulo.icone} tom={rotulo.tom} className="mb-2.5">
                 {rotulo.texto}
               </Rotulo>
-              <h1 className="font-titulo text-[26px] leading-[1.08] font-bold tracking-[-0.025em] break-words md:text-[40px] md:leading-[1.05] md:tracking-[-0.03em]">
+              <h1 className="font-titulo text-[1.625rem] leading-[1.08] font-bold tracking-[-0.025em] break-words md:text-[2.5rem] md:leading-[1.05] md:tracking-[-0.03em]">
                 {titulo}
               </h1>
-              <p className="mt-2 text-[12px] text-tinta-600">
+              <p className="mt-2 text-[0.75rem] text-tinta-600">
                 <strong className="numero font-medium text-tinta-900">
                   {numero(resultado.total)}
                 </strong>{" "}
@@ -233,7 +233,7 @@ export function ListaDeResultados({
                   resultados. Quem marcou "Espírito Santo" e recebeu uma lista
                   vazia conclui que não há concurso no estado dele. */}
               {semDado && (
-                <p className="mt-1.5 max-w-[70ch] text-[12px] leading-5 text-tinta-600">
+                <p className="mt-1.5 max-w-[70ch] text-[0.75rem] leading-5 text-tinta-600">
                   {semDado}
                 </p>
               )}
@@ -243,13 +243,13 @@ export function ListaDeResultados({
               aria-label="Ordenação"
               className="flex flex-wrap items-center gap-1.5"
             >
-              <span className="text-[12px] text-tinta-500">Ordenar por</span>
+              <span className="text-[0.75rem] text-tinta-500">Ordenar por</span>
               {(Object.keys(ORDENS) as (keyof typeof ORDENS)[]).map((chave) => (
                 <LinkDaConsulta
                   key={chave}
                   href={urlDaBusca(consulta, { ordem: chave, pagina: 1 })}
                   aria-current={chave === consulta.ordem ? "true" : undefined}
-                  className={`rounded-controle px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                  className={`rounded-controle px-3 py-1.5 text-[0.75rem] font-medium transition-colors ${
                     chave === consulta.ordem
                       ? "bg-tinta-900 text-cartao"
                       : "bg-rebaixada text-tinta-900 hover:bg-linha"

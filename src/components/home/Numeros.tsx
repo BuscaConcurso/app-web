@@ -76,13 +76,13 @@ export function Numeros({
           os cartões abaixo. */}
       <div className="conteudo relative -mt-14 hidden xl:block">
         <section
-          className="grid h-[120px] rounded-[20px] bg-cartao shadow-numeros"
+          className="grid min-h-[7.5rem] rounded-[20px] bg-cartao shadow-numeros"
           style={{ gridTemplateColumns: `repeat(${itensDoDesktop.length}, minmax(0, 1fr))` }}
         >
           {itensDoDesktop.map((item, indice) => (
             <div
               key={item.rotulo}
-              className={`flex items-center gap-4 px-5 ${
+              className={`flex items-center gap-4 px-5 fonte-grande:py-4 ${
                 indice < itensDoDesktop.length - 1 ? "border-r border-linha-fraca" : ""
               }`}
             >
@@ -92,8 +92,8 @@ export function Numeros({
                 <Icone nome={item.icone} tamanho={24} />
               </span>
               <div className="min-w-0">
-                <div className="font-titulo text-[32px] leading-none font-bold">{item.valor}</div>
-                <div className="mt-1 text-sm whitespace-nowrap text-tinta-600">{item.rotulo}</div>
+                <div className="font-titulo text-[2rem] leading-none font-bold">{item.valor}</div>
+                <div className="mt-1 text-sm whitespace-nowrap text-tinta-600 fonte-grande:whitespace-normal">{item.rotulo}</div>
               </div>
             </div>
           ))}
@@ -114,7 +114,7 @@ export function Numeros({
               <Icone nome={item.icone} tamanho={22} />
             </span>
             <div className="min-w-0">
-              <div className="font-titulo text-[26px] leading-none font-bold">{item.valor}</div>
+              <div className="font-titulo text-[1.625rem] leading-none font-bold">{item.valor}</div>
               <div className="mt-1 text-sm text-tinta-600">{item.rotulo}</div>
             </div>
           </div>
@@ -122,13 +122,13 @@ export function Numeros({
       </section>
 
       {/* Celular: dois cartões soltos, só abertos e vagas previstas. */}
-      <section className="conteudo mt-5 grid grid-cols-2 gap-2 md:hidden">
+      <section className="conteudo mt-5 grid grid-cols-2 gap-2 fonte-grande:grid-cols-1 md:hidden">
         <div className="flex items-center gap-2.5 rounded-[16px] bg-cartao p-3.5 shadow-cartao">
           <span className="flex size-[38px] shrink-0 items-center justify-center rounded-controle bg-verde-fundo text-verde-texto">
             <Icone nome="aberto" tamanho={20} />
           </span>
           <div className="min-w-0">
-            <div className="font-titulo text-[22px] leading-none font-bold">
+            <div className="font-titulo text-[1.375rem] leading-none font-bold">
               {numero(totalAbertos)}
             </div>
             <div className="text-xs text-tinta-600">abertos</div>
@@ -141,7 +141,7 @@ export function Numeros({
               <Icone nome="vagas" tamanho={20} />
             </span>
             <div className="min-w-0">
-              <div className="font-titulo text-[22px] leading-none font-bold">
+              <div className="font-titulo text-[1.375rem] leading-none font-bold">
                 {numero(vagasPrevistas)}
               </div>
               <div className="text-xs text-tinta-600">vagas previstas</div>

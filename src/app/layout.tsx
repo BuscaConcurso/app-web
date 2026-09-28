@@ -10,7 +10,7 @@ import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
 import { origemDoAcervo, type OrigemDoAcervo } from "@/lib/concursos";
 import { dataCurta, hojeEmSaoPaulo } from "@/lib/formato";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
-import { SCRIPT_DO_TEMA } from "@/lib/tema";
+import { SCRIPT_DE_ACESSIBILIDADE } from "@/lib/acessibilidade";
 import { SessionProvider } from "@/lib/auth/session";
 
 /**
@@ -208,27 +208,28 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // `suppressHydrationWarning` é o que faltava para o aviso "A tree hydrated
     // but some attributes of the server rendered HTML didn't match" sumir. O
-    // script de tema logo abaixo escreve `data-tema` no `<html>` ANTES de o
-    // React hidratar (é o ponto dele, senão quem escolheu o escuro vê um
-    // lampejo claro), e o servidor não tem como saber o que vai estar lá. A
-    // divergência é deliberada e acontece em toda carga.
+    // script de acessibilidade logo abaixo escreve `data-contraste` e
+    // `data-fonte` no `<html>` ANTES de o React hidratar (é o ponto dele,
+    // senão quem escolheu o alto contraste vê um lampejo das cores normais),
+    // e o servidor não tem como saber o que vai estar lá. A divergência é
+    // deliberada.
     //
     // O prop vale só para os atributos deste elemento, um nível: não esconde
     // divergência de nenhum filho. Antes deste conserto o mesmo aviso foi
     // atribuído à barra de busca e tratado com `autoComplete="off"`, que é
     // correto por outro motivo mas não era a causa: o log do `next dev`
-    // mostrou o diff apontando para `data-tema` no `<html>`.
+    // mostrou o diff apontando para o atributo do `<html>`.
     <html
       lang="pt-BR"
       className={`${bricolage.variable} ${publicSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
-        {/* Antes da primeira pintura, senão quem escolheu o contrário do
-            sistema vê um lampejo do tema errado. O CSS já trata a ausência
-            do atributo como "sistema", então isto só corrige a escolha
-            explícita. */}
-        <script dangerouslySetInnerHTML={{ __html: SCRIPT_DO_TEMA }} />
+        {/* Antes da primeira pintura, senão quem escolheu alto contraste ou
+            outra fonte vê um lampejo do padrão. O CSS já trata a ausência
+            dos atributos como o padrão, então isto só aplica a escolha
+            guardada. */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_DE_ACESSIBILIDADE }} />
       </head>
       <body className="flex min-h-full flex-col">
         <GoogleTagManager />

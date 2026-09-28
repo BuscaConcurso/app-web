@@ -37,15 +37,15 @@ export function Mosaico({
       {destaque && (
         <Link
           href={`/concursos/${destaque.slug}`}
-          className="absolute bottom-16 left-0 flex w-[340px] flex-col gap-3.5 rounded-cartao bg-cartao p-5 text-tinta-900 shadow-flutuante"
+          className="absolute bottom-16 left-0 flex w-[21.25rem] flex-col gap-3.5 rounded-cartao bg-cartao p-5 text-tinta-900 shadow-flutuante"
         >
           <div className="flex items-center gap-3">
             <Selo sigla={destaque.orgao.sigla} logoUrl={destaque.orgao.logoUrl} />
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[15px] leading-[1.3] font-semibold">
+              <div className="truncate text-[0.9375rem] leading-[1.3] font-semibold">
                 {destaque.nomesDeCargo[0] ?? tituloSemOrgao(destaque.titulo, destaque.orgao)}
               </div>
-              <div className="truncate text-[13px] text-tinta-600">
+              <div className="truncate text-[0.8125rem] text-tinta-600">
                 {[tituloSemOrgao(destaque.titulo, destaque.orgao), destaque.localidades[0]]
                   .filter(Boolean)
                   .join(" · ")}
@@ -53,38 +53,38 @@ export function Mosaico({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 fonte-grande:grid-cols-2">
             <div className="rounded-[10px] bg-rebaixada p-2.5">
-              <div className="flex items-center gap-1 text-[11px] font-semibold text-tinta-600">
+              <div className="flex items-center gap-1 text-[0.6875rem] font-semibold text-tinta-600">
                 <Icone nome="salario" tamanho={13} />
                 SALÁRIO
               </div>
-              <div className="mt-1 text-[15px] font-bold">
+              <div className="mt-1 text-[0.9375rem] font-bold">
                 {destaque.salarioAte !== null ? moeda(destaque.salarioAte) : "A definir"}
               </div>
             </div>
             <div className="rounded-[10px] bg-rebaixada p-2.5">
-              <div className="flex items-center gap-1 text-[11px] font-semibold text-tinta-600">
+              <div className="flex items-center gap-1 text-[0.6875rem] font-semibold text-tinta-600">
                 <Icone nome="vagas" tamanho={13} />
                 VAGAS
               </div>
-              <div className="mt-1 text-[15px] font-bold">
+              <div className="mt-1 text-[0.9375rem] font-bold">
                 {destaque.vagas ?? "A definir"}
               </div>
             </div>
             <div className="rounded-[10px] bg-urucum-fundo p-2.5">
-              <div className="flex items-center gap-1 text-[11px] font-semibold text-urucum-texto">
+              <div className="flex items-center gap-1 text-[0.6875rem] font-semibold text-urucum-texto">
                 <Icone nome="prazo" tamanho={13} />
                 ATÉ
               </div>
-              <div className="mt-1 text-[15px] font-bold text-urucum-texto">
+              <div className="mt-1 text-[0.9375rem] font-bold text-urucum-texto">
                 {destaque.inscricoesAte ? dataCurta(destaque.inscricoesAte) : "A definir"}
               </div>
             </div>
           </div>
 
-          {/* Texto verde usa `verde-texto`, não `acao` (que não passa contraste de texto no escuro). */}
-          <div className="flex items-center gap-1.5 text-[13px] font-semibold text-verde-texto">
+          {/* Texto verde usa `verde-texto`, não `acao` (que é só superfície, ver `contraste.test.ts`). */}
+          <div className="flex items-center gap-1.5 text-[0.8125rem] font-semibold text-verde-texto">
             <Icone nome="aberto" tamanho={15} />
             Conferido no edital original
           </div>
@@ -94,7 +94,7 @@ export function Mosaico({
       {novoAto && (
         <Link
           href={`/concursos/${novoAto.slug}`}
-          className="absolute top-[88px] -right-2 flex h-11 items-center gap-2.5 rounded-[22px] bg-cartao py-0 pr-4 pl-2 text-[14px] font-semibold text-tinta-900 shadow-flutuante"
+          className="absolute top-[88px] -right-2 flex h-11 items-center gap-2.5 rounded-[22px] bg-cartao py-0 pr-4 pl-2 text-[0.875rem] font-semibold text-tinta-900 shadow-flutuante"
         >
           <span className="flex size-[30px] shrink-0 items-center justify-center rounded-[15px] bg-ouro-fundo text-ouro-sinal-texto">
             <Icone nome="alerta" tamanho={16} />

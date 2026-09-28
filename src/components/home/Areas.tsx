@@ -9,7 +9,7 @@ import { hrefEmBreve } from "@/lib/emBreve";
  *
  * As quatro cores repetem exatamente o par fundo/texto que `Etiqueta`
  * (`ui/Etiqueta.tsx`) já usa para o mesmo tom, então o contraste medido lá
- * vale aqui também, nos dois temas.
+ * vale aqui também, nos dois modos de cor.
  */
 const CLASSE_DO_ICONE: Record<Area["tom"], string> = {
   verde: "bg-verde-fundo text-verde-texto",
@@ -22,7 +22,7 @@ function Azulejo({ area }: { area: Area }) {
   return (
     <Link
       href={hrefDaArea(area)}
-      className="flex h-[152px] flex-col justify-between rounded-cartao bg-cartao p-5 shadow-cartao"
+      className="flex h-[9.5rem] flex-col justify-between rounded-cartao bg-cartao p-5 shadow-cartao"
     >
       <span
         className={`flex size-12 items-center justify-center rounded-[14px] ${CLASSE_DO_ICONE[area.tom]}`}
@@ -31,7 +31,7 @@ function Azulejo({ area }: { area: Area }) {
       </span>
       <div className="min-w-0">
         <div className="text-base font-bold">{area.nome}</div>
-        <div className="mt-0.5 truncate text-[13px] text-tinta-600">{area.apoio}</div>
+        <div className="mt-0.5 truncate text-[0.8125rem] text-tinta-600">{area.apoio}</div>
       </div>
     </Link>
   );
@@ -54,7 +54,7 @@ export function Areas() {
           <div className="mb-2.5 hidden md:block">
             <Rotulo icone="areas" tom="aberto">POR ÁREA</Rotulo>
           </div>
-          <h2 className="font-titulo text-[26px] leading-[1.08] font-bold tracking-[-0.025em] md:text-[40px] md:leading-[1.05] md:tracking-[-0.03em]">
+          <h2 className="font-titulo text-[1.625rem] leading-[1.08] font-bold tracking-[-0.025em] md:text-[2.5rem] md:leading-[1.05] md:tracking-[-0.03em]">
             <span className="md:hidden">Por área</span>
             <span className="hidden md:inline">O que você quer prestar?</span>
           </h2>
@@ -72,26 +72,26 @@ export function Areas() {
       {/* Desktop: as 12, em 6 colunas (`Main.dc.html:132`) a partir de `xl`;
           entre 768 e 1279px cada azulejo teria menos de 130px e o nome
           ("Administrativo") vazava, então são 3 colunas. */}
-      <div className="hidden gap-3 md:grid md:grid-cols-3 xl:grid-cols-6">
+      <div className="hidden gap-3 md:grid md:grid-cols-3 xl:grid-cols-6 fonte-grande:xl:grid-cols-3">
         {AREAS.map((area) => (
           <Azulejo key={area.nome} area={area} />
         ))}
       </div>
 
       {/* Celular: as 6 primeiras, em 3 colunas fixas (`Mobile.dc.html:56`). */}
-      <div className="grid grid-cols-3 gap-2 md:hidden">
+      <div className="grid grid-cols-3 gap-2 fonte-grande:grid-cols-2 md:hidden">
         {AREAS.slice(0, 6).map((area) => (
           <Link
             key={area.nome}
             href={hrefDaArea(area)}
-            className="flex h-[104px] flex-col items-center justify-center gap-2.5 rounded-[16px] bg-cartao px-2.5 py-3.5 text-center shadow-cartao"
+            className="flex h-[6.5rem] flex-col items-center justify-center gap-2.5 rounded-[16px] bg-cartao px-2.5 py-3.5 text-center shadow-cartao"
           >
             <span
               className={`flex size-[42px] items-center justify-center rounded-[12px] ${CLASSE_DO_ICONE[area.tom]}`}
             >
               <Icone nome={area.icone} tamanho={23} />
             </span>
-            <span className="text-[13px] leading-tight font-semibold text-tinta-900">
+            <span className="text-[0.8125rem] leading-tight font-semibold text-tinta-900">
               {area.nome}
             </span>
           </Link>

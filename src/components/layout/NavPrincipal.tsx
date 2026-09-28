@@ -7,7 +7,7 @@ import { Icone } from "@/components/ui/Icone";
 import { Gaveta } from "@/components/ui/Revelador";
 import { useSession } from "@/lib/auth/session";
 import { ITENS_DA_NAV } from "./itensDaNav";
-import { SeletorDeTema } from "./SeletorDeTema";
+import { ControlesDeAcessibilidade } from "./ControlesDeAcessibilidade";
 
 export { ITENS_DA_NAV, type ItemDaNav } from "./itensDaNav";
 
@@ -32,7 +32,7 @@ function Abas({
             key={item.rotulo}
             href={item.href}
             aria-current={ativo ? "page" : undefined}
-            className={`flex h-10 shrink-0 items-center gap-2 rounded-[10px] px-3 text-[15px] whitespace-nowrap ${
+            className={`flex h-10 shrink-0 items-center gap-2 rounded-[10px] px-3 text-[0.9375rem] whitespace-nowrap ${
               ativo
                 ? "bg-verde-fundo font-semibold text-verde-texto"
                 : "font-medium text-tinta-900 hover:bg-rebaixada"
@@ -42,7 +42,7 @@ function Abas({
                 já tem os 1216px do artboard: abaixo disso as cinco abas com
                 ícone não cabem ao lado da logo e do grupo da direita. */}
             {naHome && (
-              <Icone nome={item.icone} tamanho={18} className="hidden xl:block" />
+              <Icone nome={item.icone} tamanho={18} className="hidden xl:block fonte-grande:hidden" />
             )}
             {item.rotulo}
           </Link>
@@ -76,7 +76,7 @@ export function NavPrincipal({ className }: { className?: string }) {
   const caminho = usePathname();
   const naHome = caminho === "/";
   return (
-    <div className={`hidden items-center gap-1 lg:flex ${className ?? ""}`}>
+    <div className={`hidden items-center gap-1 lg:flex max-xl:fonte-grande:hidden ${className ?? ""}`}>
       <Suspense fallback={<Abas caminho="" busca={SEM_BUSCA} naHome={naHome} />}>
         <AbasComBusca caminho={caminho} naHome={naHome} />
       </Suspense>
@@ -85,7 +85,8 @@ export function NavPrincipal({ className }: { className?: string }) {
 }
 
 /**
- * A gaveta do celular, abaixo de `lg`: os mesmos `ITENS_DA_NAV` da nav de desktop, mais o seletor de tema. Fechar
+ * A gaveta do celular, abaixo de `lg` (abaixo de `xl` com a fonte nos
+ * degraus grandes, quando a nav não cabe na fileira do cabeçalho): os mesmos `ITENS_DA_NAV` da nav de desktop, mais alto contraste e tamanho da fonte. Fechar
  * ao navegar já é comportamento de `Gaveta` (`useRevelador`, `Revelador.tsx`).
  */
 export function GavetaDeNavegacao({ className }: { className?: string }) {
@@ -100,12 +101,12 @@ export function GavetaDeNavegacao({ className }: { className?: string }) {
       titulo="Menu"
       largura="estreita"
       gatilho="size-11 justify-center rounded-controle bg-rebaixada text-tinta-900 transition-colors hover:bg-linha"
-      className={`lg:hidden ${className ?? ""}`}
+      className={`lg:hidden max-xl:fonte-grande:block ${className ?? ""}`}
     >
       <div className="flex flex-col gap-1">
         {ITENS_DA_NAV.flatMap((item) => {
           const classe =
-            "h-11 items-center gap-3 rounded-controle px-3 text-[15px] font-medium text-tinta-900 hover:bg-rebaixada";
+            "h-11 items-center gap-3 rounded-controle px-3 text-[0.9375rem] font-medium text-tinta-900 hover:bg-rebaixada";
           const conteudo = (
             <>
               <Icone nome={item.icone} tamanho={18} />
@@ -135,16 +136,15 @@ export function GavetaDeNavegacao({ className }: { className?: string }) {
       <div className="mt-4 border-t border-linha pt-4">
         <Link
           href={logado ? "/conta" : "/entrar"}
-          className="flex h-11 items-center gap-3 rounded-controle px-3 text-[15px] font-semibold text-tinta-900 hover:bg-rebaixada"
+          className="flex h-11 items-center gap-3 rounded-controle px-3 text-[0.9375rem] font-semibold text-tinta-900 hover:bg-rebaixada"
         >
           <Icone nome="entrar" tamanho={18} />
           {logado ? "Minha conta" : "Entrar"}
         </Link>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-linha pt-4">
-        <span className="text-[13px] font-medium text-tinta-600">Tema</span>
-        <SeletorDeTema />
+      <div className="mt-4 border-t border-linha pt-4">
+        <ControlesDeAcessibilidade variante="gaveta" />
       </div>
     </Gaveta>
   );

@@ -2,7 +2,7 @@
  * O placeholder "em breve": todo botão sem função e todo link sem destino
  * chega aqui, em vez de fingir que faz algo.
  *
- * Uma lista fechada, e não texto livre em cada chamador: os dez recursos são
+ * Uma lista fechada, e não texto livre em cada chamador: os recursos são
  * o inventário completo do que o protótipo promete e o acervo ainda não
  * entrega, e cada chamador só escolhe qual deles é.
  */
@@ -14,8 +14,6 @@ export type RecursoEmBreve =
   | "acessibilidade"
   | "contato"
   | "alertas"
-  | "alto-contraste"
-  | "tamanho-da-fonte"
   | "lembrete";
 
 export const RECURSOS_EM_BREVE: Record<
@@ -52,14 +50,6 @@ export const RECURSOS_EM_BREVE: Record<
   alertas: {
     titulo: "Alertas",
     frase: "Receba o edital no dia em que ele sair.",
-  },
-  "alto-contraste": {
-    titulo: "Alto contraste",
-    frase: "Uma versão de cores com contraste máximo.",
-  },
-  "tamanho-da-fonte": {
-    titulo: "Tamanho da fonte",
-    frase: "Aumentar e diminuir o texto do site inteiro.",
   },
   lembrete: {
     titulo: "Lembretes",

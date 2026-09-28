@@ -53,14 +53,14 @@ function Cartao({ concurso, hoje }: { concurso: ConcursoResumo; hoje: Date }) {
       <div className="flex items-center gap-3.5">
         <Calendario iso={concurso.inscricoesAte} hoje={hoje} />
         <div className="min-w-0">
-          <div className={`text-[13px] font-bold ${corDoPrazo(concurso.inscricoesAte, hoje)}`}>
+          <div className={`text-[0.8125rem] font-bold ${corDoPrazo(concurso.inscricoesAte, hoje)}`}>
             {prazoRelativo(concurso.inscricoesAte, hoje) ?? "Encerra hoje"}
           </div>
           <div className="mt-0.5 truncate text-base font-bold">{siglaEEdital(concurso)}</div>
         </div>
       </div>
       <div className="text-sm leading-[1.45] text-tinta-600">{concurso.orgao.nome}</div>
-      <div className="flex gap-3.5 text-[13px] text-tinta-600">
+      <div className="flex gap-3.5 text-[0.8125rem] text-tinta-600">
         <span className="flex min-w-0 items-center gap-1.5">
           <Icone nome={meta1.icone} tamanho={15} />
           <span className="truncate">{meta1.texto}</span>
@@ -104,13 +104,13 @@ function CartaoMovel({ concurso, hoje }: { concurso: ConcursoResumo; hoje: Date 
       <div className="flex items-center gap-3">
         <Calendario iso={concurso.inscricoesAte} hoje={hoje} />
         <div className="min-w-0">
-          <div className={`text-[13px] font-bold ${corDoPrazo(concurso.inscricoesAte, hoje)}`}>
+          <div className={`text-[0.8125rem] font-bold ${corDoPrazo(concurso.inscricoesAte, hoje)}`}>
             {prazoRelativo(concurso.inscricoesAte, hoje) ?? "Encerra hoje"}
           </div>
           <div className="truncate text-base font-bold">{siglaEEdital(concurso)}</div>
         </div>
       </div>
-      <div className="text-[13px] leading-[1.45] text-tinta-600">
+      <div className="text-[0.8125rem] leading-[1.45] text-tinta-600">
         {concurso.orgao.nome} · {meta1.texto}
       </div>
     </Link>
@@ -141,7 +141,7 @@ export function EncerramSemana({
           <div className="mb-2.5 hidden md:block">
             <Rotulo icone="prazo" tom="urgente">ÚLTIMA CHAMADA</Rotulo>
           </div>
-          <h2 className="font-titulo text-[26px] leading-[1.08] font-bold tracking-[-0.025em] md:text-[40px] md:leading-[1.05] md:tracking-[-0.03em]">
+          <h2 className="font-titulo text-[1.625rem] leading-[1.08] font-bold tracking-[-0.025em] md:text-[2.5rem] md:leading-[1.05] md:tracking-[-0.03em]">
             Encerram esta semana
           </h2>
         </div>
