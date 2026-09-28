@@ -39,14 +39,14 @@ export function FatosDoConcurso({ fatos }: { fatos: Fato[] }) {
   return (
     <section aria-label="Resumo">
       {/* Celular: quatro cartões, ícone e texto lado a lado. */}
-      <div className="grid grid-cols-2 gap-2 md:hidden">
+      <div className="grid grid-cols-2 gap-2 fonte-grande:grid-cols-1 md:hidden">
         {doCelular.map((fato) => (
           <CartaoDoCelular key={fato.rotulo} fato={fato} />
         ))}
       </div>
 
       {/* Tablet e desktop: os seis, ícone em cima do texto. */}
-      <div className="hidden gap-3 md:grid md:grid-cols-3 xl:grid-cols-6">
+      <div className="hidden gap-3 md:grid md:grid-cols-3 xl:grid-cols-6 fonte-grande:xl:grid-cols-3">
         {fatos.map((fato) => (
           <CartaoDoFato key={fato.rotulo} fato={fato} />
         ))}
@@ -87,17 +87,17 @@ export function CartaoDeFato({
         <Icone nome={icone} tamanho={20} />
       </span>
       <div className="min-w-0">
-        <div className="text-[12px] font-bold tracking-[0.05em] text-tinta-500">{rotulo}</div>
+        <div className="text-[0.75rem] font-bold tracking-[0.05em] text-tinta-500">{rotulo}</div>
         <div
           className={`break-words ${
             informado
-              ? "font-titulo text-[28px] leading-[1.1] font-bold text-tinta-900"
-              : "font-titulo text-[22px] leading-[1.25] font-semibold text-tinta-500"
+              ? "font-titulo text-[1.75rem] leading-[1.1] font-bold text-tinta-900"
+              : "font-titulo text-[1.375rem] leading-[1.25] font-semibold text-tinta-500"
           }`}
         >
           {valor}
         </div>
-        {apoio && <div className="text-[13px] text-tinta-600">{apoio}</div>}
+        {apoio && <div className="text-[0.8125rem] text-tinta-600">{apoio}</div>}
       </div>
     </div>
   );
@@ -123,10 +123,10 @@ export function CartaoDeFatoCelular({
         <Icone nome={icone} tamanho={18} />
       </span>
       <div className="min-w-0">
-        <div className={informado ? "text-[18px] font-bold text-tinta-900" : "text-[15px] font-bold text-tinta-600"}>
+        <div className={informado ? "text-[1.125rem] font-bold text-tinta-900" : "text-[0.9375rem] font-bold text-tinta-600"}>
           {valor}
         </div>
-        {apoio && <div className="truncate text-[12px] text-tinta-600">{apoio}</div>}
+        {apoio && <div className="truncate text-[0.75rem] text-tinta-600">{apoio}</div>}
       </div>
     </div>
   );

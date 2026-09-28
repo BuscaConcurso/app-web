@@ -162,11 +162,11 @@ export default async function PaginaDoConcurso(
           className="flex flex-col gap-6 rounded-[22px] bg-cartao p-8 shadow-cartao"
         >
           <div>
-            <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
+            <h2 className="flex items-center gap-2.5 font-titulo text-[1.75rem] leading-none font-bold tracking-[-0.025em]">
               <Icone nome="previsto" tamanho={24} className="text-acao" />
               Cronograma
             </h2>
-            <p className="mt-1.5 text-[15px] text-tinta-600">
+            <p className="mt-1.5 text-[0.9375rem] text-tinta-600">
               Cada data mostra de qual trecho do ato ela foi lida.
             </p>
           </div>

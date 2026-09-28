@@ -74,8 +74,8 @@ async function ufsDoRodape(): Promise<LinkDeFaceta[]> {
   }
 }
 
-const CLASSE_DO_TITULO = "text-[12px] font-bold tracking-[0.06em] text-tinta-500 uppercase";
-const CLASSE_DO_LINK = "block text-[15px] break-words text-tinta-600 hover:text-tinta-900";
+const CLASSE_DO_TITULO = "text-[0.75rem] font-bold tracking-[0.06em] text-tinta-500 uppercase";
+const CLASSE_DO_LINK = "block text-[0.9375rem] break-words text-tinta-600 hover:text-tinta-900";
 
 function ColunaDeLinks({
   titulo,
@@ -129,9 +129,9 @@ export async function Rodape({
     <footer className="mt-24 border-t border-linha bg-cartao">
       <div className="conteudo flex flex-col gap-10 py-14">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
-          <div className="flex max-w-[360px] flex-col gap-3.5">
+          <div className="flex max-w-[22.5rem] flex-col gap-3.5">
             <Logo tamanho={32} />
-            <p className="text-[15px] leading-[1.55] text-tinta-600">
+            <p className="text-[0.9375rem] leading-[1.55] text-tinta-600">
               Concursos públicos abertos no Brasil, lidos direto do edital.
               Feito no Brasil.
             </p>
@@ -158,7 +158,7 @@ export async function Rodape({
                 <li key={uf.href}>
                   <Link
                     href={uf.href}
-                    className="flex min-h-[42px] items-center gap-1.5 rounded-full bg-rebaixada px-3.5 text-[13px] text-tinta-900"
+                    className="flex min-h-[2.625rem] items-center gap-1.5 rounded-full bg-rebaixada px-3.5 text-[0.8125rem] text-tinta-900"
                   >
                     {uf.rotulo}
                     <span className="numero text-tinta-500">{uf.total}</span>
@@ -174,7 +174,7 @@ export async function Rodape({
             só não veio com um artboard que os mostrasse. Restilizados nos
             tokens do canvas novo (`text-tinta-600`, pequeno), mas a palavra
             é a mesma de antes (`git show 2b91305:src/components/layout/Rodape.tsx`). */}
-        <div className="flex flex-col gap-4 border-t border-linha pt-6 text-[13px] text-tinta-600">
+        <div className="flex flex-col gap-4 border-t border-linha pt-6 text-[0.8125rem] text-tinta-600">
           <p>
             BuscaConcurso não organiza concursos. Confira sempre o edital
             original no diário oficial ou no site da banca antes de se

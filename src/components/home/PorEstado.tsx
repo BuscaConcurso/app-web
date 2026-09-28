@@ -33,7 +33,7 @@ function Celula({ uf, total, maximo }: { uf: Uf; total: number; maximo: number }
       ].join(" ")}
     >
       {uf}
-      {total > 0 && <span className="text-[11px] font-medium">{numero(total)}</span>}
+      {total > 0 && <span className="text-[0.6875rem] font-medium">{numero(total)}</span>}
     </Link>
   );
 }
@@ -48,11 +48,11 @@ function LinhaDeRanking({
   return (
     <Link
       href={link.href}
-      className="flex items-center justify-between gap-3 border-b border-linha-fraca py-2.5 text-[15px] last:border-0"
+      className="flex items-center justify-between gap-3 border-b border-linha-fraca py-2.5 text-[0.9375rem] last:border-0"
     >
       <span className="min-w-0 truncate">{link.rotulo}</span>
       <span
-        className={`flex h-[26px] min-w-[26px] shrink-0 items-center justify-center rounded-full px-2 text-[13px] font-bold ${classeDoNumero}`}
+        className={`flex h-[1.625rem] min-w-[1.625rem] shrink-0 items-center justify-center rounded-full px-2 text-[0.8125rem] font-bold ${classeDoNumero}`}
       >
         {numero(link.total)}
       </span>
@@ -101,7 +101,7 @@ export function PorEstado({
         <Rotulo icone="estados" tom="anil" className="mb-2.5">
           POR ESTADO
         </Rotulo>
-        <h2 className="font-titulo text-[40px] leading-[1.05] font-bold tracking-[-0.03em]">
+        <h2 className="font-titulo text-[2.5rem] leading-[1.05] font-bold tracking-[-0.03em]">
           Onde tem concurso aberto
         </h2>
       </div>
@@ -123,25 +123,25 @@ export function PorEstado({
                 Abertos por estado
               </div>
               <div className="flex gap-[3px]">
-                <span className="h-2.5 w-[22px] rounded-[3px] bg-rebaixada" />
+                <span className="h-2.5 w-[1.375rem] rounded-[3px] bg-rebaixada" />
                 <span
-                  className="h-2.5 w-[22px] rounded-[3px]"
+                  className="h-2.5 w-[1.375rem] rounded-[3px]"
                   style={{ background: ESTILO_DO_NIVEL[2].fundo }}
                 />
                 <span
-                  className="h-2.5 w-[22px] rounded-[3px]"
+                  className="h-2.5 w-[1.375rem] rounded-[3px]"
                   style={{ background: ESTILO_DO_NIVEL[3].fundo }}
                 />
                 <span
-                  className="h-2.5 w-[22px] rounded-[3px]"
+                  className="h-2.5 w-[1.375rem] rounded-[3px]"
                   style={{ background: ESTILO_DO_NIVEL[5].fundo }}
                 />
                 <span
-                  className="h-2.5 w-[22px] rounded-[3px]"
+                  className="h-2.5 w-[1.375rem] rounded-[3px]"
                   style={{ background: ESTILO_DO_NIVEL[7].fundo }}
                 />
               </div>
-              <div className="flex w-[122px] justify-between text-xs text-tinta-500">
+              <div className="flex w-[7.625rem] justify-between text-xs text-tinta-500">
                 <span>0</span>
                 <span>{numero(maximo)}</span>
               </div>

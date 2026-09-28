@@ -82,7 +82,7 @@ export function Numero({
 }) {
   return (
     <div>
-      <dt className="mb-0.5 text-[10px] font-semibold tracking-[0.06em] uppercase text-tinta-500">
+      <dt className="mb-0.5 text-[0.625rem] font-semibold tracking-[0.06em] uppercase text-tinta-500">
         {rotulo}
       </dt>
       <dd className="numero text-base font-medium text-tinta-900">{children}</dd>
@@ -110,7 +110,7 @@ function raioDoSelo(lado: number): string {
  * senão a caixa lisa (`faceDoSelo` decide). As três faces medem o mesmo lado
  * e têm o mesmo raio, e o título ao lado começa no mesmo x em qualquer uma.
  *
- * O logo vai por `SeloComLogo`, num fundo branco nos dois temas; se a imagem
+ * O logo vai por `SeloComLogo`, num fundo sempre branco; se a imagem
  * quebrar, aparece a caixa com a sigla que existir (ou a lisa).
  *
  * **O tamanho** é o lado em pixels (padrão 44, como no cartão de "Encerram
@@ -238,13 +238,13 @@ function SeloSemLogo({
   // numa caixa menor.
   const corpo = grande
     ? letras.length > 6
-      ? "font-titulo text-[13px] wrap-anywhere"
-      : "font-titulo text-[17px]"
+      ? "font-titulo text-[0.8125rem] wrap-anywhere"
+      : "font-titulo text-[1.0625rem]"
     : letras.length > 4
-      ? "text-[9px] wrap-anywhere"
+      ? "text-[0.5625rem] wrap-anywhere"
       : lado >= 44
         ? "text-xs"
-        : "text-[11px]";
+        : "text-[0.6875rem]";
 
   return (
     <span

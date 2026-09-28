@@ -1,11 +1,6 @@
 import Link from "next/link";
-import { BotaoEmBreve } from "@/components/ui/EmBreve";
-import { Icone } from "@/components/ui/Icone";
 import { hrefEmBreve } from "@/lib/emBreve";
-import { SeletorDeTema } from "./SeletorDeTema";
-
-/** O sinal de menos (U+2212), não o hífen nem o travessão. */
-const MENOS = "−";
+import { ControlesDeAcessibilidade } from "./ControlesDeAcessibilidade";
 
 /**
  * A barra utilitária: a faixa escura acima da nav (`Main.dc.html:24-31`).
@@ -27,12 +22,12 @@ export function BarraUtilitaria({
   // (`Main.dc.html:24`), e fica assim. Cada controle ocupa a
   // altura inteira dela (`h-9`) com respiro dos lados, o maior alvo que
   // cabe; é um desvio consciente da regra dos 42px, restrito a esta faixa
-  // que só aparece a partir de `md`. O tema continua na gaveta do menu,
-  // com alvos de 44px, para quem precisa de um alvo maior.
+  // que só aparece a partir de `md`. Alto contraste e fonte se repetem
+  // na gaveta do menu, com alvos de 44px, para quem precisa de um alvo maior.
   const alvo = "inline-flex h-9 min-w-9 items-center justify-center px-2";
 
   return (
-    <div className="hidden h-9 bg-utilitaria text-[13px] text-utilitaria-texto md:block">
+    <div className="hidden h-9 bg-utilitaria text-[0.8125rem] text-utilitaria-texto md:block">
       <div className="conteudo flex h-full items-center justify-between">
         <div className="flex min-w-0 items-center gap-2.5">
           <span aria-hidden="true" className="flex gap-0.5">
@@ -53,35 +48,7 @@ export function BarraUtilitaria({
         </div>
 
         <div className="-mr-2 flex shrink-0 items-center gap-1 whitespace-nowrap lg:gap-3">
-          {/* Abaixo de `lg` o rótulo sai e fica o ícone (com o nome no
-              `aria-label`), para a data à esquerda caber sem cortar. */}
-          <BotaoEmBreve
-            recurso="alto-contraste"
-            aria-label="Alto contraste"
-            className={`${alvo} gap-1.5 hover:underline`}
-          >
-            <Icone nome="contraste" tamanho={15} />
-            <span className="hidden lg:inline">Alto contraste</span>
-          </BotaoEmBreve>
-
-          <span className="flex">
-            <BotaoEmBreve
-              recurso="tamanho-da-fonte"
-              aria-label="Diminuir fonte"
-              className={`${alvo} text-[13px] font-semibold`}
-            >
-              A{MENOS}
-            </BotaoEmBreve>
-            <BotaoEmBreve
-              recurso="tamanho-da-fonte"
-              aria-label="Aumentar fonte"
-              className={`${alvo} text-[13px] font-semibold`}
-            >
-              A+
-            </BotaoEmBreve>
-          </span>
-
-          <SeletorDeTema compacto />
+          <ControlesDeAcessibilidade variante="barra" />
 
           <Link href={hrefEmBreve("como-lemos")} className={`${alvo} hover:underline`}>
             Como lemos os editais

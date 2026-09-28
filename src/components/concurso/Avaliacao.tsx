@@ -144,7 +144,7 @@ function BotaoDeVoto({
       disabled={disabled}
       aria-pressed={marcado}
       className={[
-        "inline-flex h-11 items-center gap-2 rounded-controle px-4 text-[14px] font-semibold transition-colors",
+        "inline-flex h-11 items-center gap-2 rounded-controle px-4 text-[0.875rem] font-semibold transition-colors",
         "disabled:cursor-not-allowed disabled:bg-rebaixada disabled:text-tinta-500",
         marcado ? corDeMarcado : "bg-rebaixada text-tinta-900 hover:bg-linha",
       ].join(" ")}
@@ -229,14 +229,14 @@ export function Avaliacao({
       </span>
 
       <div className="min-w-[220px] flex-1">
-        <p id={pergunta} className="text-[16px] font-bold text-tinta-900">
+        <p id={pergunta} className="text-[1rem] font-bold text-tinta-900">
           Esta página está certa?
         </p>
         {/* O que se avalia é dito, porque muda o que a pessoa responde: não é
             o concurso que é bom ou ruim, é a leitura que o modelo fez do ato.
             Sem isto, um "não" poderia querer dizer "não gostei do salário",
             que não é conserto de nada. */}
-        <p className="mt-0.5 text-[14px] leading-[1.5] text-tinta-600">
+        <p className="mt-0.5 text-[0.875rem] leading-[1.5] text-tinta-600">
           Tudo acima foi lido do ato por um modelo. Um “não” faz alguém
           conferir.
         </p>
@@ -266,17 +266,15 @@ export function Avaliacao({
       {/* `empty:absolute`: vazio, o recibo sai do fluxo do `flex-wrap` (que
           abria uma fileira de 24px embaixo dos botões) sem sair da árvore de
           acessibilidade, onde a região viva precisa estar antes do texto. */}
-      <p aria-live="polite" className="w-full text-[12px] text-tinta-500 empty:absolute">
+      <p aria-live="polite" className="w-full text-[0.75rem] text-tinta-500 empty:absolute">
         {recibo(estado.resultado, estado.gostei)}
       </p>
 
       <dialog
         ref={modal}
-        /* `backdrop:bg-veu/40` e não `tinta-900`: os dois são #141715 no
-           tema claro, mas `tinta-900` é token de texto e inverte no escuro,
-           onde o véu virava um clarão branco sobre a página quase preta.
-           `veu` não inverte. É o mesmo tom do fundo da gaveta, para as duas
-           camadas concordarem. */
+        /* `backdrop:bg-veu/40` e não `tinta-900`: `tinta-900` é token de
+           texto, e o véu tem papel próprio. É o mesmo tom do fundo da
+           gaveta, para as duas camadas concordarem. */
         className="m-auto w-[min(32rem,92vw)] rounded-cartao bg-cartao p-6 text-tinta-900 backdrop:bg-veu/40"
       >
         <form
@@ -299,7 +297,7 @@ export function Avaliacao({
           <h2 className="text-sm font-semibold">
             Qual parte está errada, e o que devia estar no lugar?
           </h2>
-          <p className="text-[12px] leading-5 text-tinta-600">
+          <p className="text-[0.75rem] leading-5 text-tinta-600">
             O seu “não” já foi registrado. Escrever é opcional, e é o
             que permite consertar em vez de só contar. Diga de qual parte você
             fala (o cronograma, os cargos, o órgão, uma resposta) e o que o ato
@@ -311,13 +309,13 @@ export function Avaliacao({
             rows={4}
             maxLength={LIMITE_DO_COMENTARIO}
             placeholder="Ex.: no cronograma, a data de fim das inscrições é de outro concurso; no ato ela é 12/03."
-            className="w-full rounded-controle bg-rebaixada px-3 py-2 text-[13px] leading-6 text-tinta-900 outline-none focus:ring-2 focus:ring-acao"
+            className="w-full rounded-controle bg-rebaixada px-3 py-2 text-[0.8125rem] leading-6 text-tinta-900 outline-none focus:ring-2 focus:ring-acao"
           />
           {/* O recibo de fora fica atrás do modal, então o comentário que não
               gravou precisa dizer isso aqui dentro: senão a janela fica
               aberta sem explicar por quê. */}
           {estado.comentou && estado.resultado !== "gravada" && (
-            <p role="alert" className="text-[12px] text-urucum-texto">
+            <p role="alert" className="text-[0.75rem] text-urucum-texto">
               {recibo(estado.resultado, estado.gostei)}
             </p>
           )}
@@ -325,14 +323,14 @@ export function Avaliacao({
             <button
               type="button"
               onClick={() => modal.current?.close()}
-              className="min-h-11 rounded-controle px-4 text-[14px] font-medium text-tinta-600 hover:bg-rebaixada"
+              className="min-h-11 rounded-controle px-4 text-[0.875rem] font-medium text-tinta-600 hover:bg-rebaixada"
             >
               Fechar sem escrever
             </button>
             <button
               type="submit"
               disabled={enviando}
-              className="min-h-11 rounded-controle bg-acao px-4 text-[14px] font-semibold text-acao-texto hover:bg-acao-hover disabled:bg-rebaixada disabled:text-tinta-500"
+              className="min-h-11 rounded-controle bg-acao px-4 text-[0.875rem] font-semibold text-acao-texto hover:bg-acao-hover disabled:bg-rebaixada disabled:text-tinta-500"
             >
               Enviar
             </button>

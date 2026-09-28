@@ -84,7 +84,7 @@ function alternarNoStorage(slug: string, indice: number): void {
  * isso mora inteiro em `localStorage`, por concurso (a chave leva o `slug`).
  *
  * `useSyncExternalStore`, não `useState` + `useEffect`: o mesmo problema que
- * `SeletorDeTema` já resolve para o tema (`lib/tema.ts`), ler o
+ * `ControlesDeAcessibilidade` já resolve (`lib/acessibilidade.ts`), ler o
  * `localStorage` teria que esperar a hidratação para não divergir do HTML do
  * servidor (que não tem acesso a ele), e `useSyncExternalStore` é o hook que
  * faz essa troca sem o efeito colateral de chamar `setState` de dentro de um
@@ -113,7 +113,7 @@ export function PassosDaInscricao({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="mb-1.5 text-[12px] font-bold tracking-[0.05em] text-tinta-500">
+      <div className="mb-1.5 text-[0.75rem] font-bold tracking-[0.05em] text-tinta-500">
         PARA SE INSCREVER
       </div>
       {passos.map((passo, indice) => {

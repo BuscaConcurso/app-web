@@ -5,8 +5,8 @@
  *
  * A marca vem de Athos Bulcão: azulejo verde, sol em ouro, papel de edital.
  * O ouro é a chamada única da tela. Urucum é prazo curto. Anil é link e
- * informação. Os nomes são de papel e não de cor: o escuro troca o valor, o
- * componente não muda.
+ * informação. Os nomes são de papel e não de cor: o alto contraste troca o
+ * valor, o componente não muda.
  */
 @theme {
   --color-pagina: #f6f4ee;
@@ -64,11 +64,11 @@
   --color-rodape: #ffffff;
   --color-rodape-texto: #0f1f17;
   --color-rodape-suave: #4f5d55;
-  /* O véu atrás de gaveta e diálogo: não inverte com o tema (um token de
-   * texto como `tinta-900` vira claro no escuro e o véu virava um clarão). */
+  /* O véu atrás de gaveta e diálogo: token próprio, e não o `tinta-900` de
+   * texto, porque os dois papéis não mudam juntos. */
   --color-veu: #141715;
-  /* O fundo do logo oficial no selo do órgão: branco nos dois temas, porque
-   * o arquivo de marca é desenhado para fundo claro. Como o véu, não inverte. */
+  /* O fundo do logo oficial no selo do órgão: sempre branco, porque o
+   * arquivo de marca é desenhado para fundo claro. */
   --color-logo-fundo: #ffffff;
 
   --font-titulo: var(--fonte-bricolage), "Helvetica Neue", Arial, sans-serif;
@@ -107,108 +107,110 @@
 }
 
 /**
- * Tema escuro.
+ * Alto contraste.
  *
- * Só troca o valor dos tokens; nenhum componente sabe que ele existe. As
- * regras do protótipo continuam valendo, invertidas: o que separa as caixas é
- * o degrau entre superfícies, e agora o cartão é mais claro que a página em
- * vez de mais branco.
+ * Continua claro (o site só tem tema claro): o que muda é a distância entre
+ * texto e fundo. Letra preta sobre branco, linhas pretas no lugar do degrau
+ * sutil entre superfícies, e as cores de marca e de sinal escurecidas até
+ * passarem de 7:1 (AAA). Como no resto do site, só troca o valor dos tokens;
+ * nenhum componente sabe que ele existe.
  *
- * A medida de todo par de texto e fundo aqui é `src/lib/contraste.test.ts`:
- * os de leitura passam de 4.5:1 e as superfícies de ação passam de 3:1.
- *
- * A segunda regra cobre tanto a escolha "sistema" quanto a ausência do
- * atributo. Isso vale antes de qualquer JavaScript rodar, então quem usa o
- * sistema no escuro nunca vê um lampejo claro.
+ * A medida de todo par é `src/lib/contraste.test.ts`, com o piso de 7:1 para
+ * texto neste modo.
  */
-:root[data-tema="escuro"],
-:root:not([data-tema="claro"]):not([data-tema="escuro"]):not([data-tema="sistema"]) {
-  color-scheme: dark;
-  --color-pagina: #0b1611;
-  --color-cartao: #13211a;
-  --color-rebaixada: #1c2d24;
-  --color-faixa: #072a19;
-  --color-faixa-texto: #cfe3d6;
-  --color-utilitaria: #041a0f;
-  --color-utilitaria-texto: #cfe3d6;
-  --color-linha: #22362b;
-  --color-linha-fraca: #1a2a21;
-  --color-contorno: #34493d;
-  --color-tinta-900: #eef2ee;
-  --color-tinta-600: #b3c0b8;
-  --color-tinta-500: #97a59c;
-  /* O protótipo repete o verde de ação do claro (#0B6B3A) aqui, mas `acao`
-   * como não-texto (o anel de foco em `focus:ring-acao`, o ponto de "hoje"
-   * do cronograma, o marcador do filtro selecionado, direto sobre `cartao`
-   * ou `pagina`) cai para 2,52:1 e 2,80:1, os dois abaixo do mínimo de
-   * não-texto (3:1). Por isso `acao` é só superfície: texto verde
-   * usa `verde-texto`, não `acao` (ver `contraste.test.ts`). Clareado em
-   * quatro passos de 4 no canal verde, #0B7B3A: 3,10:1 sobre `cartao` e o
-   * branco de `acao-texto` ainda lê 5,37:1 sobre ele, longe do piso de
-   * 4.5:1. */
-  --color-acao: #0b7b3a;
-  --color-acao-hover: #0e7a43;
-  --color-acao-texto: #ffffff;
-  --color-link: #8fb0f0;
-  --color-link-hover: #7fd3a2;
-  --color-ouro-hover: #f5cd4f;
-  --color-verde-fundo: #16382a;
-  --color-verde-texto: #7fd3a2;
-  --color-anil-fundo: #1a2744;
-  --color-anil-texto: #a9c0f2;
-  --color-ouro-fundo: #33290b;
-  --color-ouro-sinal-texto: #f2c230;
-  --color-urucum: #b8401f;
-  --color-urucum-fundo: #3a1c12;
-  --color-urucum-texto: #f4a58c;
-  --color-neutro-fundo: #1c2d24;
-  --color-neutro-texto: #eef2ee;
-  --color-rodape: #13211a;
-  --color-rodape-texto: #eef2ee;
-  --color-rodape-suave: #b3c0b8;
+:root[data-contraste="alto"] {
+  --color-pagina: #ffffff;
+  --color-cartao: #ffffff;
+  --color-rebaixada: #ededed;
+  --color-faixa: #000000;
+  --color-faixa-texto: #ffffff;
+  --color-utilitaria: #000000;
+  --color-utilitaria-texto: #ffffff;
+
+  --color-linha: #000000;
+  --color-linha-fraca: #4d4d4d;
+  --color-contorno: #000000;
+
+  --color-tinta-900: #000000;
+  --color-tinta-600: #1f1f1f;
+  --color-tinta-500: #2e2e2e;
+
+  --color-acao: #004020;
+  --color-acao-hover: #002612;
+  --color-link: #00237a;
+  --color-link-hover: #000000;
+
+  --color-ouro-texto: #000000;
+
+  --color-verde: #004020;
+  --color-verde-fundo: #e4f1e8;
+  --color-verde-texto: #004020;
+  --color-anil: #00237a;
+  --color-anil-fundo: #e7ecf8;
+  --color-anil-texto: #00237a;
+  --color-ouro-fundo: #fcf1cf;
+  --color-ouro-sinal-texto: #3d2d00;
+  --color-urucum: #7a2610;
+  --color-urucum-fundo: #fbe7e0;
+  --color-urucum-texto: #6b1f0a;
+  --color-neutro-fundo: #ededed;
+  --color-neutro-texto: #000000;
+
+  --color-rodape: #ffffff;
+  --color-rodape-texto: #000000;
+  --color-rodape-suave: #1f1f1f;
   --color-veu: #000000;
+
+  /* Sem sombra difusa: o que separa as caixas é a linha preta. */
+  --shadow-cartao: 0 0 0 1px var(--color-linha);
+  --shadow-numeros: 0 0 0 1px var(--color-linha);
+  --shadow-tabela: 0 0 0 1px var(--color-linha);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root[data-tema="sistema"] {
-    color-scheme: dark;
-    --color-pagina: #0b1611;
-    --color-cartao: #13211a;
-    --color-rebaixada: #1c2d24;
-    --color-faixa: #072a19;
-    --color-faixa-texto: #cfe3d6;
-    --color-utilitaria: #041a0f;
-    --color-utilitaria-texto: #cfe3d6;
-    --color-linha: #22362b;
-    --color-linha-fraca: #1a2a21;
-    --color-contorno: #34493d;
-    --color-tinta-900: #eef2ee;
-    --color-tinta-600: #b3c0b8;
-    --color-tinta-500: #97a59c;
-    /* Mesmo ajuste do bloco `[data-tema="escuro"]` acima: ver o comentário
-     * lá para o porquê de #0B7B3A. */
-    --color-acao: #0b7b3a;
-    --color-acao-hover: #0e7a43;
-    --color-acao-texto: #ffffff;
-    --color-link: #8fb0f0;
-    --color-link-hover: #7fd3a2;
-    --color-ouro-hover: #f5cd4f;
-    --color-verde-fundo: #16382a;
-    --color-verde-texto: #7fd3a2;
-    --color-anil-fundo: #1a2744;
-    --color-anil-texto: #a9c0f2;
-    --color-ouro-fundo: #33290b;
-    --color-ouro-sinal-texto: #f2c230;
-    --color-urucum: #b8401f;
-    --color-urucum-fundo: #3a1c12;
-    --color-urucum-texto: #f4a58c;
-    --color-neutro-fundo: #1c2d24;
-    --color-neutro-texto: #eef2ee;
-    --color-rodape: #13211a;
-    --color-rodape-texto: #eef2ee;
-    --color-rodape-suave: #b3c0b8;
-  --color-veu: #000000;
+/* Link sublinhado: em alto contraste a cor sozinha não basta para dizer que
+ * o texto leva a algum lugar. */
+:root[data-contraste="alto"] main a:not([class*="bg-"]) {
+  text-decoration-line: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* O anel de foco fica mais grosso e preto, o maior contraste possível sobre
+ * as superfícies brancas deste modo. */
+:root[data-contraste="alto"] :focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 2px;
+}
+
+/**
+ * Tamanho da fonte (A− e A+ da barra utilitária).
+ *
+ * Todo tamanho de texto do site é `rem`, então mudar o `font-size` do `html`
+ * escala o texto inteiro de uma vez. Os degraus são os de
+ * `src/lib/acessibilidade.ts`; sem o atributo, fica o padrão do navegador,
+ * que respeita quem já aumentou a fonte nas configurações dele.
+ */
+/* Para as grades que não cabem com a fonte grande: `fonte-grande:` vale nos
+ * dois degraus de cima (125% e 137,5%) e reorganiza só ali, sem mexer no
+ * desenho do tamanho padrão. O seletor pelo `html` pesa mais que a classe de
+ * breakpoint, então ganha dela sem depender da ordem no CSS. */
+@custom-variant fonte-grande {
+  :root[data-fonte="2"] &,
+  :root[data-fonte="3"] & {
+    @slot;
   }
+}
+
+:root[data-fonte="-1"] {
+  font-size: 87.5%;
+}
+:root[data-fonte="1"] {
+  font-size: 112.5%;
+}
+:root[data-fonte="2"] {
+  font-size: 125%;
+}
+:root[data-fonte="3"] {
+  font-size: 137.5%;
 }
 
 html {

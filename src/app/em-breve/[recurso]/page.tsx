@@ -20,18 +20,17 @@ export default async function EmBreve({
   const { titulo, frase } = RECURSOS_EM_BREVE[recurso];
 
   return (
-    <section className="conteudo grid gap-8 py-16 md:grid-cols-[1fr_440px]">
+    <section className="conteudo grid gap-8 py-16 md:grid-cols-[1fr_440px] max-lg:fonte-grande:grid-cols-1">
       <div className="flex flex-col justify-center gap-4">
-        {/* `acao` é só superfície (não passa contraste de texto no escuro): o texto verde usa
-            `verde-texto`, que é a mesma cor no claro e o par que passa
-            contraste no escuro. */}
-        <p className="text-[13px] font-bold tracking-[0.06em] text-verde-texto">
+        {/* `acao` é só superfície: o texto verde usa `verde-texto`, o par
+            medido em `contraste.test.ts`. */}
+        <p className="text-[0.8125rem] font-bold tracking-[0.06em] text-verde-texto">
           EM BREVE
         </p>
-        <h1 className="font-titulo text-[40px] font-bold leading-[1.05] tracking-[-0.03em] break-words">
+        <h1 className="font-titulo text-[2.5rem] font-bold leading-[1.05] tracking-[-0.03em] break-words">
           {titulo}
         </h1>
-        <p className="max-w-[520px] text-[17px] leading-[1.55] text-tinta-600">
+        <p className="max-w-[32.5rem] text-[1.0625rem] leading-[1.55] text-tinta-600">
           {frase}
         </p>
         <BotaoLink
@@ -47,7 +46,7 @@ export default async function EmBreve({
       <Azulejos
         ladrilhos={FAIXA_MARCA}
         colunas={6}
-        className="hidden rounded-painel md:grid"
+        className="hidden rounded-painel md:grid max-lg:fonte-grande:hidden"
       />
     </section>
   );

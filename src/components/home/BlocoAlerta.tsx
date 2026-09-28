@@ -124,11 +124,11 @@ export function BlocoAlerta({
           aria-hidden="true"
           className="absolute -top-9 -right-9 size-[72px] rounded-full bg-ouro"
         />
-        <div className="relative flex items-center gap-2 text-[12px] font-bold tracking-[0.06em] text-ouro">
+        <div className="relative flex items-center gap-2 text-[0.75rem] font-bold tracking-[0.06em] text-ouro">
           <Icone nome="alerta" tamanho={16} />
           ALERTA GRÁTIS
         </div>
-        <h2 className="relative font-titulo text-[22px] leading-[1.15] font-bold tracking-[-0.02em]">
+        <h2 className="relative font-titulo text-[1.375rem] leading-[1.15] font-bold tracking-[-0.02em]">
           {titulo ?? "Receba o edital no dia em que ele sair."}
         </h2>
         <form onSubmit={aoEnviar} className="relative flex flex-col gap-2.5">
@@ -140,7 +140,7 @@ export function BlocoAlerta({
             name="email"
             type="email"
             placeholder="seu@email.com"
-            className="h-12 rounded-[12px] border-0 bg-cartao px-3.5 text-[15px] text-tinta-900 outline-none placeholder:text-tinta-500"
+            className="h-12 rounded-[12px] border-0 bg-cartao px-3.5 text-[0.9375rem] text-tinta-900 outline-none placeholder:text-tinta-500"
           />
           <button
             type="submit"
@@ -160,7 +160,7 @@ export function BlocoAlerta({
     <div className="conteudo mt-12 md:mt-24">
       <section
         id="alerta"
-        className="overflow-hidden rounded-[22px] bg-faixa text-white lg:flex lg:h-[340px] lg:rounded-[28px]"
+        className="overflow-hidden rounded-[22px] bg-faixa text-white lg:flex lg:h-[21.25rem] lg:rounded-[28px]"
       >
         <div className="relative flex flex-col gap-4 overflow-hidden p-6 lg:flex-grow lg:justify-center lg:gap-[18px] lg:p-0 lg:pl-14">
           {/* Duas bolhas soltas no celular, no lugar da grade de 9 do desktop. */}
@@ -173,37 +173,37 @@ export function BlocoAlerta({
             className="absolute right-10 -bottom-[30px] size-[60px] rounded-full bg-ouro lg:hidden"
           />
 
-          <div className="relative flex items-center gap-2.5 text-[13px] font-bold tracking-[0.06em] text-ouro">
+          <div className="relative flex items-center gap-2.5 text-[0.8125rem] font-bold tracking-[0.06em] text-ouro">
             <Icone nome="alerta" tamanho={18} />
             ALERTA GRÁTIS
           </div>
-          <h2 className="relative font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.03em] lg:text-[44px] lg:leading-[1.05]">
+          <h2 className="relative font-titulo text-[1.625rem] leading-[1.1] font-bold tracking-[-0.03em] lg:text-[2.75rem] lg:leading-[1.05]">
             Receba o edital no dia em que ele sair.
           </h2>
 
-          <form onSubmit={aoEnviar} className="relative flex flex-col gap-2 lg:max-w-[620px] lg:flex-row lg:gap-2">
+          <form onSubmit={aoEnviar} className="relative flex flex-col gap-2 lg:max-w-[38.75rem] lg:flex-row lg:gap-2">
             <label htmlFor="alerta-email" className="sr-only">
               Seu e-mail
             </label>
-            <div className="flex h-[52px] items-center gap-2.5 rounded-[13px] bg-cartao px-4 lg:h-14 lg:flex-grow lg:rounded-[14px]">
+            <div className="flex h-[3.25rem] items-center gap-2.5 rounded-[13px] bg-cartao px-4 lg:h-14 lg:flex-grow lg:rounded-[14px]">
               <Icone nome="email" tamanho={20} className="hidden text-tinta-500 lg:block" />
               <input
                 id="alerta-email"
                 name="email"
                 type="email"
                 placeholder="seu@email.com"
-                className="min-w-0 flex-grow border-0 bg-transparent text-base text-tinta-900 outline-none placeholder:text-tinta-500 lg:text-[17px]"
+                className="min-w-0 flex-grow border-0 bg-transparent text-base text-tinta-900 outline-none placeholder:text-tinta-500 lg:text-[1.0625rem]"
               />
             </div>
             <button
               type="submit"
-              className="h-[52px] shrink-0 rounded-[13px] bg-ouro px-6 font-bold text-ouro-texto lg:h-14 lg:rounded-[14px] lg:text-base"
+              className="h-[3.25rem] shrink-0 rounded-[13px] bg-ouro px-6 font-bold text-ouro-texto lg:h-14 lg:rounded-[14px] lg:text-base"
             >
               Criar alerta
             </button>
           </form>
 
-          <div className="relative text-[13px] text-faixa-texto lg:flex lg:gap-6 lg:text-sm">
+          <div className="relative text-[0.8125rem] text-faixa-texto lg:flex lg:gap-6 lg:text-sm">
             <span className="lg:hidden">{GARANTIAS.join(" · ")}</span>
             {GARANTIAS.map((garantia) => (
               <span key={garantia} className="hidden items-center gap-1.5 lg:flex">

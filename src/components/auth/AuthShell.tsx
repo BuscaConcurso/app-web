@@ -23,14 +23,14 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       <div className="hidden flex-col bg-faixa lg:flex">
         <div className="flex flex-1 flex-col items-center justify-center gap-6 px-14 text-center">
           <Logo variante="empilhado" tom="claro" tamanho={64} />
-          <p className="max-w-[360px] text-[17px] leading-[1.55] text-faixa-texto">
+          <p className="max-w-[22.5rem] text-[1.0625rem] leading-[1.55] text-faixa-texto">
             {DESCRICAO_SITE.split(".")[0]}.
           </p>
         </div>
         <Azulejos ladrilhos={FAIXA_MARCA} colunas={6} />
       </div>
       <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-14 lg:px-10">
-        <div className="w-full max-w-[420px] rounded-painel bg-cartao p-8 shadow-cartao">
+        <div className="w-full max-w-[26.25rem] rounded-painel bg-cartao p-8 shadow-cartao">
           {children}
         </div>
       </div>

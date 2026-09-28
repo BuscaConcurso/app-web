@@ -52,7 +52,7 @@ export function Cabecalho({ atualizadoEm }: { atualizadoEm: string | null }) {
   const classeDaNav = `${naPaginaDoConcurso ? "hidden lg:block" : "block"} border-b border-linha bg-cartao`;
   const classeDaFileira = [
     "conteudo flex flex-wrap items-center gap-x-1",
-    "lg:h-[76px] lg:flex-nowrap lg:gap-x-6",
+    "lg:h-[4.75rem] lg:flex-nowrap lg:gap-x-6",
     naHome ? "xl:gap-x-10" : "xl:gap-x-7",
   ].join(" ");
 
@@ -83,14 +83,14 @@ export function Cabecalho({ atualizadoEm }: { atualizadoEm: string | null }) {
           </Link>
 
           {!naHome && (
-            <div className="order-last min-w-0 basis-full pb-3 lg:order-none lg:max-w-[520px] lg:flex-1 lg:basis-auto lg:pb-0">
+            <div className="order-last min-w-0 basis-full pb-3 lg:order-none lg:max-w-[32.5rem] lg:flex-1 lg:basis-auto lg:pb-0">
               <BarraBuscaDoCabecalho />
             </div>
           )}
 
           <NavPrincipal className={naHome ? "lg:flex-1" : "lg:ml-auto"} />
 
-          <div className="ml-auto flex shrink-0 items-center gap-1 lg:ml-0 lg:gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-1 lg:ml-0 lg:gap-2 max-xl:fonte-grande:ml-auto">
             {naHome && (
               <BotaoEmBreve
                 recurso="salvos"
@@ -163,7 +163,7 @@ function CabecalhoCelularDoConcurso() {
   }
 
   return (
-    <div className="flex h-[60px] items-center gap-1 border-b border-linha bg-cartao px-2 lg:hidden">
+    <div className="flex h-[3.75rem] items-center gap-1 border-b border-linha bg-cartao px-2 lg:hidden">
       <button
         type="button"
         onClick={voltar}

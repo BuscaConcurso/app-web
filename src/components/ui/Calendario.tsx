@@ -111,17 +111,17 @@ export function Calendario({
     <div
       aria-hidden="true"
       className={`flex shrink-0 flex-col items-center overflow-hidden rounded-[12px] ${sobreOTom ? "bg-cartao" : estilo.caixa} ${
-        lg ? "h-[72px] w-16" : "h-[60px] w-14"
+        lg ? "h-[4.5rem] w-16" : "h-[3.75rem] w-14"
       }`}
     >
       <span
-        className={`flex h-[18px] w-full items-center justify-center text-[10px] font-bold ${estilo.faixa}`}
+        className={`flex h-[1.125rem] w-full items-center justify-center text-[0.625rem] font-bold ${estilo.faixa}`}
       >
         {MESES[Number(mes) - 1]}
       </span>
       <span
         className={`font-titulo font-bold ${estilo.dia} ${
-          lg ? "text-[30px] leading-[54px]" : "text-2xl leading-10"
+          lg ? "text-[1.875rem] leading-[54px]" : "text-2xl leading-10"
         }`}
       >
         {Number(dia)}

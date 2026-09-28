@@ -138,10 +138,10 @@ export default async function PaginaDoOrgao(
               <Selo sigla={orgao.sigla} logoUrl={orgao.logoUrl} tamanho={72} />
             </div>
             <div className="min-w-0">
-              <h1 className="font-titulo text-[22px] leading-[1.15] font-bold tracking-[-0.02em] break-words text-balance md:text-[32px] md:leading-[1.1] md:tracking-[-0.025em]">
+              <h1 className="font-titulo text-[1.375rem] leading-[1.15] font-bold tracking-[-0.02em] break-words text-balance md:text-[2rem] md:leading-[1.1] md:tracking-[-0.025em]">
                 {orgao.nome}
               </h1>
-              <p className="mt-1.5 text-sm text-tinta-600 md:text-[15px]">
+              <p className="mt-1.5 text-sm text-tinta-600 md:text-[0.9375rem]">
                 {linhaDeContexto(orgao)}
               </p>
             </div>
@@ -160,7 +160,7 @@ export default async function PaginaDoOrgao(
             na página do concurso (`Concurso.dc.html:90`): dentro dele eram
             cartão sobre cartão, só com a sombra de baixo, e pareciam
             quebrados. */}
-        <div className="-mt-2 grid grid-cols-3 gap-2 md:gap-3">
+        <div className="-mt-2 grid grid-cols-3 gap-2 max-md:fonte-grande:grid-cols-1 md:gap-3">
           <CartaoDeFato
             icone="aberto"
             cor="bg-verde-fundo text-verde-texto"
@@ -203,7 +203,7 @@ export default async function PaginaDoOrgao(
                   : `/orgaos/${orgao.slug}`
               }
             />
-            <p className="text-[12px] text-tinta-600">
+            <p className="text-[0.75rem] text-tinta-600">
               {numero(ordenados.length)} concursos, {numero(POR_PAGINA)} por
               página
             </p>

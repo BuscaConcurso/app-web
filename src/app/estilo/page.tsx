@@ -4,7 +4,7 @@ import { Logo } from "@/components/marca/Logo";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Cargos } from "@/components/concurso/Cargos";
 import { Faq } from "@/components/concurso/Faq";
-import { SeletorDeTema } from "@/components/layout/SeletorDeTema";
+import { ControlesDeAcessibilidade } from "@/components/layout/ControlesDeAcessibilidade";
 import { Abas } from "@/components/ui/Abas";
 import { Botao, type TamanhoDoBotao, type VarianteDoBotao } from "@/components/ui/Botao";
 import { Calendario } from "@/components/ui/Calendario";
@@ -75,7 +75,7 @@ function Bloco({
   return (
     <section className="mb-8">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-titulo text-[18px] font-semibold tracking-[-0.01em]">
+        <h2 className="font-titulo text-[1.125rem] font-semibold tracking-[-0.01em]">
           {titulo}
         </h2>
         {nota && <Rotulo>{nota}</Rotulo>}
@@ -162,7 +162,7 @@ export default function Estilo() {
   return (
     <div className="conteudo py-10">
       <header className="mb-8">
-        <h1 className="font-titulo text-[27px] font-semibold tracking-[-0.02em]">
+        <h1 className="font-titulo text-[1.6875rem] font-semibold tracking-[-0.02em]">
           Design system
         </h1>
         <p className="mt-2 max-w-[70ch] text-sm leading-6 text-tinta-600">
@@ -174,19 +174,20 @@ export default function Estilo() {
       </header>
 
       {/*
-        O seletor de tema abre a página, e não fecha: tudo abaixo tem de ser
-        olhado duas vezes, e este é o interruptor. É o MESMO componente do
-        cabeçalho, e não uma cópia: o estado vive no atributo `data-tema` do
-        `html`, e clicar aqui e ver o de cima mudar é a própria conferência.
+        Os controles de acessibilidade abrem a página, e não fecham: tudo
+        abaixo tem de ser olhado também em alto contraste e com a fonte
+        maior. É o MESMO componente da gaveta do menu, e não uma cópia: o
+        estado vive nos atributos `data-contraste` e `data-fonte` do `html`.
       */}
-      <Bloco titulo="Tema" nota="claro · escuro · sistema, e sistema é o padrão">
+      <Bloco titulo="Acessibilidade" nota="alto contraste · tamanho da fonte">
         <Cartao className="flex flex-wrap items-center gap-4 p-5">
-          <SeletorDeTema />
-          <p className="max-w-[60ch] text-[12px] leading-5 text-tinta-600">
-            Três posições e não um interruptor de duas: quem quer que o site
-            siga o aparelho precisa de um lugar para onde voltar. Sem escolha
-            (e portanto também sem JavaScript), o CSS segue a preferência do
-            sistema sozinho.
+          <div className="w-full max-w-[20rem]">
+            <ControlesDeAcessibilidade variante="gaveta" />
+          </div>
+          <p className="max-w-[60ch] text-[0.75rem] leading-5 text-tinta-600">
+            O site só tem tema claro. O alto contraste continua claro e leva
+            todo texto a 7:1; a fonte vai de 87,5% a 137,5% em degraus, e todo
+            tamanho de texto é `rem` para acompanhar.
           </p>
         </Cartao>
       </Bloco>
@@ -215,7 +216,7 @@ export default function Estilo() {
           </Cartao>
           <div className="flex flex-col items-center justify-center gap-4 rounded-cartao bg-faixa p-6 sm:p-10">
             <Logo variante="empilhado" tom="claro" tamanho={64} />
-            <span className="text-[12px] font-bold tracking-[0.06em] text-faixa-texto uppercase">
+            <span className="text-[0.75rem] font-bold tracking-[0.06em] text-faixa-texto uppercase">
               Empilhado · sobre verde
             </span>
           </div>
@@ -228,7 +229,7 @@ export default function Estilo() {
           </Cartao>
           <div className="flex flex-col items-center justify-center gap-3 rounded-cartao bg-faixa p-6">
             <Logo variante="simbolo" tom="claro" tamanho={64} />
-            <span className="text-[12px] font-bold tracking-[0.06em] text-faixa-texto uppercase">
+            <span className="text-[0.75rem] font-bold tracking-[0.06em] text-faixa-texto uppercase">
               Símbolo · claro
             </span>
           </div>
@@ -276,7 +277,7 @@ export default function Estilo() {
           {PALETA_DE_MARCA.map((cor) => (
             <Cartao key={cor.nome} className="flex flex-col overflow-hidden p-0">
               <div
-                className={`h-[100px] ${cor.classe} ${
+                className={`h-[6.25rem] ${cor.classe} ${
                   // O papel é a mesma cor da página por trás do cartão: sem
                   // um traço nos quatro lados a amostra some, porque não há
                   // nenhum degrau contra o fundo ao redor do cartão (a
@@ -286,8 +287,8 @@ export default function Estilo() {
               />
               <div className="flex flex-col gap-1 p-4">
                 <p className="text-sm font-bold">{cor.nome}</p>
-                <p className="numero text-[12px] text-tinta-500">{cor.hex}</p>
-                <p className="text-[12px] text-tinta-600">{cor.uso}</p>
+                <p className="numero text-[0.75rem] text-tinta-500">{cor.hex}</p>
+                <p className="text-[0.75rem] text-tinta-600">{cor.uso}</p>
               </div>
             </Cartao>
           ))}
@@ -295,9 +296,9 @@ export default function Estilo() {
 
         <div className="mt-2 overflow-x-auto">
           <Cartao className="p-5">
-            <table className="w-full min-w-[560px] border-collapse text-left text-[13px]">
+            <table className="w-full min-w-[560px] border-collapse text-left text-[0.8125rem]">
               <thead>
-                <tr className="text-[11px] font-semibold tracking-[0.06em] text-tinta-500 uppercase">
+                <tr className="text-[0.6875rem] font-semibold tracking-[0.06em] text-tinta-500 uppercase">
                   <th className="pb-2 pr-4">Sinal</th>
                   <th className="pb-2 pr-4">Fundo</th>
                   <th className="pb-2 pr-4">Texto</th>
@@ -338,7 +339,7 @@ export default function Estilo() {
                   >
                     <Icone nome={chave} tamanho={26} />
                   </span>
-                  <span className="text-[11px] leading-4 text-tinta-600">
+                  <span className="text-[0.6875rem] leading-4 text-tinta-600">
                     {ROTULO_ICONE[chave]}
                   </span>
                 </div>
@@ -352,13 +353,13 @@ export default function Estilo() {
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1fr_460px]">
           <Cartao className="flex flex-col justify-center gap-2.5 p-7">
             <Rotulo>Títulos · Bricolage Grotesque 700</Rotulo>
-            <p className="font-titulo text-[56px] leading-[1] font-bold tracking-[-0.035em]">
+            <p className="font-titulo text-[3.5rem] leading-[1] font-bold tracking-[-0.035em]">
               Encontre seu concurso.
             </p>
           </Cartao>
           <Cartao className="flex flex-col justify-center gap-2.5 p-7">
             <Rotulo>Texto e números · Public Sans</Rotulo>
-            <p className="text-[17px] leading-[1.55]">
+            <p className="text-[1.0625rem] leading-[1.55]">
               Tipografia cívica, feita para serviço público: legível em
               qualquer tela. Números tabulares alinham{" "}
               <strong>R$ 13.753</strong> e <strong>27/09</strong> em coluna.
@@ -372,11 +373,11 @@ export default function Estilo() {
           <table className="w-full min-w-[720px] border-separate border-spacing-3">
             <thead>
               <tr>
-                <th className="text-left text-[11px] font-semibold tracking-[0.06em] text-tinta-500 uppercase" />
+                <th className="text-left text-[0.6875rem] font-semibold tracking-[0.06em] text-tinta-500 uppercase" />
                 {TAMANHOS_DO_BOTAO.map((tamanho) => (
                   <th
                     key={tamanho}
-                    className="text-left text-[11px] font-semibold tracking-[0.06em] text-tinta-500 uppercase"
+                    className="text-left text-[0.6875rem] font-semibold tracking-[0.06em] text-tinta-500 uppercase"
                   >
                     {tamanho}
                   </th>
@@ -386,7 +387,7 @@ export default function Estilo() {
             <tbody>
               {VARIANTES_DO_BOTAO.map((variante) => (
                 <tr key={variante}>
-                  <th className="pr-3 text-left text-[12px] font-semibold text-tinta-900">
+                  <th className="pr-3 text-left text-[0.75rem] font-semibold text-tinta-900">
                     {variante}
                   </th>
                   {TAMANHOS_DO_BOTAO.map((tamanho) => (
@@ -450,7 +451,7 @@ export default function Estilo() {
               <Rotulo>{tom}</Rotulo>
               {(["md", "sm"] as const).map((tamanho) => (
                 <div key={tamanho} className="mt-3 flex flex-wrap items-center gap-3">
-                  <span className="numero w-6 text-[11px] text-tinta-500">{tamanho}</span>
+                  <span className="numero w-6 text-[0.6875rem] text-tinta-500">{tamanho}</span>
                   {SIGLAS_DE_PROVA.map((sigla) => (
                     <Selo key={sigla ?? "sem"} sigla={sigla} tom={tom} tamanho={tamanho} />
                   ))}
@@ -463,14 +464,14 @@ export default function Estilo() {
 
       {/*
         O logo oficial do órgão, quando há um revisado (`faceDoSelo`): mesma
-        caixa e mesmo raio da sigla em cada tamanho, fundo branco nos dois
-        temas. O último logo não existe, e a caixa tem que cair para a sigla.
+        caixa e mesmo raio da sigla em cada tamanho, sempre sobre fundo
+        branco. O último logo não existe, e a caixa tem que cair para a sigla.
       */}
       <Bloco titulo="Selo com logo" nota="Logo, sigla ou vazio, na mesma caixa">
         <Cartao className="flex flex-col gap-4 p-5">
           {[72, 44, 36].map((tamanho) => (
             <div key={tamanho} className="flex flex-wrap items-center gap-3">
-              <span className="numero w-6 text-[11px] text-tinta-500">{tamanho}</span>
+              <span className="numero w-6 text-[0.6875rem] text-tinta-500">{tamanho}</span>
               {FACES_DO_SELO.map(({ rotulo, sigla, logoUrl }) => (
                 <Selo key={rotulo} sigla={sigla} logoUrl={logoUrl} tamanho={tamanho} />
               ))}
@@ -486,9 +487,8 @@ export default function Estilo() {
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Cartao className="p-6">
             <p className="text-sm text-tinta-600">
-              O cartão branco padrão, sempre `bg-cartao`: o que muda de um
-              tema para o outro é o degrau contra a página, não o próprio
-              cartão.
+              O cartão branco padrão, sempre `bg-cartao`: o que separa é o
+              degrau contra a página, e no alto contraste uma linha preta.
             </p>
           </Cartao>
           <Cartao className="p-6">
@@ -561,7 +561,7 @@ export default function Estilo() {
         <Cartao className="flex flex-wrap items-center gap-3 p-5">
           <BotaoEmBreve
             recurso="alertas"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-controle bg-rebaixada px-[18px] text-[15px] font-semibold text-tinta-900 transition-colors hover:bg-linha"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-controle bg-rebaixada px-[18px] text-[0.9375rem] font-semibold text-tinta-900 transition-colors hover:bg-linha"
           >
             Criar alerta
           </BotaoEmBreve>

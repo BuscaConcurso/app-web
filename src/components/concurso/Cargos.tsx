@@ -157,14 +157,14 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h2 className="flex items-center gap-2.5 font-titulo text-[28px] leading-none font-bold tracking-[-0.025em]">
+        <h2 className="flex items-center gap-2.5 font-titulo text-[1.75rem] leading-none font-bold tracking-[-0.025em]">
           <Icone nome="administrativo" tamanho={24} className="text-acao" />
           {singular ? (
             "Cargo e vagas"
           ) : (
             <>
               Áreas e vagas{" "}
-              <span className="text-[20px] font-normal text-tinta-600">
+              <span className="text-[1.25rem] font-normal text-tinta-600">
                 ({numero(cargos.length)})
               </span>
             </>
@@ -186,7 +186,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
             onChange={(evento) => setFiltro(evento.target.value)}
             placeholder="Filtrar áreas"
             data-sem-anel=""
-            className="min-w-0 grow border-0 bg-transparent text-[15px] text-tinta-900 outline-none placeholder:text-tinta-500"
+            className="min-w-0 grow border-0 bg-transparent text-[0.9375rem] text-tinta-900 outline-none placeholder:text-tinta-500"
           />
         </label>
       </div>
@@ -206,10 +206,10 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
       <div className="flex flex-col">
         {/* Cabeçalho só a partir de `sm`: abaixo disso a linha empilha (nome
             em cima, vagas e o link embaixo), e um rótulo de coluna em cima de
-            uma pilha não rotula nada. `grid-cols-[1fr_120px_150px]` do
+            uma pilha não rotula nada. `grid-cols-[1fr_7.5rem_9.375rem]` do
             protótipo é para telas largas; a 390px, 120+150=270px já não
             deixa espaço para o nome da área, e era isso que sumia. */}
-        <div className="hidden grid-cols-[1fr_120px_150px] items-center gap-4 border-b border-linha-fraca px-1 pb-2.5 text-[12px] font-bold tracking-[0.05em] text-tinta-500 sm:grid">
+        <div className="hidden grid-cols-[1fr_7.5rem_9.375rem] items-center gap-4 border-b border-linha-fraca px-1 pb-2.5 text-[0.75rem] font-bold tracking-[0.05em] text-tinta-500 sm:grid">
           <span>ÁREA</span>
           <span>VAGAS</span>
           <span aria-hidden="true" />
@@ -235,7 +235,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
 
             return (
               <li key={`${cargo.nome}-${cargo.codigo ?? indice}`} hidden={oculta}>
-                <div className="flex flex-col gap-1.5 border-b border-linha-fraca py-3 text-[15px] sm:grid sm:grid-cols-[1fr_120px_150px] sm:items-center sm:gap-4 sm:py-[15px]">
+                <div className="flex flex-col gap-1.5 border-b border-linha-fraca py-3 text-[0.9375rem] sm:grid sm:grid-cols-[1fr_7.5rem_9.375rem] sm:items-center sm:gap-4 sm:py-[15px]">
                   <div className="min-w-0">
                     {/* `sm:truncate`: só a partir de onde a linha vira grade
                         de uma linha só, com a largura fixa de VAGAS e do link
@@ -246,11 +246,11 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
                     <span className="block font-semibold break-words text-tinta-900 sm:truncate">
                       {cargo.nome}
                     </span>
-                    {detalhe && <p className="mt-0.5 text-[13px] text-tinta-600">{detalhe}</p>}
+                    {detalhe && <p className="mt-0.5 text-[0.8125rem] text-tinta-600">{detalhe}</p>}
                   </div>
                   <span className="flex items-center gap-1.5 text-tinta-900">
                     {total !== null && total > 0 && (
-                      <span aria-hidden="true" className="text-[9px] tracking-[2px] text-acao">
+                      <span aria-hidden="true" className="text-[0.5625rem] tracking-[2px] text-acao">
                         {"●".repeat(Math.min(total, MAX_PONTOS))}
                       </span>
                     )}
@@ -261,7 +261,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
                       type="button"
                       onClick={() => alternarEvidencia(indice)}
                       aria-expanded={aberta}
-                      className="inline-flex items-center gap-1 text-[13px] font-semibold text-link hover:text-link-hover sm:justify-self-end"
+                      className="inline-flex items-center gap-1 text-[0.8125rem] font-semibold text-link hover:text-link-hover sm:justify-self-end"
                     >
                       <Icone nome="documento" tamanho={14} />
                       De onde foi lido
@@ -271,7 +271,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
                   )}
                 </div>
                 {aberta && temRevelacao && (
-                  <dl className="flex flex-col gap-3 border-b border-linha-fraca px-1 pt-1 pb-3 text-[12px] leading-5 text-tinta-600">
+                  <dl className="flex flex-col gap-3 border-b border-linha-fraca px-1 pt-1 pb-3 text-[0.75rem] leading-5 text-tinta-600">
                     {/* A vaga por localidade e a reserva legal, que o total
                         com pontos da linha resume num número só. Sem isto,
                         "São Paulo: 8 ampla, 1 PCD, 1 negros" não aparecia em
@@ -323,7 +323,7 @@ export function Cargos({ cargos }: { cargos: Cargo[] }) {
           type="button"
           onClick={() => setMostrarTodas((atual) => !atual)}
           aria-expanded={mostrarTodas}
-          className="flex h-[46px] items-center justify-center gap-2 rounded-controle bg-rebaixada text-[15px] font-semibold text-tinta-900 hover:bg-linha"
+          className="flex h-[2.875rem] items-center justify-center gap-2 rounded-controle bg-rebaixada text-[0.9375rem] font-semibold text-tinta-900 hover:bg-linha"
         >
           {mostrarTodas ? "Mostrar menos" : `Mostrar as ${numero(cargos.length)} áreas`}
           <Icone nome={mostrarTodas ? "acima" : "abaixo"} tamanho={17} />

@@ -20,7 +20,7 @@ function TituloDoConcurso({ concurso }: { concurso: ConcursoResumo }) {
   return (
     <Link
       href={`/concursos/${concurso.slug}`}
-      className="block truncate text-[15px] font-bold text-tinta-900 hover:underline hover:underline-offset-4"
+      className="block truncate text-[0.9375rem] font-bold text-tinta-900 hover:underline hover:underline-offset-4"
     >
       {siglaEEdital(concurso)}
     </Link>
@@ -40,13 +40,13 @@ function Linha({
 }) {
   return (
     <Fragment>
-      <div className="w-[72px] shrink-0 md:w-[92px]">
-        <div className="font-titulo text-[22px] leading-none font-bold md:text-[28px]">{valorGrande}</div>
+      <div className="w-[4.5rem] shrink-0 md:w-[5.75rem]">
+        <div className="font-titulo text-[1.375rem] leading-none font-bold md:text-[1.75rem]">{valorGrande}</div>
         {rotulo && <div className="text-xs text-tinta-500">{rotulo}</div>}
       </div>
       <div className="min-w-0 flex-grow">
         <TituloDoConcurso concurso={concurso} />
-        <div className="truncate text-[13px] text-tinta-600">{apoio}</div>
+        <div className="truncate text-[0.8125rem] text-tinta-600">{apoio}</div>
       </div>
     </Fragment>
   );
@@ -96,7 +96,7 @@ export function VemAiEDou({
         <div className="flex items-start justify-between gap-4">
           <div>
             <Rotulo icone="previsto" tom="previsto">PREVISTOS</Rotulo>
-            <h2 className="mt-2 font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.025em] md:text-[30px]">
+            <h2 className="mt-2 font-titulo text-[1.625rem] leading-[1.1] font-bold tracking-[-0.025em] md:text-[1.875rem]">
               Vem aí
             </h2>
             <p className="mt-1 text-sm text-tinta-600">
@@ -146,7 +146,7 @@ export function VemAiEDou({
         <div className="flex items-start justify-between gap-4">
           <div>
             <Rotulo icone="diario" tom="anil">DIÁRIO OFICIAL DA UNIÃO</Rotulo>
-            <h2 className="mt-2 font-titulo text-[26px] leading-[1.1] font-bold tracking-[-0.025em] md:text-[30px]">
+            <h2 className="mt-2 font-titulo text-[1.625rem] leading-[1.1] font-bold tracking-[-0.025em] md:text-[1.875rem]">
               Saiu no DOU
             </h2>
             <p className="mt-1 text-sm text-tinta-600">
@@ -171,12 +171,12 @@ export function VemAiEDou({
                 </span>
                 <div className="min-w-0 flex-grow">
                   <TituloDoConcurso concurso={concurso} />
-                  <div className="truncate text-[13px] text-tinta-600">
+                  <div className="truncate text-[0.8125rem] text-tinta-600">
                     {rotuloDeSituacao(concurso, hoje)} · {contextoDoAto(concurso)}
                   </div>
                 </div>
                 {concurso.ultimoAto?.data && (
-                  <span className="shrink-0 text-[13px] text-tinta-500">{dataCurta(concurso.ultimoAto.data)}</span>
+                  <span className="shrink-0 text-[0.8125rem] text-tinta-500">{dataCurta(concurso.ultimoAto.data)}</span>
                 )}
               </div>
             );

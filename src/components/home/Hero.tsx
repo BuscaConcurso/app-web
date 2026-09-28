@@ -83,7 +83,7 @@ export function Hero({
     // `lg`: abaixo disso a coluna de 700px não cabe ao lado de nada. O
     // mosaico entra em `xl`, onde o `conteudo` já tem os 1216px do artboard.
     <section className="overflow-hidden bg-faixa text-white">
-      <div className="conteudo flex flex-col gap-4 py-7 md:py-10 lg:min-h-[620px] lg:flex-row lg:gap-10 lg:py-0 xl:gap-16">
+      <div className="conteudo flex flex-col gap-4 py-7 md:py-10 lg:min-h-[38.75rem] lg:flex-row lg:gap-10 lg:py-10 xl:gap-16">
         <div className="relative flex flex-col gap-4 lg:w-[700px] lg:shrink-0 lg:justify-center lg:gap-6 lg:pb-10">
           {/* O sol dourado que só aparece no celular (`Mobile.dc.html:29`);
               no desktop o mosaico de azulejos já cumpre o papel decorativo. */}
@@ -92,22 +92,22 @@ export function Hero({
             className="absolute -top-[60px] -right-[60px] size-[120px] rounded-full bg-ouro md:hidden"
           />
 
-          <div className="inline-flex h-[30px] items-center gap-2 self-start rounded-full bg-white/10 pr-3.5 pl-1.5 text-[13px] text-faixa-texto lg:h-[34px] lg:gap-2.5 lg:pr-3.5 lg:pl-2 lg:text-sm">
-            <span className="flex h-5 items-center rounded-full bg-ouro px-1.5 text-[11px] font-bold text-ouro-texto lg:h-[22px] lg:px-2 lg:text-xs">
+          <div className="inline-flex h-[1.875rem] items-center gap-2 self-start rounded-full bg-white/10 pr-3.5 pl-1.5 text-[0.8125rem] text-faixa-texto lg:h-[2.125rem] lg:gap-2.5 lg:pr-3.5 lg:pl-2 lg:text-sm">
+            <span className="flex h-5 items-center rounded-full bg-ouro px-1.5 text-[0.6875rem] font-bold text-ouro-texto lg:h-[1.375rem] lg:px-2 lg:text-xs">
               {numero(totalAbertos)}
             </span>
             <span className="lg:hidden">abertos hoje</span>
             <span className="hidden lg:inline">concursos com inscrição aberta hoje</span>
           </div>
 
-          <h1 className="font-titulo text-[40px] leading-[1.04] font-bold tracking-[-0.035em] md:text-[52px] lg:text-[68px] lg:leading-[1.02]">
+          <h1 className="font-titulo text-[2.5rem] leading-[1.04] font-bold tracking-[-0.035em] md:text-[3.25rem] lg:text-[4.25rem] lg:leading-[1.02]">
             Encontre seu concurso.
             <br className="hidden lg:block" />
             <span className="lg:hidden"> </span>
             <span className="text-ouro">Direto do edital.</span>
           </h1>
 
-          <p className="text-base leading-[1.5] text-faixa-texto lg:max-w-[580px] lg:text-[19px] lg:leading-[1.55]">
+          <p className="text-base leading-[1.5] text-faixa-texto lg:max-w-[36.25rem] lg:text-[1.1875rem] lg:leading-[1.55]">
             <span className="lg:hidden">
               Cargo, vagas, salário e prazo, com o link para o documento original.
             </span>

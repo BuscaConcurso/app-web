@@ -33,9 +33,9 @@ const VARIANTE: Record<VarianteDoBotao, string> = {
 };
 
 const TAMANHO: Record<TamanhoDoBotao, string> = {
-  sm: "h-[42px] rounded-controle px-4 text-sm",
-  md: "h-11 rounded-controle px-[18px] text-[15px]",
-  lg: "h-[52px] rounded-controle px-[22px] text-base",
+  sm: "h-[2.625rem] rounded-controle px-4 text-sm",
+  md: "h-11 rounded-controle px-[18px] text-[0.9375rem]",
+  lg: "h-[3.25rem] rounded-controle px-[22px] text-base",
   xl: "h-14 rounded-[12px] px-[26px] text-base",
 };
 

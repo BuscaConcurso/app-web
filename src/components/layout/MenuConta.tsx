@@ -13,7 +13,7 @@ import { useSession } from "@/lib/auth/session";
  * conteúdo dentro dele.
  */
 const GATILHO =
-  "h-11 rounded-controle px-[18px] text-[15px] font-semibold text-tinta-900 " +
+  "h-11 rounded-controle px-[18px] text-[0.9375rem] font-semibold text-tinta-900 " +
   "shadow-[inset_0_0_0_1px_var(--color-contorno)] transition-colors hover:bg-rebaixada";
 
 /**
@@ -68,7 +68,7 @@ export function MenuConta() {
       <div className="mt-4 flex flex-col gap-3">
         <Link
           href="/conta"
-          className="inline-flex h-8 items-center justify-center rounded-controle bg-acao px-3 text-[12px] font-medium text-acao-texto hover:bg-acao-hover"
+          className="inline-flex h-8 items-center justify-center rounded-controle bg-acao px-3 text-[0.75rem] font-medium text-acao-texto hover:bg-acao-hover"
         >
           Minha conta
         </Link>

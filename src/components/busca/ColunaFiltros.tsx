@@ -87,7 +87,7 @@ function Grupo({
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcado ? "remover filtro" : "filtrar"
                 }`}
-                className="-mx-1.5 flex min-h-[42px] items-center gap-2.5 rounded-controle px-1.5 text-sm text-tinta-900 transition-colors hover:bg-rebaixada"
+                className="-mx-1.5 flex min-h-[2.625rem] items-center gap-2.5 rounded-controle px-1.5 text-sm text-tinta-900 transition-colors hover:bg-rebaixada"
               >
                 <Quadradinho marcado={marcado} />
                 <span className={marcado ? "font-medium text-tinta-900" : ""}>
@@ -129,7 +129,7 @@ function GrupoDeBancas({
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcada ? "remover filtro" : "filtrar"
                 }`}
-                className={`inline-flex min-h-[42px] items-center rounded-controle px-3 text-[13px] transition-colors ${
+                className={`inline-flex min-h-[2.625rem] items-center rounded-controle px-3 text-[0.8125rem] transition-colors ${
                   marcada
                     ? "bg-acao font-medium text-acao-texto hover:bg-acao-hover"
                     : "bg-rebaixada text-tinta-900 hover:bg-linha"
@@ -185,7 +185,7 @@ function FaixaDeSalario({
   prefixo: string;
 }) {
   const campo =
-    "h-[42px] w-full min-w-0 rounded-controle bg-rebaixada px-3 text-[14px] " +
+    "h-[2.625rem] w-full min-w-0 rounded-controle bg-rebaixada px-3 text-[0.875rem] " +
     "text-tinta-900 outline-none placeholder:text-tinta-500 " +
     "focus:bg-cartao focus:ring-2 focus:ring-acao numero";
 
@@ -206,7 +206,7 @@ function FaixaDeSalario({
           placeholder="R$ 0"
           className={campo}
         />
-        <span className="shrink-0 text-[13px] text-tinta-600">a</span>
+        <span className="shrink-0 text-[0.8125rem] text-tinta-600">a</span>
         <label htmlFor={`${prefixo}-salario-max`} className="sr-only">
           Salário máximo
         </label>
@@ -222,7 +222,7 @@ function FaixaDeSalario({
       </div>
       <button
         type="submit"
-        className="h-[42px] rounded-controle bg-rebaixada text-[14px] font-semibold text-tinta-900 transition-colors hover:bg-linha"
+        className="h-[2.625rem] rounded-controle bg-rebaixada text-[0.875rem] font-semibold text-tinta-900 transition-colors hover:bg-linha"
       >
         Aplicar faixa
       </button>
@@ -282,7 +282,7 @@ function Painel({
                 salarioMax: undefined,
                 pagina: 1,
               })}
-              className="text-[12px] font-semibold text-tinta-900 underline underline-offset-[3px] hover:text-link"
+              className="text-[0.75rem] font-semibold text-tinta-900 underline underline-offset-[3px] hover:text-link"
             >
               Limpar
             </LinkDaConsulta>
@@ -308,7 +308,7 @@ function CartaoDeAlerta({ total }: { total: number }) {
       <p className="text-sm leading-5 font-semibold">
         Receba estes {numero(total)} concursos por e-mail
       </p>
-      <p className="text-[12px] leading-5 text-tinta-600">
+      <p className="text-[0.75rem] leading-5 text-tinta-600">
         Salvamos esta busca e avisamos a cada edital novo.
       </p>
       <Link

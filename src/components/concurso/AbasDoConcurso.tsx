@@ -77,7 +77,7 @@ export function AbasDoConcurso({
               aria-controls={`painel-${painel.id}`}
               tabIndex={ativo ? 0 : -1}
               onClick={() => setAtiva(indice)}
-              className={`flex h-[38px] flex-grow items-center justify-center rounded-[9px] text-[13px] ${
+              className={`flex h-[2.375rem] flex-grow items-center justify-center rounded-[9px] text-[0.8125rem] ${
                 ativo
                   ? "bg-cartao font-semibold text-tinta-900 shadow-aba"
                   : "font-medium text-tinta-600"

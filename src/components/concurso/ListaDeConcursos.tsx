@@ -32,7 +32,9 @@ export function ListaDeConcursos({
    * Aí a tabela só entra a partir de `xl`, onde o `conteudo` tem os 1216px
    * do artboard; sem filtros (o órgão), a partir de `lg`. Abaixo disso as seis colunas não cabem, e o que sobrava era
    * "a / definir" em duas linhas e o nome do cargo cortado numa letra: ficam
-   * os cartões do celular.
+   * os cartões do celular. Com a fonte nos degraus grandes (`fonte-grande:`,
+   * `globals.css`) as seis colunas também não cabem, e ficam os cartões em
+   * qualquer largura.
    */
   comFiltros?: boolean;
 }) {
@@ -43,7 +45,7 @@ export function ListaDeConcursos({
       <div
         role="table"
         aria-label="Concursos"
-        className={`hidden overflow-hidden rounded-[20px] bg-cartao shadow-tabela ${tabela} [&>*:last-child]:border-b-0`}
+        className={`hidden overflow-hidden rounded-[20px] bg-cartao shadow-tabela ${tabela} fonte-grande:hidden [&>*:last-child]:border-b-0`}
       >
         <div
           role="row"
@@ -60,7 +62,7 @@ export function ListaDeConcursos({
         ))}
       </div>
 
-      <ul className={`flex flex-col gap-2.5 ${cartoes}`}>
+      <ul className={`flex flex-col gap-2.5 ${cartoes} fonte-grande:flex`}>
         {itens.map((concurso) => (
           <li key={concurso.slug} className="min-w-0">
             <CartaoConcurso concurso={concurso} hoje={hoje} ufDoFiltro={ufDoFiltro} semOrgao={semOrgao} />

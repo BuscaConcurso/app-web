@@ -34,7 +34,7 @@ export function Abas({
   itens: ItemDeAba[];
   tamanho?: "md" | "sm";
 }) {
-  const altura = tamanho === "sm" ? "h-8 px-3 text-[13px]" : "h-9 px-3.5 text-sm";
+  const altura = tamanho === "sm" ? "h-8 px-3 text-[0.8125rem]" : "h-9 px-3.5 text-sm";
   const comAba = itens.some((item) => !item.href);
 
   return (

@@ -12,7 +12,7 @@ import { ApiError } from "@/lib/auth/api";
 
 export function AuthTitle({ children }: { children: ReactNode }) {
   return (
-    <h1 className="font-titulo text-[28px] leading-tight font-bold tracking-[-0.02em] text-tinta-900">
+    <h1 className="font-titulo text-[1.75rem] leading-tight font-bold tracking-[-0.02em] text-tinta-900">
       {children}
     </h1>
   );

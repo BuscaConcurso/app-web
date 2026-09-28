@@ -28,9 +28,9 @@ import { NOME_SITE } from "@/lib/site";
  * fora dos azulejos, do logo e da imagem de OG: Papel `#F6F4EE`, tinta
  * `#0F1F17`, botão `#0B6B3A`.
  *
- * **Sem tema escuro.** Pela mesma razão: alternar de tema aqui dependeria do
- * script que o `layout.tsx` injeta (`SCRIPT_DO_TEMA`), e este arquivo não
- * pode presumir que ele rodou. A tela fica sempre no claro fixo.
+ * **Sem alto contraste.** Pela mesma razão: aplicá-lo aqui dependeria do
+ * script que o `layout.tsx` injeta (`SCRIPT_DE_ACESSIBILIDADE`), e este
+ * arquivo não pode presumir que ele rodou. A tela fica sempre no claro fixo.
  *
  * **Sem `metadata`.** Limite de erro só existe como Client Component, e a
  * doc diz que `metadata`/`generateMetadata` não são suportados aqui; o

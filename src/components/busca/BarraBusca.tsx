@@ -116,7 +116,7 @@ export function BarraBusca({ uf }: { uf?: Uf }) {
         role="search"
         onSubmit={aoEnviar}
         onClick={aoClicarNaBarra}
-        className="flex h-[46px] w-full cursor-text items-center gap-2.5 rounded-[12px] bg-rebaixada pr-2 pl-3.5 outline-acao outline-offset-2 has-[input:focus]:outline-2"
+        className="flex h-[2.875rem] w-full cursor-text items-center gap-2.5 rounded-[12px] bg-rebaixada pr-2 pl-3.5 outline-acao outline-offset-2 has-[input:focus]:outline-2"
       >
         <Icone nome="busca" tamanho={18} className="shrink-0 text-tinta-600" />
         <label htmlFor={idCampo} className="sr-only">
@@ -142,13 +142,13 @@ export function BarraBusca({ uf }: { uf?: Uf }) {
           autoComplete="off"
           placeholder="Buscar cargo, órgão ou banca"
           data-sem-anel=""
-          className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-tinta-900 outline-none placeholder:text-tinta-500 [&::-webkit-search-cancel-button]:hidden"
+          className="h-full min-w-0 flex-1 bg-transparent text-[0.9375rem] text-tinta-900 outline-none placeholder:text-tinta-500 [&::-webkit-search-cancel-button]:hidden"
           {...campo}
         />
         {uf && <input type="hidden" name="uf" value={uf} />}
         <kbd
           aria-hidden="true"
-          className="hidden h-6 min-w-6 shrink-0 items-center justify-center rounded-[6px] bg-cartao px-1 text-[12px] font-semibold text-tinta-600 shadow-[inset_0_-1px_0_var(--color-contorno)] sm:flex"
+          className="hidden h-6 min-w-6 shrink-0 items-center justify-center rounded-[6px] bg-cartao px-1 text-[0.75rem] font-semibold text-tinta-600 shadow-[inset_0_-1px_0_var(--color-contorno)] sm:flex"
         >
           /
         </kbd>

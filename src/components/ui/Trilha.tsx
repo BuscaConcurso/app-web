@@ -54,7 +54,7 @@ export function Trilha({ degraus }: { degraus: Degrau[] }) {
 
       <nav
         aria-label="Trilha"
-        className="flex min-h-[60px] min-w-0 flex-wrap items-center gap-x-2 gap-y-1 py-2 text-[14px] text-tinta-600"
+        className="flex min-h-[3.75rem] min-w-0 flex-wrap items-center gap-x-2 gap-y-1 py-2 text-[0.875rem] text-tinta-600"
       >
         {degraus.map((degrau, indice) => {
           const corrente = indice === degraus.length - 1;

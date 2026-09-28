@@ -97,12 +97,12 @@ export function CartaoConcurso({
           tamanho={42}
         />
         <div className="min-w-0 flex-grow">
-          <div className="truncate text-[15px] font-bold">{titulo}</div>
-          <div className="mt-0.5 truncate text-[13px] text-tinta-600">{subtitulo}</div>
+          <div className="truncate text-[0.9375rem] font-bold">{titulo}</div>
+          <div className="mt-0.5 truncate text-[0.8125rem] text-tinta-600">{subtitulo}</div>
         </div>
         <Icone nome="salvar" tamanho={20} className="mt-0.5 shrink-0 text-tinta-500" />
       </div>
-      <div className="flex flex-wrap gap-1.5 text-[13px]">
+      <div className="flex flex-wrap gap-1.5 text-[0.8125rem]">
         <span className="flex h-7 items-center gap-1.5 rounded-lg bg-verde-fundo px-2.5 font-bold text-verde-texto">
           <Icone nome="salario" tamanho={14} />
           {concurso.salarioAte === null ? "a definir" : moeda(concurso.salarioAte)}
