@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { idDoGtm, scriptDoGtm, urlDoNoscriptDoGtm } from "@/lib/gtm";
+import { idDoGtm, scriptDoGtm } from "@/lib/gtm";
 
 describe("idDoGtm", () => {
   it("aceita um ID de contêiner válido", () => {
@@ -24,11 +24,5 @@ describe("snippet", () => {
     expect(js).toContain("https://www.googletagmanager.com/gtm.js?id=");
     expect(js).toContain("'GTM-ABC1234'");
     expect(js).toContain("dataLayer");
-  });
-
-  it("aponta o noscript para o iframe do contêiner", () => {
-    expect(urlDoNoscriptDoGtm("GTM-ABC1234")).toBe(
-      "https://www.googletagmanager.com/ns.html?id=GTM-ABC1234",
-    );
   });
 });

@@ -4,6 +4,8 @@ import { unstable_rethrow } from "next/navigation";
 import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
 import { Cabecalho } from "@/components/layout/Cabecalho";
+import { BannerDeConsentimento } from "@/components/consentimento/BannerDeConsentimento";
+import { IdentificacaoNaAnalitica } from "@/components/consentimento/IdentificacaoNaAnalitica";
 import { ID_DO_CONTEUDO, PularParaConteudo } from "@/components/layout/PularParaConteudo";
 import { GoogleTagManager } from "@/components/layout/GoogleTagManager";
 import { Rodape } from "@/components/layout/Rodape";
@@ -237,6 +239,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <PularParaConteudo />
         <GoogleTagManager />
         <SessionProvider>
+          {/* A conta que entrou vai para a analítica pelo id; sai ao sair. */}
+          <IdentificacaoNaAnalitica />
           {/* Dentro da sessão: os salvos são da conta. */}
           <SalvosProvider>
           <DadosEstruturados dados={dadosEstruturados} />
@@ -249,6 +253,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <Rodape atualizadoEm={atualizadoEm} />
           </SalvosProvider>
         </SessionProvider>
+        {/* Por último no corpo: por cima do conteúdo, sem prender o foco. */}
+        <BannerDeConsentimento />
       </body>
     </html>
   );

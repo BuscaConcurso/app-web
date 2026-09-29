@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { unstable_rethrow } from "next/navigation";
 import { Logo } from "@/components/marca/Logo";
 import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
@@ -6,6 +7,8 @@ import { urlDoCargo, type CargoMedido } from "@/lib/cargos";
 import { cargosEscolhidos, facetas, type LinkDeFaceta } from "@/lib/concursos";
 import { hojeCivilEmSaoPaulo } from "@/lib/formato";
 import { PAGINAS_INSTITUCIONAIS } from "@/lib/institucionais";
+import { PreferenciasDeCookies } from "@/components/consentimento/PreferenciasDeCookies";
+import { ferramentasLigadas } from "@/lib/consentimento";
 
 const LIMITE_DE_CARGOS_NO_RODAPE = 8;
 const LIMITE_DE_UFS_NO_RODAPE = 8;
@@ -80,9 +83,12 @@ const CLASSE_DO_LINK = "block text-[0.9375rem] break-words text-tinta-600 hover:
 function ColunaDeLinks({
   titulo,
   links,
+  extra,
 }: {
   titulo: string;
   links: { rotulo: string; href: string }[];
+  /** Um item a mais no fim da lista, que não é link: o botão de cookies. */
+  extra?: ReactNode;
 }) {
   return (
     <nav aria-label={titulo} className="min-w-0">
@@ -95,6 +101,7 @@ function ColunaDeLinks({
             </Link>
           </li>
         ))}
+        {extra && <li className="min-w-0">{extra}</li>}
       </ul>
     </nav>
   );
@@ -120,6 +127,8 @@ export async function Rodape({
   atualizadoEm: string | null;
 }) {
   const [cargos, ufs] = await Promise.all([cargosDoRodape(), ufsDoRodape()]);
+  const { posthog, gtm } = ferramentasLigadas();
+  const comMedicao = posthog || gtm;
   const cargosLinks = cargos.map((cargo) => ({
     rotulo: cargo.rotulo,
     href: urlDoCargo(cargo),
@@ -142,7 +151,13 @@ export async function Rodape({
             {cargos.length > 0 && (
               <ColunaDeLinks titulo="Cargos mais buscados" links={cargosLinks} />
             )}
-            <ColunaDeLinks titulo="Sobre" links={COLUNA_SOBRE} />
+            <ColunaDeLinks
+              titulo="Sobre"
+              links={COLUNA_SOBRE}
+              extra={
+                comMedicao ? <PreferenciasDeCookies className={CLASSE_DO_LINK} /> : undefined
+              }
+            />
           </div>
         </div>
 
