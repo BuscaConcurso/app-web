@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { CartaoConcurso } from "@/components/concurso/CartaoConcurso";
 import {
+  concursosDaArea,
   contagensDeFaceta,
   contarConcursos,
   facetas,
@@ -12,11 +13,13 @@ import {
   normalizarDetalhe,
   normalizarResumo,
   paraALista,
+  resumoDasAreas,
   semTravessao,
   tambemAbertos,
 } from "./concursos";
 import type { ConcursoDetalhe, Escolaridade } from "./dominio";
-import type { Situacao } from "./consulta";
+import { filtrar, type Situacao } from "./consulta";
+import { AREAS, casaComArea } from "./areas";
 import { CONCURSOS } from "@/mocks/concursos";
 
 /** O travessão por escape, não pelo glifo: ver o cabeçalho de `semTravessao`. */
@@ -305,5 +308,31 @@ describe("feedDoDiario", () => {
     });
     expect(ato.titulo).toBe("EDITAL - RETIFICAÇÃO");
     expect(ato.concurso.titulo).toBe("ENFAM - Edital 2");
+  });
+});
+
+describe("concursosDaArea", () => {
+  it("são os concursos do acervo que casam com a regra da área", async () => {
+    for (const area of AREAS) {
+      const esperados = CONCURSOS.filter((concurso) => casaComArea(concurso, area)).map((c) => c.slug);
+      expect((await concursosDaArea(area)).map((c) => c.slug), area.slug).toEqual(esperados);
+    }
+  });
+
+  it("o mock tem pelo menos uma área com concurso, para o teste provar algo", async () => {
+    const totais = await Promise.all(AREAS.map(async (area) => (await concursosDaArea(area)).length));
+    expect(totais.some((total) => total > 0)).toBe(true);
+  });
+});
+
+describe("resumoDasAreas", () => {
+  it("as 12, na ordem de AREAS, com o total e os abertos da própria lista", async () => {
+    const resumo = await resumoDasAreas(HOJE);
+    expect(resumo.map((item) => item.area.slug)).toEqual(AREAS.map((area) => area.slug));
+    for (const item of resumo) {
+      const lista = await concursosDaArea(item.area);
+      expect(item.total, item.area.slug).toBe(lista.length);
+      expect(item.abertos, item.area.slug).toBe(filtrar(lista, { situacoes: ["abertas"] }, HOJE).length);
+    }
   });
 });

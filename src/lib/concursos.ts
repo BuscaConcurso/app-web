@@ -38,6 +38,7 @@ import { tomDoConcurso } from "./situacao";
 import { NOME_UF } from "./rotulos";
 import { acharOrgao, agruparPorOrgao, type OrgaoDoAcervo } from "./orgaos";
 import { feedDeMock, type AtoDoDiario, type FeedDoDiario } from "./diarioOficial";
+import { AREAS, casaComArea, type Area } from "./areas";
 import { CONCURSOS } from "@/mocks/concursos";
 
 export interface Consulta extends Filtro {
@@ -747,6 +748,41 @@ export async function obterOrgao(slug: string): Promise<OrgaoDoAcervo | null> {
 /** Todos os órgãos do acervo, do maior para o menor. Alimenta o sitemap. */
 export async function listarOrgaos(): Promise<OrgaoDoAcervo[]> {
   return agruparPorOrgao(await acervo());
+}
+
+/**
+ * Os concursos de uma área, todos (abertos, previstos e encerrados), na
+ * ordem do acervo: quem mostra ordena. A regra está em `casaComArea`
+ * (`areas.ts`), e é o mesmo acervo de `obterOrgao`, sem requisição nova.
+ */
+export async function concursosDaArea(area: Area): Promise<ConcursoResumo[]> {
+  return (await acervo()).filter((concurso) => casaComArea(concurso, area));
+}
+
+export interface ResumoDaArea {
+  area: Area;
+  /** Com inscrição aberta hoje (inclui os que encerram esta semana). */
+  abertos: number;
+  total: number;
+}
+
+/**
+ * As 12 áreas com o que `/areas` mostra em cada azulejo, na ordem de
+ * `AREAS`. "Abertos" é o mesmo recorte do filtro de situação
+ * (`situacoes: ["abertas"]`), para o número do azulejo ser o que a aba
+ * "Abertas" da página da área mostra.
+ */
+export async function resumoDasAreas(hoje: Date = new Date()): Promise<ResumoDaArea[]> {
+  return Promise.all(
+    AREAS.map(async (area) => {
+      const lista = await concursosDaArea(area);
+      return {
+        area,
+        abertos: filtrar(lista, { situacoes: ["abertas"] }, hoje).length,
+        total: lista.length,
+      };
+    }),
+  );
 }
 
 /**
