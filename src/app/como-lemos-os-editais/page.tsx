@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PaginaDeTexto } from "@/components/ui/PaginaDeTexto";
 import { numerosDoAcervo } from "@/lib/concursos";
-import { numero } from "@/lib/formato";
 import { PAGINAS_INSTITUCIONAIS } from "@/lib/institucionais";
+import { aberturaDoMetodo, numerosSemDerrubar } from "@/lib/metodo";
 import { EMAIL_CONTATO } from "@/lib/site";
 
 const { titulo, href } = PAGINAS_INSTITUCIONAIS["como-lemos"];
@@ -11,8 +11,8 @@ const { titulo, href } = PAGINAS_INSTITUCIONAIS["como-lemos"];
 export const metadata: Metadata = {
   title: titulo,
   description:
-    "Onde o BuscaConcurso procura os concursos, o que lê, como o edital vira página, " +
-    "o que conferimos e como avisar um erro.",
+    "Onde o BuscaConcurso procura os concursos, o que lê, como organiza cada concurso " +
+    "e como avisar um erro.",
   alternates: { canonical: href },
 };
 
@@ -27,67 +27,52 @@ export const revalidate = 300;
  * (`engine/src/buscaconcurso`, lido em 2026-09-28), e o que o spec pedia e o
  * motor não faz ficou de fora:
  *
- * - Diário: INLABS, seções 1, 2 e 3, só dia útil, sem edição extra
- *   (`diarios/dou.py:33-49`, `cli.py:535-545`); nenhum diário estadual ou
- *   municipal (`pipeline/diario.py:38-40`). O filtro é "concurso público",
- *   "processo seletivo", "seleção pública" (`diarios/filtro.py`).
- * - Bancas: algumas, uma vez por dia (`crawl_interval` de 1 dia); as que
- *   bloqueiam robô ficam de fora (Quadrix, Vunesp). Lidos só abertura,
- *   retificação e anexo (`pipeline/fetch.py:36-40`). Sem nome nem número de
- *   bancas aqui: muda com o catálogo, e o número que aparece é o do acervo.
+ * - Fonte: só o Diário Oficial da União. As bancas (IBADE, Cebraspe, FGV)
+ *   saíram do catálogo em 2026-09-14 (`api.py`, comentário da fila; a tabela
+ *   `source` tem só `dou`). INLABS, seções 1, 2 e 3, só dia útil, sem edição
+ *   extra (`diarios/dou.py:33-49`, `cli.py:535-545`); nenhum diário estadual
+ *   ou municipal. O filtro é "concurso público", "processo seletivo",
+ *   "seleção pública" (`diarios/filtro.py`).
  * - Regras que reprovam a leitura (`validacao.py`): data fora de 2000 a
  *   hoje + 5 anos, data que não existe (schema), fim antes do início, cargo
- *   sem nome, salário fora de R$ 100 a R$ 100 mil, cargo sem vaga nem
- *   cadastro de reserva (só edital de banca). **Não há regra de "salário
- *   abaixo do mínimo"**: o piso é R$ 100, para pegar "R$ 3.000" lido como 3.
- * - Órgão: da hierarquia do próprio Diário (`diarios/hierarquia.py`), sem
- *   cadastro externo. Estado: evidência explícita ou município da tabela do
- *   IBGE, cidade ambígua não conta (`ufs.py`). Junção de atos: órgão, ano e
- *   número do edital; título parecido só marca revisão (`pipeline/resolve.py`).
- * - O selo "Conferido por nós" (`AtosPublicados.tsx`) está no cartão do ato
- *   do Diário e quer dizer "este é o texto do ato como saiu, guardado e
- *   mostrado inteiro", não que uma pessoa conferiu os dados.
+ *   sem nome, salário fora de R$ 100 a R$ 100 mil. **Não há regra de
+ *   "salário abaixo do mínimo"**: o piso é R$ 100, para pegar "R$ 3.000"
+ *   lido como 3. A regra de cargo sem vaga só vale para edital de banca, e
+ *   não há banca como fonte.
+ * - Órgão: em geral da hierarquia do próprio Diário
+ *   (`diarios/hierarquia.py`), senão da leitura do ato; sem cadastro
+ *   externo. Estado (`ufs.py:155-248`): cidade da vaga na tabela do IBGE, ou
+ *   o nome do órgão quando nomeia um estado ou traz a sigla; cidade ambígua
+ *   só conta com o órgão confirmando. Junção de atos: órgão, ano e número do
+ *   edital; título parecido só marca revisão (`pipeline/resolve.py`).
+ * - O selo "Conferido por nós" (`AtosPublicados.tsx`, `temSeloConferido`)
+ *   só aparece com o texto do ato guardado, e quer dizer isso.
  *
  * Mudou o motor, muda esta página.
  */
 export default async function ComoLemosOsEditais() {
-  const { concursos, orgaos, bancas } = await numerosDoAcervo();
+  const numeros = await numerosSemDerrubar(numerosDoAcervo);
 
   return (
-    <PaginaDeTexto
-      titulo={titulo}
-      href={href}
-      abertura={
-        `Cada concurso do BuscaConcurso sai de um ato publicado. Esta página conta ` +
-        `onde procuramos, o que lemos, o que conferimos e o que pode estar errado. ` +
-        `Hoje a lista tem ${numero(concursos)} concursos de ${numero(orgaos)} órgãos, ` +
-        `com ${numero(bancas)} bancas organizadoras citadas nos editais.`
-      }
-    >
+    <PaginaDeTexto titulo={titulo} href={href} abertura={aberturaDoMetodo(numeros)}>
       <h2>Onde procuramos</h2>
-      <ul>
-        <li>
-          <strong>No Diário Oficial da União, todo dia útil.</strong> Lemos as
-          três seções da edição do dia e separamos os atos que falam em
-          concurso público, processo seletivo ou seleção pública.
-        </li>
-        <li>
-          <strong>Nos sites de algumas bancas organizadoras, uma vez por
-          dia.</strong> Não são todas. Bancas cujo site não aceita a visita de
-          robôs ficam de fora.
-        </li>
-      </ul>
       <p>
-        Ainda não lemos os diários oficiais dos estados e dos municípios, nem
-        as edições extras do Diário Oficial da União. Um concurso publicado só
-        nesses lugares pode não estar aqui.
+        Hoje lemos só o Diário Oficial da União, todo dia útil. Lemos as três
+        seções da edição do dia e separamos os atos que falam em concurso
+        público, processo seletivo ou seleção pública.
+      </p>
+      <p>
+        Ainda não lemos os sites das bancas organizadoras, os diários oficiais
+        dos estados e dos municípios, nem as edições extras do Diário Oficial
+        da União. Um concurso publicado só nesses lugares pode não estar aqui.
       </p>
 
       <h2>O que lemos</h2>
       <p>
         Lemos o edital de abertura e os atos que mudam o concurso depois, como
-        as retificações. Quando sai uma retificação, o dado novo toma o lugar
-        do antigo.
+        as retificações. Quando lemos uma retificação, o dado novo em geral
+        toma o lugar do antigo. Retificação publicada em edição extra do
+        Diário não é lida.
       </p>
       <p>
         Um edital costuma trazer os cargos, as vagas, a escolaridade, o
@@ -117,10 +102,7 @@ export default async function ComoLemosOsEditais() {
         <li>cargo sem nome;</li>
         <li>
           salário abaixo de R$ 100 ou acima de R$ 100 mil, sinal de número
-          lido errado, como R$ 3.000 que virou R$ 3;
-        </li>
-        <li>
-          no edital da banca, cargo sem nenhuma vaga e sem cadastro de reserva.
+          lido errado, como R$ 3.000 que virou R$ 3.
         </li>
       </ul>
       <p>
@@ -129,18 +111,20 @@ export default async function ComoLemosOsEditais() {
         data possível passa por elas.
       </p>
 
-      <h2>O que conferimos</h2>
+      <h2>Como organizamos cada concurso</h2>
       <ul>
         <li>
-          <strong>O órgão.</strong> Sai da própria estrutura do Diário, que diz
-          a que ministério, secretaria ou autarquia o ato pertence. Não
+          <strong>O órgão.</strong> Em geral sai da própria estrutura do
+          Diário, que diz a que ministério, secretaria ou autarquia o ato
+          pertence; quando o Diário não diz, sai da leitura do ato. Não
           conferimos o órgão em cadastro de fora, como o do CNPJ.
         </li>
         <li>
-          <strong>O estado.</strong> Só aparece quando o texto mostra: pela
-          sede do órgão ou pela cidade das vagas, conferida na lista de
-          municípios do IBGE. Cidade com o mesmo nome em mais de um estado não
-          define estado. Nunca adivinhamos o estado pelo nome do órgão.
+          <strong>O estado.</strong> Vem da cidade das vagas, conferida na
+          lista de municípios do IBGE, ou do nome do órgão quando ele nomeia
+          um estado ou traz a sigla, como Universidade Federal do Piauí ou
+          Prefeitura de Campinas/SP. Cidade com o mesmo nome em mais de um estado só conta se o
+          órgão confirmar o estado.
         </li>
         <li>
           <strong>A ligação com o ato no Diário.</strong> Um ato novo só é
@@ -160,8 +144,9 @@ export default async function ComoLemosOsEditais() {
       <h2>O que pode estar errado, e como avisar</h2>
       <p>
         A leitura automática erra: pode trocar uma data, juntar dois cargos ou
-        perder uma vaga. Por isso o cronograma mostra de onde cada data foi
-        lida, e o ato inteiro fica no fim da página do concurso.
+        perder uma vaga. Por isso o cronograma mostra, quando o ato permite,
+        de onde cada data foi lida, e o ato inteiro fica no fim da página do
+        concurso.
       </p>
       <p>
         Achou um erro? Na página do concurso, responda &quot;Não, tem

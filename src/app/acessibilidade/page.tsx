@@ -21,7 +21,8 @@ export const metadata: Metadata = {
  *   `localStorage` por `src/lib/acessibilidade.ts`, cinco degraus de 87,5%
  *   a 137,5%;
  * - contraste medido: `src/lib/contraste.test.ts` (4,5:1 no normal, 7:1 no
- *   alto contraste);
+ *   alto contraste), numa lista fechada de pares: por isso "as cores
+ *   principais", e não "todas" (há texto branco translúcido fora dela);
  * - foco visível: `:focus-visible` em `globals.css`;
  * - regiões vivas: `AvisoFlutuante` (`EmBreve.tsx`), o recibo da avaliação
  *   (`Avaliacao.tsx`), os erros dos formulários de conta (`AuthUi.tsx`);
@@ -57,9 +58,9 @@ export default function Acessibilidade() {
           escolher de novo.
         </li>
         <li>
-          <strong>Cores com contraste medido.</strong> Cada par de cor de texto
-          e fundo é conferido por um teste automático: pelo menos 4,5 para 1
-          no modo normal e 7 para 1 no alto contraste.
+          <strong>Cores com contraste medido.</strong> As cores principais de
+          texto e fundo do site são conferidas por um teste automático: pelo
+          menos 4,5 para 1 no modo normal e 7 para 1 no alto contraste.
         </li>
         <li>
           <strong>Teclado.</strong> Links, botões e campos são alcançados com a
