@@ -70,6 +70,13 @@ const BANCAS_VALIDAS = Object.keys(BANCAS);
 
 export interface ConsultaDaUrl {
   q?: string;
+  /**
+   * Onde a lista mora, quando não é a busca: a página de área fixa
+   * `/areas/<slug>`, e todo link de filtro, chip, aba, ordem e página fica
+   * nela. Sem ele, o caminho é o da busca pelo termo (`caminhoDaBusca`).
+   * Não vem da URL: quem lê a consulta decide.
+   */
+  caminho?: string;
   uf?: Uf;
   escolaridades: Escolaridade[];
   situacoes: Situacao[];
@@ -127,6 +134,11 @@ export function caminhoDaBusca(q?: string): string {
   return slug ? `/busca/${slug}` : "/concursos";
 }
 
+/** O caminho de uma consulta: o dela, se tiver, senão o da busca pelo termo. */
+export function caminhoDaConsulta(consulta: ConsultaDaUrl): string {
+  return consulta.caminho ?? caminhoDaBusca(consulta.q);
+}
+
 /**
  * Monta o endereço da busca a partir de uma consulta, aplicando as
  * alterações pedidas.
@@ -156,7 +168,7 @@ export function urlDaBusca(
 
   // O termo vai no caminho, e não na query: `/busca/<slug>` é o endereço
   // que o buscador indexa, e a query fica só para os recortes dele.
-  const caminho = caminhoDaBusca(final.q);
+  const caminho = caminhoDaConsulta(final);
   const texto = busca.toString();
   return texto ? `${caminho}?${texto}` : caminho;
 }

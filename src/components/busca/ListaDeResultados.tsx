@@ -160,9 +160,15 @@ export function ListaDeResultados({
   aviso,
   dimensoes,
   hoje,
+  nivelDoTitulo = "h1",
 }: {
   consulta: ConsultaDaUrl;
   titulo: string;
+  /**
+   * `h2` quando a lista é uma seção de uma página que já tem o seu `h1`: a
+   * página de área, com o cabeçalho e o ícone da área em cima.
+   */
+  nivelDoTitulo?: "h1" | "h2";
   resultado: Pagina;
   contagens: ContagensDeFaceta;
   aviso: AvisoDoAcervo | null;
@@ -175,6 +181,7 @@ export function ListaDeResultados({
   // devolve, e contar só `chips.length` nunca daria zero numa busca.
   const soOTermo = chips.every((chip) => chip.chave === "q");
   const rotulo = rotuloDaLista(consulta);
+  const Titulo = nivelDoTitulo;
 
   return (
     <>
@@ -218,9 +225,9 @@ export function ListaDeResultados({
               <Rotulo icone={rotulo.icone} tom={rotulo.tom} className="mb-2.5">
                 {rotulo.texto}
               </Rotulo>
-              <h1 className="font-titulo text-[1.625rem] leading-[1.08] font-bold tracking-[-0.025em] break-words md:text-[2.5rem] md:leading-[1.05] md:tracking-[-0.03em]">
+              <Titulo className="font-titulo text-[1.625rem] leading-[1.08] font-bold tracking-[-0.025em] break-words md:text-[2.5rem] md:leading-[1.05] md:tracking-[-0.03em]">
                 {titulo}
-              </h1>
+              </Titulo>
               <p className="mt-2 text-[0.75rem] text-tinta-600">
                 <strong className="numero font-medium text-tinta-900">
                   {numero(resultado.total)}

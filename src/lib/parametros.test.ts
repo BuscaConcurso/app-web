@@ -3,6 +3,7 @@ import { termoDoSlug } from "./enderecoDaBusca";
 import {
   CONSULTA_VAZIA,
   caminhoDaBusca,
+  caminhoDaConsulta,
   destinoDoFormulario,
   filtroDaConsulta,
   lerConsulta,
@@ -253,5 +254,34 @@ describe("tituloDaListaDeConcursos", () => {
       tituloDaListaDeConcursos({ ...CONSULTA_VAZIA, situacoes: ["previstos"], uf: "MG" }),
     ).toBe("Concursos previstos em Minas Gerais");
     expect(tituloDaListaDeConcursos({ ...CONSULTA_VAZIA, uf: "BA" })).toBe("Concursos públicos na Bahia");
+  });
+});
+
+describe("caminho próprio da consulta (página de área)", () => {
+  const naArea: ConsultaDaUrl = { ...VAZIA, caminho: "/areas/saude", escolaridades: ["superior"] };
+
+  it("urlDaBusca fica no caminho da consulta, e não em /concursos", () => {
+    expect(urlDaBusca(naArea)).toBe("/areas/saude?escolaridade=superior");
+    expect(urlDaBusca(naArea, { pagina: 3, ordem: "vagas" })).toBe(
+      "/areas/saude?escolaridade=superior&ordem=vagas&pagina=3",
+    );
+  });
+
+  it("marcar, desmarcar e limpar também ficam na área", () => {
+    expect(urlAlternando(naArea, "escolaridades", "medio")).toBe(
+      "/areas/saude?escolaridade=superior&escolaridade=medio",
+    );
+    expect(urlSemValor(naArea, "escolaridades", "superior")).toBe("/areas/saude");
+    expect(urlSemFiltros({ ...naArea, uf: "SP", salarioMin: 5000 })).toBe("/areas/saude");
+  });
+
+  it("o caminho vence o termo, que a área não usa", () => {
+    expect(urlDaBusca({ ...naArea, q: "professor" })).toBe("/areas/saude?escolaridade=superior");
+  });
+
+  it("caminhoDaConsulta: o da consulta, ou o da busca pelo termo", () => {
+    expect(caminhoDaConsulta(naArea)).toBe("/areas/saude");
+    expect(caminhoDaConsulta({ ...VAZIA, q: "professor" })).toBe(caminhoDaBusca("professor"));
+    expect(caminhoDaConsulta(VAZIA)).toBe("/concursos");
   });
 });

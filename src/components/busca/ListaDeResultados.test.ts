@@ -60,6 +60,18 @@ describe("abasDeSituacao", () => {
   });
 });
 
+describe("abasDeSituacao numa área", () => {
+  it("toda aba fica no caminho da área", () => {
+    const naArea: ConsultaDaUrl = { ...CONSULTA_VAZIA, caminho: "/areas/saude", escolaridades: ["superior"] };
+    expect(abasDeSituacao(naArea, CONTAGENS).map((aba) => aba.href)).toEqual([
+      "/areas/saude?escolaridade=superior",
+      "/areas/saude?escolaridade=superior&situacao=abertas",
+      "/areas/saude?escolaridade=superior&situacao=previstos",
+      "/areas/saude?escolaridade=superior&situacao=encerrados",
+    ]);
+  });
+});
+
 describe("rotuloDaLista", () => {
   it("diz a situação filtrada, e não sempre \"inscrições abertas\"", () => {
     expect(rotuloDaLista(comSituacoes(["abertas"])).texto).toBe("INSCRIÇÕES ABERTAS");
