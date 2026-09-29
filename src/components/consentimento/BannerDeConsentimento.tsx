@@ -37,10 +37,13 @@ export function CartaoDeConsentimento({
           <strong className="font-semibold text-tinta-900">
             Usamos cookies para entender como o site é usado e melhorá-lo.
           </strong>{" "}
-          Com a sua permissão, as ferramentas {quemMede(ligados)} medem visitas e cliques e
-          gravam a navegação, sem o que você digita nos campos. Sem ela, só contamos visitas, sem
-          cookie e sem saber quem é você. Recusar não muda nada no site, e dá para mudar de ideia em
-          &quot;Preferências de cookies&quot;, no rodapé.
+          {/* A gravação de sessão e a contagem anônima de quem recusa são do
+              PostHog: só com ele ligado o banner fala delas. */}
+          {ligados.posthog
+            ? `Com a sua permissão, as ferramentas ${quemMede(ligados)} medem visitas e cliques e gravam a navegação, sem o que você digita nos campos. Sem ela, só contamos visitas, sem cookie e sem saber quem é você.`
+            : `Com a sua permissão, as ferramentas ${quemMede(ligados)} medem visitas e cliques. Sem ela, nada é medido.`}{" "}
+          Recusar não muda nada no site, e dá para mudar de ideia em &quot;Preferências de
+          cookies&quot;, no rodapé.
         </p>
         <div className="flex shrink-0 gap-2">
           <button

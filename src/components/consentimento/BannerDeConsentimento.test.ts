@@ -37,3 +37,16 @@ describe("CartaoDeConsentimento", () => {
     expect(html).toContain("Sem ela, só contamos visitas, sem cookie e sem saber quem é você.");
   });
 });
+
+describe("CartaoDeConsentimento só com o GTM", () => {
+  const html = renderToStaticMarkup(
+    createElement(CartaoDeConsentimento, { ligados: { posthog: false, gtm: true }, aoResponder: () => {} }),
+  );
+
+  it("não promete gravação nem contagem anônima, que são do PostHog", () => {
+    expect(html).toContain("do Google");
+    expect(html).not.toContain("gravam a navegação");
+    expect(html).not.toContain("só contamos visitas");
+    expect(html).toContain("Sem ela, nada é medido.");
+  });
+});
