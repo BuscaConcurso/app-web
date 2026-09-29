@@ -141,6 +141,17 @@ export function GavetaDeNavegacao({ className }: { className?: string }) {
           <Icone nome="entrar" tamanho={18} />
           {logado ? "Minha conta" : "Entrar"}
         </Link>
+        {/* No celular o "Salvos" do cabeçalho não existe (só cabem logo,
+            alertas e menu): a gaveta é o caminho até a página. */}
+        {logado && (
+          <Link
+            href="/salvos"
+            className="flex h-11 items-center gap-3 rounded-controle px-3 text-[0.9375rem] font-semibold text-tinta-900 hover:bg-rebaixada"
+          >
+            <Icone nome="salvar" tamanho={18} />
+            Salvos
+          </Link>
+        )}
       </div>
 
       <div className="mt-4 border-t border-linha pt-4">

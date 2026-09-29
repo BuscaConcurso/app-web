@@ -7,7 +7,6 @@
  * entrega, e cada chamador só escolhe qual deles é.
  */
 export type RecursoEmBreve =
-  | "salvos"
   | "alertas"
   | "lembrete";
 
@@ -15,10 +14,6 @@ export const RECURSOS_EM_BREVE: Record<
   RecursoEmBreve,
   { titulo: string; frase: string }
 > = {
-  salvos: {
-    titulo: "Concursos salvos",
-    frase: "Guarde os concursos que interessam e veja todos num lugar só.",
-  },
   alertas: {
     titulo: "Alertas",
     frase: "Receba o edital no dia em que ele sair.",

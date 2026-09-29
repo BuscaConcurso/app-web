@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Azulejos, FAIXA_MARCA } from "@/components/marca/Azulejos";
 import { BotaoLink } from "@/components/ui/Botao";
 import { RECURSOS_EM_BREVE, recursoEmBreve } from "@/lib/emBreve";
@@ -15,7 +15,11 @@ export const metadata: Metadata = { robots: { index: false, follow: true } };
 export default async function EmBreve({
   params,
 }: PageProps<"/em-breve/[recurso]">) {
-  const recurso = recursoEmBreve((await params).recurso);
+  const segmento = (await params).recurso;
+  // Os salvos saíram do "em breve": quem guardou o link antigo cai na página
+  // de verdade.
+  if (segmento === "salvos") permanentRedirect("/salvos");
+  const recurso = recursoEmBreve(segmento);
   if (!recurso) notFound();
   const { titulo, frase } = RECURSOS_EM_BREVE[recurso];
 

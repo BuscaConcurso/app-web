@@ -11,7 +11,7 @@ describe("emBreve", () => {
   });
 
   it("o endereço é /em-breve/<recurso>", () => {
-    expect(hrefEmBreve("salvos")).toBe("/em-breve/salvos");
+    expect(hrefEmBreve("alertas")).toBe("/em-breve/alertas");
   });
 
   it("o Diário Oficial saiu da lista: a página existe", () => {
@@ -24,7 +24,12 @@ describe("emBreve", () => {
 
   it("recurso desconhecido é null", () => {
     expect(recursoEmBreve("banana")).toBeNull();
-    expect(recursoEmBreve("salvos")).toBe("salvos");
+    expect(recursoEmBreve("alertas")).toBe("alertas");
+  });
+
+  it("salvos já existe: não é mais recurso em breve", () => {
+    expect(recursoEmBreve("salvos")).toBeNull();
+    expect(Object.keys(RECURSOS_EM_BREVE)).not.toContain("salvos");
   });
 
   it("não aceita nome herdado do protótipo do objeto", () => {
