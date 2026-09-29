@@ -6,8 +6,11 @@
 import type { ConcursoResumo } from "./dominio";
 import { paraDataLocal } from "./formato";
 
-/** O mesmo tamanho de página da API: 30 atos. */
-export const ATOS_POR_PAGINA = 30;
+/**
+ * O tamanho de página do mock, e só dele: com a API, o tamanho é o
+ * `porPagina` que ela manda, e o app não repete a constante.
+ */
+const ATOS_POR_PAGINA_DO_MOCK = 30;
 
 export interface AtoDoDiario {
   /** `AAAA-MM-DD`: a data da edição do Diário em que o ato saiu. */
@@ -23,6 +26,8 @@ export interface AtoDoDiario {
 export interface FeedDoDiario {
   itens: AtoDoDiario[];
   pagina: number;
+  /** Quantos atos cabem numa página, como a API decidiu. */
+  porPagina: number;
   totalDePaginas: number;
   total: number;
 }
@@ -80,11 +85,12 @@ export function feedDeMock(concursos: ConcursoResumo[], pagina: number): FeedDoD
     )
     // ISO curto compara como texto na mesma ordem que como data.
     .sort((a, b) => (a.publicadoEm === b.publicadoEm ? 0 : a.publicadoEm < b.publicadoEm ? 1 : -1));
-  const inicio = (pagina - 1) * ATOS_POR_PAGINA;
+  const inicio = (pagina - 1) * ATOS_POR_PAGINA_DO_MOCK;
   return {
-    itens: itens.slice(inicio, inicio + ATOS_POR_PAGINA),
+    itens: itens.slice(inicio, inicio + ATOS_POR_PAGINA_DO_MOCK),
     pagina,
-    totalDePaginas: Math.ceil(itens.length / ATOS_POR_PAGINA),
+    porPagina: ATOS_POR_PAGINA_DO_MOCK,
+    totalDePaginas: Math.ceil(itens.length / ATOS_POR_PAGINA_DO_MOCK),
     total: itens.length,
   };
 }

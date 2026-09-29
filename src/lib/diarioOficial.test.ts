@@ -45,6 +45,7 @@ describe("feedDeMock", () => {
     const feed = feedDeMock(CONCURSOS, 1);
     expect(feed.total).toBe(CONCURSOS.filter((c) => c.ultimoAto?.data).length);
     expect(feed.total).toBeGreaterThan(0);
+    expect(feed.porPagina).toBe(30);
     expect(feed.itens.every((item) => item.url === null)).toBe(true);
     const datas = feed.itens.map((item) => item.publicadoEm);
     expect(datas).toEqual([...datas].sort().reverse());

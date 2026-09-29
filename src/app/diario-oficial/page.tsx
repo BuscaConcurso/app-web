@@ -4,7 +4,7 @@ import { FeedDoDiario } from "@/components/diario/FeedDoDiario";
 import { Paginacao } from "@/components/ui/Paginacao";
 import { Trilha, type Degrau } from "@/components/ui/Trilha";
 import { feedDoDiario } from "@/lib/concursos";
-import { agruparPorDia, ATOS_POR_PAGINA } from "@/lib/diarioOficial";
+import { agruparPorDia } from "@/lib/diarioOficial";
 import { hojeEmSaoPaulo, numero } from "@/lib/formato";
 
 /**
@@ -84,7 +84,7 @@ export default async function PaginaDoDiarioOficial(
           <div className="flex flex-col items-center gap-2">
             <Paginacao pagina={pagina} paginas={feed.totalDePaginas} hrefDe={hrefDe} />
             <p className="text-[0.75rem] text-tinta-600">
-              {numero(feed.total)} atos, {numero(ATOS_POR_PAGINA)} por página
+              {numero(feed.total)} atos, {numero(feed.porPagina)} por página
             </p>
           </div>
         )}
