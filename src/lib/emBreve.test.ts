@@ -11,11 +11,15 @@ describe("emBreve", () => {
   });
 
   it("o endereço é /em-breve/<recurso>", () => {
-    expect(hrefEmBreve("areas")).toBe("/em-breve/areas");
+    expect(hrefEmBreve("salvos")).toBe("/em-breve/salvos");
   });
 
   it("o Diário Oficial saiu da lista: a página existe", () => {
     expect(recursoEmBreve("diario-oficial")).toBeNull();
+  });
+
+  it("áreas saiu da lista: tem página própria em /areas", () => {
+    expect(recursoEmBreve("areas")).toBeNull();
   });
 
   it("recurso desconhecido é null", () => {

@@ -14,7 +14,7 @@ const COLUNA_BUSCAR = [
   { rotulo: "Abertos", href: "/concursos?situacao=abertas" },
   { rotulo: "Previstos", href: "/concursos?situacao=previstos" },
   { rotulo: "Diário Oficial", href: "/diario-oficial" },
-  { rotulo: "Por área", href: hrefEmBreve("areas") },
+  { rotulo: "Por área", href: "/areas" },
 ];
 
 const COLUNA_SOBRE = [

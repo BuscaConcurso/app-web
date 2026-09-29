@@ -1,5 +1,4 @@
 import type { NomeDoIcone } from "@/components/ui/Icone";
-import { hrefEmBreve } from "@/lib/emBreve";
 
 /**
  * Os itens da nav: dado puro, sem `"use client"`.
@@ -62,8 +61,8 @@ export const ITENS_DA_NAV = [
   {
     rotulo: "Áreas",
     icone: "areas",
-    href: hrefEmBreve("areas"),
-    ativo: (caminho) => caminho === hrefEmBreve("areas"),
+    href: "/areas",
+    ativo: (caminho) => caminho === "/areas" || caminho.startsWith("/areas/"),
     soNaHome: true,
   },
   {

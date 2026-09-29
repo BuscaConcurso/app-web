@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { AREAS } from "@/lib/areas";
 import { medirCargos } from "@/lib/cargos";
 import { slugDaBusca } from "@/lib/enderecoDaBusca";
 import { urlAbsoluta } from "@/lib/site";
@@ -30,5 +31,11 @@ describe("sitemap", () => {
   it("tem o feed do Diário Oficial, diário", async () => {
     const entrada = (await sitemap()).find((e) => e.url === urlAbsoluta("/diario-oficial"));
     expect(entrada?.changeFrequency).toBe("daily");
+  });
+
+  it("tem /areas e a página de cada uma das 12 áreas", async () => {
+    const urls = (await sitemap()).map((entrada) => entrada.url);
+    expect(urls).toContain(urlAbsoluta("/areas"));
+    for (const area of AREAS) expect(urls).toContain(urlAbsoluta(`/areas/${area.slug}`));
   });
 });

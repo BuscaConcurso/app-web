@@ -22,8 +22,11 @@ describe("ITENS_DA_NAV", () => {
     expect(ativo("Diário Oficial", "/diario-oficial", "pagina=3")).toBe(true);
   });
 
-  it("Áreas acende na página em breve dela", () => {
-    expect(ativo("Áreas", "/em-breve/areas")).toBe(true);
+  it("Áreas leva a /areas e acende nela e em cada área", () => {
+    expect(ITENS_DA_NAV.find((item) => item.rotulo === "Áreas")?.href).toBe("/areas");
+    expect(ativo("Áreas", "/areas")).toBe(true);
+    expect(ativo("Áreas", "/areas/saude")).toBe(true);
+    expect(ativo("Áreas", "/areasx")).toBe(false);
   });
 
   it("nenhuma acende na home", () => {

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { AREAS, hrefDaArea } from "@/lib/areas";
 import { urlDoCargo } from "@/lib/cargos";
 import { cargosEscolhidos, listarOrgaos, listarSlugs } from "@/lib/concursos";
 import { UFS, type Escolaridade } from "@/lib/dominio";
@@ -8,10 +9,10 @@ import { urlAbsoluta } from "@/lib/site";
  * O mapa do site.
  *
  * Entram a home, a busca, o feed do Diário Oficial, as facetas finitas
- * (estado e escolaridade), cada cargo que `medirCargos` escolheu, cada órgão
- * com mais de um concurso e cada concurso. Não entram as buscas por texto
- * livre, que são infinitas, nem `/estilo`, que é ferramenta de trabalho e não
- * conteúdo.
+ * (estado e escolaridade), as 12 áreas, cada cargo que `medirCargos`
+ * escolheu, cada órgão com mais de um concurso e cada concurso. Não entram
+ * as buscas por texto livre, que são infinitas, nem `/estilo`, que é
+ * ferramenta de trabalho e não conteúdo.
  *
  * **Os órgãos de um concurso só ficam de fora**, e são 195 dos 466. A página
  * deles é o cartão de um concurso que já está neste mesmo mapa com prioridade
@@ -85,6 +86,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: agora,
       changeFrequency: "daily" as const,
       priority: 0.7,
+    })),
+    // As áreas: um índice fixo de 12, mais durável que qualquer busca. A
+    // página de área filtrada (`?situacao=`) ou adiante (`?pagina=`) fica de
+    // fora, pela mesma regra de `robots` dela.
+    {
+      url: urlAbsoluta("/areas"),
+      lastModified: agora,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    },
+    ...AREAS.map((area) => ({
+      url: urlAbsoluta(hrefDaArea(area)),
+      lastModified: agora,
+      changeFrequency: "daily" as const,
+      priority: 0.75,
     })),
     // Entre a faceta e o concurso: um órgão é mais durável que uma busca por
     // estado e menos específico que um edital, que é o que a pessoa procura.

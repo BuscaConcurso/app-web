@@ -8,7 +8,6 @@
  */
 export type RecursoEmBreve =
   | "salvos"
-  | "areas"
   | "como-lemos"
   | "acessibilidade"
   | "contato"
@@ -22,11 +21,6 @@ export const RECURSOS_EM_BREVE: Record<
   salvos: {
     titulo: "Concursos salvos",
     frase: "Guarde os concursos que interessam e veja todos num lugar só.",
-  },
-  areas: {
-    titulo: "Concursos por área",
-    frase:
-      "Tribunais, polícia, saúde e as outras áreas, cada uma com a sua lista.",
   },
   "como-lemos": {
     titulo: "Como lemos os editais",
