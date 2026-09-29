@@ -28,6 +28,18 @@ const nextConfig: NextConfig = {
   //
   // Vale só em desenvolvimento: `next build`/`next start` ignoram esta opção.
   allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.15.100"],
+
+  // O feed do Diário saiu do "em breve": quem guardou o endereço antigo chega
+  // na página de verdade. Permanente (308), para o buscador trocar também.
+  async redirects() {
+    return [
+      {
+        source: "/em-breve/diario-oficial",
+        destination: "/diario-oficial",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

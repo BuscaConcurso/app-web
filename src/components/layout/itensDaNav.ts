@@ -56,8 +56,8 @@ export const ITENS_DA_NAV = [
   {
     rotulo: "Diário Oficial",
     icone: "diario",
-    href: hrefEmBreve("diario-oficial"),
-    ativo: (caminho) => caminho === hrefEmBreve("diario-oficial"),
+    href: "/diario-oficial",
+    ativo: (caminho) => caminho === "/diario-oficial",
   },
   {
     rotulo: "Áreas",

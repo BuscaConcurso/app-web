@@ -16,8 +16,13 @@ describe("ITENS_DA_NAV", () => {
     expect(ativo("Previstos", "/concursos", "situacao=previstos")).toBe(true);
   });
 
-  it("Diário Oficial e Áreas acendem na página em breve deles", () => {
-    expect(ativo("Diário Oficial", "/em-breve/diario-oficial")).toBe(true);
+  it("Diário Oficial leva ao feed e acende nele, com ou sem página", () => {
+    expect(ITENS_DA_NAV.find((item) => item.rotulo === "Diário Oficial")!.href).toBe("/diario-oficial");
+    expect(ativo("Diário Oficial", "/diario-oficial")).toBe(true);
+    expect(ativo("Diário Oficial", "/diario-oficial", "pagina=3")).toBe(true);
+  });
+
+  it("Áreas acende na página em breve dela", () => {
     expect(ativo("Áreas", "/em-breve/areas")).toBe(true);
   });
 

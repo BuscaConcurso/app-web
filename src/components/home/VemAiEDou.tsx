@@ -4,7 +4,6 @@ import { BotaoEmBreve } from "@/components/ui/EmBreve";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { Icone } from "@/components/ui/Icone";
 import type { ConcursoResumo } from "@/lib/dominio";
-import { hrefEmBreve } from "@/lib/emBreve";
 import { estiloDoAto } from "@/lib/estiloDoAto";
 import { dataCurta, numero, quantidade, vagasTexto } from "@/lib/formato";
 import { ROTULO_ESCOLARIDADE, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos";
@@ -148,7 +147,7 @@ export function VemAiEDou({
             </p>
           </div>
           <Link
-            href={hrefEmBreve("diario-oficial")}
+            href="/diario-oficial"
             className="flex shrink-0 items-center gap-1 text-sm font-semibold text-tinta-900 hover:text-verde-texto"
           >
             Ver feed

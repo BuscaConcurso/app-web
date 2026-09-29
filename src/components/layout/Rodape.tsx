@@ -13,7 +13,7 @@ const LIMITE_DE_UFS_NO_RODAPE = 8;
 const COLUNA_BUSCAR = [
   { rotulo: "Abertos", href: "/concursos?situacao=abertas" },
   { rotulo: "Previstos", href: "/concursos?situacao=previstos" },
-  { rotulo: "Diário Oficial", href: hrefEmBreve("diario-oficial") },
+  { rotulo: "Diário Oficial", href: "/diario-oficial" },
   { rotulo: "Por área", href: hrefEmBreve("areas") },
 ];
 

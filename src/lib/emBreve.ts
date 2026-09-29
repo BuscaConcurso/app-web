@@ -9,7 +9,6 @@
 export type RecursoEmBreve =
   | "salvos"
   | "areas"
-  | "diario-oficial"
   | "como-lemos"
   | "acessibilidade"
   | "contato"
@@ -28,10 +27,6 @@ export const RECURSOS_EM_BREVE: Record<
     titulo: "Concursos por área",
     frase:
       "Tribunais, polícia, saúde e as outras áreas, cada uma com a sua lista.",
-  },
-  "diario-oficial": {
-    titulo: "Feed do Diário Oficial",
-    frase: "Todo ato novo sobre concurso, do mais recente para o mais antigo.",
   },
   "como-lemos": {
     titulo: "Como lemos os editais",
