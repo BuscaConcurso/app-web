@@ -209,11 +209,14 @@ acervo"), e 9 dos 12 falham com a regra anterior ao ajuste.
 
 ## Desvios
 
-- **`exceto` num cargo tira só aquele cargo.** O spec diz "se casar em
-  qualquer campo, fica de fora". No órgão e no título continua assim; no
-  cargo, tirar o concurso inteiro tirava de Saúde todo edital de
-  universidade que tem "Médico" e "Médico Veterinário" juntos (UFRRJ, UFPE,
-  UFFS, Unilab). Então o cargo que casa com `exceto` só deixa de contar.
+- **`exceto` anula só o campo em que casa.** O spec diz "se casar em
+  qualquer campo, fica de fora". Tirar o concurso inteiro tirava de Saúde
+  todo edital de universidade que tem "Médico" e "Médico Veterinário"
+  juntos (UFRRJ, UFPE, UFFS, Unilab), e também o edital cujo título cita os
+  dois. Então: `exceto` no órgão ou no título anula o casamento por órgão e
+  por título; num cargo, anula só aquele cargo. O concurso ainda entra por
+  um cargo da área. TCU e Funpresp-Jud continuam fora de Tribunais porque
+  nenhum cargo deles é de tribunal.
 - **`/areas/[slug]` sem `generateStaticParams`.** A página lê `?situacao=` e
   `?pagina=` no servidor, como a página de órgão, e página que lê
   `searchParams` renderiza por requisição: os 12 parâmetros não seriam
@@ -226,6 +229,10 @@ acervo"), e 9 dos 12 falham com a regra anterior ao ajuste.
   dinâmico e não toca arquivo que outros agentes editam.
 
 ## Pendências
+
+- Em Tribunais, um concurso do TSE tem por título uma lista de nomes e
+  notas ("10161306, Antonia Clarina Rodrigues Machado, 65.00, ..."): o
+  título veio errado do engine, o órgão está certo.
 
 - O engine classifica como concurso atos que não são: "AVISO DE LICITAÇÃO"
   da Prefeitura de Rio Verde (primeiro de Prefeituras) e 9 "Aviso de
@@ -254,3 +261,32 @@ acervo"), e 9 dos 12 falham com a regra anterior ao ajuste.
   `/areas/tecnologia` (390); `scripts/verificar-navegador.mjs` com as páginas
   de área: sem rolagem lateral a 360, 375, 390 e 1440px e sem erro de
   console.
+
+## Correções da revisão independente
+
+1. **Abertos primeiro em "Todas".** `ordenar(..., "encerrando")` olha só
+   `inscricoesAte`: um aberto sem data ia para o fim e um homologado com
+   data futura subia (o CRM-PR homologado era o primeiro de
+   `/areas/conselhos`). `listaDaArea` agora faz, depois de `ordenar`, uma
+   ordenação estável por situação (abertas, previstos, encerrados). A busca
+   não mudou. Conferido: o primeiro de `/areas/conselhos` é o CRA-AM, aberto.
+2. Lista vazia sem filtro diz "Nenhum concurso desta área no acervo agora."
+3. `exceto` no título ou no órgão anula só o casamento por título e órgão
+   (ver Desvios).
+4. Administrativo: `exceto` também "administrador de banco de dados",
+   "administrador de sistemas" e "administrador de dados".
+5. Prefeituras: `exceto` "tribunal de contas" (Tribunal de Contas do
+   Município de São Paulo).
+6. As abas de situação ficam num `<nav aria-label="Situação">`, com `p-1
+   -m-1` em volta da rolagem: o anel de foco aparece inteiro a 390px
+   (conferido por teclado, com captura).
+7. Os casos reais do teste usam o escape `\u2014` no lugar do glifo.
+
+**Contagens depois das correções**, de novo contra o `/v1/acervo` local:
+nenhuma mudou. Tribunais 85/3, Polícia 33/0, Educação 3.596/76, Saúde 151/8,
+Fiscal 48/2, Bancos 39/0, Forças 77/0, Prefeituras 40/1, Conselhos 216/4,
+Tecnologia 107/3, Administrativo 200/4, Ambiente 78/2 (total/abertos). O
+acervo local não tem Tribunal de Contas de município nem administrador de
+banco de dados, de sistemas ou de dados, e nenhum título com exceção
+citada tinha cargo da área. A amostra dos 10 primeiros, agora na ordem
+nova da página, continua sem falso positivo de área.
