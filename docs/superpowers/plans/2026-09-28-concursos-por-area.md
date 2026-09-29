@@ -182,8 +182,53 @@ expect(hrefDaListaDaArea(saude, { situacao: "previstos", pagina: 3 })).toBe("/ar
 
 ## Aceite (seção 4 do spec)
 
-Preenchido na Tarefa 2.
+Conferência de 28/09/2026 sobre o `/v1/acervo` da api local (4.724 concursos
+com dado, de 4.918 no engine), com `src/lib/conferenciaDasAreas.local.test.ts`
+(não versionado): por área, os 10 primeiros na ordem da página, todos os
+órgãos que casaram e todo cargo que casou fora deles. Abertos contados em
+28/09/2026.
+
+| Área | Total | Abertos | Falsos positivos encontrados | Ajuste |
+|---|---:|---:|---|---|
+| Tribunais | 85 | 3 | 6 da Funpresp-Jud (fundo de pensão, casava por "Poder Judiciário") | `exceto: previdencia complementar` |
+| Polícia e segurança | 33 | 0 | 5 do MJSP que são chamada de conselheiro (CNPD, CNCP) e consultor PNUD, casando por "Segurança Pública"; faltava a polícia penal (SENAPPEN/DEPEN) | sai `seguranca publica` do órgão; entram `execucao penal`, `policia judicial` no cargo e `politicas penais`, `senappen`, `depen` no título |
+| Educação | 3.596 | 76 | nenhum (tudo é universidade, IF, CEFET, Colégio Pedro II ou cargo de professor) | nenhum |
+| Saúde | 151 | 8 | "Médico Veterinário" casava "médico" (UFV, UFLA, UFU, CRMV, auditor agropecuário) | `exceto: medico veterinario`, só no cargo (ver Desvios); entram Hemobrás, Rede Sarah, Inca, INC, Into, Funasa, ANS e mais cargos de saúde |
+| Fiscal e controle | 48 | 2 | nenhum (auditor de universidade é controle interno) | nenhum |
+| Bancos e estatais | 39 | 0 | nenhum; faltavam ABGF, Dataprev e Emgepron | três órgãos a mais |
+| Forças Armadas | 77 | 0 | nenhum; faltavam Comando de Operações Navais e Fuzileiros Navais | `operacoes navais`, `fuzileiros navais`, `distrito naval` |
+| Prefeituras | 40 | 1 | nenhum de área (ver Pendências: um "AVISO DE LICITAÇÃO") | nenhum |
+| Conselhos | 216 | 4 | nenhum (CNJ, CNPq, Conarq, conselhos gestores de fundo ficam fora pela regra) | nenhum |
+| Tecnologia | 107 | 3 | 33 por "Informática" sozinha, que nos editais de IF é a área do professor ("Informática", "Professor Substituto - Informática", "Informática Educativa") | sai `informatica`; entram frases de cargo de TI (`tecnico em informatica`, `agente censitario de informatica`, `tecnico de laboratorio area informatica`...) |
+| Administrativo | 200 | 4 | "PAS - Analista de TI - Administrador de Redes" casava "administrador" | `exceto: administrador de redes`, só no cargo |
+| Ambiente e agro | 78 | 2 | nenhum; faltavam veterinário, pesca, IBAMA pela sigla, ANA | entram `medico veterinario`, `pesca`, `ibama`, `aguas e saneamento` e outros |
+
+Amostra final (10 primeiros de cada área) sem falso positivo de área. Os
+casos reais viraram teste em `src/lib/areas.test.ts` ("casos reais do
+acervo"), e 9 dos 12 falham com a regra anterior ao ajuste.
 
 ## Desvios
 
-Preenchido durante a execução.
+- **`exceto` num cargo tira só aquele cargo.** O spec diz "se casar em
+  qualquer campo, fica de fora". No órgão e no título continua assim; no
+  cargo, tirar o concurso inteiro tirava de Saúde todo edital de
+  universidade que tem "Médico" e "Médico Veterinário" juntos (UFRRJ, UFPE,
+  UFFS, Unilab). Então o cargo que casa com `exceto` só deixa de contar.
+- **`/areas/[slug]` sem `generateStaticParams`.** A página lê `?situacao=` e
+  `?pagina=` no servidor, como a página de órgão, e página que lê
+  `searchParams` renderiza por requisição: os 12 parâmetros não seriam
+  prerenderizados. Slug desconhecido é 404 por `areaDoSlug` e `notFound()`.
+  A alternativa (página estática e filtro no navegador, como `/busca`)
+  mandaria a lista inteira da área ao navegador: 3.596 concursos em Educação.
+- **`/em-breve/areas` redireciona por uma rota própria**
+  (`src/app/em-breve/areas/page.tsx`, `permanentRedirect`), e não por
+  `next.config.ts` nem pela página `[recurso]`: segmento estático vence o
+  dinâmico e não toca arquivo que outros agentes editam.
+
+## Pendências
+
+- O engine classifica como concurso atos que não são: "AVISO DE LICITAÇÃO"
+  da Prefeitura de Rio Verde (primeiro de Prefeituras) e 9 "Aviso de
+  Credenciamento" da Operação Carro-Pipa (Comando Militar do Nordeste, em
+  Forças Armadas). São do órgão certo e aparecem também na busca e na
+  página do órgão; a correção é no engine, não na regra de área.

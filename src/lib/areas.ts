@@ -37,7 +37,12 @@ export interface RegraDaArea {
   cargo?: string[];
   /** Casa no título do concurso. */
   titulo?: string[];
-  /** Se casar em qualquer um dos três campos, o concurso fica de fora. */
+  /**
+   * O que tira. No órgão ou no título, tira o concurso inteiro; num cargo,
+   * tira só aquele cargo, que deixa de contar para a área (o concurso ainda
+   * entra por outro cargo, pelo órgão ou pelo título). É o que separa
+   * "Médico Veterinário" de "Médico" num edital que tem os dois.
+   */
   exceto?: string[];
 }
 
@@ -61,7 +66,9 @@ export const AREAS: Area[] = [
     regra: {
       orgao: ["tribunal", "poder judiciario", "justica federal", "conselho da justica federal", "conselho nacional de justica"],
       cargo: ["analista judiciario", "tecnico judiciario", "juiz"],
-      exceto: ["tribunal de contas"],
+      // Tribunal de Contas é Fiscal e controle; a Funpresp-Jud é um fundo de
+      // pensão que só tem "Poder Judiciário" no nome.
+      exceto: ["tribunal de contas", "previdencia complementar"],
     },
   },
   {
@@ -71,8 +78,11 @@ export const AREAS: Area[] = [
     icone: "policia",
     tom: "anil",
     regra: {
-      orgao: ["policia", "seguranca publica"],
-      cargo: ["delegado", "escrivao", "papiloscopista", "agente de policia", "policial", "agente penitenciario", "policia penal"],
+      // Não "segurança pública": o Ministério da Justiça e Segurança Pública
+      // publica chamada de conselheiro e de consultor, que não é segurança.
+      orgao: ["policia"],
+      cargo: ["delegado", "escrivao", "papiloscopista", "agente de policia", "policial", "policia judicial", "agente penitenciario", "policia penal", "execucao penal"],
+      titulo: ["politicas penais", "senappen", "depen"],
     },
   },
   {
@@ -93,8 +103,10 @@ export const AREAS: Area[] = [
     icone: "saude",
     tom: "urucum",
     regra: {
-      orgao: ["hospital", "ministerio da saude", "sus", "ebserh"],
-      cargo: ["medico", "enfermeiro", "tecnico de enfermagem", "tecnico em enfermagem", "farmaceutico", "nutricionista", "fisioterapeuta", "odontologo"],
+      orgao: ["hospital", "ministerio da saude", "sus", "ebserh", "hemoderivados", "pioneiras sociais", "fundacao nacional de saude", "saude suplementar", "instituto nacional de cancer", "instituto nacional de cardiologia", "instituto nacional de traumatologia"],
+      cargo: ["medico", "enfermeiro", "tecnico de enfermagem", "tecnico em enfermagem", "auxiliar de enfermagem", "farmaceutico", "nutricionista", "fisioterapeuta", "fonoaudiologo", "odontologo", "cirurgiao dentista"],
+      // Veterinário é Ambiente e agro.
+      exceto: ["medico veterinario"],
     },
   },
   {
@@ -115,7 +127,7 @@ export const AREAS: Area[] = [
     icone: "estatais",
     tom: "anil",
     regra: {
-      orgao: ["banco", "caixa economica", "bndes", "empresa brasileira", "companhia"],
+      orgao: ["banco", "caixa economica", "bndes", "empresa brasileira", "companhia", "fundos garantidores", "empresa de tecnologia e informacoes da previdencia", "empresa gerencial de projetos navais"],
     },
   },
   {
@@ -125,7 +137,7 @@ export const AREAS: Area[] = [
     icone: "forcas",
     tom: "anil",
     regra: {
-      orgao: ["marinha", "exercito", "aeronautica", "comando militar", "ministerio da defesa", "colegio militar"],
+      orgao: ["marinha", "exercito", "aeronautica", "comando militar", "ministerio da defesa", "colegio militar", "operacoes navais", "fuzileiros navais", "distrito naval"],
       exceto: ["tribunal militar"],
     },
   },
@@ -156,7 +168,9 @@ export const AREAS: Area[] = [
     icone: "tecnologia",
     tom: "anil",
     regra: {
-      cargo: ["tecnologia da informacao", "informatica", "analista de sistemas", "desenvolvedor", "programador", "ciencia de dados"],
+      // Não "informática" sozinha: nos editais de IF ela é a área do
+      // professor ("Informática", "Informática Educativa"), que é Educação.
+      cargo: ["tecnologia da informacao", "tecnico em informatica", "tecnico de informatica", "analista de informatica", "agente censitario de informatica", "tecnico de laboratorio informatica", "tecnico de laboratorio area informatica", "analista de sistemas", "administrador de redes", "desenvolvedor", "programador", "ciencia de dados", "cientista de dados", "analista de dados"],
     },
   },
   {
@@ -168,6 +182,7 @@ export const AREAS: Area[] = [
     regra: {
       cargo: ["assistente em administracao", "assistente administrativo", "auxiliar em administracao", "auxiliar administrativo", "tecnico administrativo", "agente administrativo", "administrador"],
       titulo: ["tecnico administrativo", "tecnicos administrativos"],
+      exceto: ["administrador de redes"],
     },
   },
   {
@@ -177,8 +192,8 @@ export const AREAS: Area[] = [
     icone: "ambiente",
     tom: "verde",
     regra: {
-      orgao: ["meio ambiente", "icmbio", "chico mendes", "conab", "abastecimento", "agricultura", "agropecuaria", "reforma agraria"],
-      cargo: ["engenheiro agronomo", "engenheiro florestal", "zootecnista", "tecnico em agropecuaria", "analista ambiental"],
+      orgao: ["meio ambiente", "ibama", "icmbio", "chico mendes", "conab", "abastecimento", "agricultura", "agropecuaria", "reforma agraria", "pesca", "aguas e saneamento", "florestal", "vegetacao nativa", "mata atlantica", "extensao rural"],
+      cargo: ["engenheiro agronomo", "engenheiro florestal", "engenheiro ambiental", "medico veterinario", "zootecnista", "tecnico em agropecuaria", "tecnico agricola", "analista ambiental", "gestor ambiental"],
     },
   },
 ];
@@ -244,21 +259,19 @@ function contem(texto: string, termos: string[]): boolean {
   return termos.some((termo) => texto.includes(termo));
 }
 
-/** O concurso inteiro entra ou não: basta um campo casar e nenhum excluir. */
+/**
+ * O concurso inteiro entra ou não: basta um campo casar e o órgão e o título
+ * não excluírem. O cargo que casa com `exceto` só deixa de contar (ver
+ * `RegraDaArea.exceto`).
+ */
 export function casaComArea(concurso: ConcursoResumo, area: Area): boolean {
   const termos = termosDa(area.regra);
   const { orgao, cargos, titulo } = textosDo(concurso);
-  if (
-    contem(orgao, termos.exceto) ||
-    contem(titulo, termos.exceto) ||
-    cargos.some((cargo) => contem(cargo, termos.exceto))
-  ) {
-    return false;
-  }
+  if (contem(orgao, termos.exceto) || contem(titulo, termos.exceto)) return false;
   return (
     contem(orgao, termos.orgao) ||
-    cargos.some((cargo) => contem(cargo, termos.cargo)) ||
-    contem(titulo, termos.titulo)
+    contem(titulo, termos.titulo) ||
+    cargos.some((cargo) => contem(cargo, termos.cargo) && !contem(cargo, termos.exceto))
   );
 }
 
