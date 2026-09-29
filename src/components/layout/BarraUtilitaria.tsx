@@ -39,7 +39,7 @@ export function BarraUtilitaria({
               grupo da direita não cabem na mesma linha de 36px, e a barra
               quebrava em duas. Ali fica só a data, ou a frase curta. */}
           <span className="hidden truncate xl:inline">
-            Dados públicos, lidos do Diário Oficial e das bancas
+            Dados públicos, lidos do Diário Oficial da União
             {atualizadoEm !== null && ` · Atualizado em ${atualizadoEm}`}
           </span>
           <span className="truncate xl:hidden">

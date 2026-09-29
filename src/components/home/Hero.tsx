@@ -112,8 +112,8 @@ export function Hero({
               Cargo, vagas, salário e prazo, com o link para o documento original.
             </span>
             <span className="hidden lg:inline">
-              Lemos todo dia os editais das bancas e dos diários oficiais e mostramos cargo,
-              vagas, salário e prazo, com o link para o documento original.
+              Lemos o Diário Oficial da União todo dia útil e mostramos cargo, vagas,
+              salário e prazo, com o link para o documento original.
             </span>
           </p>
 

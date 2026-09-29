@@ -17,8 +17,8 @@ const PASSOS: Passo[] = [
     numero: "01",
     icone: "globo",
     classeDoIcone: "bg-acao text-white",
-    titulo: "Coletamos todo dia",
-    corpo: "Um robô visita as bancas organizadoras e os diários oficiais e baixa cada ato publicado.",
+    titulo: "Coletamos todo dia útil",
+    corpo: "Um robô lê o Diário Oficial da União de cada dia útil e separa os atos sobre concurso.",
   },
   {
     numero: "02",

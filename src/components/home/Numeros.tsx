@@ -62,8 +62,8 @@ export function Numeros({
       icone: "ciclo",
       fundo: "bg-urucum-fundo text-urucum-texto",
       texto: "text-tinta-900",
-      valor: "Todo dia",
-      rotulo: "robô visita bancas e diários",
+      valor: "Todo dia útil",
+      rotulo: "robô lê o Diário Oficial",
     },
   ];
 
