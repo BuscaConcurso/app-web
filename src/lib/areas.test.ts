@@ -96,7 +96,21 @@ describe("casaComArea", () => {
     ).toBe(true);
   });
 
-  it("exceto no órgão ou no título tira o concurso inteiro", () => {
+  it("exceto no título ou no órgão não anula o cargo que casa", () => {
+    const edital = concurso({
+      titulo: "Edital nº 5 - Médico, Enfermeiro e Médico Veterinário",
+      cargos: ["Médico", "Enfermeiro", "Médico Veterinário"],
+    });
+    expect(casaComArea(edital, area("saude"))).toBe(true);
+  });
+
+  it("exceto no órgão anula o casamento pelo órgão", () => {
+    expect(
+      casaComArea(
+        concurso({ orgao: "Tribunal de Contas da União", cargos: ["Auditor Federal de Controle Externo"] }),
+        area("tribunais"),
+      ),
+    ).toBe(false);
     // Tribunal de Contas é fiscal e controle, não tribunal do Judiciário.
     expect(casaComArea(concurso({ orgao: "Tribunal de Contas da União" }), area("tribunais"))).toBe(false);
     expect(casaComArea(concurso({ orgao: "Tribunal de Contas da União" }), area("fiscal-e-controle"))).toBe(true);
@@ -203,6 +217,7 @@ describe("casos reais do acervo", () => {
     expect(casa("prefeituras", { orgao: "PREFEITURA MUNICIPAL DE GUIMARÂNIA" })).toBe(true);
     expect(casa("prefeituras", { titulo: "Município de Caldas Novas \u2014 Edital nº 33/2026", orgao: "Município de Caldas Novas" })).toBe(true);
     expect(casa("prefeituras", { orgao: "Ministério das Cidades" })).toBe(false);
+    expect(casa("prefeituras", { orgao: "Tribunal de Contas do Município de São Paulo" })).toBe(false);
   });
 
   it("Conselhos: conselho profissional entra; CNJ e CNPq não", () => {
@@ -217,6 +232,12 @@ describe("casos reais do acervo", () => {
     expect(casa("tecnologia", { orgao: "Universidade Federal do Rio de Janeiro", cargos: ["Técnico de Tecnologia da Informação"] })).toBe(true);
     expect(casa("tecnologia", { orgao: "Instituto Federal de Educação, Ciência e Tecnologia do Paraná", cargos: ["Professor Substituto - Informática"] })).toBe(false);
     expect(casa("tecnologia", { orgao: "Instituto Federal de Educação, Ciência e Tecnologia do Paraná", cargos: ["Informática"] })).toBe(false);
+  });
+
+  it("Administrativo: administrador de TI (banco de dados, sistemas, dados) não conta", () => {
+    for (const cargo of ["Administrador de Banco de Dados", "Administrador de Sistemas", "Administrador de Dados"]) {
+      expect(casa("administrativo", { orgao: "Empresa de Tecnologia e Informações da Previdência", cargos: [cargo] }), cargo).toBe(false);
+    }
   });
 
   it("Administrativo: assistente e administrador entram; administrador de redes não", () => {

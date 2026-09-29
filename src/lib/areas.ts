@@ -38,10 +38,11 @@ export interface RegraDaArea {
   /** Casa no título do concurso. */
   titulo?: string[];
   /**
-   * O que tira. No órgão ou no título, tira o concurso inteiro; num cargo,
-   * tira só aquele cargo, que deixa de contar para a área (o concurso ainda
-   * entra por outro cargo, pelo órgão ou pelo título). É o que separa
-   * "Médico Veterinário" de "Médico" num edital que tem os dois.
+   * O que tira. Cada campo é anulado por si: `exceto` no órgão ou no título
+   * anula o casamento pelo órgão e pelo título, e num cargo anula só aquele
+   * cargo. O concurso ainda entra por um cargo que case e não seja exceção:
+   * é o que separa "Médico Veterinário" de "Médico" num edital que tem os
+   * dois, até quando o título cita os dois.
    */
   exceto?: string[];
 }
@@ -149,6 +150,8 @@ export const AREAS: Area[] = [
     tom: "ouro",
     regra: {
       orgao: ["prefeitura", "municipio"],
+      // "Tribunal de Contas do Município de São Paulo" não é prefeitura.
+      exceto: ["tribunal de contas"],
     },
   },
   {
@@ -182,7 +185,8 @@ export const AREAS: Area[] = [
     regra: {
       cargo: ["assistente em administracao", "assistente administrativo", "auxiliar em administracao", "auxiliar administrativo", "tecnico administrativo", "agente administrativo", "administrador"],
       titulo: ["tecnico administrativo", "tecnicos administrativos"],
-      exceto: ["administrador de redes"],
+      // Administrador de TI é Tecnologia.
+      exceto: ["administrador de redes", "administrador de banco de dados", "administrador de sistemas", "administrador de dados"],
     },
   },
   {
@@ -260,17 +264,18 @@ function contem(texto: string, termos: string[]): boolean {
 }
 
 /**
- * O concurso inteiro entra ou não: basta um campo casar e o órgão e o título
- * não excluírem. O cargo que casa com `exceto` só deixa de contar (ver
- * `RegraDaArea.exceto`).
+ * O concurso inteiro entra ou não: basta o órgão, o título ou um cargo casar
+ * sem ser anulado por `exceto` (ver `RegraDaArea.exceto`).
+ *
+ * TCU e Funpresp-Jud ficam fora de Tribunais porque o órgão é anulado e
+ * nenhum cargo deles é de tribunal (auditor, advogado, analista de TI).
  */
 export function casaComArea(concurso: ConcursoResumo, area: Area): boolean {
   const termos = termosDa(area.regra);
   const { orgao, cargos, titulo } = textosDo(concurso);
-  if (contem(orgao, termos.exceto) || contem(titulo, termos.exceto)) return false;
+  const orgaoOuTituloExcluido = contem(orgao, termos.exceto) || contem(titulo, termos.exceto);
   return (
-    contem(orgao, termos.orgao) ||
-    contem(titulo, termos.titulo) ||
+    (!orgaoOuTituloExcluido && (contem(orgao, termos.orgao) || contem(titulo, termos.titulo))) ||
     cargos.some((cargo) => contem(cargo, termos.cargo) && !contem(cargo, termos.exceto))
   );
 }
