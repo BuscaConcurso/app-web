@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   acoesDeSalvos,
+  avisoAoLigarLembrete,
   avisoDeFalha,
   hrefParaEntrar,
   mapaDe,
@@ -98,5 +99,14 @@ describe("mapaDe", () => {
       ["a", true],
       ["b", false],
     ]);
+  });
+});
+
+describe("avisoAoLigarLembrete", () => {
+  it("avisa que os e-mails esperam a confirmação do endereço", () => {
+    expect(avisoAoLigarLembrete(true)).toBe("Lembrete ligado. Avisamos por e-mail.");
+    expect(avisoAoLigarLembrete(false)).toBe(
+      "Lembrete ligado. Os e-mails só saem depois que você confirmar seu endereço.",
+    );
   });
 });

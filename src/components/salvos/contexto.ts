@@ -20,6 +20,8 @@ export interface ValorDeSalvos {
   salvar(slug: string): Promise<boolean>;
   remover(slug: string): Promise<boolean>;
   lembrar(slug: string, ligar: boolean): Promise<boolean>;
+  /** O aviso flutuante dos salvos, um só para a página inteira. */
+  avisar(texto: string): void;
 }
 
 export const ContextoDeSalvos = createContext<ValorDeSalvos | null>(null);
@@ -38,6 +40,7 @@ const FORA_DO_PROVIDER: ValorDeSalvos = {
   salvar: async () => false,
   remover: async () => false,
   lembrar: async () => false,
+  avisar: () => {},
 };
 
 export function useSalvos(): ValorDeSalvos {

@@ -58,6 +58,17 @@ export function avisoDeFalha(erro: unknown, acao: Acao): string {
   return `Não deu para ${VERBO[acao]} agora. Tente de novo.`;
 }
 
+/**
+ * O aviso depois de ligar um lembrete. Hoje o login recusa conta sem e-mail
+ * confirmado, então o segundo caso é raro, mas os lembretes saem só para
+ * endereço confirmado e a pessoa precisa saber.
+ */
+export function avisoAoLigarLembrete(emailConfirmado: boolean): string {
+  return emailConfirmado
+    ? "Lembrete ligado. Avisamos por e-mail."
+    : "Lembrete ligado. Os e-mails só saem depois que você confirmar seu endereço.";
+}
+
 export interface ApiDeSalvos {
   salvar(slug: string, lembrar?: boolean): Promise<unknown>;
   remover(slug: string): Promise<unknown>;

@@ -32,6 +32,11 @@ describe("emBreve", () => {
     expect(Object.keys(RECURSOS_EM_BREVE)).not.toContain("salvos");
   });
 
+  it("lembrete já existe; alertas (o formulário por filtro) continua em breve", () => {
+    expect(recursoEmBreve("lembrete")).toBeNull();
+    expect(recursoEmBreve("alertas")).toBe("alertas");
+  });
+
   it("não aceita nome herdado do protótipo do objeto", () => {
     expect(recursoEmBreve("constructor")).toBeNull();
     expect(recursoEmBreve("toString")).toBeNull();

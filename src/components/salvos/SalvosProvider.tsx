@@ -111,8 +111,9 @@ export function SalvosProvider({ children }: { children: ReactNode }) {
       salvar,
       remover,
       lembrar,
+      avisar,
     };
-  }, [session.status, session.profile, conta, lido, mapa, recarregar, salvar, remover, lembrar]);
+  }, [session.status, session.profile, conta, lido, mapa, recarregar, salvar, remover, lembrar, avisar]);
 
   return (
     <ContextoDeSalvos.Provider value={valor}>

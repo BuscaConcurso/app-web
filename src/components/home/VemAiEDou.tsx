@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { BotaoEmBreve } from "@/components/ui/EmBreve";
+import { BotaoLembrar } from "@/components/salvos/BotaoLembrar";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { Icone } from "@/components/ui/Icone";
 import type { ConcursoResumo } from "@/lib/dominio";
@@ -121,14 +121,14 @@ export function VemAiEDou({
                 />
                 {/* No celular só o sino (com o nome no `aria-label`), para o
                     título caber ao lado do número. */}
-                <BotaoEmBreve
-                  recurso="alertas"
-                  aria-label="Avisar quando abrir"
+                <BotaoLembrar
+                  slug={concurso.slug}
+                  rotulo="Avisar quando abrir"
+                  texto="Avisar"
+                  textoSoAPartirDeSm
+                  tamanhoDoIcone={16}
                   className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-controle bg-ouro-fundo px-3 text-sm font-semibold text-ouro-sinal-texto sm:px-3.5"
-                >
-                  <Icone nome="alerta" tamanho={16} />
-                  <span className="hidden sm:inline">Avisar</span>
-                </BotaoEmBreve>
+                />
               </div>
             );
           })}

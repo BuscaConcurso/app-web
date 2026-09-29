@@ -7,8 +7,7 @@
  * entrega, e cada chamador só escolhe qual deles é.
  */
 export type RecursoEmBreve =
-  | "alertas"
-  | "lembrete";
+  | "alertas";
 
 export const RECURSOS_EM_BREVE: Record<
   RecursoEmBreve,
@@ -17,10 +16,6 @@ export const RECURSOS_EM_BREVE: Record<
   alertas: {
     titulo: "Alertas",
     frase: "Receba o edital no dia em que ele sair.",
-  },
-  lembrete: {
-    titulo: "Lembretes",
-    frase: "Um aviso na véspera do fim das inscrições.",
   },
 };
 

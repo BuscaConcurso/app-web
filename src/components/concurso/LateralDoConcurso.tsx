@@ -2,7 +2,7 @@ import { BlocoAlerta } from "@/components/home/BlocoAlerta";
 import { BotaoLink } from "@/components/ui/Botao";
 import { Calendario, ESTILO_DO_PRAZO, tomDoCalendario } from "@/components/ui/Calendario";
 import { BotaoSalvar } from "@/components/salvos/BotaoSalvar";
-import { BotaoEmBreve } from "@/components/ui/EmBreve";
+import { BotaoLembrar } from "@/components/salvos/BotaoLembrar";
 import { Icone } from "@/components/ui/Icone";
 import type { ConcursoDetalhe, ConcursoResumo } from "@/lib/dominio";
 import { dataCurta } from "@/lib/formato";
@@ -82,12 +82,11 @@ export function LateralDoConcurso({
           )}
 
           {tom === "previsto" ? (
-            <BotaoEmBreve
-              recurso="alertas"
+            <BotaoLembrar
+              slug={concurso.slug}
+              rotulo="Avisar quando abrir"
               className="flex h-14 w-full items-center justify-center gap-2 rounded-[12px] bg-ouro text-base font-bold text-ouro-texto hover:bg-ouro-hover"
-            >
-              Avisar quando abrir
-            </BotaoEmBreve>
+            />
           ) : (
             tom !== "encerrado" &&
             destino && (
@@ -132,13 +131,12 @@ export function LateralDoConcurso({
               className="flex h-11 items-center justify-center gap-1.5 rounded-controle bg-rebaixada text-sm font-semibold text-tinta-900 hover:bg-linha"
             />
             {tom !== "encerrado" && (
-              <BotaoEmBreve
-                recurso="lembrete"
+              <BotaoLembrar
+                slug={concurso.slug}
+                rotulo="Lembrar amanhã"
+                tamanhoDoIcone={16}
                 className="flex h-11 items-center justify-center gap-1.5 rounded-controle bg-rebaixada text-sm font-semibold text-tinta-900 hover:bg-linha"
-              >
-                <Icone nome="alerta" tamanho={16} />
-                Lembrar amanhã
-              </BotaoEmBreve>
+              />
             )}
           </div>
         </div>
