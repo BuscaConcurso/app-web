@@ -6,6 +6,7 @@ import {
   hrefParaEntrar,
   criarSincronizadorDeSalvos,
   mapaDe,
+  normalizarRespostaDeSalvos,
 } from "./salvos";
 
 interface Chamada {
@@ -202,5 +203,29 @@ describe("avisoAoLigarLembrete", () => {
     expect(avisoAoLigarLembrete(false)).toBe(
       "Lembrete ligado. Os e-mails só saem depois que você confirmar seu endereço.",
     );
+  });
+});
+
+describe("normalizarRespostaDeSalvos", () => {
+  it("tira o travessão que vem da api no título, no órgão e nos cargos", () => {
+    const concurso = {
+      slug: "cra-am",
+      titulo: "CRA-AM \u2014 Edital nº 1/2026",
+      orgao: { nome: "Conselho \u2014 AM" },
+      banca: null,
+      nomesDeCargo: ["Fiscal \u2014 Nível superior"],
+      ultimoAto: { data: "2026-09-01", titulo: "Aviso \u2014 1", primeiro: true },
+    } as never;
+    const resposta = normalizarRespostaDeSalvos({
+      itens: [{ concurso, lembrar: true, salvoEm: "2026-09-28T00:00:00Z" }],
+      semDado: ["x"],
+    });
+    const [item] = resposta.itens;
+    expect(item!.concurso.titulo).toBe("CRA-AM - Edital nº 1/2026");
+    expect(item!.concurso.orgao.nome).toBe("Conselho - AM");
+    expect(item!.concurso.nomesDeCargo).toEqual(["Fiscal - Nível superior"]);
+    expect(item!.concurso.ultimoAto?.titulo).toBe("Aviso - 1");
+    expect(item!.lembrar).toBe(true);
+    expect(resposta.semDado).toEqual(["x"]);
   });
 });

@@ -5,6 +5,7 @@ import { AvisoFlutuante } from "@/components/ui/EmBreve";
 import { authenticatedRequest, useSession } from "@/lib/auth/session";
 import {
   criarSincronizadorDeSalvos,
+  normalizarRespostaDeSalvos,
   type MapaDeSalvos,
   type RespostaDeSalvos,
 } from "@/lib/salvos";
@@ -69,7 +70,7 @@ export function SalvosProvider({ children }: { children: ReactNode }) {
     if (!conta || !sincronizador) return;
     const marca = sincronizador.marca();
     try {
-      const resposta = await authenticatedRequest<RespostaDeSalvos>("/v1/me/salvos");
+      const resposta = await authenticatedRequest<RespostaDeSalvos>("/v1/me/salvos").then(normalizarRespostaDeSalvos);
       sincronizador.carregar(resposta, marca);
       setLido({ dono: conta, estado: "pronto", resposta });
     } catch {
@@ -85,7 +86,7 @@ export function SalvosProvider({ children }: { children: ReactNode }) {
     // Como no `SessionProvider`: o estado só muda quando a leitura volta.
     if (!conta || !sincronizador) return;
     const marca = sincronizador.marca();
-    void authenticatedRequest<RespostaDeSalvos>("/v1/me/salvos").then(
+    void authenticatedRequest<RespostaDeSalvos>("/v1/me/salvos").then(normalizarRespostaDeSalvos).then(
       (resposta) => {
         sincronizador.carregar(resposta, marca);
         setLido({ dono: conta, estado: "pronto", resposta });

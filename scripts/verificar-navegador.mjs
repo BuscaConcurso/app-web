@@ -263,7 +263,7 @@ async function tirarScreenshot(cdp, caminhoArquivo) {
  * inteira da home e do concurso a 390 e 1440px.
  */
 async function verificarTask16(cdp, concurso) {
-  const paginas = ["/", "/concursos", "/busca/professor", "/entrar", "/em-breve/salvos", concurso].filter(
+  const paginas = ["/", "/concursos", "/busca/professor", "/entrar", "/em-breve/alertas", concurso].filter(
     Boolean,
   );
 

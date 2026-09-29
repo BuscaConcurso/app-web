@@ -1,4 +1,5 @@
 import type { ConcursoResumo } from "./dominio";
+import { normalizarResumo } from "./nomeacao";
 
 /**
  * Concursos salvos: tipos da api e a lógica que não depende de React.
@@ -19,6 +20,17 @@ export interface RespostaDeSalvos {
   itens: ItemSalvo[];
   /** Salvos cujo concurso saiu do acervo. */
   semDado: string[];
+}
+
+/**
+ * A resposta de `/v1/me/salvos` com o título e os nomes sem o travessão que
+ * vem do acervo, a mesma regra que `lerAcervoDaApi` aplica à lista.
+ */
+export function normalizarRespostaDeSalvos(resposta: RespostaDeSalvos): RespostaDeSalvos {
+  return {
+    ...resposta,
+    itens: resposta.itens.map((item) => ({ ...item, concurso: normalizarResumo(item.concurso) })),
+  };
 }
 
 /** Slug do concurso salvo para o seu `lembrar`. Ausente é não salvo. */
