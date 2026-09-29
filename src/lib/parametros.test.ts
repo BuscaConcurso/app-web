@@ -10,6 +10,7 @@ import {
   parametrosDaUrl,
   quantosFiltros,
   urlAlternando,
+  urlAlternandoUf,
   urlDaBusca,
   urlSemFiltros,
   urlSemValor,
@@ -283,5 +284,20 @@ describe("caminho próprio da consulta (página de área)", () => {
     expect(caminhoDaConsulta(naArea)).toBe("/areas/saude");
     expect(caminhoDaConsulta({ ...VAZIA, q: "professor" })).toBe(caminhoDaBusca("professor"));
     expect(caminhoDaConsulta(VAZIA)).toBe("/concursos");
+  });
+});
+
+describe("urlAlternandoUf", () => {
+  it("marca, troca e desmarca o estado, e volta à primeira página", () => {
+    const naArea: ConsultaDaUrl = { ...VAZIA, caminho: "/areas/saude", pagina: 3 };
+    expect(urlAlternandoUf(naArea, "SP")).toBe("/areas/saude?uf=SP");
+    expect(urlAlternandoUf({ ...naArea, uf: "SP" }, "RJ")).toBe("/areas/saude?uf=RJ");
+    expect(urlAlternandoUf({ ...naArea, uf: "SP" }, "SP")).toBe("/areas/saude");
+  });
+
+  it("na busca, mantém o termo no caminho e os outros filtros", () => {
+    expect(urlAlternandoUf({ ...VAZIA, escolaridades: ["superior"] }, "BA")).toBe(
+      "/concursos?uf=BA&escolaridade=superior",
+    );
   });
 });

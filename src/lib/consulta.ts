@@ -20,7 +20,7 @@ import type {
   Uf,
 } from "./dominio";
 import { tomDoConcurso } from "./situacao";
-import { ROTULO_ESCOLARIDADE } from "./rotulos";
+import { NOME_UF, ROTULO_ESCOLARIDADE } from "./rotulos";
 
 export type Ordem = "encerrando" | "recentes" | "vagas" | "salario";
 
@@ -312,6 +312,11 @@ export interface ContagensDeFaceta {
   situacoes: OpcaoDeFaceta[];
   escolaridades: OpcaoDeFaceta[];
   bancas: OpcaoDeFaceta[];
+  /**
+   * Só os estados que aparecem na lista, como as bancas: os 27 sempre, a
+   * maioria com zero numa área pequena, empurrariam o resto da coluna.
+   */
+  ufs: OpcaoDeFaceta[];
 }
 
 /** Ordem em que a escolaridade aparece na coluna: da mais baixa à mais alta. */
@@ -360,6 +365,11 @@ export function contarFacetas(
     if (concurso.banca) bancasNoAcervo.set(concurso.banca.slug, concurso.banca.nome);
   }
 
+  // `ufs`, e não `uf`: é o que o filtro lê, e o concurso de vários estados
+  // aparece em cada um deles.
+  const ufsNoAcervo = new Set<Uf>();
+  for (const concurso of todos) for (const uf of concurso.ufs ?? []) ufsNoAcervo.add(uf);
+
   return {
     situacoes: (Object.keys(SITUACOES) as Situacao[]).map((situacao) => ({
       valor: situacao,
@@ -377,6 +387,9 @@ export function contarFacetas(
         rotulo: nome,
         total: contar({ bancas: [slug] }),
       }))
+      .sort((a, b) => b.total - a.total || a.rotulo.localeCompare(b.rotulo)),
+    ufs: [...ufsNoAcervo]
+      .map((uf) => ({ valor: uf, rotulo: NOME_UF[uf], total: contar({ uf }) }))
       .sort((a, b) => b.total - a.total || a.rotulo.localeCompare(b.rotulo)),
   };
 }

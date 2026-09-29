@@ -11,6 +11,7 @@ const CONTAGENS: ContagensDeFaceta = {
   ],
   escolaridades: [],
   bancas: [],
+  ufs: [],
 };
 
 function comSituacoes(situacoes: ConsultaDaUrl["situacoes"]): ConsultaDaUrl {

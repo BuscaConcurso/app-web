@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoResumo, Escolaridade, Uf } from "./dominio";
-import { filtrar, normalizar, ordenar, ultimasAtualizacoes } from "./consulta";
+import { contarFacetas, filtrar, normalizar, ordenar, ultimasAtualizacoes } from "./consulta";
 import { hojeCivilEmSaoPaulo } from "./formato";
 
 const HOJE = new Date(2026, 3, 10, 9, 0);
@@ -400,5 +400,40 @@ describe("hoje em São Paulo nas duas listas", () => {
     for (const ordem of vistos) {
       expect(ordem).toEqual(["encerra-hoje", "encerra-amanha", "encerrou"]);
     }
+  });
+});
+
+describe("contarFacetas: estados", () => {
+  it("só os estados que aparecem na lista, do mais para o menos concursos, com o nome", () => {
+    const itens = [
+      fixture({ uf: "SP" }),
+      fixture({ uf: "SP" }),
+      fixture({ uf: "RJ" }),
+      fixture({ uf: null, ufs: [] }),
+    ];
+    expect(contarFacetas(itens, {}, HOJE).ufs).toEqual([
+      { valor: "SP", rotulo: "São Paulo", total: 2 },
+      { valor: "RJ", rotulo: "Rio de Janeiro", total: 1 },
+    ]);
+  });
+
+  it("concurso de vários estados conta em cada um", () => {
+    const itens = [fixture({ uf: null, ufs: ["MG", "ES"] }), fixture({ uf: "MG" })];
+    const ufs = contarFacetas(itens, {}, HOJE).ufs;
+    expect(ufs.find((opcao) => opcao.valor === "MG")?.total).toBe(2);
+    expect(ufs.find((opcao) => opcao.valor === "ES")?.total).toBe(1);
+  });
+
+  it("a contagem de cada estado respeita os outros filtros, e troca o estado marcado", () => {
+    const itens = [
+      fixture({ uf: "SP", escolaridades: ["superior"] }),
+      fixture({ uf: "SP", escolaridades: ["medio"] }),
+      fixture({ uf: "RJ", escolaridades: ["superior"] }),
+    ];
+    const ufs = contarFacetas(itens, { escolaridades: ["superior"], uf: "RJ" }, HOJE).ufs;
+    expect(ufs).toEqual([
+      { valor: "RJ", rotulo: "Rio de Janeiro", total: 1 },
+      { valor: "SP", rotulo: "São Paulo", total: 1 },
+    ]);
   });
 });

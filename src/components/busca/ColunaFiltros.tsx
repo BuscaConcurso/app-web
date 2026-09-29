@@ -4,11 +4,13 @@ import { Gaveta } from "@/components/ui/Revelador";
 import { FormularioDaConsulta, LinkDaConsulta } from "./LinkDaConsulta";
 import type { ContagensDeFaceta, OpcaoDeFaceta } from "@/lib/concursos";
 import { numero } from "@/lib/formato";
+import type { Uf } from "@/lib/dominio";
 import {
   PARAMETRO_DA_DIMENSAO,
   caminhoDaConsulta,
   quantosFiltros,
   urlAlternando,
+  urlAlternandoUf,
   urlDaBusca,
   type ConsultaDaUrl,
   type Dimensao,
@@ -94,6 +96,52 @@ function Grupo({
                   {opcao.rotulo}
                 </span>
                 <span className="numero ml-auto text-xs text-tinta-500">
+                  {numero(opcao.total)}
+                </span>
+              </LinkDaConsulta>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * O estado, em chip com a sigla, como as bancas: 27 linhas de quadradinho
+ * dobrariam a altura da coluna. O nome inteiro vai no `aria-label`, com a
+ * contagem. Um estado por vez (`urlAlternandoUf`): a URL guarda um só.
+ */
+function GrupoDeEstados({
+  opcoes,
+  consulta,
+}: {
+  opcoes: OpcaoDeFaceta[];
+  consulta: ConsultaDaUrl;
+}) {
+  if (opcoes.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      <Rotulo>Estado</Rotulo>
+      <ul className="flex flex-wrap gap-1.5">
+        {opcoes.map((opcao) => {
+          const marcado = consulta.uf === opcao.valor;
+          return (
+            <li key={opcao.valor}>
+              <LinkDaConsulta
+                href={urlAlternandoUf(consulta, opcao.valor as Uf)}
+                aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
+                  marcado ? "remover filtro" : "filtrar"
+                }`}
+                className={`inline-flex min-h-[2.625rem] items-center gap-1.5 rounded-controle px-3 text-[0.8125rem] transition-colors ${
+                  marcado
+                    ? "bg-acao font-medium text-acao-texto hover:bg-acao-hover"
+                    : "bg-rebaixada text-tinta-900 hover:bg-linha"
+                }`}
+              >
+                <span className="font-semibold">{opcao.valor}</span>
+                <span className={`numero text-xs ${marcado ? "" : "text-tinta-500"}`}>
                   {numero(opcao.total)}
                 </span>
               </LinkDaConsulta>
@@ -296,6 +344,7 @@ function Painel({
           opcoes={contagens.escolaridades}
           consulta={consulta}
         />
+        <GrupoDeEstados opcoes={contagens.ufs} consulta={consulta} />
         <FaixaDeSalario consulta={consulta} prefixo={prefixo} />
         <GrupoDeBancas opcoes={contagens.bancas} consulta={consulta} />
       </div>

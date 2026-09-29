@@ -242,6 +242,15 @@ export function urlAlternando(
   } as Partial<ConsultaDaUrl>);
 }
 
+/**
+ * O endereço que marca, troca ou desmarca o estado. A URL guarda um estado
+ * só (`uf`), então marcar outro troca, e clicar no marcado tira. Volta para
+ * a primeira página, como `urlAlternando`.
+ */
+export function urlAlternandoUf(consulta: ConsultaDaUrl, uf: Uf): string {
+  return urlDaBusca(consulta, { uf: consulta.uf === uf ? undefined : uf, pagina: 1 });
+}
+
 export function urlSemValor(
   consulta: ConsultaDaUrl,
   dimensao: Dimensao,
