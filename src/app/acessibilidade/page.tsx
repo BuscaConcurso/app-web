@@ -64,7 +64,9 @@ export default function Acessibilidade() {
         </li>
         <li>
           <strong>Teclado.</strong> Links, botões e campos são alcançados com a
-          tecla Tab, e o elemento em foco ganha um contorno visível.
+          tecla Tab, e o elemento em foco ganha um contorno visível. O
+          primeiro Tab da página mostra o atalho &quot;Pular para o
+          conteúdo&quot;, que passa direto pelo topo e pelo menu.
         </li>
         <li>
           <strong>Leitor de tela.</strong> A página é marcada em português. Os
@@ -87,10 +89,6 @@ export default function Acessibilidade() {
 
       <h2>O que ainda não tem</h2>
       <ul>
-        <li>
-          Um atalho para pular o menu e ir direto ao conteúdo. Hoje, com o
-          teclado, é preciso passar pelos links do topo.
-        </li>
         <li>
           Tema escuro. O site só tem o tema claro, com o alto contraste como
           opção.

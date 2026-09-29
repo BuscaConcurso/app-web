@@ -4,6 +4,7 @@ import { unstable_rethrow } from "next/navigation";
 import "./globals.css";
 import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
 import { Cabecalho } from "@/components/layout/Cabecalho";
+import { ID_DO_CONTEUDO, PularParaConteudo } from "@/components/layout/PularParaConteudo";
 import { GoogleTagManager } from "@/components/layout/GoogleTagManager";
 import { Rodape } from "@/components/layout/Rodape";
 import { DadosEstruturados } from "@/components/ui/DadosEstruturados";
@@ -233,6 +234,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_DE_ACESSIBILIDADE }} />
       </head>
       <body className="flex min-h-full flex-col">
+        <PularParaConteudo />
         <GoogleTagManager />
         <SessionProvider>
           {/* Dentro da sessão: os salvos são da conta. */}
@@ -243,7 +245,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               em vez de afirmar "api" ou "mock" sem ter lido nenhum dos dois. */}
           {origem && <AvisoDeOrigem origem={origem} />}
           <Cabecalho atualizadoEm={atualizadoEm} />
-          <main className="flex-1">{children}</main>
+          <main id={ID_DO_CONTEUDO} tabIndex={-1} className="flex-1 outline-none">{children}</main>
           <Rodape atualizadoEm={atualizadoEm} />
           </SalvosProvider>
         </SessionProvider>

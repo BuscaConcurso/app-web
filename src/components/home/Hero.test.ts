@@ -34,6 +34,18 @@ describe("Hero", () => {
     expect(html).toContain("Direto do edital.");
   });
 
+  it("o cartão de destaque diz de onde o dado veio, sem prometer o edital original", () => {
+    const html = renderToStaticMarkup(
+      createElement(Hero, {
+        totalAbertos: 1,
+        destaque: CONCURSOS[0],
+        novoAto: null,
+      }),
+    );
+    expect(html).toContain("Lido no Diário Oficial da União");
+    expect(html).not.toContain("Conferido no edital original");
+  });
+
   it("sem concurso de destaque não desenha o cartão flutuante", () => {
     const html = renderToStaticMarkup(
       createElement(Hero, {
@@ -42,7 +54,7 @@ describe("Hero", () => {
         novoAto: null,
       }),
     );
-    expect(html).not.toContain("Conferido no edital original");
+    expect(html).not.toContain("Lido no Diário Oficial da União");
   });
 });
 
