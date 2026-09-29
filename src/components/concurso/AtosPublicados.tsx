@@ -81,6 +81,16 @@ export function enderecoLegivel(url: string): string {
  * precisou mudar.
  */
 
+/**
+ * O selo "Conferido por nós" quer dizer uma coisa só: o texto deste ato
+ * está guardado no nosso banco e aparece inteiro logo abaixo, para quem
+ * quiser comparar. Sem o texto não há o que conferir, e o selo some.
+ * "Como lemos os editais" (`/como-lemos-os-editais`) diz isso ao leitor.
+ */
+export function temSeloConferido(origem: Origem): boolean {
+  return Boolean(origem.texto?.trim());
+}
+
 export function AtosPublicados({ origens }: { origens: Origem[] }) {
   return (
     <div className="flex flex-col gap-[18px]">
@@ -106,9 +116,11 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                   <Icone nome="diario" tamanho={20} />
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[0.75rem] font-bold tracking-[0.05em] text-verde-texto">
-                    CONFERIDO POR NÓS
-                  </div>
+                  {temSeloConferido(origem) && (
+                    <div className="text-[0.75rem] font-bold tracking-[0.05em] text-verde-texto">
+                      CONFERIDO POR NÓS
+                    </div>
+                  )}
                   <div className="text-[1rem] font-bold text-tinta-900">
                     {origem.fonte ? `Ato no ${origem.fonte}` : "Ato no Diário Oficial"}
                   </div>
