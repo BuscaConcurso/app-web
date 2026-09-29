@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCompartilhar } from "@/components/concurso/useCompartilhar";
 import { BarraBuscaDoCabecalho } from "@/components/busca/BarraBusca";
 import { Logo } from "@/components/marca/Logo";
+import { BotaoSalvar } from "@/components/salvos/BotaoSalvar";
 import { BotaoEmBreve, AvisoFlutuante } from "@/components/ui/EmBreve";
 import { Icone } from "@/components/ui/Icone";
 import { urlAbsoluta } from "@/lib/site";
@@ -92,13 +93,13 @@ export function Cabecalho({ atualizadoEm }: { atualizadoEm: string | null }) {
 
           <div className="ml-auto flex shrink-0 items-center gap-1 lg:ml-0 lg:gap-2 max-xl:fonte-grande:ml-auto">
             {naHome && (
-              <BotaoEmBreve
-                recurso="salvos"
+              <Link
+                href="/salvos"
                 aria-label="Salvos"
                 className="hidden size-11 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada lg:flex"
               >
                 <Icone nome="salvar" tamanho={20} />
-              </BotaoEmBreve>
+              </Link>
             )}
 
             <BotaoEmBreve
@@ -143,6 +144,9 @@ export function Cabecalho({ atualizadoEm }: { atualizadoEm: string | null }) {
 function CabecalhoCelularDoConcurso() {
   const router = useRouter();
   const caminho = usePathname();
+  // `/concursos/<slug>`: um slug antigo já foi redirecionado para o canônico
+  // pela página, então este é o mesmo slug que a api grava.
+  const slug = caminho.split("/").filter(Boolean)[1];
   const { compartilhar, aviso } = useCompartilhar({
     titulo: typeof document !== "undefined" ? document.title : "",
     url: urlAbsoluta(caminho),
@@ -188,13 +192,13 @@ function CabecalhoCelularDoConcurso() {
         <Icone nome="compartilhar" tamanho={20} />
       </button>
 
-      <BotaoEmBreve
-        recurso="salvos"
-        aria-label="Salvar"
-        className="flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
-      >
-        <Icone nome="salvar" tamanho={20} />
-      </BotaoEmBreve>
+      {slug && (
+        <BotaoSalvar
+          slug={slug}
+          tamanhoDoIcone={20}
+          className="flex size-11 shrink-0 items-center justify-center rounded-controle text-tinta-900 transition-colors hover:bg-rebaixada"
+        />
+      )}
 
       <AvisoFlutuante>{aviso}</AvisoFlutuante>
     </div>

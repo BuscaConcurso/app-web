@@ -32,6 +32,8 @@ export const ICONES = {
   homologado: [{ d: "M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" }, { d: "m9 12 2 2 4-4" }],
   alerta: [{ d: "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" }, { d: "M10.3 21a1.94 1.94 0 0 0 3.4 0" }],
   salvar: [{ d: "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z" }],
+  // O mesmo marcador, preenchido: o estado "Salvo" do `BotaoSalvar`.
+  salvo: [{ d: "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z", preenchido: true }],
   areas: [{ retangulo: [3, 3, 7, 7, 1.5] }, { retangulo: [14, 3, 7, 7, 1.5] }, { retangulo: [3, 14, 7, 7, 1.5] }, { retangulo: [14, 14, 7, 7, 1.5] }],
   estados: [{ d: "M14.1 6 9.9 4 3 7v13l6.9-3 4.2 2L21 17V4Z" }, { d: "M9.9 4v13M14.1 6v13" }],
   entrar: [{ circulo: [12, 8, 4] }, { d: "M4 21a8 8 0 0 1 16 0" }],

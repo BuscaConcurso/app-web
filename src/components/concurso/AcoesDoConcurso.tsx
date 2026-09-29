@@ -1,6 +1,7 @@
 "use client";
 
-import { AvisoFlutuante, BotaoEmBreve } from "@/components/ui/EmBreve";
+import { BotaoSalvar } from "@/components/salvos/BotaoSalvar";
+import { AvisoFlutuante } from "@/components/ui/EmBreve";
 import { Icone } from "@/components/ui/Icone";
 import { urlAbsoluta } from "@/lib/site";
 import { useCompartilhar } from "./useCompartilhar";
@@ -10,8 +11,8 @@ const FORMA_DO_BOTAO =
 const CLASSE_DO_BOTAO = `inline-flex ${FORMA_DO_BOTAO}`;
 
 /**
- * As três ações do cabeçalho: `Concurso.dc.html:70-73`. Salvar não existe
- * ainda (`BotaoEmBreve`); Compartilhar usa a folha nativa quando o navegador
+ * As três ações do cabeçalho: `Concurso.dc.html:70-73`. Salvar é o
+ * `BotaoSalvar` (salva na conta, ou leva para entrar); Compartilhar usa a folha nativa quando o navegador
  * tem, e senão copia o link (ou avisa que não deu, ver
  * `resolverCompartilhamento` em `useCompartilhar.ts`); Pôr na agenda baixa o
  * `.ics` e some quando o concurso não tem data de fim de inscrição
@@ -50,10 +51,7 @@ export function AcoesDoConcurso({
 
   return (
     <div className="flex flex-wrap gap-2">
-      <BotaoEmBreve recurso="salvos" className={soNoDesktop}>
-        <Icone nome="salvar" tamanho={17} />
-        Salvar
-      </BotaoEmBreve>
+      <BotaoSalvar slug={slug} comTexto tamanhoDoIcone={17} className={soNoDesktop} />
       <button type="button" onClick={compartilhar} className={soNoDesktop}>
         <Icone nome="compartilhar" tamanho={17} />
         Compartilhar

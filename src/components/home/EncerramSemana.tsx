@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BotaoLink } from "@/components/ui/Botao";
 import { Calendario } from "@/components/ui/Calendario";
-import { BotaoEmBreve } from "@/components/ui/EmBreve";
+import { BotaoSalvar } from "@/components/salvos/BotaoSalvar";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { Icone } from "@/components/ui/Icone";
 import type { ConcursoResumo } from "@/lib/dominio";
@@ -80,13 +80,10 @@ function Cartao({ concurso, hoje }: { concurso: ConcursoResumo; hoje: Date }) {
         >
           Ver edital
         </BotaoLink>
-        <BotaoEmBreve
-          recurso="salvos"
-          aria-label="Salvar"
+        <BotaoSalvar
+          slug={concurso.slug}
           className="flex size-[42px] shrink-0 items-center justify-center rounded-controle bg-rebaixada text-tinta-900"
-        >
-          <Icone nome="salvar" tamanho={18} />
-        </BotaoEmBreve>
+        />
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import { dataCurta, hojeEmSaoPaulo } from "@/lib/formato";
 import { DESCRICAO_SITE, NOME_SITE, URL_SITE } from "@/lib/site";
 import { SCRIPT_DE_ACESSIBILIDADE } from "@/lib/acessibilidade";
 import { SessionProvider } from "@/lib/auth/session";
+import { SalvosProvider } from "@/components/salvos/SalvosProvider";
 
 /**
  * Bricolage Grotesque em título e Public Sans em todo o resto, número
@@ -234,6 +235,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col">
         <GoogleTagManager />
         <SessionProvider>
+          {/* Dentro da sessão: os salvos são da conta. */}
+          <SalvosProvider>
           <DadosEstruturados dados={dadosEstruturados} />
           {/* `null` só quando o acervo falhou ao montar o layout
               (`acervoDoLayout`): sem origem para dizer, a faixa fica calada
@@ -242,6 +245,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <Cabecalho atualizadoEm={atualizadoEm} />
           <main className="flex-1">{children}</main>
           <Rodape atualizadoEm={atualizadoEm} />
+          </SalvosProvider>
         </SessionProvider>
       </body>
     </html>

@@ -1,6 +1,6 @@
 import { BotaoLink } from "@/components/ui/Botao";
 import { Selo } from "@/components/ui/Cartao";
-import { BotaoEmBreve } from "@/components/ui/EmBreve";
+import { BotaoSalvar } from "@/components/salvos/BotaoSalvar";
 import { Icone } from "@/components/ui/Icone";
 import type { ConcursoResumo, Tom } from "@/lib/dominio";
 import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
@@ -188,13 +188,10 @@ export function LinhaConcurso({
 
       <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "px-5"}>
         <div className="flex items-center justify-end gap-1.5">
-          <BotaoEmBreve
-            recurso="salvos"
-            aria-label="Salvar"
-            className="flex size-[42px] shrink-0 items-center justify-center rounded-controle text-tinta-600 hover:bg-rebaixada"
-          >
-            <Icone nome="salvar" tamanho={18} />
-          </BotaoEmBreve>
+          <BotaoSalvar
+            slug={concurso.slug}
+            className="flex size-[42px] shrink-0 items-center justify-center rounded-controle text-tinta-600 hover:bg-rebaixada aria-pressed:text-verde-texto"
+          />
           <BotaoLink href={`/concursos/${concurso.slug}`} variante="contorno" tamanho="sm" iconeDepois="seta">
             Ver
             {/* Sem isto, a lista inteira eram links com o mesmo nome "Ver"

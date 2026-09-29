@@ -628,6 +628,7 @@ export const ROTULO_ICONE: Record<NomeDoIcone, string> = {
   homologado: "Homologado",
   alerta: "Alerta",
   salvar: "Salvar",
+  salvo: "Salvo",
   areas: "Áreas",
   estados: "Estados",
   entrar: "Entrar",
