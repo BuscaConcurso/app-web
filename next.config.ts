@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { REDIRECIONAMENTOS_DO_EM_BREVE } from "./src/lib/institucionais";
+import { REESCRITAS_DO_POSTHOG } from "./src/lib/posthog";
 
 const nextConfig: NextConfig = {
   // A imagem de produção copia só `.next/standalone` (servidor + dependências
@@ -42,6 +43,12 @@ const nextConfig: NextConfig = {
       },
       ...REDIRECIONAMENTOS_DO_EM_BREVE,
     ];
+  },
+
+  // O proxy do PostHog em `/ingest`: o porquê, e o marcador `/_` no lugar da
+  // barra do fim, estão em `src/lib/posthog.ts`.
+  async rewrites() {
+    return REESCRITAS_DO_POSTHOG;
   },
 };
 
