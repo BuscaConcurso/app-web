@@ -49,11 +49,13 @@ describe("hrefDaListaDaArea", () => {
 });
 
 describe("listaDaArea", () => {
-  it("ordena como a busca, encerrando primeiro, e pagina", () => {
+  it("em cada situação, a ordem da busca (encerrando primeiro), e pagina", () => {
     const { pagina } = listaDaArea(CONCURSOS, { situacao: null, pagina: 1 }, HOJE);
-    expect(pagina.itens.map((c) => c.slug)).toEqual(
-      ordenar(CONCURSOS, "encerrando", HOJE).slice(0, POR_PAGINA_DA_AREA).map((c) => c.slug),
+    const ordemDaBusca = ordenar(CONCURSOS, "encerrando", HOJE);
+    const esperada = (["abertas", "previstos", "encerrados"] as const).flatMap((situacao) =>
+      ordemDaBusca.filter((c) => situacaoDoConcurso(c, HOJE) === situacao),
     );
+    expect(pagina.itens.map((c) => c.slug)).toEqual(esperada.slice(0, POR_PAGINA_DA_AREA).map((c) => c.slug));
     expect(pagina.total).toBe(CONCURSOS.length);
   });
 
@@ -79,5 +81,21 @@ describe("listaDaArea", () => {
     expect(total).toBe(0);
     expect(pagina.pagina).toBe(1);
     expect(pagina.paginas).toBe(1);
+  });
+
+  it("em Todas, abertos primeiro, depois previstos, depois encerrados, mesmo sem data ou com data futura", () => {
+    const base = CONCURSOS[0];
+    const homologadoComPrazoFuturo = { ...base, slug: "homologado", status: "homologado" as const, inscricoesAte: "2026-04-12" };
+    const abertoSemData = { ...base, slug: "aberto-sem-data", status: "inscricoes_abertas" as const, inscricoesAte: null };
+    const previsto = { ...base, slug: "previsto", status: "previsto" as const, inscricoesAte: null };
+    const abertoComData = { ...base, slug: "aberto-com-data", status: "inscricoes_abertas" as const, inscricoesAte: "2026-04-20" };
+    const { pagina } = listaDaArea(
+      [homologadoComPrazoFuturo, previsto, abertoSemData, abertoComData],
+      { situacao: null, pagina: 1 },
+      HOJE,
+    );
+    expect(pagina.itens.map((c) => situacaoDoConcurso(c, HOJE))).toEqual(["abertas", "abertas", "previstos", "encerrados"]);
+    // Dentro de cada situação, a ordem de `ordenar`: o prazo mais perto primeiro.
+    expect(pagina.itens.map((c) => c.slug)).toEqual(["aberto-com-data", "aberto-sem-data", "previsto", "homologado"]);
   });
 });

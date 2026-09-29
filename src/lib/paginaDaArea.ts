@@ -74,10 +74,31 @@ export interface ListaDaArea {
   total: number;
 }
 
+/** O posto de cada situação na lista "Todas". */
+const POSTO: Record<Situacao, number> = { abertas: 0, previstos: 1, encerrados: 2 };
+
 /**
- * Ordem "encerrando", a padrão da busca: o que ainda tem prazo primeiro,
- * depois o previsto, depois o encerrado. Página além do fim vira a última,
- * como na página do órgão: um `?pagina=999` velho num link não é lista vazia.
+ * Abertos primeiro, depois previstos, depois encerrados, e dentro de cada
+ * situação a ordem "encerrando" da busca (prazo mais perto primeiro).
+ *
+ * `ordenar` sozinho não basta: ele olha só `inscricoesAte`, então um aberto
+ * sem data ia para o fim e um homologado com data futura subia. No acervo
+ * real, o primeiro de `/areas/conselhos` era o CRM-PR homologado, e havia
+ * aberto da UFMG sem data na posição 795 de Educação. O `sort` é estável,
+ * então o posto só separa as situações e mantém a ordem de `ordenar` dentro
+ * delas. A busca continua com a ordem dela.
+ */
+function ordenarPorSituacao(itens: ConcursoResumo[], hoje: Date): ConcursoResumo[] {
+  return ordenar(itens, "encerrando", hoje)
+    .map((concurso) => ({ concurso, posto: POSTO[situacaoDoConcurso(concurso, hoje)] }))
+    .sort((a, b) => a.posto - b.posto)
+    .map(({ concurso }) => concurso);
+}
+
+/**
+ * A lista da área, filtrada pela situação pedida e paginada. Página além do
+ * fim vira a última, como na página do órgão: um `?pagina=999` velho num
+ * link não é lista vazia.
  */
 export function listaDaArea(
   itens: ConcursoResumo[],
@@ -93,7 +114,7 @@ export function listaDaArea(
   const ultima = Math.max(Math.ceil(filtrados.length / POR_PAGINA_DA_AREA), 1);
   return {
     pagina: paginar(
-      ordenar(filtrados, "encerrando", hoje),
+      ordenarPorSituacao(filtrados, hoje),
       Math.min(consulta.pagina, ultima),
       POR_PAGINA_DA_AREA,
     ),
