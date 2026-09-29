@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const chamadas: string[] = [];
+let status: "granted" | "denied" | "pending" = "pending";
 const falso = {
   __loaded: false,
+  get_explicit_consent_status: vi.fn(() => status),
   init: vi.fn(() => {
     chamadas.push("init");
     falso.__loaded = true;
@@ -34,6 +36,7 @@ beforeEach(() => {
   chamadas.length = 0;
   falso.__loaded = false;
   consentimento = null;
+  status = "pending";
 });
 
 describe("sem PostHog ligado", () => {
@@ -54,6 +57,19 @@ describe("sem PostHog ligado", () => {
   });
 });
 
+describe("resposta que o PostHog já conhece", () => {
+  it("não repete o opt-in a cada página, que mandaria um $opt_in por carregamento", () => {
+    falso.__loaded = true;
+    status = "granted";
+    aplicarConsentimento("aceito");
+    status = "denied";
+    aplicarConsentimento("recusado");
+    status = "pending";
+    aplicarConsentimento(null);
+    expect(chamadas).toEqual([]);
+  });
+});
+
 describe("com PostHog ligado", () => {
   it("liga com a chave e aplica a resposta que já estava guardada", () => {
     consentimento = "aceito";
@@ -64,13 +80,15 @@ describe("com PostHog ligado", () => {
 
   it("sem resposta, fica pendente e não captura", () => {
     iniciarAnalitica("phc_chave");
-    expect(chamadas).toEqual(["init", "pendente"]);
+    expect(chamadas).toEqual(["init"]);
   });
 
-  it("cada resposta vira a chamada certa", () => {
+  it("cada resposta nova vira a chamada certa", () => {
     falso.__loaded = true;
     aplicarConsentimento("aceito");
+    status = "granted";
     aplicarConsentimento("recusado");
+    status = "denied";
     aplicarConsentimento(null);
     expect(chamadas).toEqual(["opt_in", "opt_out", "pendente"]);
   });

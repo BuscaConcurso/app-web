@@ -21,17 +21,30 @@ export type EventoDeAnalitica =
   | "lembrete_ligado"
   | "lembrete_desligado"
   | "cadastro_concluido"
-  | "login_concluido";
+  | "login_concluido"
+  | "inscricao_clicada"
+  | "filtro_aplicado"
+  | "avaliacao_enviada";
 
 function ligado(): boolean {
   return typeof window !== "undefined" && posthog.__loaded;
 }
 
+/**
+ * Leva a resposta guardada ao PostHog, só quando ele ainda não a tem: o
+ * `opt_in_capturing()` manda um evento `$opt_in`, e chamá-lo a cada página
+ * carregada encheria os dados de um por visita.
+ */
 export function aplicarConsentimento(consentimento: Consentimento | null): void {
   if (!ligado()) return;
-  if (consentimento === "aceito") posthog.opt_in_capturing();
-  else if (consentimento === "recusado") posthog.opt_out_capturing();
-  else posthog.clear_opt_in_out_capturing();
+  const atual = posthog.get_explicit_consent_status();
+  if (consentimento === "aceito") {
+    if (atual !== "granted") posthog.opt_in_capturing();
+  } else if (consentimento === "recusado") {
+    if (atual !== "denied") posthog.opt_out_capturing();
+  } else if (atual !== "pending") {
+    posthog.clear_opt_in_out_capturing();
+  }
 }
 
 /** Chamado uma vez, por `src/instrumentation-client.ts`, com a chave validada. */
