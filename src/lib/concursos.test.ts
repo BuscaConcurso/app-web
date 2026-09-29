@@ -6,7 +6,9 @@ import {
   contagensDeFaceta,
   contarConcursos,
   facetas,
+  feedDoDiario,
   listarConcursos,
+  normalizarAto,
   normalizarDetalhe,
   normalizarResumo,
   paraALista,
@@ -283,5 +285,25 @@ describe("facetas", () => {
     // aceita e descarta o segundo argumento em silêncio).
     const { ufs: uma } = await facetas(HOJE, { ufs: 1 });
     expect(uma).toHaveLength(1);
+  });
+});
+
+describe("feedDoDiario", () => {
+  it("sem API, lê o mock", async () => {
+    const feed = await feedDoDiario(1);
+    expect(feed.pagina).toBe(1);
+    expect(feed.total).toBe(CONCURSOS.filter((c) => c.ultimoAto?.data).length);
+  });
+
+  it("normalizarAto tira o travessão do título do ato e do concurso", () => {
+    const ato = normalizarAto({
+      publicadoEm: "2026-09-25",
+      titulo: "EDITAL \u2014 RETIFICAÇÃO",
+      url: null,
+      secao: "DO3",
+      concurso: { ...CONCURSOS[0], titulo: "ENFAM \u2014 Edital 2" },
+    });
+    expect(ato.titulo).toBe("EDITAL - RETIFICAÇÃO");
+    expect(ato.concurso.titulo).toBe("ENFAM - Edital 2");
   });
 });

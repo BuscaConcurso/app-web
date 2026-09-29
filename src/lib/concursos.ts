@@ -37,6 +37,7 @@ import { medirCargos, type CargoMedido } from "./cargos";
 import { tomDoConcurso } from "./situacao";
 import { NOME_UF } from "./rotulos";
 import { acharOrgao, agruparPorOrgao, type OrgaoDoAcervo } from "./orgaos";
+import { feedDeMock, type AtoDoDiario, type FeedDoDiario } from "./diarioOficial";
 import { CONCURSOS } from "@/mocks/concursos";
 
 export interface Consulta extends Filtro {
@@ -680,6 +681,48 @@ export async function obterDetalhe(
         editalCitadoUrl: null,
       })
     : null;
+}
+
+/** O corte do travessão para o ato do feed: o título dele e o resumo do concurso. */
+export function normalizarAto(ato: AtoDoDiario): AtoDoDiario {
+  return {
+    ...ato,
+    titulo: ato.titulo ? semTravessao(ato.titulo) : ato.titulo,
+    concurso: normalizarResumo(ato.concurso),
+  };
+}
+
+/**
+ * Uma página do feed do Diário Oficial (`GET /diario-oficial`).
+ *
+ * Rota própria, e não o `/acervo`: o acervo traz só o último ato de cada
+ * concurso, e o feed é todo ato. O `fetch` guarda cinco minutos, o mesmo
+ * `revalidate` do acervo. Como em `obterDetalhe`, com `BC_API_URL` definida
+ * não há mock: a falha lança e a página de erro responde.
+ */
+export async function feedDoDiario(pagina: number): Promise<FeedDoDiario> {
+  if (!URL_DA_API) return feedDeMock(CONCURSOS, pagina);
+  const endereco = `${URL_DA_API}/diario-oficial?pagina=${pagina}`;
+  try {
+    const resposta = await fetch(endereco, {
+      next: { revalidate: VALIDADE_DO_ACERVO_S },
+      signal: AbortSignal.timeout(TEMPO_MAXIMO_DA_LEITURA_MS),
+    });
+    if (!resposta.ok) throw new Error(`a API respondeu ${resposta.status}`);
+    const corpo: FeedDoDiario = await resposta.json();
+    if (!Array.isArray(corpo?.itens)) {
+      throw new Error("a resposta não tem a lista `itens`");
+    }
+    return { ...corpo, itens: corpo.itens.map(normalizarAto) };
+  } catch (erro) {
+    unstable_rethrow(erro);
+    console.error(
+      `[concursos] ${endereco} falhou (${
+        erro instanceof Error ? erro.message : erro
+      }); a página de erro responde.`,
+    );
+    throw erro;
+  }
 }
 
 /** Todos os slugs. Alimenta o sitemap; a página do concurso rende na requisição. */
