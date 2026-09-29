@@ -145,7 +145,7 @@ describe("casos reais do acervo", () => {
     expect(casa("tribunais", { orgao: "Tribunal de Contas da União" })).toBe(false);
     expect(
       casa("tribunais", {
-        titulo: "Funpresp-Jud — Edital nº 8",
+        titulo: "Funpresp-Jud \u2014 Edital nº 8",
         orgao: "Fundação de Previdência Complementar do Servidor Público Federal do Poder Judiciário",
         cargos: ["Advogado", "Analista de Tecnologia da Informação"],
       }),
@@ -154,11 +154,11 @@ describe("casos reais do acervo", () => {
 
   it("Polícia: PF, polícia penal e polícia judicial entram; conselheiro do MJSP não", () => {
     expect(casa("policia-e-seguranca", { orgao: "Polícia Rodoviária Federal", cargos: ["Policial Rodoviário Federal"] })).toBe(true);
-    expect(casa("policia-e-seguranca", { titulo: "DEPEN — Edital nº 91", orgao: "Ministério da Justiça e Segurança Pública", cargos: ["Agente Federal de Execução Penal"] })).toBe(true);
+    expect(casa("policia-e-seguranca", { titulo: "DEPEN \u2014 Edital nº 91", orgao: "Ministério da Justiça e Segurança Pública", cargos: ["Agente Federal de Execução Penal"] })).toBe(true);
     expect(casa("policia-e-seguranca", { orgao: "Tribunal Regional Federal da 6ª Região", cargos: ["Técnico Judiciário - Agente da Polícia Judicial"] })).toBe(true);
     expect(
       casa("policia-e-seguranca", {
-        titulo: "Ministério da Justiça e Segurança Pública — Edital nº 1/2026",
+        titulo: "Ministério da Justiça e Segurança Pública \u2014 Edital nº 1/2026",
         orgao: "Ministério da Justiça e Segurança Pública",
         cargos: ["Conselheiro do CNPD - Representante de Entidades da Sociedade Civil com Atuação em Proteção de Dados Pessoais"],
       }),
@@ -190,7 +190,7 @@ describe("casos reais do acervo", () => {
     expect(casa("bancos-e-estatais", { orgao: "Caixa Econômica Federal" })).toBe(true);
     expect(casa("bancos-e-estatais", { orgao: "BANCO REGIONAL DE DESENVOLVIMENTO DO EXTREMO SUL" })).toBe(true);
     expect(casa("bancos-e-estatais", { orgao: "Empresa de Tecnologia e Informações da Previdência" })).toBe(true);
-    expect(casa("bancos-e-estatais", { titulo: "Banco de Talentos — Edital nº 2/2026", orgao: "Prefeitura Municipal de Sabará" })).toBe(false);
+    expect(casa("bancos-e-estatais", { titulo: "Banco de Talentos \u2014 Edital nº 2/2026", orgao: "Prefeitura Municipal de Sabará" })).toBe(false);
   });
 
   it("Forças Armadas: comandos e colégio militar entram; Superior Tribunal Militar não", () => {
@@ -201,7 +201,7 @@ describe("casos reais do acervo", () => {
 
   it("Prefeituras: prefeitura e município entram; órgão federal não", () => {
     expect(casa("prefeituras", { orgao: "PREFEITURA MUNICIPAL DE GUIMARÂNIA" })).toBe(true);
-    expect(casa("prefeituras", { titulo: "Município de Caldas Novas — Edital nº 33/2026", orgao: "Município de Caldas Novas" })).toBe(true);
+    expect(casa("prefeituras", { titulo: "Município de Caldas Novas \u2014 Edital nº 33/2026", orgao: "Município de Caldas Novas" })).toBe(true);
     expect(casa("prefeituras", { orgao: "Ministério das Cidades" })).toBe(false);
   });
 
