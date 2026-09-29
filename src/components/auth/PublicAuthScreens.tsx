@@ -11,6 +11,7 @@ import {
   authApi,
   meApi,
 } from "@/lib/auth/api";
+import { registrar } from "@/lib/analitica";
 import { useSession, withSession } from "@/lib/auth/session";
 import { safeReturnTo } from "@/lib/auth/return-to";
 import { Botao } from "@/components/ui/Botao";
@@ -115,6 +116,7 @@ export function LoginScreen({ returnTo }: { returnTo?: string }) {
     try {
       const response = await authApi.login(email.trim(), password);
       await session.login(response);
+      registrar("login_concluido", { metodo: "senha" });
       router.replace(safeReturnTo(returnTo));
     } catch (caught) {
       setErrors(fieldErrors(caught));
@@ -220,6 +222,7 @@ export function RegisterScreen() {
         password: form.password,
         ...(form.phone.trim() ? { phone: form.phone.trim() } : {}),
       });
+      registrar("cadastro_concluido");
       setDone(true);
     } catch (caught) {
       setErrors(fieldErrors(caught));
@@ -467,6 +470,7 @@ export function OAuthCallbackScreen({
       void authApi.exchangeOAuth(code)
         .then(async (response) => {
           await session.login(response);
+          registrar("login_concluido", { metodo: "oauth" });
           router.replace(destination);
         })
         .catch((caught) => setError(errorMessage(caught)));

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AvisoFlutuante } from "@/components/ui/EmBreve";
+import { registrar } from "@/lib/analitica";
 import { authenticatedRequest, useSession } from "@/lib/auth/session";
 import {
   criarSincronizadorDeSalvos,
@@ -111,9 +112,21 @@ export function SalvosProvider({ children }: { children: ReactNode }) {
       resposta: doDono?.resposta ?? null,
       emailConfirmado: Boolean(session.profile?.emailVerifiedAt),
       recarregar: ler,
-      salvar: (slug) => sincronizador?.salvar(slug) ?? Promise.resolve(false),
-      remover: (slug) => sincronizador?.remover(slug) ?? Promise.resolve(false),
-      lembrar: (slug, ligar) => sincronizador?.lembrar(slug, ligar) ?? Promise.resolve(false),
+      // O evento é o gesto da pessoa, registrado no clique: o sincronizador
+      // pode juntar cliques rápidos num pedido só, e isso não muda o que ela
+      // quis fazer.
+      salvar: (slug) => {
+        registrar("concurso_salvo", { slug });
+        return sincronizador?.salvar(slug) ?? Promise.resolve(false);
+      },
+      remover: (slug) => {
+        registrar("concurso_removido", { slug });
+        return sincronizador?.remover(slug) ?? Promise.resolve(false);
+      },
+      lembrar: (slug, ligar) => {
+        registrar(ligar ? "lembrete_ligado" : "lembrete_desligado", { slug });
+        return sincronizador?.lembrar(slug, ligar) ?? Promise.resolve(false);
+      },
       avisar,
     };
   }, [session.status, session.profile, conta, lido, mapa, ler, sincronizador, avisar]);

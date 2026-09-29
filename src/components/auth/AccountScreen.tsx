@@ -183,7 +183,7 @@ function EmailSection() {
   return (
     <Section id="email" title="E-mail">
       <p className="mb-4 text-sm text-tinta-600">
-        Atual: <strong className="text-tinta-900">{session.profile?.email}</strong>
+        Atual: <strong className="ph-no-capture text-tinta-900">{session.profile?.email}</strong>
       </p>
       {message && <Alert success={message.success}>{message.text}</Alert>}
       {session.profile?.hasPassword ? (

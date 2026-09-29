@@ -49,14 +49,17 @@ export function MenuConta() {
   const nomeDaConta = session.profile?.name ?? "Minha conta";
 
   return (
+    // `ph-no-capture`: nome e e-mail da conta ficam fora da gravação de
+    // sessão do PostHog (`lib/posthog.ts`). O nome acessível do gatilho
+    // continua saindo do texto do `span`.
     <Gaveta
-      rotulo={nomeDaConta}
+      rotulo={<span className="ph-no-capture">{nomeDaConta}</span>}
       titulo="Minha conta"
       largura="estreita"
       gatilho={GATILHO}
       className="min-w-0"
     >
-      <div className="flex flex-col gap-1">
+      <div className="ph-no-capture flex flex-col gap-1">
         <p className="min-w-0 truncate text-sm font-semibold text-tinta-900">
           {nomeDaConta}
         </p>

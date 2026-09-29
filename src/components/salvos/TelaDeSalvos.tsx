@@ -149,7 +149,7 @@ function AvisoDeEmailNaoConfirmado({ email }: { email: string }) {
         Confirme seu e-mail para receber os lembretes. Eles só saem depois que você confirmar o endereço.
       </p>
       {enviado ? (
-        <p className="text-sm font-semibold">Enviamos um novo link para {email}.</p>
+        <p className="text-sm font-semibold">Enviamos um novo link para <span className="ph-no-capture">{email}</span>.</p>
       ) : (
         <Botao variante="secundario" tamanho="sm" type="button" disabled={pendente} onClick={() => void reenviar()}>
           Reenviar o link de confirmação

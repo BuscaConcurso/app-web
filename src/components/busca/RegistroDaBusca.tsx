@@ -43,6 +43,7 @@
  */
 
 import { useEffect } from "react";
+import { registrar } from "@/lib/analitica";
 import { registrarBusca } from "@/lib/termosBuscados";
 
 export function RegistroDaBusca({
@@ -62,6 +63,9 @@ export function RegistroDaBusca({
     // está em primeiro não muda a lista e não avisa ninguém, então a segunda
     // passada do modo estrito não custa uma renderização.
     registrarBusca({ termo, resultados, filtrada });
+    // O mesmo gesto vai para a analítica, com o desfecho: é aqui que o
+    // termo e o total estão juntos. Navegar só por filtro não é busca.
+    if (termo) registrar("busca", { termo, resultados, filtrada });
   }, [termo, resultados, filtrada]);
 
   return null;
