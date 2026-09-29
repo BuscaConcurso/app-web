@@ -26,4 +26,9 @@ describe("sitemap", () => {
   it("não lista busca por texto livre", async () => {
     expect((await sitemap()).some((entrada) => entrada.url.includes("?q="))).toBe(false);
   });
+
+  it("tem o feed do Diário Oficial, diário", async () => {
+    const entrada = (await sitemap()).find((e) => e.url === urlAbsoluta("/diario-oficial"));
+    expect(entrada?.changeFrequency).toBe("daily");
+  });
 });

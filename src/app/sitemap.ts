@@ -7,10 +7,11 @@ import { urlAbsoluta } from "@/lib/site";
 /**
  * O mapa do site.
  *
- * Entram a home, a busca, as facetas finitas (estado e escolaridade), cada
- * cargo que `medirCargos` escolheu, cada órgão com mais de um concurso e cada
- * concurso. Não entram as buscas por texto livre, que são infinitas, nem
- * `/estilo`, que é ferramenta de trabalho e não conteúdo.
+ * Entram a home, a busca, o feed do Diário Oficial, as facetas finitas
+ * (estado e escolaridade), cada cargo que `medirCargos` escolheu, cada órgão
+ * com mais de um concurso e cada concurso. Não entram as buscas por texto
+ * livre, que são infinitas, nem `/estilo`, que é ferramenta de trabalho e não
+ * conteúdo.
  *
  * **Os órgãos de um concurso só ficam de fora**, e são 195 dos 466. A página
  * deles é o cartão de um concurso que já está neste mesmo mapa com prioridade
@@ -55,6 +56,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: agora,
       changeFrequency: "daily",
       priority: 0.9,
+    },
+    // O feed muda todo dia útil, com a edição do Diário. Só a primeira
+    // página: as outras são o mesmo feed empurrado para trás.
+    {
+      url: urlAbsoluta("/diario-oficial"),
+      lastModified: agora,
+      changeFrequency: "daily",
+      priority: 0.8,
     },
     ...UFS.map((uf) => ({
       url: urlAbsoluta(`/concursos?uf=${uf}`),
