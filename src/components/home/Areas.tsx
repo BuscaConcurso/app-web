@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Icone } from "@/components/ui/Icone";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { AREAS, hrefDaArea, type Area } from "@/lib/areas";
-import { hrefEmBreve } from "@/lib/emBreve";
 
 /**
  * A cor do quadrado do ícone, por área: `Main.dc.html:133-144`.
@@ -39,12 +38,11 @@ function Azulejo({ area }: { area: Area }) {
 
 /**
  * "O que você quer prestar?" (`Main.dc.html:126-146`): as 12 áreas em
- * azulejo, cada uma levando à busca pelo termo dela (`hrefDaArea`).
+ * azulejo, cada uma levando à página dela (`hrefDaArea`, `/areas/<slug>`).
  *
  * **O celular mostra 6, não os 12.** É o que `Mobile.dc.html:54-64` desenha:
  * uma grade fixa de 3 colunas com as 6 primeiras áreas, e "Ver todas" ao lado
- * do título leva para o recurso ainda sem página própria
- * (`hrefEmBreve("areas")`), a mesma origem do link do desktop.
+ * do título leva a `/areas`, o mesmo destino do link do desktop.
  */
 export function Areas() {
   return (
@@ -60,7 +58,7 @@ export function Areas() {
           </h2>
         </div>
         <Link
-          href={hrefEmBreve("areas")}
+          href="/areas"
           className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-tinta-900 hover:text-verde-texto"
         >
           <span className="md:hidden">Ver todas</span>
