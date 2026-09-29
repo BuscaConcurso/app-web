@@ -19,6 +19,7 @@ import {
   hrefDaListaDaArea,
   lerConsultaDaArea,
   listaDaArea,
+  listaVaziaDaArea,
   type ConsultaDaArea,
   type ListaDaArea,
 } from "@/lib/paginaDaArea";
@@ -170,9 +171,13 @@ export default async function PaginaDaArea(props: PageProps<"/areas/[slug]">) {
           />
         </div>
 
-        <div className="max-w-full overflow-x-auto">
+        {/* `nav` com nome, para o leitor de tela anunciar o grupo de filtros
+            (o `aria-label` do trilho sozinho, numa `div` sem papel, não é
+            lido). A rolagem é para a largura do celular, e o `p-1 -m-1` dá
+            espaço ao anel de foco, que o `overflow` cortaria rente. */}
+        <nav aria-label="Situação" className="-m-1 max-w-[calc(100%+0.5rem)] overflow-x-auto p-1">
           <Abas rotulo="Situação" tamanho="sm" itens={abasDaArea(area, consulta, lista)} />
-        </div>
+        </nav>
 
         <section>
           <h2 className="sr-only">Os concursos desta área</h2>
@@ -180,7 +185,7 @@ export default async function PaginaDaArea(props: PageProps<"/areas/[slug]">) {
             <ListaDeConcursos itens={pagina.itens} hoje={hoje} />
           ) : (
             <p className="rounded-cartao bg-cartao p-6 text-sm text-tinta-600 shadow-cartao">
-              Nenhum concurso desta área nesta situação agora.
+              {listaVaziaDaArea(consulta.situacao)}
             </p>
           )}
         </section>

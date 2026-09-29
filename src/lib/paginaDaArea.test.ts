@@ -6,6 +6,7 @@ import {
   hrefDaListaDaArea,
   lerConsultaDaArea,
   listaDaArea,
+  listaVaziaDaArea,
 } from "./paginaDaArea";
 import { CONCURSOS } from "@/mocks/concursos";
 
@@ -97,5 +98,15 @@ describe("listaDaArea", () => {
     expect(pagina.itens.map((c) => situacaoDoConcurso(c, HOJE))).toEqual(["abertas", "abertas", "previstos", "encerrados"]);
     // Dentro de cada situação, a ordem de `ordenar`: o prazo mais perto primeiro.
     expect(pagina.itens.map((c) => c.slug)).toEqual(["aberto-com-data", "aberto-sem-data", "previsto", "homologado"]);
+  });
+});
+
+describe("listaVaziaDaArea", () => {
+  it("sem filtro, fala do acervo, não de uma situação", () => {
+    expect(listaVaziaDaArea(null)).toBe("Nenhum concurso desta área no acervo agora.");
+  });
+
+  it("com filtro, fala da situação", () => {
+    expect(listaVaziaDaArea("abertas")).toBe("Nenhum concurso desta área nesta situação agora.");
   });
 });

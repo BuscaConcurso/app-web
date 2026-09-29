@@ -122,3 +122,10 @@ export function listaDaArea(
     total: itens.length,
   };
 }
+
+/** O texto da lista vazia: sem filtro, "nesta situação" não diz nada. */
+export function listaVaziaDaArea(situacao: Situacao | null): string {
+  return situacao
+    ? "Nenhum concurso desta área nesta situação agora."
+    : "Nenhum concurso desta área no acervo agora.";
+}
