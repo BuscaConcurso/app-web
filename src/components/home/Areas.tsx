@@ -2,26 +2,41 @@ import Link from "next/link";
 import { Icone } from "@/components/ui/Icone";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { AREAS, hrefDaArea, type Area } from "@/lib/areas";
+import { numero } from "@/lib/formato";
 
 /**
  * A cor do quadrado do ícone, por área: `Main.dc.html:133-144`.
  *
  * As quatro cores repetem exatamente o par fundo/texto que `Etiqueta`
  * (`ui/Etiqueta.tsx`) já usa para o mesmo tom, então o contraste medido lá
- * vale aqui também, nos dois modos de cor.
+ * vale aqui também, nos dois modos de cor. Exportada porque o cabeçalho de
+ * `/areas/<slug>` desenha o mesmo quadrado.
  */
-const CLASSE_DO_ICONE: Record<Area["tom"], string> = {
+export const CLASSE_DO_ICONE: Record<Area["tom"], string> = {
   verde: "bg-verde-fundo text-verde-texto",
   anil: "bg-anil-fundo text-anil-texto",
   ouro: "bg-ouro-fundo text-ouro-sinal-texto",
   urucum: "bg-urucum-fundo text-urucum-texto",
 };
 
-function Azulejo({ area }: { area: Area }) {
+/**
+ * O azulejo de uma área. Na home, nome e apoio; em `/areas`, também a
+ * contagem (`resumo`), e aí a altura deixa de ser fixa para a linha a mais
+ * caber com a fonte grande.
+ */
+export function Azulejo({
+  area,
+  resumo,
+}: {
+  area: Area;
+  resumo?: { abertos: number; total: number };
+}) {
   return (
     <Link
       href={hrefDaArea(area)}
-      className="flex h-[9.5rem] flex-col justify-between rounded-cartao bg-cartao p-5 shadow-cartao"
+      className={`flex flex-col justify-between gap-4 rounded-cartao bg-cartao p-5 shadow-cartao ${
+        resumo ? "min-h-[9.5rem]" : "h-[9.5rem]"
+      }`}
     >
       <span
         className={`flex size-12 items-center justify-center rounded-[14px] ${CLASSE_DO_ICONE[area.tom]}`}
@@ -31,6 +46,14 @@ function Azulejo({ area }: { area: Area }) {
       <div className="min-w-0">
         <div className="text-base font-bold">{area.nome}</div>
         <div className="mt-0.5 truncate text-[0.8125rem] text-tinta-600">{area.apoio}</div>
+        {resumo && (
+          <div className="mt-2 text-[0.8125rem] text-tinta-600">
+            <span className="font-semibold text-verde-texto">
+              {numero(resumo.abertos)} {resumo.abertos === 1 ? "aberto" : "abertos"}
+            </span>{" "}
+            de {numero(resumo.total)} {resumo.total === 1 ? "concurso" : "concursos"}
+          </div>
+        )}
       </div>
     </Link>
   );
