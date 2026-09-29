@@ -325,6 +325,27 @@ export async function dimensoesDoAcervo(): Promise<DimensoesDoAcervo> {
   };
 }
 
+/**
+ * Os números de "Como lemos os editais": quantos concursos a lista tem, de
+ * quantos órgãos e com quantas bancas. Contados no mesmo acervo que a busca
+ * lê, a cada geração da página, para o texto nunca afirmar um número
+ * escrito à mão. Concurso sem banca informada não conta banca nenhuma.
+ */
+export interface NumerosDoAcervo {
+  concursos: number;
+  orgaos: number;
+  bancas: number;
+}
+
+export async function numerosDoAcervo(): Promise<NumerosDoAcervo> {
+  const todos = await acervo();
+  return {
+    concursos: todos.length,
+    orgaos: new Set(todos.map((concurso) => concurso.orgao.slug)).size,
+    bancas: new Set(todos.flatMap((concurso) => (concurso.banca ? [concurso.banca.slug] : []))).size,
+  };
+}
+
 async function acervo(): Promise<ConcursoResumo[]> {
   return (await carregar()).concursos;
 }

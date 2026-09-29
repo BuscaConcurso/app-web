@@ -12,6 +12,7 @@ import {
   normalizarAto,
   normalizarDetalhe,
   normalizarResumo,
+  numerosDoAcervo,
   paraALista,
   resumoDasAreas,
   semTravessao,
@@ -334,5 +335,19 @@ describe("resumoDasAreas", () => {
       expect(item.total, item.area.slug).toBe(lista.length);
       expect(item.abertos, item.area.slug).toBe(filtrar(lista, { situacoes: ["abertas"] }, HOJE).length);
     }
+  });
+});
+
+describe("numerosDoAcervo", () => {
+  it("conta concursos, órgãos e bancas distintos do acervo, sem banca vazia", async () => {
+    const numeros = await numerosDoAcervo();
+    expect(numeros.concursos).toBe(CONCURSOS.length);
+    expect(numeros.orgaos).toBe(new Set(CONCURSOS.map((c) => c.orgao.slug)).size);
+    expect(numeros.bancas).toBe(
+      new Set(CONCURSOS.flatMap((c) => (c.banca ? [c.banca.slug] : []))).size,
+    );
+    // O mock tem concurso sem banca: sem ele, o teste não provaria o corte.
+    expect(CONCURSOS.some((c) => !c.banca)).toBe(true);
+    expect(numeros.bancas).toBeGreaterThan(1);
   });
 });
