@@ -86,7 +86,7 @@ export function Mosaico({
           {/* Texto verde usa `verde-texto`, não `acao` (que é só superfície, ver `contraste.test.ts`). */}
           <div className="flex items-center gap-1.5 text-[0.8125rem] font-semibold text-verde-texto">
             <Icone nome="aberto" tamanho={15} />
-            Conferido no edital original
+            Lido no Diário Oficial da União
           </div>
         </Link>
       )}
