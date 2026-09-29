@@ -74,49 +74,138 @@ export interface ApiDeSalvos {
   remover(slug: string): Promise<unknown>;
 }
 
+/** `null` é "não salvo"; um booleano é "salvo", com o `lembrar` dele. */
+type Estado = boolean | null;
+
+export interface SincronizadorDeSalvos {
+  /** O que a tela mostra: o confirmado pelo banco, com os cliques pendentes por cima. */
+  mapa(): MapaDeSalvos;
+  observar(ouvinte: (mapa: MapaDeSalvos) => void): () => void;
+  /** Marca o momento de um `GET`, para `carregar` não desfazer o que foi confirmado depois. */
+  marca(): number;
+  carregar(resposta: RespostaDeSalvos, marca: number): void;
+  salvar(slug: string): Promise<boolean>;
+  remover(slug: string): Promise<boolean>;
+  lembrar(slug: string, ligar: boolean): Promise<boolean>;
+}
+
+function lembrarDa(resposta: unknown): boolean | null {
+  const valor = (resposta as { lembrar?: unknown } | null | undefined)?.lembrar;
+  return typeof valor === "boolean" ? valor : null;
+}
+
 /**
- * Salvar, remover e lembrar, todos otimistas: o mapa muda na hora, a api é
- * chamada depois, e uma falha devolve só aquele slug ao que era antes (não o
- * mapa inteiro, que outro clique pode ter mudado enquanto isso) e avisa.
- * Cada ação resolve `true` quando a api aceitou.
+ * Salvar, remover e lembrar, otimistas e **em fila por slug**: um pedido
+ * por concurso de cada vez. O clique muda o estado desejado na hora (a tela
+ * responde), e quando o pedido em voo termina, o último estado desejado é
+ * enviado se ainda for diferente do confirmado. Sem a fila, um clique duplo
+ * mandava PUT e DELETE juntos, que podiam chegar fora de ordem e deixar a
+ * tela dizendo uma coisa e o banco outra (ou um lembrete desligado na tela e
+ * ligado no banco, mandando e-mail).
+ *
+ * Uma falha desfaz o slug para o que o banco confirmou e avisa. Cada ação
+ * resolve `true` quando o banco terminou no estado pedido.
  */
-export function acoesDeSalvos(deps: {
-  ler(): MapaDeSalvos;
-  escrever(mapa: MapaDeSalvos): void;
+export function criarSincronizadorDeSalvos(deps: {
   api: ApiDeSalvos;
   avisar(texto: string): void;
-}) {
-  function trocar(slug: string, valor: boolean | undefined) {
-    const mapa = new Map(deps.ler());
-    if (valor === undefined) mapa.delete(slug);
-    else mapa.set(slug, valor);
-    deps.escrever(mapa);
+}): SincronizadorDeSalvos {
+  let confirmado = new Map<string, boolean>();
+  const desejado = new Map<string, Estado>();
+  const ultimaAcao = new Map<string, Acao>();
+  const emVoo = new Map<string, Promise<boolean>>();
+  /** Em que mudança cada slug foi confirmado pela última vez. */
+  const confirmadoEm = new Map<string, number>();
+  let mudancas = 0;
+  const ouvintes = new Set<(mapa: MapaDeSalvos) => void>();
+
+  // O mesmo objeto enquanto nada muda: é o que `useSyncExternalStore` exige.
+  let instantaneo: MapaDeSalvos = new Map();
+  const mapa = (): MapaDeSalvos => instantaneo;
+
+  function emitir() {
+    const visivel = new Map(confirmado);
+    for (const [slug, estado] of desejado) {
+      if (estado === null) visivel.delete(slug);
+      else visivel.set(slug, estado);
+    }
+    instantaneo = visivel;
+    for (const ouvinte of ouvintes) ouvinte(instantaneo);
   }
 
-  async function otimista(
-    slug: string,
-    novo: boolean | undefined,
-    acao: Acao,
-    chamar: () => Promise<unknown>,
-  ): Promise<boolean> {
-    const anterior = deps.ler().get(slug);
-    trocar(slug, novo);
-    try {
-      await chamar();
-      return true;
-    } catch (erro) {
-      trocar(slug, anterior);
-      deps.avisar(avisoDeFalha(erro, acao));
-      return false;
+  function confirmar(slug: string, estado: Estado) {
+    if (estado === null) confirmado.delete(slug);
+    else confirmado.set(slug, estado);
+    mudancas += 1;
+    confirmadoEm.set(slug, mudancas);
+  }
+
+  async function sincronizar(slug: string): Promise<boolean> {
+    for (;;) {
+      const alvo = desejado.get(slug);
+      if (alvo === undefined) return true;
+      const atual = confirmado.get(slug) ?? null;
+      if (alvo === atual) {
+        desejado.delete(slug);
+        emitir();
+        return true;
+      }
+      // Salvar o que não estava salvo vai sem `lembrar`: se o banco já o
+      // tinha (a lista ainda não carregou), o lembrete dele é mantido.
+      const semLembrete = alvo === false && atual === null;
+      try {
+        if (alvo === null) {
+          await deps.api.remover(slug);
+          confirmar(slug, null);
+        } else {
+          const resposta = await deps.api.salvar(slug, semLembrete ? undefined : alvo);
+          const doBanco = semLembrete ? (lembrarDa(resposta) ?? false) : alvo;
+          confirmar(slug, doBanco);
+          if (semLembrete && desejado.get(slug) === false) desejado.set(slug, doBanco);
+        }
+      } catch (erro) {
+        desejado.delete(slug);
+        emitir();
+        deps.avisar(avisoDeFalha(erro, ultimaAcao.get(slug) ?? "salvar"));
+        return false;
+      }
     }
   }
 
+  function querer(slug: string, estado: Estado, acao: Acao): Promise<boolean> {
+    desejado.set(slug, estado);
+    ultimaAcao.set(slug, acao);
+    emitir();
+    const pendente = emVoo.get(slug);
+    if (pendente) return pendente;
+    const execucao = sincronizar(slug).finally(() => emVoo.delete(slug));
+    emVoo.set(slug, execucao);
+    return execucao;
+  }
+
   return {
-    salvar: (slug: string) =>
-      otimista(slug, deps.ler().get(slug) ?? false, "salvar", () => deps.api.salvar(slug)),
-    remover: (slug: string) =>
-      otimista(slug, undefined, "remover", () => deps.api.remover(slug)),
-    lembrar: (slug: string, ligar: boolean) =>
-      otimista(slug, ligar, "lembrar", () => deps.api.salvar(slug, ligar)),
+    mapa,
+    observar(ouvinte) {
+      ouvintes.add(ouvinte);
+      return () => {
+        ouvintes.delete(ouvinte);
+      };
+    },
+    marca: () => mudancas,
+    carregar(resposta, marca) {
+      const lido = new Map(mapaDe(resposta));
+      // O que foi confirmado depois do pedido desta lista vale mais que ela.
+      for (const [slug, quando] of confirmadoEm) {
+        if (quando <= marca) continue;
+        const valor = confirmado.get(slug);
+        if (valor === undefined) lido.delete(slug);
+        else lido.set(slug, valor);
+      }
+      confirmado = lido;
+      emitir();
+    },
+    salvar: (slug) => querer(slug, mapa().get(slug) ?? false, "salvar"),
+    remover: (slug) => querer(slug, null, "remover"),
+    lembrar: (slug, ligar) => querer(slug, ligar, "lembrar"),
   };
 }
