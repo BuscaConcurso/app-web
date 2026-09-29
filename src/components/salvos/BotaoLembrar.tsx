@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Icone } from "@/components/ui/Icone";
-import { avisoAoLigarLembrete, hrefParaEntrar } from "@/lib/salvos";
+import { avisoAoLigarLembrete } from "@/lib/salvos";
 import { useSalvos } from "./contexto";
+import { LinkParaEntrar } from "./LinkParaEntrar";
 
 /**
  * "Lembrar amanhã" e "Avisar quando abrir" (spec de lembretes, §6): os dois
@@ -33,7 +32,6 @@ export function BotaoLembrar({
   className?: string;
 }) {
   const salvos = useSalvos();
-  const caminho = usePathname();
   const ligado = salvos.mapa.get(slug) === true;
   const nome = ligado ? "Lembrete ligado" : rotulo;
   const visivel = ligado ? "Lembrete ligado" : texto;
@@ -47,9 +45,9 @@ export function BotaoLembrar({
 
   if (salvos.estado === "anonimo") {
     return (
-      <Link href={hrefParaEntrar(caminho)} aria-label={ariaLabel} className={className}>
+      <LinkParaEntrar ariaLabel={ariaLabel} className={className}>
         {conteudo}
-      </Link>
+      </LinkParaEntrar>
     );
   }
 

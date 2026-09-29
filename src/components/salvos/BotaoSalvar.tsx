@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Icone } from "@/components/ui/Icone";
-import { hrefParaEntrar } from "@/lib/salvos";
 import { useSalvos } from "./contexto";
+import { LinkParaEntrar } from "./LinkParaEntrar";
 
 /**
  * O botão Salvar dos seis lugares do site. Cada lugar passa as próprias
@@ -29,7 +27,6 @@ export function BotaoSalvar({
   comTexto?: boolean;
 }) {
   const salvos = useSalvos();
-  const caminho = usePathname();
   const salvo = salvos.mapa.has(slug);
   const rotulo = salvo ? "Salvo" : "Salvar";
   const conteudo = (
@@ -41,9 +38,9 @@ export function BotaoSalvar({
 
   if (salvos.estado === "anonimo") {
     return (
-      <Link href={hrefParaEntrar(caminho)} aria-label={comTexto ? undefined : "Salvar"} className={className}>
+      <LinkParaEntrar ariaLabel={comTexto ? undefined : "Salvar"} className={className}>
         {conteudo}
-      </Link>
+      </LinkParaEntrar>
     );
   }
 

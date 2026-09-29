@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   avisoAoLigarLembrete,
   avisoDeFalha,
+  caminhoParaVoltar,
   hrefParaEntrar,
   criarSincronizadorDeSalvos,
   mapaDe,
@@ -160,6 +161,18 @@ describe("avisoDeFalha", () => {
     expect(avisoDeFalha({ code: "CONCURSO_NAO_ENCONTRADO", status: 404 }, "salvar")).toBe(
       "Este concurso não está mais na lista.",
     );
+  });
+});
+
+describe("caminhoParaVoltar", () => {
+  it("leva a query junto, para a busca filtrada voltar filtrada", () => {
+    expect(caminhoParaVoltar({ pathname: "/busca/policia", search: "?uf=SP&pagina=2" })).toBe(
+      "/busca/policia?uf=SP&pagina=2",
+    );
+    expect(hrefParaEntrar(caminhoParaVoltar({ pathname: "/concursos", search: "?situacao=abertas" }))).toBe(
+      "/entrar?retorno=%2Fconcursos%3Fsituacao%3Dabertas",
+    );
+    expect(caminhoParaVoltar({ pathname: "/", search: "" })).toBe("/");
   });
 });
 

@@ -31,6 +31,15 @@ export function mapaDe(resposta: RespostaDeSalvos): MapaDeSalvos {
   ]);
 }
 
+/**
+ * O caminho da página atual com a query (uma busca filtrada volta filtrada).
+ * Lido de `window.location` só no clique: `useSearchParams` tiraria da
+ * renderização estática as páginas que têm um botão Salvar.
+ */
+export function caminhoParaVoltar(local: { pathname: string; search: string }): string {
+  return `${local.pathname}${local.search}`;
+}
+
 /** O `/entrar` que volta para onde a pessoa estava (`?retorno=`, ver `app/entrar`). */
 export function hrefParaEntrar(caminho: string | null): string {
   return caminho ? `/entrar?retorno=${encodeURIComponent(caminho)}` : "/entrar";
