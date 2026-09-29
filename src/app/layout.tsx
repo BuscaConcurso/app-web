@@ -6,6 +6,7 @@ import { AvisoDeOrigem } from "@/components/layout/AvisoDeOrigem";
 import { Cabecalho } from "@/components/layout/Cabecalho";
 import { BannerDeConsentimento } from "@/components/consentimento/BannerDeConsentimento";
 import { IdentificacaoNaAnalitica } from "@/components/consentimento/IdentificacaoNaAnalitica";
+import { OuvinteDeAnalitica } from "@/components/consentimento/OuvinteDeAnalitica";
 import { ID_DO_CONTEUDO, PularParaConteudo } from "@/components/layout/PularParaConteudo";
 import { GoogleTagManager } from "@/components/layout/GoogleTagManager";
 import { Rodape } from "@/components/layout/Rodape";
@@ -253,6 +254,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <Rodape atualizadoEm={atualizadoEm} />
           </SalvosProvider>
         </SessionProvider>
+        {/* Os eventos marcados com `data-analitica-*` no HTML. */}
+        <OuvinteDeAnalitica />
         {/* Por último no corpo: por cima do conteúdo, sem prender o foco. */}
         <BannerDeConsentimento />
       </body>

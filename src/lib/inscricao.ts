@@ -1,5 +1,6 @@
 import type { ConcursoDetalhe, ConcursoResumo } from "./dominio";
 import { dataCurta, diasAte, moedaExata, paraDataLocal } from "./formato";
+import { atributosDeAnalitica } from "./eventosNaPagina";
 import { tomDoConcurso } from "./situacao";
 
 export interface Passo { titulo: string; detalhe: string }
@@ -65,4 +66,22 @@ export function destinoDaInscricao(c: ConcursoDetalhe) {
   const host = endereco.host;
   if (!host) return null;
   return { href, host, rotulo: edital ? ("Ir para a inscrição" as const) : ("Ver o ato publicado" as const) };
+}
+
+/**
+ * O clique no botão de inscrição, para a analítica (`eventosNaPagina.ts`):
+ * qual concurso, se leva à inscrição ou só ao ato, para qual site, e de
+ * qual botão (a lateral do desktop ou a barra do celular).
+ */
+export function atributosDaInscricao(
+  slug: string,
+  destino: { host: string; rotulo: "Ir para a inscrição" | "Ver o ato publicado" | string },
+  local: "lateral" | "barra",
+): Record<string, string> {
+  return atributosDeAnalitica("inscricao_clicada", {
+    slug,
+    destino: destino.rotulo === "Ir para a inscrição" ? "inscricao" : "ato",
+    host: destino.host,
+    local,
+  });
 }

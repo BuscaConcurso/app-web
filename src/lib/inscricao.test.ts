@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ConcursoDetalhe } from "./dominio";
 import { hojeCivilEmSaoPaulo } from "./formato";
-import { destinoDaInscricao, passosDaInscricao, periodoDaInscricao, prazoPorExtenso } from "./inscricao";
+import { atributosDaInscricao, destinoDaInscricao, passosDaInscricao, periodoDaInscricao, prazoPorExtenso } from "./inscricao";
 
 const HOJE = new Date(2026, 8, 24);
 const base = {
@@ -96,5 +96,24 @@ describe("destinoDaInscricao", () => {
 
   it("sem endereço cai no ato publicado", () => {
     expect(destinoDaInscricao({ ...base, editalCitadoUrl: null })).toMatchObject({ href: "https://in.gov.br/ato/1", rotulo: "Ver o ato publicado" });
+  });
+});
+
+describe("atributosDaInscricao", () => {
+  const inscricao = { href: "https://banca.org/inscricao", host: "banca.org", rotulo: "Ir para a inscrição" as const };
+  const ato = { href: "https://in.gov.br/ato", host: "in.gov.br", rotulo: "Ver o ato publicado" as const };
+
+  it("marca o clique com o concurso, o tipo de destino, o site e o lugar do botão", () => {
+    expect(atributosDaInscricao("tj-sp-2026", inscricao, "lateral")).toEqual({
+      "data-analitica": "inscricao_clicada",
+      "data-analitica-slug": "tj-sp-2026",
+      "data-analitica-destino": "inscricao",
+      "data-analitica-host": "banca.org",
+      "data-analitica-local": "lateral",
+    });
+  });
+
+  it("sem edital, o destino é o ato publicado", () => {
+    expect(atributosDaInscricao("x", ato, "barra")["data-analitica-destino"]).toBe("ato");
   });
 });

@@ -274,7 +274,7 @@ export default async function PaginaDoConcurso(
 
             {concurso.origens.length > 0 && (
               <section className="rounded-[22px] bg-cartao p-8 shadow-cartao">
-                <AtosPublicados origens={concurso.origens} />
+                <AtosPublicados origens={concurso.origens} slug={concurso.slug} />
               </section>
             )}
 
@@ -289,7 +289,7 @@ export default async function PaginaDoConcurso(
         </div>
       </div>
 
-      <BarraDeInscricao taxa={taxaDoConcurso(concurso)} destino={destino} />
+      <BarraDeInscricao slug={concurso.slug} taxa={taxaDoConcurso(concurso)} destino={destino} />
     </div>
   );
 }

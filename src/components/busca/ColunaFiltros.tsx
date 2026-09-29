@@ -3,6 +3,7 @@ import { Rotulo } from "@/components/ui/Etiqueta";
 import { Gaveta } from "@/components/ui/Revelador";
 import { FormularioDaConsulta, LinkDaConsulta } from "./LinkDaConsulta";
 import type { ContagensDeFaceta, OpcaoDeFaceta } from "@/lib/concursos";
+import { atributosDeAnalitica } from "@/lib/eventosNaPagina";
 import { numero } from "@/lib/formato";
 import type { Uf } from "@/lib/dominio";
 import {
@@ -86,6 +87,11 @@ function Grupo({
             <li key={opcao.valor}>
               <LinkDaConsulta
                 href={urlAlternando(consulta, dimensao, opcao.valor)}
+                {...atributosDeAnalitica("filtro_aplicado", {
+                  filtro: PARAMETRO_DA_DIMENSAO[dimensao],
+                  valor: opcao.valor,
+                  acao: marcado ? "desmarcar" : "marcar",
+                })}
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcado ? "remover filtro" : "filtrar"
                 }`}
@@ -131,6 +137,11 @@ function GrupoDeEstados({
             <li key={opcao.valor}>
               <LinkDaConsulta
                 href={urlAlternandoUf(consulta, opcao.valor as Uf)}
+                {...atributosDeAnalitica("filtro_aplicado", {
+                  filtro: "uf",
+                  valor: opcao.valor,
+                  acao: marcado ? "desmarcar" : "marcar",
+                })}
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcado ? "remover filtro" : "filtrar"
                 }`}
@@ -174,6 +185,11 @@ function GrupoDeBancas({
             <li key={opcao.valor}>
               <LinkDaConsulta
                 href={urlAlternando(consulta, "bancas", opcao.valor)}
+                {...atributosDeAnalitica("filtro_aplicado", {
+                  filtro: "banca",
+                  valor: opcao.valor,
+                  acao: marcada ? "desmarcar" : "marcar",
+                })}
                 aria-label={`${opcao.rotulo}, ${numero(opcao.total)} concursos, ${
                   marcada ? "remover filtro" : "filtrar"
                 }`}
@@ -239,7 +255,11 @@ function FaixaDeSalario({
     "focus:bg-cartao focus:ring-2 focus:ring-acao numero";
 
   return (
-    <FormularioDaConsulta action={caminhoDaConsulta(consulta)} className="flex flex-col gap-2.5">
+    <FormularioDaConsulta
+      action={caminhoDaConsulta(consulta)}
+      className="flex flex-col gap-2.5"
+      {...atributosDeAnalitica("filtro_aplicado", { filtro: "salario", campos: "salarioMin,salarioMax" })}
+    >
       <CamposOcultos consulta={consulta} />
       <Rotulo>Salário</Rotulo>
       <div className="flex items-center gap-2">

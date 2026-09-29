@@ -1,4 +1,5 @@
 import { BotaoLink } from "@/components/ui/Botao";
+import { atributosDaInscricao } from "@/lib/inscricao";
 
 /**
  * A barra de inscrição do celular, fim de `ConcursoMobile.dc.html`.
@@ -19,9 +20,12 @@ import { BotaoLink } from "@/components/ui/Botao";
  * ponta, como um `fixed inset-x-0` desenharia.
  */
 export function BarraDeInscricao({
+  slug,
   taxa,
   destino,
 }: {
+  /** O concurso, para o clique no botão ir para a analítica. */
+  slug: string;
   /**
    * A taxa já escrita (`taxaDoConcurso`, a mesma do fato TAXA), ou `null`
    * quando o ato não a informou: "Não informada", e não "Sem taxa", que
@@ -44,6 +48,7 @@ export function BarraDeInscricao({
         href={destino.href}
         target="_blank"
         rel="nofollow noopener noreferrer"
+        {...atributosDaInscricao(slug, destino, "barra")}
         variante="chamada"
         tamanho="lg"
         iconeDepois="externo"

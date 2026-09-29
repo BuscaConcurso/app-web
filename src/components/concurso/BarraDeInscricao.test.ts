@@ -16,10 +16,17 @@ function cargoComTaxa(taxaInscricao: number | null): Cargo {
 }
 
 function barra(taxa: string | null): string {
-  return renderToStaticMarkup(createElement(BarraDeInscricao, { taxa, destino: DESTINO }));
+  return renderToStaticMarkup(createElement(BarraDeInscricao, { slug: "tj-sp-2026", taxa, destino: DESTINO }));
 }
 
 describe("BarraDeInscricao", () => {
+  it("o botão leva a marca do clique na inscrição, vindo da barra do celular", () => {
+    const html = barra("R$ 100,00");
+    expect(html).toContain('data-analitica="inscricao_clicada"');
+    expect(html).toContain('data-analitica-slug="tj-sp-2026"');
+    expect(html).toContain('data-analitica-local="barra"');
+  });
+
   it("sem taxa informada diz 'Não informada', e não 'Sem taxa'", () => {
     const taxa = taxaDoConcurso({ taxaInscricao: null, cargos: [cargoComTaxa(null)] });
     expect(taxa).toBeNull();

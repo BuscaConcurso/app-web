@@ -55,6 +55,7 @@
  */
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Icone } from "@/components/ui/Icone";
+import { registrar } from "@/lib/analitica";
 import {
   ESTADO_INICIAL,
   LIMITE_DO_COMENTARIO,
@@ -208,6 +209,9 @@ export function Avaliacao({
       resultado = "falhou";
     }
     if (resultado !== "gravada") setEscolha(null);
+    // Só a avaliação que chegou ao servidor, com o sim ou não e se veio
+    // comentário; o texto do comentário não vai para a analítica.
+    else registrar("avaliacao_enviada", { slug, gostei, comentou: texto != null && texto !== "" });
     setEstado({
       resultado,
       gostei,

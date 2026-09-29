@@ -7,6 +7,7 @@ import { Icone } from "@/components/ui/Icone";
 import type { ConcursoDetalhe, ConcursoResumo, Tom } from "@/lib/dominio";
 import { dataCurta } from "@/lib/formato";
 import {
+  atributosDaInscricao,
   destinoDaInscricao,
   passosDaInscricao,
   periodoDaInscricao,
@@ -108,6 +109,7 @@ export function LateralDoConcurso({
                   href={destino.href}
                   target="_blank"
                   rel="nofollow noopener noreferrer"
+                  {...atributosDaInscricao(concurso.slug, destino, "lateral")}
                   variante="chamada"
                   tamanho="xl"
                   iconeDepois="externo"

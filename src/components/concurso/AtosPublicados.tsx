@@ -7,6 +7,7 @@ import {
   type Faixa,
 } from "@/lib/destaque";
 import type { Origem } from "@/lib/dominio";
+import { atributosDeAnalitica } from "@/lib/eventosNaPagina";
 import { dataLonga, numero } from "@/lib/formato";
 import { partirEmParagrafos, type Paragrafo } from "@/lib/leitura";
 
@@ -27,6 +28,15 @@ export function enderecoLegivel(url: string): string {
     return `${endereco.host}${endereco.pathname}`.replace(/\/+$/, "");
   } catch {
     return url.replace(/^https?:\/\//, "");
+  }
+}
+
+/** Só o domínio, para a analítica saber para qual site a pessoa saiu. */
+function hostDe(url: string): string | null {
+  try {
+    return new URL(url).host || null;
+  } catch {
+    return null;
   }
 }
 
@@ -91,7 +101,14 @@ export function temSeloConferido(origem: Origem): boolean {
   return Boolean(origem.texto?.trim());
 }
 
-export function AtosPublicados({ origens }: { origens: Origem[] }) {
+export function AtosPublicados({
+  origens,
+  slug,
+}: {
+  origens: Origem[];
+  /** O concurso, para o clique no edital completo ir para a analítica. */
+  slug?: string;
+}) {
   return (
     <div className="flex flex-col gap-[18px]">
       <h2 className="flex items-center gap-2.5 font-titulo text-[1.75rem] leading-none font-bold tracking-[-0.025em]">
@@ -190,6 +207,12 @@ export function AtosPublicados({ origens }: { origens: Origem[] }) {
                   href={origem.editalCitadoUrl}
                   target="_blank"
                   rel="nofollow noopener noreferrer"
+                  {...atributosDeAnalitica("inscricao_clicada", {
+                    slug,
+                    destino: "edital",
+                    host: hostDe(origem.editalCitadoUrl),
+                    local: "fontes",
+                  })}
                   className="inline-flex h-11 items-center gap-1.5 self-start text-[0.875rem] font-semibold text-link hover:text-link-hover"
                 >
                   Abrir o edital completo
