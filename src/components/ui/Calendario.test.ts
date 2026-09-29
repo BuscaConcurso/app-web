@@ -17,4 +17,11 @@ describe("Calendario", () => {
     expect(html).toContain("SET");
     expect(html).toContain(">25<");
   });
+
+  it("a faixa do mês no ouro usa letra escura, o par medido em contraste.test.ts", () => {
+    // Branco sobre `ouro-faixa` dava 2,59:1, abaixo do mínimo de 4,5:1.
+    const html = renderToStaticMarkup(createElement(Calendario, { iso: "2026-09-25", hoje: HOJE }));
+    expect(html).toContain("bg-ouro-faixa text-ouro-texto");
+    expect(html).not.toContain("text-white");
+  });
 });

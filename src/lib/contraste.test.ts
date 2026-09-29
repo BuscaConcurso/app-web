@@ -42,6 +42,10 @@ const PARES: Par[] = [
   // O sinal ouro tem par próprio: o texto sobre o fundo claro do sinal não é
   // o mesmo que segura leitura sobre o ouro cheio.
   { texto: "ouro-sinal-texto", fundo: "ouro-fundo", minimo: TEXTO },
+  // A faixa do mês do calendário de "amanhã" (`Calendario.tsx`) e o ícone do
+  // prazo previsto (`LateralDoConcurso.tsx`): o ouro mais fechado, com a
+  // letra escura do ouro. Era branco, com 2,59:1.
+  { texto: "ouro-texto", fundo: "ouro-faixa", minimo: TEXTO },
   ...["verde", "anil", "urucum", "neutro"].map((sinal) => ({
     texto: `${sinal}-texto`, fundo: `${sinal}-fundo`, minimo: TEXTO,
   })),

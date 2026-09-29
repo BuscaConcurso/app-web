@@ -192,7 +192,7 @@ function CabecalhoDoPrazo({
 
   const { fundo, texto, icone } =
     tom === "previsto"
-      ? { fundo: "bg-ouro-fundo", texto: "text-ouro-sinal-texto", icone: "bg-ouro-faixa text-white" }
+      ? { fundo: "bg-ouro-fundo", texto: "text-ouro-sinal-texto", icone: "bg-ouro-faixa text-ouro-texto" }
       : tom === "encerrado"
         ? { fundo: "bg-rebaixada", texto: "text-tinta-600", icone: "bg-tinta-500 text-cartao" }
         : { fundo: "bg-verde-fundo", texto: "text-verde-texto", icone: "bg-acao text-acao-texto" };

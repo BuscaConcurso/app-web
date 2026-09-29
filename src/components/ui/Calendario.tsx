@@ -39,7 +39,7 @@ const ESTILO: Record<
   },
   ouro: {
     caixa: "bg-ouro-fundo",
-    faixa: "bg-ouro-faixa text-white",
+    faixa: "bg-ouro-faixa text-ouro-texto",
     dia: "text-ouro-sinal-texto",
   },
   verde: {
