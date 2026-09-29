@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { REDIRECIONAMENTOS_DO_EM_BREVE } from "./src/lib/institucionais";
 
 const nextConfig: NextConfig = {
   // A imagem de produção copia só `.next/standalone` (servidor + dependências
@@ -29,8 +30,9 @@ const nextConfig: NextConfig = {
   // Vale só em desenvolvimento: `next build`/`next start` ignoram esta opção.
   allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.15.100"],
 
-  // O feed do Diário saiu do "em breve": quem guardou o endereço antigo chega
-  // na página de verdade. Permanente (308), para o buscador trocar também.
+  // Os `/em-breve/...` que viraram página: o feed do Diário aqui, as
+  // institucionais em `src/lib/institucionais.ts`. Permanentes (308), para o
+  // buscador trocar também.
   async redirects() {
     return [
       {
@@ -38,6 +40,7 @@ const nextConfig: NextConfig = {
         destination: "/diario-oficial",
         permanent: true,
       },
+      ...REDIRECIONAMENTOS_DO_EM_BREVE,
     ];
   },
 };

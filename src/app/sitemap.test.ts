@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { AREAS } from "@/lib/areas";
 import { medirCargos } from "@/lib/cargos";
 import { slugDaBusca } from "@/lib/enderecoDaBusca";
+import { PAGINAS_INSTITUCIONAIS } from "@/lib/institucionais";
 import { urlAbsoluta } from "@/lib/site";
 import { CONCURSOS } from "@/mocks/concursos";
 import sitemap from "./sitemap";
@@ -37,5 +38,12 @@ describe("sitemap", () => {
     const urls = (await sitemap()).map((entrada) => entrada.url);
     expect(urls).toContain(urlAbsoluta("/areas"));
     for (const area of AREAS) expect(urls).toContain(urlAbsoluta(`/areas/${area.slug}`));
+  });
+
+  it("tem as três páginas institucionais", async () => {
+    const urls = (await sitemap()).map((entrada) => entrada.url);
+    for (const { href } of Object.values(PAGINAS_INSTITUCIONAIS)) {
+      expect(urls).toContain(urlAbsoluta(href));
+    }
   });
 });

@@ -4,8 +4,8 @@ import { Logo } from "@/components/marca/Logo";
 import { LogoGvTechLab } from "@/components/marca/LogoGvTechLab";
 import { urlDoCargo, type CargoMedido } from "@/lib/cargos";
 import { cargosEscolhidos, facetas, type LinkDeFaceta } from "@/lib/concursos";
-import { hrefEmBreve } from "@/lib/emBreve";
 import { hojeCivilEmSaoPaulo } from "@/lib/formato";
+import { PAGINAS_INSTITUCIONAIS } from "@/lib/institucionais";
 
 const LIMITE_DE_CARGOS_NO_RODAPE = 8;
 const LIMITE_DE_UFS_NO_RODAPE = 8;
@@ -18,10 +18,10 @@ const COLUNA_BUSCAR = [
 ];
 
 const COLUNA_SOBRE = [
-  { rotulo: "Como lemos os editais", href: hrefEmBreve("como-lemos") },
+  { rotulo: "Como lemos os editais", href: PAGINAS_INSTITUCIONAIS["como-lemos"].href },
   { rotulo: "Design system", href: "/estilo" },
-  { rotulo: "Acessibilidade", href: hrefEmBreve("acessibilidade") },
-  { rotulo: "Contato", href: hrefEmBreve("contato") },
+  { rotulo: "Acessibilidade", href: PAGINAS_INSTITUCIONAIS.acessibilidade.href },
+  { rotulo: "Contato", href: PAGINAS_INSTITUCIONAIS.contato.href },
 ];
 
 /**

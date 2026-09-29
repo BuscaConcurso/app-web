@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { hrefEmBreve } from "@/lib/emBreve";
+import { PAGINAS_INSTITUCIONAIS } from "@/lib/institucionais";
 import { ControlesDeAcessibilidade } from "./ControlesDeAcessibilidade";
 
 /**
@@ -50,7 +50,7 @@ export function BarraUtilitaria({
         <div className="-mr-2 flex shrink-0 items-center gap-1 whitespace-nowrap lg:gap-3">
           <ControlesDeAcessibilidade variante="barra" />
 
-          <Link href={hrefEmBreve("como-lemos")} className={`${alvo} hover:underline`}>
+          <Link href={PAGINAS_INSTITUCIONAIS["como-lemos"].href} className={`${alvo} hover:underline`}>
             Como lemos os editais
           </Link>
         </div>

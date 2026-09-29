@@ -3,6 +3,7 @@ import { AREAS, hrefDaArea } from "@/lib/areas";
 import { urlDoCargo } from "@/lib/cargos";
 import { cargosEscolhidos, listarOrgaos, listarSlugs } from "@/lib/concursos";
 import { UFS, type Escolaridade } from "@/lib/dominio";
+import { PAGINAS_INSTITUCIONAIS } from "@/lib/institucionais";
 import { urlAbsoluta } from "@/lib/site";
 
 /**
@@ -10,9 +11,9 @@ import { urlAbsoluta } from "@/lib/site";
  *
  * Entram a home, a busca, o feed do Diário Oficial, as facetas finitas
  * (estado e escolaridade), as 12 áreas, cada cargo que `medirCargos`
- * escolheu, cada órgão com mais de um concurso e cada concurso. Não entram
- * as buscas por texto livre, que são infinitas, nem `/estilo`, que é
- * ferramenta de trabalho e não conteúdo.
+ * escolheu, cada órgão com mais de um concurso, cada concurso e as três
+ * páginas institucionais. Não entram as buscas por texto livre, que são
+ * infinitas, nem `/estilo`, que é ferramenta de trabalho e não conteúdo.
  *
  * **Os órgãos de um concurso só ficam de fora**, e são 195 dos 466. A página
  * deles é o cartão de um concurso que já está neste mesmo mapa com prioridade
@@ -115,6 +116,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: agora,
       changeFrequency: "weekly" as const,
       priority: 0.8,
+    })),
+    // Texto que muda pouco: como lemos, acessibilidade e contato.
+    ...Object.values(PAGINAS_INSTITUCIONAIS).map(({ href }) => ({
+      url: urlAbsoluta(href),
+      lastModified: agora,
+      changeFrequency: "monthly" as const,
+      priority: 0.3,
     })),
   ];
 }
