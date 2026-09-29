@@ -4,7 +4,7 @@ import { Calendario, ESTILO_DO_PRAZO, tomDoCalendario } from "@/components/ui/Ca
 import { BotaoSalvar } from "@/components/salvos/BotaoSalvar";
 import { BotaoLembrar } from "@/components/salvos/BotaoLembrar";
 import { Icone } from "@/components/ui/Icone";
-import type { ConcursoDetalhe, ConcursoResumo } from "@/lib/dominio";
+import type { ConcursoDetalhe, ConcursoResumo, Tom } from "@/lib/dominio";
 import { dataCurta } from "@/lib/formato";
 import {
   destinoDaInscricao,
@@ -15,6 +15,18 @@ import {
 import { tomDoConcurso } from "@/lib/situacao";
 import { PassosDaInscricao } from "./PassosDaInscricao";
 import { TambemAbertos } from "./TambemAbertos";
+
+/**
+ * Os botões de lembrete da lateral. Os dois são o mesmo `lembrar` do
+ * concurso salvo (spec de lembretes): o previsto fica só com "Avisar quando
+ * abrir", o aberto só com "Lembrar amanhã", e o encerrado sem nenhum.
+ */
+export function botoesDeAviso(tom: Tom): { avisarQuandoAbrir: boolean; lembrarAmanha: boolean } {
+  return {
+    avisarQuandoAbrir: tom === "previsto",
+    lembrarAmanha: tom === "aberto" || tom === "urgente",
+  };
+}
 
 /**
  * A lateral da página do concurso: `Concurso.dc.html:208-260`.
@@ -42,6 +54,7 @@ export function LateralDoConcurso({
   const periodo = periodoDaInscricao(concurso, hoje);
   const destino = destinoDaInscricao(concurso);
   const passos = passosDaInscricao(concurso);
+  const avisos = botoesDeAviso(tom);
 
   const uf = concurso.uf ?? concurso.ufs[0] ?? null;
   const areaOuCargo = concurso.cargos[0]?.area ?? concurso.nomesDeCargo[0] ?? null;
@@ -81,7 +94,7 @@ export function LateralDoConcurso({
             </div>
           )}
 
-          {tom === "previsto" ? (
+          {avisos.avisarQuandoAbrir ? (
             <BotaoLembrar
               slug={concurso.slug}
               rotulo="Avisar quando abrir"
@@ -121,16 +134,16 @@ export function LateralDoConcurso({
             </>
           )}
 
-          {/* Encerrado não tem prazo nenhum para lembrar: fica só
-              Salvar, na largura inteira. */}
-          <div className={`grid gap-2 ${tom === "encerrado" ? "grid-cols-1" : "grid-cols-2"}`}>
+          {/* Sem "Lembrar amanhã" (encerrado, ou previsto, que já tem o
+              "Avisar quando abrir" acima) fica só Salvar, na largura inteira. */}
+          <div className={`grid gap-2 ${avisos.lembrarAmanha ? "grid-cols-2" : "grid-cols-1"}`}>
             <BotaoSalvar
               slug={concurso.slug}
               comTexto
               tamanhoDoIcone={16}
               className="flex h-11 items-center justify-center gap-1.5 rounded-controle bg-rebaixada text-sm font-semibold text-tinta-900 hover:bg-linha"
             />
-            {tom !== "encerrado" && (
+            {avisos.lembrarAmanha && (
               <BotaoLembrar
                 slug={concurso.slug}
                 rotulo="Lembrar amanhã"
