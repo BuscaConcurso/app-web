@@ -2,9 +2,10 @@ import { Fragment } from "react";
 import Link from "next/link";
 import { BotaoEmBreve } from "@/components/ui/EmBreve";
 import { Rotulo } from "@/components/ui/Etiqueta";
-import { Icone, type NomeDoIcone } from "@/components/ui/Icone";
-import type { ConcursoResumo, ConcursoStatus } from "@/lib/dominio";
+import { Icone } from "@/components/ui/Icone";
+import type { ConcursoResumo } from "@/lib/dominio";
 import { hrefEmBreve } from "@/lib/emBreve";
+import { estiloDoAto } from "@/lib/estiloDoAto";
 import { dataCurta, numero, quantidade, vagasTexto } from "@/lib/formato";
 import { ROTULO_ESCOLARIDADE, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos";
 import { rotuloDeSituacao } from "@/lib/situacao";
@@ -50,13 +51,6 @@ function Linha({
       </div>
     </Fragment>
   );
-}
-
-/** Ícone e cor pelo status do ato: `Main.dc.html:351-354`. */
-function estiloDoAto(status: ConcursoStatus): { icone: NomeDoIcone; classe: string } {
-  if (status === "homologado") return { icone: "homologado", classe: "bg-verde-fundo text-verde-texto" };
-  if (status === "inscricoes_abertas") return { icone: "aberto", classe: "bg-verde-fundo text-verde-texto" };
-  return { icone: "previsto", classe: "bg-ouro-fundo text-ouro-sinal-texto" };
 }
 
 /** O que a segunda linha do feed do DOU mostra depois do status: o que o ato informou. */
