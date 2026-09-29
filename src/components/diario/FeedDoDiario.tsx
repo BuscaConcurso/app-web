@@ -57,6 +57,10 @@ export function FeedDoDiario({ dias }: { dias: DiaDoFeed[] }) {
                           className="flex shrink-0 items-center gap-1 font-semibold text-tinta-900 hover:text-verde-texto"
                         >
                           Ler no DOU
+                          {/* Sem isto, o feed eram trinta links com o mesmo
+                              nome para quem navega pela lista de links do
+                              leitor de tela (o padrão de "Ver" em `LinhaConcurso`). */}
+                          <span className="sr-only">: {titulo}</span>
                           <Icone nome="externo" tamanho={13} />
                         </a>
                       )}
