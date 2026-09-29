@@ -10,7 +10,7 @@ import { authApi } from "@/lib/auth/api";
 import { useSession } from "@/lib/auth/session";
 import { hojeCivilEmSaoPaulo } from "@/lib/formato";
 import { useSalvos } from "./contexto";
-import { InterruptorDeLembrete } from "./InterruptorDeLembrete";
+import { ControlesDoSalvo } from "./ControlesDoSalvo";
 
 /**
  * A página `/salvos`: exige sessão (sem ela, vai para `/entrar` e volta).
@@ -96,7 +96,7 @@ function Conteudo({
         <ListaDeConcursos
           itens={itens.map((item) => item.concurso)}
           hoje={hojeCivilEmSaoPaulo()}
-          extra={(concurso) => <InterruptorDeLembrete slug={concurso.slug} />}
+          extra={(concurso, forma) => <ControlesDoSalvo slug={concurso.slug} forma={forma} />}
         />
       )}
       {semDado.length > 0 && (

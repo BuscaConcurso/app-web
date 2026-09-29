@@ -11,10 +11,11 @@ describe("ListaDeConcursos", () => {
       createElement(ListaDeConcursos, {
         itens: [concurso!],
         hoje: new Date("2026-09-28T12:00:00Z"),
-        extra: (c) => createElement("span", null, `extra de ${c.slug}`),
+        extra: (c, forma) => createElement("span", null, `extra ${forma} de ${c.slug}`),
       }),
     );
-    expect(html.split(`extra de ${concurso!.slug}`).length - 1).toBe(2);
+    expect(html).toContain(`extra linha de ${concurso!.slug}`);
+    expect(html).toContain(`extra cartao de ${concurso!.slug}`);
   });
 
   it("sem extra, nada muda", () => {

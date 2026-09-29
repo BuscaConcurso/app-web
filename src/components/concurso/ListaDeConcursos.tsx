@@ -40,10 +40,11 @@ export function ListaDeConcursos({
    */
   comFiltros?: boolean;
   /**
-   * Só `/salvos`: um controle a mais por concurso (o interruptor de
-   * lembrete), embaixo da linha e embaixo do cartão, fora do link dele.
+   * Só `/salvos`: controles a mais por concurso, embaixo da linha e embaixo
+   * do cartão, fora do link dele. `forma` diz onde: o cartão do celular não
+   * tem o marcador de salvar que a linha tem.
    */
-  extra?: (concurso: ConcursoResumo) => ReactNode;
+  extra?: (concurso: ConcursoResumo, forma: "linha" | "cartao") => ReactNode;
 }) {
   const tabela = comFiltros ? "xl:block" : "lg:block";
   const cartoes = comFiltros ? "xl:hidden" : "lg:hidden";
@@ -71,7 +72,7 @@ export function ListaDeConcursos({
             concurso={concurso}
             hoje={hoje}
             semOrgao={semOrgao}
-            extra={extra?.(concurso)}
+            extra={extra?.(concurso, "linha")}
           />
         ))}
       </div>
@@ -80,7 +81,7 @@ export function ListaDeConcursos({
         {itens.map((concurso) => (
           <li key={concurso.slug} className="min-w-0">
             <CartaoConcurso concurso={concurso} hoje={hoje} ufDoFiltro={ufDoFiltro} semOrgao={semOrgao} />
-            {extra && <div className="px-4 pt-2.5">{extra(concurso)}</div>}
+            {extra && <div className="px-4 pt-2.5">{extra(concurso, "cartao")}</div>}
           </li>
         ))}
       </ul>
