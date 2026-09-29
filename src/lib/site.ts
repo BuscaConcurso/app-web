@@ -17,6 +17,12 @@ export const DESCRICAO_SITE =
   "escolaridade e banca. Vagas, salário, taxa e prazo de inscrição de cada " +
   "edital, com o link para o documento original.";
 
+/**
+ * O e-mail de contato do site, o mesmo nas três páginas institucionais
+ * (`/contato`, `/acessibilidade` e `/como-lemos-os-editais`).
+ */
+export const EMAIL_CONTATO = "contato@buscaconcurso.com.br";
+
 export function urlAbsoluta(caminho: string): string {
   return `${URL_SITE}${caminho.startsWith("/") ? caminho : `/${caminho}`}`;
 }
