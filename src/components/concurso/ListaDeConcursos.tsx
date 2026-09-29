@@ -1,5 +1,6 @@
 import { CartaoConcurso } from "./CartaoConcurso";
 import { COLUNAS_DA_LINHA, LinhaConcurso } from "./LinhaConcurso";
+import type { ReactNode } from "react";
 import type { ConcursoResumo, Uf } from "@/lib/dominio";
 
 const CABECALHO = ["Órgão e cargo", "Local", "Vagas", "Salário até", "Inscrições até", ""];
@@ -20,6 +21,7 @@ export function ListaDeConcursos({
   ufDoFiltro,
   semOrgao = false,
   comFiltros = false,
+  extra,
 }: {
   itens: ConcursoResumo[];
   hoje: Date;
@@ -37,6 +39,11 @@ export function ListaDeConcursos({
    * qualquer largura.
    */
   comFiltros?: boolean;
+  /**
+   * Só `/salvos`: um controle a mais por concurso (o interruptor de
+   * lembrete), embaixo da linha e embaixo do cartão, fora do link dele.
+   */
+  extra?: (concurso: ConcursoResumo) => ReactNode;
 }) {
   const tabela = comFiltros ? "xl:block" : "lg:block";
   const cartoes = comFiltros ? "xl:hidden" : "lg:hidden";
@@ -58,7 +65,14 @@ export function ListaDeConcursos({
           ))}
         </div>
         {itens.map((concurso) => (
-          <LinhaConcurso key={concurso.slug} as="div" concurso={concurso} hoje={hoje} semOrgao={semOrgao} />
+          <LinhaConcurso
+            key={concurso.slug}
+            as="div"
+            concurso={concurso}
+            hoje={hoje}
+            semOrgao={semOrgao}
+            extra={extra?.(concurso)}
+          />
         ))}
       </div>
 
@@ -66,6 +80,7 @@ export function ListaDeConcursos({
         {itens.map((concurso) => (
           <li key={concurso.slug} className="min-w-0">
             <CartaoConcurso concurso={concurso} hoje={hoje} ufDoFiltro={ufDoFiltro} semOrgao={semOrgao} />
+            {extra && <div className="px-4 pt-2.5">{extra(concurso)}</div>}
           </li>
         ))}
       </ul>

@@ -2,6 +2,7 @@ import { BotaoLink } from "@/components/ui/Botao";
 import { Selo } from "@/components/ui/Cartao";
 import { BotaoSalvar } from "@/components/salvos/BotaoSalvar";
 import { Icone } from "@/components/ui/Icone";
+import type { ReactNode } from "react";
 import type { ConcursoResumo, Tom } from "@/lib/dominio";
 import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
 import { NOME_UF, cargosDoCartao, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos";
@@ -113,10 +114,17 @@ export function LinhaConcurso({
   hoje,
   as = "tr",
   semOrgao = false,
+  extra,
 }: {
   concurso: ConcursoResumo;
   hoje: Date;
   as?: "tr" | "div";
+  /**
+   * Só na forma `div` (`ListaDeConcursos`, em `/salvos`): uma faixa de
+   * largura inteira embaixo das seis colunas, e a linha deixa de ter altura
+   * fixa.
+   */
+  extra?: ReactNode;
   /** Só a página do órgão: esconde a sigla da coluna 1, que já é o `h1`. */
   semOrgao?: boolean;
 }) {
@@ -136,7 +144,7 @@ export function LinhaConcurso({
       role={emGrade ? "row" : undefined}
       className={
         emGrade
-          ? `grid ${COLUNAS_DA_LINHA} h-[5.5rem] items-center gap-4 border-b border-linha-fraca px-5 text-[0.9375rem]`
+          ? `grid ${COLUNAS_DA_LINHA} ${extra ? "min-h-[5.5rem] py-4" : "h-[5.5rem]"} items-center gap-4 border-b border-linha-fraca px-5 text-[0.9375rem]`
           : "h-[5.5rem] border-b border-linha-fraca text-[0.9375rem]"
       }
     >
@@ -200,6 +208,11 @@ export function LinhaConcurso({
           </BotaoLink>
         </div>
       </Celula>
+      {extra && emGrade && (
+        <div role="cell" className="col-span-full -mt-1">
+          {extra}
+        </div>
+      )}
     </Raiz>
   );
 }

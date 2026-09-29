@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ListaDeConcursos } from "@/components/concurso/ListaDeConcursos";
 import { Botao } from "@/components/ui/Botao";
 import { Rotulo } from "@/components/ui/Etiqueta";
+import { authApi } from "@/lib/auth/api";
 import { useSession } from "@/lib/auth/session";
 import { hojeCivilEmSaoPaulo } from "@/lib/formato";
 import { useSalvos } from "./contexto";
+import { InterruptorDeLembrete } from "./InterruptorDeLembrete";
 
 /**
  * A página `/salvos`: exige sessão (sem ela, vai para `/entrar` e volta).
@@ -20,7 +22,7 @@ import { useSalvos } from "./contexto";
  */
 export function TelaDeSalvos() {
   const session = useSession();
-  const { estado, mapa, resposta, recarregar, remover } = useSalvos();
+  const { estado, mapa, resposta, recarregar, remover, emailConfirmado } = useSalvos();
   const router = useRouter();
 
   useEffect(() => {
@@ -39,6 +41,9 @@ export function TelaDeSalvos() {
           Concursos salvos
         </h1>
       </header>
+      {session.status === "authenticated" && !emailConfirmado && session.profile && (
+        <AvisoDeEmailNaoConfirmado email={session.profile.email} />
+      )}
       <Conteudo
         estado={estado}
         resposta={resposta}
@@ -88,7 +93,11 @@ function Conteudo({
   return (
     <>
       {itens.length > 0 && (
-        <ListaDeConcursos itens={itens.map((item) => item.concurso)} hoje={hojeCivilEmSaoPaulo()} />
+        <ListaDeConcursos
+          itens={itens.map((item) => item.concurso)}
+          hoje={hojeCivilEmSaoPaulo()}
+          extra={(concurso) => <InterruptorDeLembrete slug={concurso.slug} />}
+        />
       )}
       {semDado.length > 0 && (
         <section className="flex flex-col gap-3">
@@ -112,5 +121,40 @@ function Conteudo({
         </section>
       )}
     </>
+  );
+}
+
+/**
+ * Os lembretes só saem para endereço confirmado (spec de lembretes, §6). O
+ * reenvio é o mesmo do login (`/v1/auth/verify-email/resend`), que responde
+ * igual exista ou não conta pendente.
+ */
+function AvisoDeEmailNaoConfirmado({ email }: { email: string }) {
+  const [enviado, setEnviado] = useState(false);
+  const [pendente, setPendente] = useState(false);
+
+  async function reenviar() {
+    setPendente(true);
+    try {
+      await authApi.resendVerification(email);
+      setEnviado(true);
+    } finally {
+      setPendente(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-start gap-3 rounded-painel bg-ouro-fundo p-5 text-ouro-sinal-texto">
+      <p className="text-sm">
+        Confirme seu e-mail para receber os lembretes. Eles só saem depois que você confirmar o endereço.
+      </p>
+      {enviado ? (
+        <p className="text-sm font-semibold">Enviamos um novo link para {email}.</p>
+      ) : (
+        <Botao variante="secundario" tamanho="sm" type="button" disabled={pendente} onClick={() => void reenviar()}>
+          Reenviar o link de confirmação
+        </Botao>
+      )}
+    </div>
   );
 }
