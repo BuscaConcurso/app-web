@@ -1,6 +1,6 @@
 # Concursos por área: plano de implementação
 
-> **Para agentes:** SUB-SKILL OBRIGATÓRIA: use superpowers:subagent-driven-development (recomendado) ou superpowers:executing-plans para executar este plano tarefa por tarefa. Os passos usam caixas (`- [ ]`) para acompanhar.
+> **Para agentes:** SUB-SKILL OBRIGATÓRIA: use superpowers:subagent-driven-development (recomendado) ou superpowers:executing-plans para executar este plano tarefa por tarefa. Os passos usam caixas (`- [x]`) para acompanhar.
 
 **Objetivo:** trocar o "em breve" de áreas por `/areas` e `/areas/[slug]`, com cada área definida por uma regra explícita (órgão, cargo, título, exceção) conferida contra o acervo real.
 
@@ -46,7 +46,7 @@
   - `areaDoSlug(slug: string): Area | null`
   - `hrefDaArea(area: Area): string` devolvendo `/areas/{slug}`
 
-- [ ] **Passo 1: testes que falham**
+- [x] **Passo 1: testes que falham**
 
 ```ts
 function concurso(parcial: { titulo?: string; orgao?: string; sigla?: string | null; cargos?: string[] }): ConcursoResumo {
@@ -66,8 +66,8 @@ it("hrefDaArea leva a /areas/<slug>", ...);
 it("slugs únicos, minúsculos, sem acento", ...);
 ```
 
-- [ ] **Passo 2:** `pnpm vitest run src/lib/areas.test.ts`, espera FAIL (`areaDoSlug` não existe).
-- [ ] **Passo 3: implementação**
+- [x] **Passo 2:** `pnpm vitest run src/lib/areas.test.ts`, espera FAIL (`areaDoSlug` não existe).
+- [x] **Passo 3: implementação**
 
 ```ts
 /** Minúsculo, sem acento, e todo o resto que não é letra ou número vira espaço. */
@@ -90,8 +90,8 @@ export function casaComArea(concurso, area) {
 
 Regras iniciais (a Tarefa 2 as confere e ajusta): Tribunais por órgão (`tribunal`, `justica federal`, siglas), Polícia por órgão e cargo (`delegado`, `escrivao`, `agente de policia`...), Educação por órgão (`universidade`, `instituto federal`, `cefet`...) e cargo (`professor`, `docente`), e assim por diante.
 
-- [ ] **Passo 4:** o mesmo comando, PASS.
-- [ ] **Passo 5:** `Areas.tsx`: "Todas as áreas" leva a `/areas`; comentários trocam "busca pelo termo" por "página da área". Commit `feat: regra por área no lugar do termo de busca`.
+- [x] **Passo 4:** o mesmo comando, PASS.
+- [x] **Passo 5:** `Areas.tsx`: "Todas as áreas" leva a `/areas`; comentários trocam "busca pelo termo" por "página da área". Commit `feat: regra por área no lugar do termo de busca`.
 
 ### Tarefa 2: conferência de aceite contra o acervo real
 
@@ -100,10 +100,10 @@ Regras iniciais (a Tarefa 2 as confere e ajusta): Tribunais por órgão (`tribun
 - Modificar: `src/lib/areas.test.ts` (casos reais)
 - Temporário, sem commit: `src/lib/conferenciaDasAreas.local.test.ts`, que lê o `/acervo` salvo em disco e imprime, por área, total, abertos, os 10 primeiros na ordem da página e todos os órgãos distintos que casaram.
 
-- [ ] **Passo 1:** baixar `/v1/acervo` da api local (porta 8793) para o scratchpad.
-- [ ] **Passo 2:** rodar a conferência, ler cada amostra à mão, anotar falsos positivos, ajustar a regra, repetir até a amostra sair limpa.
-- [ ] **Passo 3:** para cada área, um `it` com casos reais que casam e que não casam (título, órgão e cargos copiados do acervo).
-- [ ] **Passo 4:** preencher a tabela de aceite abaixo. Commit `feat: regras das áreas conferidas no acervo`.
+- [x] **Passo 1:** baixar `/v1/acervo` da api local (porta 8793) para o scratchpad.
+- [x] **Passo 2:** rodar a conferência, ler cada amostra à mão, anotar falsos positivos, ajustar a regra, repetir até a amostra sair limpa.
+- [x] **Passo 3:** para cada área, um `it` com casos reais que casam e que não casam (título, órgão e cargos copiados do acervo).
+- [x] **Passo 4:** preencher a tabela de aceite abaixo. Commit `feat: regras das áreas conferidas no acervo`.
 
 ### Tarefa 3: portas de dados
 
@@ -117,8 +117,8 @@ Regras iniciais (a Tarefa 2 as confere e ajusta): Tribunais por órgão (`tribun
   - `interface ResumoDaArea { area: Area; abertos: number; total: number }`
   - `resumoDasAreas(hoje?: Date): Promise<ResumoDaArea[]>` (as 12, na ordem de `AREAS`)
 
-- [ ] **Passo 1: teste que falha** sobre o mock: `resumoDasAreas` tem 12 itens na ordem de `AREAS`, `total` é `concursosDaArea(area).length`, e `abertos` é o `filtrar(..., { situacoes: ["abertas"] })` da mesma lista.
-- [ ] **Passo 2:** FAIL. **Passo 3:** implementar com `acervo()` e `situacaoDoConcurso`. **Passo 4:** PASS. **Passo 5:** commit `feat: concursos e contagem por área`.
+- [x] **Passo 1: teste que falha** sobre o mock: `resumoDasAreas` tem 12 itens na ordem de `AREAS`, `total` é `concursosDaArea(area).length`, e `abertos` é o `filtrar(..., { situacoes: ["abertas"] })` da mesma lista.
+- [x] **Passo 2:** FAIL. **Passo 3:** implementar com `acervo()` e `situacaoDoConcurso`. **Passo 4:** PASS. **Passo 5:** commit `feat: concursos e contagem por área`.
 
 ### Tarefa 4: lista paginada da área (lógica pura)
 
@@ -134,7 +134,7 @@ Regras iniciais (a Tarefa 2 as confere e ajusta): Tribunais por órgão (`tribun
   - `listaDaArea(itens: ConcursoResumo[], consulta: ConsultaDaArea, hoje: Date): { pagina: Pagina; contagens: Record<Situacao, number>; total: number }` (ordena "encerrando", filtra, pagina; página além do fim vira a última)
   - `POR_PAGINA_DA_AREA = 20`
 
-- [ ] **Passo 1: testes que falham** (Foco de revisão 3 e 5):
+- [x] **Passo 1: testes que falham** (Foco de revisão 3 e 5):
 
 ```ts
 expect(lerConsultaDaArea({ pagina: "-3", situacao: "banana" })).toEqual({ situacao: null, pagina: 1 });
@@ -144,7 +144,7 @@ expect(hrefDaListaDaArea(saude, { situacao: "previstos", pagina: 3 })).toBe("/ar
 // página 999 com 3 itens vira a 1; contagens somam o total
 ```
 
-- [ ] **Passos 2 a 4:** FAIL, implementar, PASS. **Passo 5:** commit `feat: consulta, endereço e página da lista da área`.
+- [x] **Passos 2 a 4:** FAIL, implementar, PASS. **Passo 5:** commit `feat: consulta, endereço e página da lista da área`.
 
 ### Tarefa 5: páginas `/areas` e `/areas/[slug]`
 
@@ -154,10 +154,10 @@ expect(hrefDaListaDaArea(saude, { situacao: "previstos", pagina: 3 })).toBe("/ar
 - Modificar: `src/components/home/Areas.tsx` (exporta `Azulejo` com contagem opcional, `CLASSE_DO_ICONE`)
 - Criar: `src/lib/listaEstruturada.ts` + teste: `listaEstruturada(nome, total, itens: { nome: string; href: string }[])` devolvendo o `ItemList` (a forma do da home, `src/app/page.tsx:48-67`).
 
-- [ ] **Passo 1:** teste de `listaEstruturada` (posição começa em 1, URL absoluta, `numberOfItems`), FAIL, implementar, PASS.
-- [ ] **Passo 2:** `/areas`: trilha Início > Áreas, `h1` "Concursos por área", grade dos 12 azulejos com "N abertos · M concursos", `ItemList` das 12.
-- [ ] **Passo 3:** `/areas/[slug]`: `areaDoSlug` ou `notFound()`; `generateMetadata` com título "Concursos de {área}", descrição com a contagem, `canonical` `/areas/{slug}`, `noindex` quando há situação ou página na query; trilha Início > Áreas > {área}; cabeçalho com ícone, nome, apoio e os três fatos (abertos, previstos, total); trilho de situação (`Abas` com `href`), `ListaDeConcursos`, `Paginacao`, `ItemList` da página, `AcervoIncompleto`.
-- [ ] **Passo 4:** `pnpm verificar`. Commit `feat: páginas de concursos por área`.
+- [x] **Passo 1:** teste de `listaEstruturada` (posição começa em 1, URL absoluta, `numberOfItems`), FAIL, implementar, PASS.
+- [x] **Passo 2:** `/areas`: trilha Início > Áreas, `h1` "Concursos por área", grade dos 12 azulejos com "N abertos · M concursos", `ItemList` das 12.
+- [x] **Passo 3:** `/areas/[slug]`: `areaDoSlug` ou `notFound()`; `generateMetadata` com título "Concursos de {área}", descrição com a contagem, `canonical` `/areas/{slug}`, `noindex` quando há situação ou página na query; trilha Início > Áreas > {área}; cabeçalho com ícone, nome, apoio e os três fatos (abertos, previstos, total); trilho de situação (`Abas` com `href`), `ListaDeConcursos`, `Paginacao`, `ItemList` da página, `AcervoIncompleto`.
+- [x] **Passo 4:** `pnpm verificar`. Commit `feat: páginas de concursos por área`.
 
 ### Tarefa 6: links, em breve, sitemap
 
@@ -169,14 +169,14 @@ expect(hrefDaListaDaArea(saude, { situacao: "previstos", pagina: 3 })).toBe("/ar
 - Criar: `src/app/em-breve/areas/page.tsx` (`permanentRedirect("/areas")`; segmento estático vence `[recurso]` e não toca o arquivo que os outros agentes editam)
 - Modificar: `src/app/sitemap.ts` + `src/app/sitemap.test.ts` (`/areas` e os 12 `/areas/{slug}`)
 
-- [ ] **Passo 1:** testes que falham: nav acende em `/areas/saude`; sitemap tem as 13 URLs; `recursoEmBreve("areas")` é `null`.
-- [ ] **Passos 2 a 4:** FAIL, implementar, PASS. **Passo 5:** commit `feat: links de área levam a /areas`.
+- [x] **Passo 1:** testes que falham: nav acende em `/areas/saude`; sitemap tem as 13 URLs; `recursoEmBreve("areas")` é `null`.
+- [x] **Passos 2 a 4:** FAIL, implementar, PASS. **Passo 5:** commit `feat: links de área levam a /areas`.
 
 ### Tarefa 7: verificação no navegador
 
-- [ ] `pnpm verificar`.
-- [ ] App em `:3103` com `BC_API_URL=http://127.0.0.1:8793/v1`: `/areas`, três `/areas/[slug]`, paginação, filtro de situação, azulejos da home, `/em-breve/areas` (308 para `/areas`), `/areas/banana` (404).
-- [ ] Parar os servidores.
+- [x] `pnpm verificar`.
+- [x] App em `:3103` com `BC_API_URL=http://127.0.0.1:8793/v1`: `/areas`, três `/areas/[slug]`, paginação, filtro de situação, azulejos da home, `/em-breve/areas` (308 para `/areas`), `/areas/banana` (404).
+- [x] Parar os servidores.
 
 ---
 
@@ -232,3 +232,25 @@ acervo"), e 9 dos 12 falham com a regra anterior ao ajuste.
   Credenciamento" da Operação Carro-Pipa (Comando Militar do Nordeste, em
   Forças Armadas). São do órgão certo e aparecem também na busca e na
   página do órgão; a correção é no engine, não na regra de área.
+
+## Verificação
+
+- `pnpm verificar`: typecheck, lint e 583 testes passando.
+- Build de produção (`output: standalone`) contra a api local com o acervo
+  real, servido em `:3103`. `/areas` sai estática com ISR de 5 minutos;
+  `/areas/[slug]` renderiza por requisição; `/em-breve/areas` responde 308
+  para `/areas`.
+- HTTP: `/areas`, `/areas/saude`, `/areas/educacao?pagina=3` e
+  `/areas/saude?situacao=abertas` 200; `/areas/banana` e `/areas/Saude` 404;
+  `?pagina=999&situacao=x` 200 (última página, situação ignorada). Com
+  filtro ou página adiante, `noindex, follow` e canônico na área.
+- Paginação e abas: em `/areas/educacao?pagina=2&situacao=encerrados` a
+  página 2 está marcada, os links de página mantêm a situação e as abas
+  voltam à página 1.
+- Home: os 12 azulejos levam a `/areas/<slug>` e "Todas as áreas" a `/areas`;
+  o sitemap tem as 13 URLs de área.
+- Navegador (Chrome headless): capturas de `/areas` (1440 e 390),
+  `/areas/saude`, `/areas/tribunais?situacao=abertas`,
+  `/areas/tecnologia` (390); `scripts/verificar-navegador.mjs` com as páginas
+  de área: sem rolagem lateral a 360, 375, 390 e 1440px e sem erro de
+  console.
