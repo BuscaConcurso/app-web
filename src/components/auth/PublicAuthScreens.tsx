@@ -14,6 +14,7 @@ import {
 import { registrar } from "@/lib/analitica";
 import { useSession, withSession } from "@/lib/auth/session";
 import { safeReturnTo } from "@/lib/auth/return-to";
+import { useTokenDaUrl } from "@/lib/useTokenDaUrl";
 import { Botao } from "@/components/ui/Botao";
 import { Campo } from "@/components/ui/Campo";
 import {
@@ -335,7 +336,8 @@ export function ForgotPasswordScreen() {
   );
 }
 
-export function ResetPasswordScreen({ token }: { token?: string }) {
+export function ResetPasswordScreen({ token: tokenDaUrl }: { token?: string }) {
+  const token = useTokenDaUrl(tokenDaUrl);
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [error, setError] = useState<string>();
@@ -400,13 +402,14 @@ export function ResetPasswordScreen({ token }: { token?: string }) {
 
 function OneTimeResult({
   title,
-  token,
+  token: tokenDaUrl,
   kind,
 }: {
   title: string;
   token?: string;
   kind: "verify" | "email-change";
 }) {
+  const token = useTokenDaUrl(tokenDaUrl);
   const started = useRef(false);
   const [result, setResult] = useState<{ success: boolean; message: string }>();
 
