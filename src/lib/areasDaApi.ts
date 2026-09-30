@@ -20,11 +20,18 @@ export interface AreaDaApi {
 
 export interface RespostaDasAreas {
   areas: AreaDaApi[];
+  /**
+   * Quando o acervo por trás da lista foi lido. A leitura do acervo devolve
+   * a última boa quando a api falha, e o job do resumo recusa uma lista
+   * velha em vez de filtrar a semana com ela.
+   */
+  geradoEm: string;
 }
 
-export function areasDaApi(concursos: ConcursoResumo[], hoje: Date): RespostaDasAreas {
+export function areasDaApi(concursos: ConcursoResumo[], hoje: Date, geradoEm: string): RespostaDasAreas {
   const vivos = concursos.filter((concurso) => situacaoDoConcurso(concurso, hoje) !== "encerrados");
   return {
+    geradoEm,
     areas: AREAS.map((area) => ({
       slug: area.slug,
       nome: area.nome,

@@ -95,6 +95,8 @@ interface RespostaDeAcervo {
     naoAbreConcurso: number;
     lacuna: number;
   };
+  /** Quando a api montou a resposta (ISO). O mock não tem. */
+  geradoEm?: string;
   /** Preenchido aqui, não pela API: é quem leu que sabe de onde leu. */
   origem: OrigemDoAcervo;
 }
@@ -750,8 +752,11 @@ export async function tambemAbertos(
 
 /**
  * O corpo de `GET /api/areas` (`areasDaApi`), sobre o mesmo acervo guardado
- * por cinco minutos que as páginas de área leem.
+ * por cinco minutos que as páginas de área leem. `geradoEm` é o da leitura
+ * da api (a última boa, se a api caiu depois dela); o mock não tem data e
+ * vale como lido agora.
  */
 export async function areasParaOResumo(hoje: Date = new Date()): Promise<RespostaDasAreas> {
-  return areasDaApi(await acervo(), hoje);
+  const resposta = await carregar();
+  return areasDaApi(resposta.concursos, hoje, resposta.geradoEm ?? new Date().toISOString());
 }

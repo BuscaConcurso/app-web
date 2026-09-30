@@ -40,7 +40,7 @@ describe("areasDaApi", () => {
     concurso("trt-vencido", { orgao: "Tribunal Regional do Trabalho", ate: "2026-09-01" }),
     concurso("tre-ti", { orgao: "Tribunal Regional Eleitoral", cargos: ["Analista de Tecnologia da Informação"] }),
   ];
-  const resposta = areasDaApi(acervo, HOJE);
+  const resposta = areasDaApi(acervo, HOJE, "2026-09-29T10:00:00.000Z");
 
   it("traz as 12 áreas na ordem do app, com slug e nome", () => {
     expect(resposta.areas.map(({ slug, nome }) => ({ slug, nome }))).toEqual(
@@ -61,6 +61,10 @@ describe("areasDaApi", () => {
 
   it("um concurso pode estar em mais de uma área", () => {
     expect(concursosDa(resposta, "tecnologia")).toEqual(["tre-ti"]);
+  });
+
+  it("diz quando o acervo por trás da lista foi lido", () => {
+    expect(resposta.geradoEm).toBe("2026-09-29T10:00:00.000Z");
   });
 
   it("área sem concurso vem com lista vazia", () => {
