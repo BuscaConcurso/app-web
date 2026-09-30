@@ -114,6 +114,6 @@ describe("resumo semanal", () => {
   it("cada tipo tem os próprios textos na página de descadastro, sem travessão", () => {
     expect(TEXTOS_DO_DESCADASTRO.resumo.pergunta).toBe("Cancelar o resumo semanal?");
     expect(TEXTOS_DO_DESCADASTRO.lembretes.pergunta).toBe("Parar os lembretes por e-mail?");
-    expect(JSON.stringify(TEXTOS_DO_DESCADASTRO)).not.toContain("—");
+    expect(JSON.stringify(TEXTOS_DO_DESCADASTRO)).not.toContain("\u2014");
   });
 });
