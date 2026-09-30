@@ -10,7 +10,7 @@ describe("ChamadaDoResumo", () => {
   it("fala do resumo semanal, sem formulário nem alerta", () => {
     const bloco = html(false);
     expect(bloco).toContain("RESUMO SEMANAL");
-    expect(bloco).toContain("Os concursos da sua área, toda segunda no seu e-mail.");
+    expect(bloco).toContain('Os concursos da sua área, toda segunda no seu <span class="whitespace-nowrap">e-mail.</span>');
     expect(bloco).toContain("Um e-mail por semana");
     expect(bloco).not.toContain("<input");
     expect(bloco).not.toContain("<form");
@@ -32,7 +32,7 @@ describe("ChamadaDoResumo", () => {
 
   it("compacto: o mesmo título e botão, sem as garantias", () => {
     const bloco = html(true, true);
-    expect(bloco).toContain("Os concursos da sua área, toda segunda no seu e-mail.");
+    expect(bloco).toContain('Os concursos da sua área, toda segunda no seu <span class="whitespace-nowrap">e-mail.</span>');
     expect(bloco).toContain('href="/conta#avisos"');
     expect(bloco).not.toContain("Cancele com um clique");
   });

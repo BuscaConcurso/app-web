@@ -25,7 +25,12 @@ const CELULAS = [
 
 const GARANTIAS = ["Sem custo", "Um e-mail por semana", "Cancele com um clique"];
 
-const TITULO = "Os concursos da sua área, toda segunda no seu e-mail.";
+/** "e-mail" não quebra no hífen: no celular, "e-" ficava sozinho no fim da linha. */
+const TITULO = (
+  <>
+    Os concursos da sua área, toda segunda no seu <span className="whitespace-nowrap">e-mail.</span>
+  </>
+);
 
 /**
  * A chamada do resumo semanal, no bloco amarelo que antes prometia o alerta
