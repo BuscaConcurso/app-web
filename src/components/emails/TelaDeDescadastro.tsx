@@ -17,6 +17,7 @@ import { VistaDeDescadastro } from "./VistaDeDescadastro";
 export function TelaDeDescadastro({ token: tokenDaUrl, tipo }: { token?: string; tipo?: string }) {
   const token = useTokenDaUrl(tokenDaUrl);
   const [estado, setEstado] = useState<EstadoDoDescadastro>("pergunta");
+  const tipoConhecido = tipoDoLink(tipo);
   const [descadastro] = useState(() =>
     criarDescadastro({
       api: {
@@ -24,7 +25,7 @@ export function TelaDeDescadastro({ token: tokenDaUrl, tipo }: { token?: string;
         religar: (valor, qual) => emailsApi.preferenciaPorLink({ token: valor, tipo: qual, ligado: true }),
       },
       token: token ?? null,
-      tipo: tipoDoLink(tipo),
+      tipo: tipoConhecido,
       mudou: setEstado,
     }),
   );
@@ -33,6 +34,8 @@ export function TelaDeDescadastro({ token: tokenDaUrl, tipo }: { token?: string;
     <VistaDeDescadastro
       // Link sem token ou com tipo desconhecido já nasce inválido.
       estado={descadastro.estado() === "invalido" ? "invalido" : estado}
+      // Sem tipo conhecido o estado já é `invalido`, que não usa os textos do tipo.
+      tipo={tipoConhecido ?? "lembretes"}
       aoConfirmar={() => void descadastro.confirmar()}
       aoDesfazer={() => void descadastro.desfazer()}
     />

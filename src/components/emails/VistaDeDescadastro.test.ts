@@ -1,12 +1,12 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { EstadoDoDescadastro } from "@/lib/preferenciasDeEmail";
+import type { EstadoDoDescadastro, TipoDeEmail } from "@/lib/preferenciasDeEmail";
 import { VistaDeDescadastro } from "./VistaDeDescadastro";
 
-function html(estado: EstadoDoDescadastro) {
+function html(estado: EstadoDoDescadastro, tipo: TipoDeEmail = "lembretes") {
   return renderToStaticMarkup(
-    createElement(VistaDeDescadastro, { estado, aoConfirmar: () => {}, aoDesfazer: () => {} }),
+    createElement(VistaDeDescadastro, { estado, tipo, aoConfirmar: () => {}, aoDesfazer: () => {} }),
   );
 }
 
@@ -58,5 +58,30 @@ describe("VistaDeDescadastro", () => {
     expect(pagina).toContain("Este link não vale mais.");
     expect(pagina).toContain('href="/entrar?retorno=%2Fconta%23avisos"');
     expect(pagina).not.toContain("<button");
+  });
+
+  describe("resumo semanal (tipo=resumo)", () => {
+    it("pergunta pelo resumo, sem falar de lembretes", () => {
+      const pagina = html("pergunta", "resumo");
+      expect(pagina).toContain("Cancelar o resumo semanal?");
+      expect(pagina).toContain("o e-mail das segundas com os concursos da semana");
+      expect(pagina).toContain(">Cancelar o resumo</button>");
+      expect(pagina).not.toContain("lembrete");
+    });
+
+    it("enviando e falha", () => {
+      expect(html("enviando", "resumo")).toMatch(/<button[^>]*disabled=""[^>]*>Cancelando…<\/button>/u);
+      expect(html("falhou", "resumo")).toContain("Não deu para cancelar agora. Tente de novo.");
+    });
+
+    it("pronto e desfeito", () => {
+      const pronto = html("pronto", "resumo");
+      expect(pronto).toContain("Pronto: o resumo semanal não chega mais.");
+      expect(pronto).toContain("Os outros e-mails continuam como estão.");
+      expect(pronto).toContain("Desfazer, quero continuar recebendo");
+      const reativado = html("reativado", "resumo");
+      expect(reativado).toContain("Resumo de volta.");
+      expect(reativado).toContain("O resumo volta a chegar às segundas, como antes.");
+    });
   });
 });

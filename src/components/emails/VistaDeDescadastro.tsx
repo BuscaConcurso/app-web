@@ -2,14 +2,15 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Botao, BotaoLink } from "@/components/ui/Botao";
 import { Icone } from "@/components/ui/Icone";
-import type { EstadoDoDescadastro } from "@/lib/preferenciasDeEmail";
+import { TEXTOS_DO_DESCADASTRO, type EstadoDoDescadastro, type TipoDeEmail } from "@/lib/preferenciasDeEmail";
 
 /**
  * A página de descadastro por link, estado a estado (artboard `Descadastro`
  * do canvas "E-mails BuscaConcurso"). Só apresentação: quem decide o estado
  * é `criarDescadastro` (`lib/preferenciasDeEmail.ts`), pela
  * `TelaDeDescadastro`. Sem e-mail da pessoa em lugar nenhum: a api não o
- * devolve pelo token, de propósito.
+ * devolve pelo token, de propósito. Os textos mudam com o tipo do link
+ * (`TEXTOS_DO_DESCADASTRO`); link sem tipo conhecido já é `invalido`.
  */
 
 const TITULO = "font-titulo text-[1.6875rem] leading-[1.1] font-extrabold tracking-[-0.025em] text-tinta-900";
@@ -26,13 +27,16 @@ function Falha({ children }: { children: ReactNode }) {
 
 function Conteudo({
   estado,
+  tipo,
   aoConfirmar,
   aoDesfazer,
 }: {
   estado: EstadoDoDescadastro;
+  tipo: TipoDeEmail;
   aoConfirmar: () => void;
   aoDesfazer: () => void;
 }) {
+  const textos = TEXTOS_DO_DESCADASTRO[tipo];
   if (estado === "invalido") {
     return (
       <>
@@ -48,8 +52,8 @@ function Conteudo({
   if (estado === "reativado") {
     return (
       <div role="status" className="flex flex-col gap-4">
-        <h1 className={TITULO}>Lembretes de volta.</h1>
-        <p className={TEXTO}>Os avisos dos concursos salvos voltam a chegar, como antes.</p>
+        <h1 className={TITULO}>{textos.reativado}</h1>
+        <p className={TEXTO}>{textos.reativadoApoio}</p>
         <BotaoLink href="/concursos" tamanho="md" className="self-start">
           Ver concursos abertos
         </BotaoLink>
@@ -63,8 +67,8 @@ function Conteudo({
         <span className="flex size-[3.25rem] items-center justify-center rounded-[14px] bg-verde-fundo text-verde-texto">
           <Icone nome="check" tamanho={26} />
         </span>
-        <h1 className={TITULO}>Pronto: os lembretes por e-mail não chegam mais.</h1>
-        <p className={TEXTO}>Os e-mails da conta continuam.</p>
+        <h1 className={TITULO}>{textos.pronto}</h1>
+        <p className={TEXTO}>{textos.prontoApoio}</p>
         {estado === "falhouAoDesfazer" && <Falha>Não deu para desfazer agora. Tente de novo.</Falha>}
         <Botao
           type="button"
@@ -89,14 +93,11 @@ function Conteudo({
       <span className="flex size-[3.25rem] items-center justify-center rounded-[14px] bg-verde-fundo text-verde-texto">
         <Icone nome="email" tamanho={26} />
       </span>
-      <h1 className={TITULO}>Parar os lembretes por e-mail?</h1>
-      <p className={TEXTO}>
-        Você deixa de receber os avisos de abertura e de véspera dos concursos salvos. Os e-mails
-        da conta continuam.
-      </p>
-      {estado === "falhou" && <Falha>Não deu para parar agora. Tente de novo.</Falha>}
+      <h1 className={TITULO}>{textos.pergunta}</h1>
+      <p className={TEXTO}>{textos.explicacao}</p>
+      {estado === "falhou" && <Falha>{textos.falhou}</Falha>}
       <Botao type="button" tamanho="md" disabled={estado === "enviando"} onClick={aoConfirmar}>
-        {estado === "enviando" ? "Parando…" : "Parar os lembretes"}
+        {estado === "enviando" ? textos.enviando : textos.botao}
       </Botao>
       <Link href="/conta#avisos" className={LINK}>
         Ajustar todas as preferências
@@ -107,6 +108,7 @@ function Conteudo({
 
 export function VistaDeDescadastro(props: {
   estado: EstadoDoDescadastro;
+  tipo: TipoDeEmail;
   aoConfirmar: () => void;
   aoDesfazer: () => void;
 }) {
