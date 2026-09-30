@@ -1,4 +1,4 @@
-import type { PreferenciasDeEmail, TipoDeEmail } from "@/lib/preferenciasDeEmail";
+import type { MudancaDePreferencias, PreferenciasDeEmail, TipoDeEmail } from "@/lib/preferenciasDeEmail";
 
 export interface ApiValidationDetail {
   field: string | null;
@@ -202,7 +202,7 @@ export const meApi = {
   preferenciasDeEmail: {
     ler: (accessToken: string) =>
       apiRequest<PreferenciasDeEmail>("/v1/me/preferencias-de-email", { accessToken }),
-    alterar: (body: Partial<PreferenciasDeEmail>, accessToken: string) =>
+    alterar: (body: MudancaDePreferencias, accessToken: string) =>
       apiRequest<PreferenciasDeEmail>("/v1/me/preferencias-de-email", {
         method: "PATCH",
         body,

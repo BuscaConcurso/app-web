@@ -5,13 +5,80 @@
  * sem `NEXT_PUBLIC_BC_API_URL`): quem chama a rede entrega a api pronta.
  */
 
-/** Os e-mails opcionais. Lista fechada, a mesma da api; a etapa 2 traz `resumo`. */
-const TIPOS = ["lembretes"] as const;
+import { AREAS } from "./areas";
+import type { Uf } from "./dominio";
+
+/** Os e-mails opcionais. Lista fechada, a mesma da api. */
+const TIPOS = ["lembretes", "resumo"] as const;
 export type TipoDeEmail = (typeof TIPOS)[number];
 
 export interface PreferenciasDeEmail {
   lembretes: boolean;
+  /** Começa desligado: a adesão é explícita. */
+  resumoSemanal: boolean;
+  /** Slugs de `AREAS`; vazia é "todas as áreas". */
+  areas: string[];
+  /** `null` é "Todo o Brasil". */
+  uf: Uf | null;
 }
+
+/** O corpo do `PATCH`: só os campos que mudam. */
+export type MudancaDePreferencias = Partial<PreferenciasDeEmail>;
+
+/** "Parar todos os e-mails opcionais": os e-mails da conta continuam. */
+export const PARAR_TODOS: MudancaDePreferencias = { lembretes: false, resumoSemanal: false };
+
+/** Marca ou desmarca a área, mantendo a ordem de `AREAS` (a dos botões). */
+export function alternarArea(areas: string[], slug: string): string[] {
+  const marcadas = new Set(areas);
+  if (marcadas.has(slug)) marcadas.delete(slug);
+  else marcadas.add(slug);
+  return AREAS.map((area) => area.slug).filter((area) => marcadas.has(area));
+}
+
+/** O que muda, por tipo, na página de descadastro. */
+export interface TextosDoDescadastro {
+  /** O título da aba. */
+  titulo: string;
+  pergunta: string;
+  explicacao: string;
+  botao: string;
+  enviando: string;
+  falhou: string;
+  pronto: string;
+  prontoApoio: string;
+  reativado: string;
+  reativadoApoio: string;
+}
+
+export const TEXTOS_DO_DESCADASTRO: Record<TipoDeEmail, TextosDoDescadastro> = {
+  lembretes: {
+    titulo: "Parar lembretes por e-mail",
+    pergunta: "Parar os lembretes por e-mail?",
+    explicacao:
+      "Você deixa de receber os avisos de abertura e de véspera dos concursos salvos. Os e-mails da conta continuam.",
+    botao: "Parar os lembretes",
+    enviando: "Parando…",
+    falhou: "Não deu para parar agora. Tente de novo.",
+    pronto: "Pronto: os lembretes por e-mail não chegam mais.",
+    prontoApoio: "Os e-mails da conta continuam.",
+    reativado: "Lembretes de volta.",
+    reativadoApoio: "Os avisos dos concursos salvos voltam a chegar, como antes.",
+  },
+  resumo: {
+    titulo: "Cancelar o resumo semanal",
+    pergunta: "Cancelar o resumo semanal?",
+    explicacao:
+      "Você deixa de receber o e-mail das segundas com os concursos da semana. Os outros e-mails continuam como estão.",
+    botao: "Cancelar o resumo",
+    enviando: "Cancelando…",
+    falhou: "Não deu para cancelar agora. Tente de novo.",
+    pronto: "Pronto: o resumo semanal não chega mais.",
+    prontoApoio: "Os outros e-mails continuam como estão.",
+    reativado: "Resumo de volta.",
+    reativadoApoio: "O resumo volta a chegar às segundas, como antes.",
+  },
+};
 
 export function tipoDoLink(valor: string | undefined): TipoDeEmail | null {
   return TIPOS.find((tipo) => tipo === valor) ?? null;

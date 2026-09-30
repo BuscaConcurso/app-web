@@ -6,6 +6,7 @@ import {
   type ApiDoDescadastro,
   type EstadoDoDescadastro,
 } from "./preferenciasDeEmail";
+import { PARAR_TODOS, TEXTOS_DO_DESCADASTRO, alternarArea } from "./preferenciasDeEmail";
 
 function montar(opcoes: { token?: string | null; tipo?: string; api?: Partial<ApiDoDescadastro> } = {}) {
   const estados: EstadoDoDescadastro[] = [];
@@ -26,7 +27,7 @@ function montar(opcoes: { token?: string | null; tipo?: string; api?: Partial<Ap
 describe("tipoDoLink", () => {
   it("aceita só os tipos conhecidos", () => {
     expect(tipoDoLink("lembretes")).toBe("lembretes");
-    expect(tipoDoLink("resumo")).toBeNull();
+    expect(tipoDoLink("newsletter")).toBeNull();
     expect(tipoDoLink(undefined)).toBeNull();
   });
 });
@@ -59,7 +60,7 @@ describe("descadastro pelo link do e-mail", () => {
   it("sem token, ou com tipo desconhecido, o link é inválido desde o começo", () => {
     expect(montar({ token: null }).descadastro.estado()).toBe("invalido");
     expect(montar({ token: "" }).descadastro.estado()).toBe("invalido");
-    expect(montar({ tipo: "resumo" }).descadastro.estado()).toBe("invalido");
+    expect(montar({ tipo: "newsletter" }).descadastro.estado()).toBe("invalido");
   });
 
   it("a api recusando o token (404 ou 400) vira link inválido", async () => {
@@ -91,5 +92,28 @@ describe("avisoDePreferencia", () => {
     expect(avisoDePreferencia(null)).toBe("Preferência salva.");
     expect(avisoDePreferencia(new Error("rede"))).toBe("Não deu para salvar agora. Tente de novo.");
     expect(avisoDePreferencia({ status: 401, code: "AUTH_SESSION_EXPIRED" })).toBe("Entre de novo para mudar a preferência.");
+  });
+});
+
+describe("resumo semanal", () => {
+  it("resumo é um tipo de link", () => {
+    expect(tipoDoLink("resumo")).toBe("resumo");
+    expect(tipoDoLink("newsletter")).toBeNull();
+  });
+
+  it("marcar uma área a põe na ordem do app, e desmarcar a tira", () => {
+    expect(alternarArea([], "saude")).toEqual(["saude"]);
+    expect(alternarArea(["saude"], "tribunais")).toEqual(["tribunais", "saude"]);
+    expect(alternarArea(["tribunais", "saude"], "tribunais")).toEqual(["saude"]);
+  });
+
+  it("parar todos desliga lembretes e resumo, e só eles", () => {
+    expect(PARAR_TODOS).toEqual({ lembretes: false, resumoSemanal: false });
+  });
+
+  it("cada tipo tem os próprios textos na página de descadastro, sem travessão", () => {
+    expect(TEXTOS_DO_DESCADASTRO.resumo.pergunta).toBe("Cancelar o resumo semanal?");
+    expect(TEXTOS_DO_DESCADASTRO.lembretes.pergunta).toBe("Parar os lembretes por e-mail?");
+    expect(JSON.stringify(TEXTOS_DO_DESCADASTRO)).not.toContain("—");
   });
 });
