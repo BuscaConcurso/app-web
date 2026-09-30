@@ -12,7 +12,9 @@ import { Campo } from "@/components/ui/Campo";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { useSalvos } from "@/components/salvos/contexto";
 import { avisoDePreferencia } from "@/lib/preferenciasDeEmail";
+import { caminhoParaVoltar, hrefParaEntrar } from "@/lib/salvos";
 import { InterruptorDePreferencia } from "./InterruptorDePreferencia";
+import { secaoDoHash } from "./secaoDaConta";
 import { OAuthButtons } from "./PublicAuthScreens";
 import {
   Alert,
@@ -410,9 +412,9 @@ function AvisosSection() {
             </Link>
           </div>
           <InterruptorDePreferencia
-            ligado={lembretes ?? false}
+            ligado={lembretes}
             rotuladoPor="t-lembretes"
-            desabilitado={lembretes === null || pending}
+            desabilitado={pending}
             aoAlternar={() => void alternar()}
           />
         </section>
@@ -436,9 +438,17 @@ export function AccountScreen() {
 
   useEffect(() => {
     if (session.status === "anonymous") {
-      router.replace("/entrar?retorno=%2Fconta");
+      // Com o hash: quem veio do link "E-mails e avisos" volta à seção.
+      router.replace(hrefParaEntrar(caminhoParaVoltar(window.location)));
     }
   }, [router, session.status]);
+
+  const pronta = session.status === "authenticated" && Boolean(session.profile);
+  useEffect(() => {
+    if (!pronta) return;
+    const secao = secaoDoHash(window.location.hash);
+    if (secao) document.getElementById(secao)?.scrollIntoView();
+  }, [pronta]);
 
   if (session.status !== "authenticated" || !session.profile) {
     return (

@@ -166,6 +166,13 @@ describe("avisoDeFalha", () => {
 });
 
 describe("caminhoParaVoltar", () => {
+  it("leva o hash junto, para /conta#avisos voltar à seção", () => {
+    expect(caminhoParaVoltar({ pathname: "/conta", search: "", hash: "#avisos" })).toBe("/conta#avisos");
+    expect(hrefParaEntrar(caminhoParaVoltar({ pathname: "/conta", search: "", hash: "#avisos" }))).toBe(
+      "/entrar?retorno=%2Fconta%23avisos",
+    );
+  });
+
   it("leva a query junto, para a busca filtrada voltar filtrada", () => {
     expect(caminhoParaVoltar({ pathname: "/busca/policia", search: "?uf=SP&pagina=2" })).toBe(
       "/busca/policia?uf=SP&pagina=2",

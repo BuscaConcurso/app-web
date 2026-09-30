@@ -2,6 +2,8 @@
  * O interruptor de uma preferência de e-mail em `/conta#avisos`, 52x32 como
  * no artboard `Preferencias`. `role="switch"` porque liga e desliga na hora,
  * sem formulário; o nome acessível vem do título do cartão (`rotuladoPor`).
+ * Antes de saber o valor (`ligado` nulo) não há switch nenhum: um
+ * `aria-checked="false"` provisório seria anunciado como "desligado".
  */
 export function InterruptorDePreferencia({
   ligado,
@@ -9,11 +11,19 @@ export function InterruptorDePreferencia({
   desabilitado = false,
   aoAlternar,
 }: {
-  ligado: boolean;
+  ligado: boolean | null;
   rotuladoPor: string;
   desabilitado?: boolean;
   aoAlternar: () => void;
 }) {
+  if (ligado === null) {
+    return (
+      <span aria-busy="true" className="inline-flex h-8 w-[3.25rem] shrink-0 animate-pulse rounded-full bg-linha">
+        <span className="sr-only">Carregando a preferência</span>
+      </span>
+    );
+  }
+
   return (
     <button
       type="button"
