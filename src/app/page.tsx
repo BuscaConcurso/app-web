@@ -94,7 +94,7 @@ export default async function Home() {
 
       <ComoFunciona aviso={aviso} />
 
-      <BlocoAlerta totalAbertos={destaques.totalAbertos} />
+      <BlocoAlerta />
     </>
   );
 }

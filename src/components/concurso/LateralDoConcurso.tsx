@@ -58,7 +58,6 @@ export function LateralDoConcurso({
   const avisos = botoesDeAviso(tom);
 
   const uf = concurso.uf ?? concurso.ufs[0] ?? null;
-  const areaOuCargo = concurso.cargos[0]?.area ?? concurso.nomesDeCargo[0] ?? null;
 
   return (
     <aside className="hidden lg:flex flex-col gap-4 sticky top-6 self-start">
@@ -161,10 +160,7 @@ export function LateralDoConcurso({
         <TambemAbertos uf={uf} concursos={tambem} />
       )}
 
-      <BlocoAlerta
-        compacto
-        titulo={areaOuCargo ? `Avise-me de novas vagas em ${areaOuCargo}` : "Avise-me de novas vagas como esta"}
-      />
+      <BlocoAlerta compacto />
     </aside>
   );
 }

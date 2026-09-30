@@ -204,7 +204,15 @@ export function LoginScreen({ returnTo }: { returnTo?: string }) {
   );
 }
 
-export function RegisterScreen() {
+/**
+ * `returnTo` vem de `/cadastrar?retorno=` (a chamada do resumo semanal manda
+ * de volta a `/conta#avisos`): segue no "Ir para entrar", no "Já tenho uma
+ * conta" e no cadastro pelo Google e pelo LinkedIn. O link de confirmação
+ * do e-mail não o carrega.
+ */
+export function RegisterScreen({ returnTo }: { returnTo?: string }) {
+  const destino = safeReturnTo(returnTo);
+  const entrar = destino === "/" ? "/entrar" : `/entrar?retorno=${encodeURIComponent(destino)}`;
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>();
@@ -245,7 +253,7 @@ export function RegisterScreen() {
           Confira também a caixa de spam. Você pode pedir outro link na tela
           de entrar.
         </p>
-        <Link className={linkClass} href="/entrar">Ir para entrar</Link>
+        <Link className={linkClass} href={entrar}>Ir para entrar</Link>
       </div>
     );
   }
@@ -284,8 +292,8 @@ export function RegisterScreen() {
         ou
         <span className="h-px flex-1 bg-linha" />
       </div>
-      <OAuthButtons mode="signup" />
-      <Link className={linkClass} href="/entrar">Já tenho uma conta</Link>
+      <OAuthButtons mode="signup" returnTo={destino} />
+      <Link className={linkClass} href={entrar}>Já tenho uma conta</Link>
     </div>
   );
 }
