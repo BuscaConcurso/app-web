@@ -3,7 +3,9 @@ import {
   CAMINHO_DO_PROXY,
   REESCRITAS_DO_POSTHOG,
   chaveDoPosthog,
+  limparSegredosDoEvento,
   opcoesDoPosthog,
+  semSegredosNaUrl,
   reescreverCaminhoDoPosthog,
 } from "./posthog";
 
@@ -90,5 +92,47 @@ describe("REESCRITAS_DO_POSTHOG", () => {
       { source: "/ingest/:path*/_", destination: "https://us.i.posthog.com/:path*/" },
       { source: "/ingest/:path*", destination: "https://us.i.posthog.com/:path*" },
     ]);
+  });
+});
+
+describe("segredos nas URLs", () => {
+  it("apaga token e code da query, e deixa o resto", () => {
+    expect(semSegredosNaUrl("https://buscaconcurso.com.br/emails/descadastro?token=abc-_1&tipo=lembretes"))
+      .toBe("https://buscaconcurso.com.br/emails/descadastro?tipo=lembretes");
+    expect(semSegredosNaUrl("https://buscaconcurso.com.br/auth/oauth/callback?code=xyz"))
+      .toBe("https://buscaconcurso.com.br/auth/oauth/callback");
+    expect(semSegredosNaUrl("https://buscaconcurso.com.br/busca/x?q=token&pagina=2"))
+      .toBe("https://buscaconcurso.com.br/busca/x?q=token&pagina=2");
+  });
+
+  it("também em texto que não é URL completa, e sem mexer em valores que não são texto", () => {
+    expect(semSegredosNaUrl("/redefinir-senha?token=abc#x")).toBe("/redefinir-senha#x");
+    expect(semSegredosNaUrl("/x?a=1&TOKEN=abc&b=2")).toBe("/x?a=1&b=2");
+    expect(semSegredosNaUrl(undefined)).toBeUndefined();
+  });
+
+  it("limpa as URLs do evento, do $set e do $set_once", () => {
+    const url = "https://buscaconcurso.com.br/emails/descadastro?token=segredo&tipo=lembretes";
+    const evento = limparSegredosDoEvento({
+      uuid: "1",
+      event: "$pageview",
+      properties: {
+        $current_url: url, $referrer: url, $initial_current_url: url, $initial_referrer: url,
+        $pathname: "/emails/descadastro", outra: "fica",
+      },
+      $set: { $current_url: url },
+      $set_once: { $initial_current_url: url, $initial_referrer: url },
+    });
+    expect(JSON.stringify(evento)).not.toContain("segredo");
+    expect(evento?.properties.$current_url).toBe("https://buscaconcurso.com.br/emails/descadastro?tipo=lembretes");
+    expect(evento?.properties.outra).toBe("fica");
+    expect(limparSegredosDoEvento(null)).toBeNull();
+  });
+
+  it("as opções ligam a máscara do PostHog para token e code e o before_send", () => {
+    const opcoes = opcoesDoPosthog();
+    expect(opcoes.mask_personal_data_properties).toBe(true);
+    expect(opcoes.custom_personal_data_properties).toEqual(["token", "code"]);
+    expect(opcoes.before_send).toBe(limparSegredosDoEvento);
   });
 });

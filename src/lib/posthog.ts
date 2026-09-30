@@ -14,7 +14,7 @@
  * a barra do fim vira um marcador `/_` no navegador
  * (`reescreverCaminhoDoPosthog`) e volta a ser barra no destino da reescrita.
  */
-import type { PostHogConfig } from "posthog-js";
+import type { CaptureResult, PostHogConfig } from "posthog-js";
 
 export const CAMINHO_DO_PROXY = "/ingest";
 
@@ -57,6 +57,60 @@ export const REESCRITAS_DO_POSTHOG = [
 ];
 
 /**
+ * Parâmetros que são segredo quando aparecem numa URL: o `token` dos links de
+ * e-mail (descadastro, senha, confirmação) e o `code` do retorno do OAuth.
+ */
+const PARAMETROS_SECRETOS = ["token", "code"];
+
+/** A URL sem os parâmetros secretos (chave e valor), o resto intacto. */
+export function semSegredosNaUrl<T>(url: T): T {
+  if (typeof url !== "string") return url;
+  const inicioDaQuery = url.indexOf("?");
+  if (inicioDaQuery === -1) return url;
+  const inicioDoHash = url.indexOf("#", inicioDaQuery);
+  const fim = inicioDoHash === -1 ? url.length : inicioDoHash;
+  const parametros = url
+    .slice(inicioDaQuery + 1, fim)
+    .split("&")
+    .filter((par) => par && !PARAMETROS_SECRETOS.includes(par.split("=")[0]!.toLowerCase()));
+  const query = parametros.length > 0 ? `?${parametros.join("&")}` : "";
+  return `${url.slice(0, inicioDaQuery)}${query}${url.slice(fim)}` as T;
+}
+
+const PROPRIEDADES_DE_URL = [
+  "$current_url",
+  "$referrer",
+  "$initial_current_url",
+  "$initial_referrer",
+  "$pathname",
+];
+
+function limparPropriedades<P extends Record<string, unknown> | undefined>(propriedades: P): P {
+  if (!propriedades) return propriedades;
+  const limpas: Record<string, unknown> = { ...propriedades };
+  for (const chave of PROPRIEDADES_DE_URL) {
+    if (chave in limpas) limpas[chave] = semSegredosNaUrl(limpas[chave]);
+  }
+  return limpas as P;
+}
+
+/**
+ * O `before_send`: a segunda camada, além da máscara do próprio PostHog
+ * (que cobre `$current_url`, mas não o `$referrer`). A primeira são as
+ * páginas que recebem token, que o tiram da barra de endereço ao abrir
+ * (`useTokenDaUrl`).
+ */
+export function limparSegredosDoEvento(evento: CaptureResult | null): CaptureResult | null {
+  if (!evento) return evento;
+  return {
+    ...evento,
+    properties: limparPropriedades(evento.properties),
+    $set: limparPropriedades(evento.$set),
+    $set_once: limparPropriedades(evento.$set_once),
+  };
+}
+
+/**
  * - `cookieless_mode: "on_reject"`: até a pessoa responder o banner, nada vai
  *   para cookie nem para o armazenamento do navegador, e nenhum evento sai.
  *   Aceitou, é o PostHog completo; recusou, só a contagem anônima dele.
@@ -70,6 +124,8 @@ export const REESCRITAS_DO_POSTHOG = [
  *   só a conta que entrou (`identificar`).
  * - Gravação de sessão com todo campo de formulário mascarado. O que mais
  *   não pode aparecer leva a classe `ph-no-capture` na tela.
+ * - `token` e `code` nunca saem numa URL: `mask_personal_data_properties`
+ *   com esses dois, e `limparSegredosDoEvento` no `before_send`.
  */
 export function opcoesDoPosthog(): Partial<PostHogConfig> {
   return {
@@ -80,6 +136,9 @@ export function opcoesDoPosthog(): Partial<PostHogConfig> {
     advanced_disable_feature_flags: true,
     person_profiles: "identified_only",
     session_recording: { maskAllInputs: true },
+    mask_personal_data_properties: true,
+    custom_personal_data_properties: PARAMETROS_SECRETOS,
+    before_send: limparSegredosDoEvento,
     rewriteRequestPath: reescreverCaminhoDoPosthog,
   };
 }
