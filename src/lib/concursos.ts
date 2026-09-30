@@ -39,6 +39,7 @@ import {
 import { medirCargos, type CargoMedido } from "./cargos";
 import { tomDoConcurso } from "./situacao";
 import { NOME_UF } from "./rotulos";
+import { areasDaApi, type RespostaDasAreas } from "./areasDaApi";
 import { acharOrgao, agruparPorOrgao, type OrgaoDoAcervo } from "./orgaos";
 import { feedDeMock, type AtoDoDiario, type FeedDoDiario } from "./diarioOficial";
 import { AREAS, casaComArea, type Area } from "./areas";
@@ -745,4 +746,12 @@ export async function tambemAbertos(
   return ordenar(filtrar(await acervo(), { situacoes: ["abertas"], uf }, hoje), "encerrando", hoje)
     .filter((c) => c.slug !== concurso.slug)
     .slice(0, limite);
+}
+
+/**
+ * O corpo de `GET /api/areas` (`areasDaApi`), sobre o mesmo acervo guardado
+ * por cinco minutos que as páginas de área leem.
+ */
+export async function areasParaOResumo(hoje: Date = new Date()): Promise<RespostaDasAreas> {
+  return areasDaApi(await acervo(), hoje);
 }
