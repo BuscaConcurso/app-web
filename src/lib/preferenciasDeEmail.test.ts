@@ -85,6 +85,19 @@ describe("descadastro pelo link do e-mail", () => {
     await descadastro.desfazer();
     expect(descadastro.estado()).toBe("falhouAoDesfazer");
   });
+
+  it("a api recusando o religar do resumo (409, passou da janela do desfazer) pede para entrar na conta", async () => {
+    const { descadastro } = montar({
+      tipo: "resumo",
+      api: { religar: vi.fn(async () => Promise.reject({ status: 409, code: "EMAIL_RELIGAR_NA_CONTA" })) },
+    });
+    await descadastro.confirmar();
+    await descadastro.desfazer();
+    expect(descadastro.estado()).toBe("religarNaConta");
+    // Nada mais a desfazer por aqui.
+    await descadastro.desfazer();
+    expect(descadastro.estado()).toBe("religarNaConta");
+  });
 });
 
 describe("avisoDePreferencia", () => {

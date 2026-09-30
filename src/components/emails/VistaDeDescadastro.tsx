@@ -61,6 +61,21 @@ function Conteudo({
     );
   }
 
+  if (estado === "religarNaConta") {
+    // O "Desfazer" pelo link não vale mais: religar o resumo é adesão, e
+    // adesão é na conta (o token vai também em e-mails que podem ser
+    // encaminhados).
+    return (
+      <div role="status" className="flex flex-col gap-4">
+        <h1 className={TITULO}>{textos.pronto}</h1>
+        <p className={TEXTO}>Para voltar a receber o resumo, entre na sua conta.</p>
+        <BotaoLink href="/entrar?retorno=%2Fconta%23avisos" tamanho="md" className="self-start">
+          Entrar para religar
+        </BotaoLink>
+      </div>
+    );
+  }
+
   if (estado === "pronto" || estado === "desfazendo" || estado === "falhouAoDesfazer") {
     return (
       <div role="status" className="flex flex-col gap-4">

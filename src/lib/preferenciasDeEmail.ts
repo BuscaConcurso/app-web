@@ -112,6 +112,8 @@ export type EstadoDoDescadastro =
   | "pronto"
   | "desfazendo"
   | "falhouAoDesfazer"
+  /** A api recusou religar pelo link (o resumo só religa na conta fora da janela do desfazer). */
+  | "religarNaConta"
   | "reativado"
   | "invalido";
 
@@ -124,6 +126,11 @@ export interface Descadastro {
   estado(): EstadoDoDescadastro;
   confirmar(): Promise<void>;
   desfazer(): Promise<void>;
+}
+
+/** 409: religar este tipo pelo link não vale mais; só na conta. */
+function religarSoNaConta(erro: unknown): boolean {
+  return formaDoErro(erro).status === 409;
 }
 
 /** 404 (token que não existe) e 400 (tipo desconhecido): o link não vale. */
@@ -165,7 +172,7 @@ export function criarDescadastro(deps: {
         await deps.api.religar(token, tipo);
         ir("reativado");
       } catch (erro) {
-        ir(linkRecusado(erro) ? "invalido" : "falhouAoDesfazer");
+        ir(linkRecusado(erro) ? "invalido" : religarSoNaConta(erro) ? "religarNaConta" : "falhouAoDesfazer");
       }
     },
   };

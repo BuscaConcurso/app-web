@@ -74,6 +74,14 @@ describe("VistaDeDescadastro", () => {
       expect(html("falhou", "resumo")).toContain("Não deu para cancelar agora. Tente de novo.");
     });
 
+    it("religar só na conta: troca o desfazer por entrar", () => {
+      const pagina = html("religarNaConta", "resumo");
+      expect(pagina).toContain("Pronto: o resumo semanal não chega mais.");
+      expect(pagina).toContain("Para voltar a receber o resumo, entre na sua conta.");
+      expect(pagina).toMatch(/href="\/entrar\?retorno=%2Fconta%23avisos"[^>]*>Entrar para religar</u);
+      expect(pagina).not.toContain("Desfazer");
+    });
+
     it("pronto e desfeito", () => {
       const pronto = html("pronto", "resumo");
       expect(pronto).toContain("Pronto: o resumo semanal não chega mais.");
