@@ -1,3 +1,5 @@
+import type { PreferenciasDeEmail, TipoDeEmail } from "@/lib/preferenciasDeEmail";
+
 export interface ApiValidationDetail {
   field: string | null;
   message: string;
@@ -197,6 +199,16 @@ export const meApi = {
       method: "POST",
       body: { token },
     }),
+  preferenciasDeEmail: {
+    ler: (accessToken: string) =>
+      apiRequest<PreferenciasDeEmail>("/v1/me/preferencias-de-email", { accessToken }),
+    alterar: (body: Partial<PreferenciasDeEmail>, accessToken: string) =>
+      apiRequest<PreferenciasDeEmail>("/v1/me/preferencias-de-email", {
+        method: "PATCH",
+        body,
+        accessToken,
+      }),
+  },
   oauth: {
     list: (accessToken: string) =>
       apiRequest<OAuthIdentity[]>("/v1/me/oauth", { accessToken }),
@@ -217,4 +229,18 @@ export const meApi = {
         accessToken,
       }),
   },
+};
+
+/** As rotas públicas do link do e-mail: o token é a prova, sem sessão. */
+export const emailsApi = {
+  descadastrar: (token: string, tipo: TipoDeEmail) =>
+    apiRequest<{ tipo: TipoDeEmail; ligado: boolean }>(
+      `/v1/emails/descadastro?token=${encodeURIComponent(token)}&tipo=${tipo}`,
+      { method: "POST" },
+    ),
+  preferenciaPorLink: (body: { token: string; tipo: TipoDeEmail; ligado: boolean }) =>
+    apiRequest<{ tipo: TipoDeEmail; ligado: boolean }>("/v1/emails/preferencia-por-link", {
+      method: "POST",
+      body,
+    }),
 };
