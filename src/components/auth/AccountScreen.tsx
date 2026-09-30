@@ -11,8 +11,15 @@ import { Botao } from "@/components/ui/Botao";
 import { Campo } from "@/components/ui/Campo";
 import { Rotulo } from "@/components/ui/Etiqueta";
 import { useSalvos } from "@/components/salvos/contexto";
-import { avisoDePreferencia } from "@/lib/preferenciasDeEmail";
+import {
+  PARAR_TODOS,
+  alternarArea,
+  avisoDePreferencia,
+  type MudancaDePreferencias,
+  type PreferenciasDeEmail,
+} from "@/lib/preferenciasDeEmail";
 import { caminhoParaVoltar, hrefParaEntrar } from "@/lib/salvos";
+import { BlocoDoResumo } from "./BlocoDoResumo";
 import { InterruptorDePreferencia } from "./InterruptorDePreferencia";
 import { secaoDoHash } from "./secaoDaConta";
 import { OAuthButtons } from "./PublicAuthScreens";
@@ -336,24 +343,24 @@ function SessionsSection() {
 }
 
 /**
- * "E-mails e avisos" (artboard `Preferencias`). Nesta etapa só há um e-mail
- * opcional, os lembretes; o resumo semanal e o "parar todos" chegam com a
- * etapa 2. O interruptor muda na hora e salva sozinho; se a api recusar,
- * volta ao que estava e avisa. O aviso é o flutuante dos salvos, um só na
- * página.
+ * "E-mails e avisos" (artboards `Preferencias` e `PreferenciasCelular`): os
+ * lembretes, o resumo semanal e o "parar todos". Cada mudança vale na hora e
+ * salva sozinha; se a api recusar, volta ao que estava e avisa. Uma mudança
+ * por vez: enquanto uma salva, as outras esperam. O aviso é o flutuante dos
+ * salvos, um só na página.
  */
 function AvisosSection() {
   const session = useSession();
   const salvos = useSalvos();
-  const [lembretes, setLembretes] = useState<boolean | null>(null);
+  const [preferencias, setPreferencias] = useState<PreferenciasDeEmail | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
     let active = true;
     void withSession((token) => meApi.preferenciasDeEmail.ler(token))
-      .then((preferencias) => {
-        if (active) setLembretes(preferencias.lembretes);
+      .then((lidas) => {
+        if (active) setPreferencias(lidas);
       })
       .catch((caught) => {
         if (active) setError(errorMessage(caught));
@@ -363,19 +370,17 @@ function AvisosSection() {
     };
   }, []);
 
-  async function alternar() {
-    if (lembretes === null || pending) return;
-    const anterior = lembretes;
-    setLembretes(!anterior);
+  async function salvar(mudanca: MudancaDePreferencias) {
+    if (preferencias === null || pending) return;
+    const anterior = preferencias;
+    setPreferencias({ ...anterior, ...mudanca });
     setPending(true);
     try {
-      const salvo = await withSession((token) =>
-        meApi.preferenciasDeEmail.alterar({ lembretes: !anterior }, token),
-      );
-      setLembretes(salvo.lembretes);
+      const salvo = await withSession((token) => meApi.preferenciasDeEmail.alterar(mudanca, token));
+      setPreferencias(salvo);
       salvos.avisar(avisoDePreferencia(null));
     } catch (caught) {
-      setLembretes(anterior);
+      setPreferencias(anterior);
       salvos.avisar(avisoDePreferencia(caught));
     } finally {
       setPending(false);
@@ -412,12 +417,21 @@ function AvisosSection() {
             </Link>
           </div>
           <InterruptorDePreferencia
-            ligado={lembretes}
+            ligado={preferencias?.lembretes ?? null}
             rotuladoPor="t-lembretes"
             desabilitado={pending}
-            aoAlternar={() => void alternar()}
+            aoAlternar={() => void salvar({ lembretes: !preferencias?.lembretes })}
           />
         </section>
+        <BlocoDoResumo
+          ligado={preferencias?.resumoSemanal ?? null}
+          areas={preferencias?.areas ?? []}
+          uf={preferencias?.uf ?? null}
+          ocupado={pending}
+          aoAlternar={() => void salvar({ resumoSemanal: !preferencias?.resumoSemanal })}
+          aoAlternarArea={(slug) => void salvar({ areas: alternarArea(preferencias?.areas ?? [], slug) })}
+          aoMudarUf={(uf) => void salvar({ uf })}
+        />
         <section aria-labelledby="t-conta" className="flex flex-col gap-1.5 rounded-painel bg-rebaixada p-5">
           <h3 id="t-conta" className="text-base font-bold text-tinta-900">
             E-mails da conta
@@ -427,6 +441,17 @@ function AvisosSection() {
             eles, não dá para proteger a sua conta.
           </p>
         </section>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1">
+          <button
+            type="button"
+            disabled={preferencias === null || pending}
+            onClick={() => void salvar(PARAR_TODOS)}
+            className="min-h-11 text-[0.9375rem] font-bold text-urucum-texto underline underline-offset-4 disabled:cursor-wait disabled:opacity-60"
+          >
+            Parar todos os e-mails opcionais
+          </button>
+          <span className="text-sm text-tinta-600">Os e-mails da conta continuam.</span>
+        </div>
       </div>
     </Section>
   );
