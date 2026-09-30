@@ -10,6 +10,9 @@ import { useSession, withSession } from "@/lib/auth/session";
 import { Botao } from "@/components/ui/Botao";
 import { Campo } from "@/components/ui/Campo";
 import { Rotulo } from "@/components/ui/Etiqueta";
+import { useSalvos } from "@/components/salvos/contexto";
+import { avisoDePreferencia } from "@/lib/preferenciasDeEmail";
+import { InterruptorDePreferencia } from "./InterruptorDePreferencia";
 import { OAuthButtons } from "./PublicAuthScreens";
 import {
   Alert,
@@ -330,6 +333,103 @@ function SessionsSection() {
   );
 }
 
+/**
+ * "E-mails e avisos" (artboard `Preferencias`). Nesta etapa só há um e-mail
+ * opcional, os lembretes; o resumo semanal e o "parar todos" chegam com a
+ * etapa 2. O interruptor muda na hora e salva sozinho; se a api recusar,
+ * volta ao que estava e avisa. O aviso é o flutuante dos salvos, um só na
+ * página.
+ */
+function AvisosSection() {
+  const session = useSession();
+  const salvos = useSalvos();
+  const [lembretes, setLembretes] = useState<boolean | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    let active = true;
+    void withSession((token) => meApi.preferenciasDeEmail.ler(token))
+      .then((preferencias) => {
+        if (active) setLembretes(preferencias.lembretes);
+      })
+      .catch((caught) => {
+        if (active) setError(errorMessage(caught));
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function alternar() {
+    if (lembretes === null || pending) return;
+    const anterior = lembretes;
+    setLembretes(!anterior);
+    setPending(true);
+    try {
+      const salvo = await withSession((token) =>
+        meApi.preferenciasDeEmail.alterar({ lembretes: !anterior }, token),
+      );
+      setLembretes(salvo.lembretes);
+      salvos.avisar(avisoDePreferencia(null));
+    } catch (caught) {
+      setLembretes(anterior);
+      salvos.avisar(avisoDePreferencia(caught));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  const comLembrete =
+    salvos.estado === "pronto" ? [...salvos.mapa.values()].filter(Boolean).length : null;
+
+  return (
+    <Section id="avisos" title="E-mails e avisos">
+      <p className="mb-5 text-sm text-tinta-600">
+        Escolha o que chega em{" "}
+        <strong className="ph-no-capture text-tinta-900">{session.profile?.email}</strong>. Cada
+        mudança vale na hora.
+      </p>
+      {error && <Alert>{error}</Alert>}
+      <div className="flex flex-col gap-3">
+        <section
+          aria-labelledby="t-lembretes"
+          className="flex items-start gap-5 rounded-painel p-5 shadow-[inset_0_0_0_1px_var(--color-linha)]"
+        >
+          <div className="flex min-w-0 grow flex-col gap-1.5">
+            <h3 id="t-lembretes" className="text-base font-bold text-tinta-900">
+              Lembretes dos concursos salvos
+            </h3>
+            <p className="text-sm leading-[1.55] text-tinta-600">
+              Avisamos quando a inscrição abre e na véspera do fim, só dos concursos com o
+              lembrete ligado.
+            </p>
+            <Link href="/salvos" className="self-start text-sm font-bold text-link underline">
+              Escolher em Meus salvos
+              {comLembrete !== null && ` (${comLembrete} com lembrete)`}
+            </Link>
+          </div>
+          <InterruptorDePreferencia
+            ligado={lembretes ?? false}
+            rotuladoPor="t-lembretes"
+            desabilitado={lembretes === null || pending}
+            aoAlternar={() => void alternar()}
+          />
+        </section>
+        <section aria-labelledby="t-conta" className="flex flex-col gap-1.5 rounded-painel bg-rebaixada p-5">
+          <h3 id="t-conta" className="text-base font-bold text-tinta-900">
+            E-mails da conta
+          </h3>
+          <p className="text-sm leading-[1.55] text-tinta-600">
+            Confirmação de cadastro, redefinição de senha e avisos de segurança chegam sempre. Sem
+            eles, não dá para proteger a sua conta.
+          </p>
+        </section>
+      </div>
+    </Section>
+  );
+}
+
 export function AccountScreen() {
   const session = useSession();
   const router = useRouter();
@@ -362,6 +462,7 @@ export function AccountScreen() {
         <EmailSection />
         <ProvidersSection />
         <SessionsSection />
+        <AvisosSection />
       </div>
     </div>
   );

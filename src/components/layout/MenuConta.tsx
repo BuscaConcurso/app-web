@@ -76,6 +76,12 @@ export function MenuConta() {
           Salvos
         </Link>
         <Link
+          href="/conta#avisos"
+          className="inline-flex h-8 items-center justify-center rounded-controle bg-rebaixada px-3 text-[0.75rem] font-medium text-tinta-900 hover:bg-linha"
+        >
+          E-mails e avisos
+        </Link>
+        <Link
           href="/conta"
           className="inline-flex h-8 items-center justify-center rounded-controle bg-acao px-3 text-[0.75rem] font-medium text-acao-texto hover:bg-acao-hover"
         >
