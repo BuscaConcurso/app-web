@@ -47,6 +47,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   return [
+    { url: urlAbsoluta("/artigos"), changeFrequency: "daily", priority: 0.8 },
+    { url: urlAbsoluta("/artigos/como-escrevemos"), changeFrequency: "monthly", priority: 0.3 },
     {
       url: urlAbsoluta("/"),
       lastModified: agora,

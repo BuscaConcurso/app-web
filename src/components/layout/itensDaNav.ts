@@ -59,6 +59,12 @@ export const ITENS_DA_NAV = [
     ativo: (caminho) => caminho === "/diario-oficial",
   },
   {
+    rotulo: "Artigos",
+    icone: "diario",
+    href: "/artigos",
+    ativo: (caminho) => caminho === "/artigos" || caminho.startsWith("/artigos/"),
+  },
+  {
     rotulo: "Áreas",
     icone: "areas",
     href: "/areas",

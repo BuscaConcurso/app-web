@@ -3,6 +3,42 @@
 Front do buscador de concursos públicos. Next.js 16 com App Router, React 19,
 TypeScript e Tailwind v4.
 
+## Artigos
+
+O catálogo em `/artigos` lê os textos publicados pelo engine via API, sem CMS e
+sem gerar conteúdo durante uma visita. Inclui busca em `/artigos/busca`, filtros,
+paginação, leitura em `/artigos/[slug]` e o método em `/artigos/como-escrevemos`.
+`src/lib/artigos.ts` concentra essa leitura. Sem `BC_API_URL`, o catálogo fica
+vazio; artigos fictícios não são publicados como fallback. Falha da API configurada
+é tratada como indisponibilidade, e artigo ausente responde 404.
+
+O conteúdo do modelo é texto escapado. Cargos, cronograma e concursos citados
+são lidos do acervo atual e separados das datas editoriais. A página do concurso
+oferece a leitura correspondente por `concursoSlug`, quando existir.
+
+JSON-LD descreve `NewsArticle` ou `Article`, autor organizacional, editor, datas,
+imagens e listas visíveis. As capas PNG próprias têm formatos 16:9, 4:3 e 1:1.
+O sitemap `/sitemap-noticias.xml` inclui apenas notícias publicadas nas últimas
+48 horas, pela data original. Acima de mil URLs ele vira índice de arquivos
+agrupados pelo hash estável do slug. `/sitemap-artigos.xml` preserva o histórico com atualização editorial
+real; ambos são anunciados no robots.txt. Falha de API retorna 503, não um mapa
+vazio bem-sucedido. O endpoint de mapa da API limita o histórico a 50000 artigos;
+acima disso será necessário paginá-lo.
+
+Ordem de implantação: engine com migrações 014 a 016, API com rotas de artigos,
+depois app-web. O CI da API lê migrações da main do engine, então o PR do engine
+precisa entrar primeiro. Mantenha `BC_ARTIGOS_LIGADO=false` até as páginas estarem
+no ar e os resumos periódicos passarem pela leitura real. A verificação automática
+de números não garante a qualidade semântica da análise. Após a implantação,
+valide uma URL pública no Rich Results Test e na inspeção do Search Console.
+
+Referências: [sitemaps de notícias](https://developers.google.com/search/docs/crawling-indexing/sitemaps/news-sitemap)
+e [dados estruturados de artigos](https://developers.google.com/search/docs/appearance/structured-data/article).
+
+Com o servidor standalone iniciado, rode `node scripts/verificar-artigos.mjs http://127.0.0.1:3107`
+para conferir as respostas HTTP. Não adicionar loading.tsx acima das consultas
+que podem chamar notFound: o streaming antecipado transforma 404 em resposta 200.
+
 Toda leitura passa por `src/lib/concursos.ts`. Com `BC_API_URL` definida, ele
 lê o acervo da API Nest (`../api`); sem ela, ou quando a API não responde, lê o
 mock tipado com a forma das tabelas do `engine` e avisa no log. Nenhum

@@ -14,6 +14,7 @@ const LIMITE_DE_CARGOS_NO_RODAPE = 8;
 const LIMITE_DE_UFS_NO_RODAPE = 8;
 
 const COLUNA_BUSCAR = [
+  { rotulo: "Artigos", href: "/artigos" },
   { rotulo: "Abertos", href: "/concursos?situacao=abertas" },
   { rotulo: "Previstos", href: "/concursos?situacao=previstos" },
   { rotulo: "Diário Oficial", href: "/diario-oficial" },
@@ -21,6 +22,7 @@ const COLUNA_BUSCAR = [
 ];
 
 const COLUNA_SOBRE = [
+  { rotulo: "Como escrevemos os artigos", href: "/artigos/como-escrevemos" },
   { rotulo: "Como lemos os editais", href: PAGINAS_INSTITUCIONAIS["como-lemos"].href },
   { rotulo: "Design system", href: "/estilo" },
   { rotulo: "Acessibilidade", href: PAGINAS_INSTITUCIONAIS.acessibilidade.href },
