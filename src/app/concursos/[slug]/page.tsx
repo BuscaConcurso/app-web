@@ -3,6 +3,8 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { connection } from "next/server";
 import { Icone } from "@/components/ui/Icone";
 import { Trilha, type Degrau } from "@/components/ui/Trilha";
+import { LeituraDoConcurso } from "@/components/concurso/LeituraDoConcurso";
+import { Suspense } from "react";
 import { AbasDoConcurso } from "@/components/concurso/AbasDoConcurso";
 import { AtosPublicados } from "@/components/concurso/AtosPublicados";
 import { Avaliacao } from "@/components/concurso/Avaliacao";
@@ -263,6 +265,9 @@ export default async function PaginaDoConcurso(
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_392px]">
           <div className="flex min-w-0 flex-col gap-6">
             <AbasDoConcurso paineis={paineis} />
+            <Suspense fallback={null}>
+              <LeituraDoConcurso slug={concurso.slug} />
+            </Suspense>
 
             {/* A avaliação do concurso, aqui e em nenhum outro ponto da
                 página: um voto por concurso por pessoa, decisão do parceiro

@@ -124,6 +124,7 @@ const dadosEstruturados = {
       name: NOME_SITE,
       url: URL_SITE,
       description: DESCRICAO_SITE,
+      logo: { "@type": "ImageObject", url: `${URL_SITE}/marca/horizontal.svg` },
     },
     {
       "@type": "WebSite",

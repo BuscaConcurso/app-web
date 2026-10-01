@@ -35,12 +35,18 @@ describe("ITENS_DA_NAV", () => {
 });
 
 describe("abas da nav interna", () => {
-  it("são Abertos, Previstos e Diário Oficial, como em Concurso.dc.html", () => {
+  it("oferece concursos, Diário Oficial e Artigos nas páginas internas", () => {
     expect(ITENS_DA_NAV.filter((item) => !item.soNaHome).map((item) => item.rotulo)).toEqual([
       "Abertos",
       "Previstos",
       "Diário Oficial",
+      "Artigos",
     ]);
+  });
+  it("Artigos acende no catálogo, na busca e na leitura", () => {
+    expect(ITENS_DA_NAV.find(item => item.rotulo === "Artigos")?.href).toBe("/artigos");
+    for (const caminho of ["/artigos", "/artigos/busca", "/artigos/leitura"]) expect(ativo("Artigos", caminho)).toBe(true);
+    expect(ativo("Artigos", "/artigosx")).toBe(false);
   });
 });
 

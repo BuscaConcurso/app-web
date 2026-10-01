@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       // `/estilo` é a vitrine do design system, ferramenta de trabalho.
       disallow: ["/estilo"],
     },
-    sitemap: urlAbsoluta("/sitemap.xml"),
+    sitemap: ["/sitemap.xml", "/sitemap-artigos.xml", "/sitemap-noticias.xml"].map(urlAbsoluta),
   };
 }

@@ -57,10 +57,13 @@ import { ROTULO_EVENTO } from "@/lib/rotulos";
 export function Cronograma({
   eventos,
   hoje,
+  hrefBaseDaOrigem = "",
 }: {
   eventos: EventoDoCronograma[];
   /** `AAAA-MM-DD`, de `hojeEmSaoPaulo()`. */
   hoje: string;
+  /** Página da ficha quando o cronograma é exibido fora dela. */
+  hrefBaseDaOrigem?: string;
 }) {
   const ordenados = ordenarEventos(eventos);
   const marca = indiceDaMarcaDeHoje(ordenados, hoje);
@@ -156,7 +159,7 @@ export function Cronograma({
                                 com o trilho: o `id` continua no item do ato,
                                 dentro do bloco "Fontes". */}
                             <a
-                              href={`#ato-${linha.evento.ato}`}
+                              href={`${hrefBaseDaOrigem}#ato-${linha.evento.ato}`}
                               className="whitespace-nowrap font-medium text-link underline underline-offset-4 hover:text-link-hover"
                             >
                               ver o ato
