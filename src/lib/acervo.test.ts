@@ -462,6 +462,20 @@ describe("obterDetalhe", () => {
     expect(detalhe!.origens[0].url).toContain("in.gov.br");
   });
 
+  it("com validade, guarda a leitura em vez de no-store: é o que a página guardada do artigo pede", async () => {
+    vi.stubEnv("BC_API_URL", API);
+    const rede = vi.fn(async () => respostaCom(DETALHE));
+    vi.stubGlobal("fetch", rede);
+
+    const { obterDetalhe } = await carregar();
+    await obterDetalhe("so-este", { validadeS: 300 });
+
+    expect(rede).toHaveBeenCalledWith(`${API}/concursos/so-este`, {
+      next: { revalidate: 300 },
+      signal: expect.any(AbortSignal),
+    });
+  });
+
   it("404 vira nulo, e não o mock", async () => {
     // A página mostra "não encontrado" a partir daqui. Cair no mock faria um
     // slug inexistente abrir um concurso de mentira, com nome de órgão de

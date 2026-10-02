@@ -585,13 +585,16 @@ export async function contagensDeFaceta(
  */
 export async function obterDetalhe(
   slug: string,
+  { validadeS }: { validadeS?: number } = {},
 ): Promise<ConcursoDetalhe | null> {
   if (URL_DA_API) {
     try {
       const resposta = await fetch(
         `${URL_DA_API}/concursos/${encodeURIComponent(slug)}`,
         {
-          cache: "no-store",
+          ...(validadeS
+            ? { next: { revalidate: validadeS } }
+            : { cache: "no-store" as const }),
           signal: AbortSignal.timeout(TEMPO_MAXIMO_DA_LEITURA_MS),
         },
       );

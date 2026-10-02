@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { listarArtigos, obterArtigo, mapaDeArtigos } from "./artigos";
+import { concursosCitadosDoArtigo, listarArtigos, obterArtigo, mapaDeArtigos } from "./artigos";
+import { CONCURSOS } from "@/mocks/concursos";
 
 const vazia = { itens: [], pagina: 1, porPagina: 12, total: 0, totalDePaginas: 0, contagemPorTipo: { concurso: 0, semanal_nacional: 0, semanal_uf: 0, prazos_semana: 0, mensal_escolaridade: 0 } };
 const fetchApi = vi.fn<typeof fetch>();
@@ -65,4 +66,41 @@ it("serializa concursoSlug para o link reverso sem alterar o caminho", async () 
 it("slug com NUL é ausência sem enviar a entrada inválida para a API", async () => {
   expect(await obterArtigo("concurso\u0000sp")).toBeNull();
   expect(fetchApi).not.toHaveBeenCalled();
+});
+
+describe("leituras da página do artigo", () => {
+  const artigo = { slug: "a", secoes: [], emResumo: [], concursosCitados: [] };
+  it("o artigo fica guardado por um dia: o texto publicado não muda", async () => {
+    fetchApi.mockResolvedValue(Response.json(artigo));
+    await obterArtigo("a");
+    const opcoes = fetchApi.mock.calls[0][1];
+    expect(opcoes?.next).toEqual({ revalidate: 86_400 });
+    expect(opcoes?.cache).toBeUndefined();
+  });
+  it("a lista aceita validade, para a página guardada não ler com no-store", async () => {
+    fetchApi.mockResolvedValue(Response.json(vazia));
+    await listarArtigos({ pagina: 1, tipo: "prazos_semana" }, { validadeS: 300 });
+    const opcoes = fetchApi.mock.calls[0][1];
+    expect(opcoes?.next).toEqual({ revalidate: 300 });
+    expect(opcoes?.cache).toBeUndefined();
+  });
+  it("lê os concursos citados numa requisição só, guardada por cinco minutos, sem travessão", async () => {
+    const citado = { ...CONCURSOS[0], slug: "c1", titulo: "Edital \u2014 abertura", origens: [{ chave: "ato-1", url: null, titulo: "Ato \u2014 extrato", fonte: "DOU" }], editalCitadoUrl: "https://banca.example/edital" };
+    fetchApi.mockResolvedValue(Response.json({ itens: [citado] }));
+    const itens = await concursosCitadosDoArtigo("a/b");
+    expect(fetchApi).toHaveBeenCalledTimes(1);
+    expect(fetchApi.mock.calls[0][0]).toBe("https://api.example/v1/artigos/a%2Fb/concursos");
+    expect(fetchApi.mock.calls[0][1]?.next).toEqual({ revalidate: 300 });
+    expect(itens).toHaveLength(1);
+    expect(itens[0]).toMatchObject({ slug: "c1", titulo: "Edital - abertura", editalCitadoUrl: "https://banca.example/edital" });
+    expect(itens[0].origens).toEqual([{ chave: "ato-1", url: null, titulo: "Ato - extrato", fonte: "DOU" }]);
+  });
+  it("sem API não há citados; falha HTTP e envelope inválido lançam", async () => {
+    fetchApi.mockImplementation(async () => new Response(null, { status: 404 }));
+    await expect(concursosCitadosDoArtigo("a")).rejects.toThrow("404");
+    fetchApi.mockImplementation(async () => Response.json({}));
+    await expect(concursosCitadosDoArtigo("a")).rejects.toThrow("Resposta inválida");
+    vi.stubEnv("BC_API_URL", "");
+    expect(await concursosCitadosDoArtigo("a")).toEqual([]);
+  });
 });
