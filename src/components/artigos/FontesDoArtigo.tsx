@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ConcursoDetalhe } from "@/lib/dominio";
+import type { ConcursoCitado } from "@/lib/artigos";
 
 function enderecoPublico(valor: string | null): string | null {
   if (!valor) return null;
@@ -7,7 +7,7 @@ function enderecoPublico(valor: string | null): string | null {
   catch { return null; }
 }
 
-export function FontesDoArtigo({ concurso }: { concurso: ConcursoDetalhe | null }) {
+export function FontesDoArtigo({ concurso }: { concurso: ConcursoCitado | null }) {
   if (!concurso) return <p className="text-tinta-600">A fonte oficial não está disponível nesta leitura. Consulte a página do órgão ou da banca antes de se inscrever.</p>;
   const edital = enderecoPublico(concurso.editalCitadoUrl) ?? enderecoPublico(concurso.editalUrl);
   return <div className="space-y-4 text-base leading-relaxed">

@@ -15,6 +15,21 @@ import { carregarDadosDoArtigo } from "@/components/artigos/dadosVivos";
 import { FontesDoArtigo } from "@/components/artigos/FontesDoArtigo";
 
 type Props = { params: Promise<{ slug: string }> };
+
+/**
+ * Estática, gerada na primeira visita e servida do cache, como a busca por
+ * termo: sem isto cada visita refazia todas as leituras (4 s num resumo com
+ * 30 concursos). O texto do artigo fica guardado por um dia; os cinco minutos
+ * são dos quadros de situação atual, que dependem do dia. Por ser estática,
+ * nenhuma leitura daqui pode ser `no-store`.
+ */
+export const revalidate = 300;
+export const dynamicParams = true;
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return [];
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const artigo = await obterArtigo((await params).slug);
   if (!artigo) notFound();
@@ -26,7 +41,7 @@ export default async function PaginaDoArtigo({ params }: Props) {
   if (!artigo) notFound();
   const [vivos, relacionados] = await Promise.all([
     carregarDadosDoArtigo(artigo),
-    listarArtigos({ pagina: 1, tipo: artigo.tipo, ...(artigo.uf ? { uf: artigo.uf } : {}) }),
+    listarArtigos({ pagina: 1, tipo: artigo.tipo, ...(artigo.uf ? { uf: artigo.uf } : {}) }, { validadeS: revalidate }),
   ]);
   const hoje = hojeEmSaoPaulo();
   const concurso = vivos.principal;

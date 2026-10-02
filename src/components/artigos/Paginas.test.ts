@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import Capa, { generateMetadata as metadataDaCapa } from "@/app/artigos/page";
 import Busca, { metadata as metadataDaBusca } from "@/app/artigos/busca/page";
-import Detalhe from "@/app/artigos/[slug]/page";
+import Detalhe, * as rotaDoDetalhe from "@/app/artigos/[slug]/page";
 import { artigoDeTeste, paginaDeTeste } from "./artigos.fixtures";
 import { CONCURSOS } from "@/mocks/concursos";
 import { ITENS_DA_NAV } from "@/components/layout/itensDaNav";
@@ -34,8 +34,9 @@ describe("páginas editoriais", () => {
     await expect(Capa({ searchParams: Promise.resolve({}) })).rejects.toThrow("503");
   });
   it("renderiza texto seguro, fonte e citados canônicos também no JSON-LD", async () => {
-    fetchApi.mockImplementation(async url => Response.json(String(url).includes("/artigos?") ? paginaDeTeste : artigoDeTeste));
-    obterDetalhe.mockImplementation(async slug => slug === "concurso-ausente" ? null : { ...CONCURSOS[0], slug: "slug-canonico", titulo: "Concurso atual", cargos: [], cronograma: [], origens: [], editalCitadoUrl: "https://fonte.example/edital" });
+    const atual = { ...CONCURSOS[0], slug: "slug-canonico", titulo: "Concurso atual", origens: [], editalCitadoUrl: "https://fonte.example/edital" };
+    fetchApi.mockImplementation(async url => Response.json(String(url).includes("/artigos?") ? paginaDeTeste : String(url).endsWith("/concursos") ? { itens: [atual] } : artigoDeTeste));
+    obterDetalhe.mockResolvedValue({ ...atual, cargos: [], cronograma: [] });
     const html = renderToStaticMarkup(await Detalhe({ params: Promise.resolve({ slug: artigoDeTeste.slug }) }));
     expect(html).toContain("Leia &lt;b&gt;com atenção&lt;/b&gt;");
     expect(html).toContain('href="/concursos/slug-canonico"');
@@ -46,6 +47,19 @@ describe("páginas editoriais", () => {
     expect(artigo.mainEntity.numberOfItems).toBe(1);
     expect(artigo.mainEntity.itemListElement[0].url).toMatch(/\/concursos\/slug-canonico$/);
     expect(artigo.about.url).toMatch(/\/concursos\/slug-canonico$/);
+  });
+  it("o artigo é página guardada, gerada na primeira visita, e nenhuma leitura dela é no-store", async () => {
+    expect(rotaDoDetalhe.revalidate).toBe(300);
+    expect(rotaDoDetalhe.dynamicParams).toBe(true);
+    expect(await rotaDoDetalhe.generateStaticParams()).toEqual([]);
+    fetchApi.mockImplementation(async url => Response.json(String(url).includes("/artigos?") ? paginaDeTeste : String(url).endsWith("/concursos") ? { itens: [] } : artigoDeTeste));
+    obterDetalhe.mockResolvedValue(null);
+    await Detalhe({ params: Promise.resolve({ slug: artigoDeTeste.slug }) });
+    expect(fetchApi.mock.calls.length).toBeGreaterThanOrEqual(3);
+    for (const [, opcoes] of fetchApi.mock.calls) {
+      expect(opcoes?.cache).toBeUndefined();
+      expect(opcoes?.next?.revalidate).toBeGreaterThan(0);
+    }
   });
   it("navegação inclui artigos e ativa suas páginas sem capturar prefixos alheios", () => {
     const item = ITENS_DA_NAV.find(i => i.href === "/artigos");
