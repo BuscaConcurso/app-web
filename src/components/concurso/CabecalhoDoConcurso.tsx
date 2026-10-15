@@ -54,6 +54,7 @@ export function CabecalhoDoConcurso({
 
   const titulo = concurso.nomesDeCargo[0] ?? tituloSemOrgao(concurso.titulo, concurso.orgao);
   const ato = tituloSemOrgao(concurso.titulo, concurso.orgao);
+  const tipo = rotuloDoTipo(concurso.tipo);
   const area = concurso.cargos[0]?.area;
   const ics = icsDoPrazo(concurso, urlAbsoluta(`/concursos/${concurso.slug}`));
 
@@ -89,7 +90,7 @@ export function CabecalhoDoConcurso({
           </Link>
           {" · "}
           {ato}
-          {rotuloDoTipo(concurso.tipo) && <>{" · "}{rotuloDoTipo(concurso.tipo)}</>}
+          {tipo && <>{" · "}{tipo}</>}
         </div>
       </div>
       <div className="hidden md:block">
@@ -138,7 +139,7 @@ export function CabecalhoDoConcurso({
           </Link>
           {" · "}
           {ato}
-          {rotuloDoTipo(concurso.tipo) && <>{" · "}{rotuloDoTipo(concurso.tipo)}</>}
+          {tipo && <>{" · "}{tipo}</>}
         </div>
 
         <div className={ics ? "order-4 md:order-none md:mt-2" : "hidden lg:mt-2 lg:block"}>

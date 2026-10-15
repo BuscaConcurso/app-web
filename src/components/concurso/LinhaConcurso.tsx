@@ -5,7 +5,7 @@ import { Icone } from "@/components/ui/Icone";
 import type { ReactNode } from "react";
 import type { ConcursoResumo, Tom } from "@/lib/dominio";
 import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
-import { NOME_UF, cargosDoCartao, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos";
+import { NOME_UF, cargosDoCartao, rotuloDoTipo, tituloDoAto, tituloSemOrgao } from "@/lib/rotulos";
 import { tomDoConcurso } from "@/lib/situacao";
 
 /**
@@ -128,7 +128,12 @@ export function LinhaConcurso({
   /** Só a página do órgão: esconde a sigla da coluna 1, que já é o `h1`. */
   semOrgao?: boolean;
 }) {
-  const { titulo, subtitulo } = orgaoECargo(concurso, semOrgao);
+  const { titulo, subtitulo: orgaoEEdital } = orgaoECargo(concurso, semOrgao);
+  // A natureza vai na frente da linha de baixo, e não no fim: a linha é
+  // `truncate`, e "Processo seletivo" ou "Estágio" é o que não pode sumir.
+  // O cartão do celular mostra a mesma coisa num chip próprio.
+  const tipo = rotuloDoTipo(concurso.tipo);
+  const subtitulo = tipo ? `${tipo} · ${orgaoEEdital}` : orgaoEEdital;
   const vagas = quantidade(concurso.vagas);
   const { icone: iconeLocal, texto: textoLocal } = localDoConcurso(concurso);
   const prazo = concurso.inscricoesAte
