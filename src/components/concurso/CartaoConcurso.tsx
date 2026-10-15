@@ -3,7 +3,7 @@ import { Selo } from "@/components/ui/Cartao";
 import { Icone } from "@/components/ui/Icone";
 import type { ConcursoResumo, Tom, Uf } from "@/lib/dominio";
 import { dataCurta, diasAte, moeda, numero, quantidade } from "@/lib/formato";
-import { estadoDoCartao } from "@/lib/rotulos";
+import { estadoDoCartao, rotuloDoTipo } from "@/lib/rotulos";
 import { tomDoConcurso } from "@/lib/situacao";
 import { orgaoECargo } from "./LinhaConcurso";
 
@@ -80,6 +80,7 @@ export function CartaoConcurso({
   semOrgao?: boolean;
 }) {
   const { titulo, subtitulo } = orgaoECargo(concurso, semOrgao);
+  const tipo = rotuloDoTipo(concurso.tipo);
   const segunda = segundaEtiqueta(concurso, ufDoFiltro);
   const prazo = concurso.inscricoesAte
     ? chipDoPrazoMovel(concurso.inscricoesAte, hoje, tomDoConcurso(concurso, hoje))
@@ -117,6 +118,11 @@ export function CartaoConcurso({
           <span className={`flex h-7 items-center gap-1.5 rounded-lg px-2.5 font-semibold ${prazo.classe}`}>
             <Icone nome="prazo" tamanho={14} />
             {prazo.texto}
+          </span>
+        )}
+        {tipo && (
+          <span className="flex h-7 items-center rounded-lg bg-rebaixada px-2.5 font-medium">
+            {tipo}
           </span>
         )}
       </div>

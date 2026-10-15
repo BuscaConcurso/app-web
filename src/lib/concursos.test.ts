@@ -138,9 +138,11 @@ describe("paraALista", () => {
     const [enxuto] = paraALista([
       { ...CONCURSOS[0], localidades: ["Pelotas"], ultimoAto: { data: "2026-09-01", titulo: "X", primeiro: true } },
     ]);
-    for (const campo of ["tipo", "uf", "inscricoesDe", "editalUrl", "localidades", "ultimoAto"]) {
+    for (const campo of ["uf", "inscricoesDe", "editalUrl", "localidades", "ultimoAto"]) {
       expect(enxuto, campo).not.toHaveProperty(campo);
     }
+    // O cartão lê o tipo para o selo de processo seletivo e estágio.
+    expect(enxuto.tipo).toBe(CONCURSOS[0].tipo);
     expect(enxuto.orgao).not.toHaveProperty("resolvido");
     expect(enxuto.orgao).not.toHaveProperty("nomeEhCaminho");
   });

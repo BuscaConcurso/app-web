@@ -40,6 +40,7 @@ export type ConcursoTipo =
   | "processo_seletivo"
   | "residencia"
   | "estagio"
+  | "curso"
   | "vestibular"
   | "outro";
 

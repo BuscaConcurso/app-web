@@ -359,9 +359,10 @@ export async function concursosDoTermo(termo: string): Promise<ConcursoResumo[]>
  *
  * Fica o que `CartaoConcurso`, `filtrar`, `ordenar` e `contarFacetas` leem.
  * Sai o resto: `localidades` só serve à busca por texto, que o servidor já
- * fez; `ultimoAto` só aparece na home; `tipo`, `uf` (o cartão e o filtro
+ * fez; `ultimoAto` só aparece na home; `uf` (o cartão e o filtro
  * leem `ufs`), `inscricoesDe`, `editalUrl` e, no órgão, `resolvido` e
- * `nomeEhCaminho` não são lidos por ninguém da lista. Medido em 2026-09-24:
+ * `nomeEhCaminho` não são lidos por ninguém da lista. O `tipo` fica: o
+ * cartão o lê para o selo de processo seletivo e estágio. Medido em 2026-09-24:
  * "professor" devolve 2.631 concursos, e o JSON deles caiu de 2,08 MB (só
  * sem `localidades` e `ultimoAto`) para 1,69 MB.
  *
@@ -379,6 +380,7 @@ export function paraALista(itens: ConcursoResumo[]): ConcursoResumo[] {
         slug: concurso.slug,
         titulo: concurso.titulo,
         status: concurso.status,
+        tipo: concurso.tipo,
         orgao: {
           slug: concurso.orgao.slug,
           nome: concurso.orgao.nome,

@@ -13,6 +13,7 @@ import {
   tituloComOrgao,
   tituloDoAto,
   tituloSemOrgao,
+  rotuloDoTipo,
 } from "./rotulos";
 
 describe("tituloComOrgao", () => {
@@ -898,5 +899,19 @@ describe("noEstado", () => {
     expect(noEstado("MG")).toBe("em Minas Gerais");
     expect(noEstado("SP")).toBe("em São Paulo");
     expect(noEstado("PB")).toBe("na Paraíba");
+  });
+});
+
+describe("rotuloDoTipo", () => {
+  it("concurso público não ganha selo: é o caso comum", () => {
+    expect(rotuloDoTipo("concurso_publico")).toBeNull();
+  });
+  it("processo seletivo e estágio ganham selo", () => {
+    expect(rotuloDoTipo("processo_seletivo")).toBe("Processo seletivo");
+    expect(rotuloDoTipo("estagio")).toBe("Estágio");
+  });
+  it("tipo que não deveria chegar ao site não ganha selo", () => {
+    expect(rotuloDoTipo("curso")).toBeNull();
+    expect(rotuloDoTipo("outro")).toBeNull();
   });
 });
