@@ -8,6 +8,7 @@ import type {
   ConcursoDetalhe,
   ConcursoResumo,
   ConcursoStatus,
+  ConcursoTipo,
   FaqPergunta,
   Escolaridade,
   Esfera,
@@ -882,3 +883,15 @@ export const ROTULO_PERGUNTA: Record<FaqPergunta, string> = {
   como_inscrever: "Como se inscrever?",
   etapas_prova: "Quais são as etapas e as provas?",
 };
+
+/**
+ * O selo do tipo de seleção. Concurso público é o caso comum e fica sem selo;
+ * o resto que chega ao site (a API só manda o publicável) ganha nome. Tipo
+ * fora do publicável não deveria chegar, e se chegar fica sem selo em vez de
+ * anunciar "Curso" num site de concursos.
+ */
+export function rotuloDoTipo(tipo: ConcursoTipo): string | null {
+  if (tipo === "processo_seletivo") return "Processo seletivo";
+  if (tipo === "estagio") return "Estágio";
+  return null;
+}

@@ -8,7 +8,7 @@ import { Icone } from "@/components/ui/Icone";
 import type { ConcursoDetalhe } from "@/lib/dominio";
 import { icsDoPrazo } from "@/lib/agenda";
 import { periodoDaInscricao, prazoPorExtenso } from "@/lib/inscricao";
-import { NOME_UF, ROTULO_ESFERA, ROTULO_STATUS, tituloSemOrgao } from "@/lib/rotulos";
+import { NOME_UF, ROTULO_ESFERA, ROTULO_STATUS, rotuloDoTipo, tituloSemOrgao } from "@/lib/rotulos";
 import { urlAbsoluta } from "@/lib/site";
 import { rotuloDeSituacao, tomDoConcurso } from "@/lib/situacao";
 
@@ -89,6 +89,7 @@ export function CabecalhoDoConcurso({
           </Link>
           {" · "}
           {ato}
+          {rotuloDoTipo(concurso.tipo) && <>{" · "}{rotuloDoTipo(concurso.tipo)}</>}
         </div>
       </div>
       <div className="hidden md:block">
@@ -137,6 +138,7 @@ export function CabecalhoDoConcurso({
           </Link>
           {" · "}
           {ato}
+          {rotuloDoTipo(concurso.tipo) && <>{" · "}{rotuloDoTipo(concurso.tipo)}</>}
         </div>
 
         <div className={ics ? "order-4 md:order-none md:mt-2" : "hidden lg:mt-2 lg:block"}>
