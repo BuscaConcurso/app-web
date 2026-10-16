@@ -98,7 +98,7 @@ export function CartaoConcurso({
           tamanho={42}
         />
         <div className="min-w-0 flex-grow">
-          <div className="truncate text-[0.9375rem] font-bold">{titulo}</div>
+          <div className="line-clamp-2 text-[0.9375rem] leading-snug font-bold">{titulo}</div>
           <div className="mt-0.5 truncate text-[0.8125rem] text-tinta-600">{subtitulo}</div>
         </div>
         <Icone nome="salvar" tamanho={20} className="mt-0.5 shrink-0 text-tinta-500" />
