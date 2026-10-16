@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BotaoLink } from "@/components/ui/Botao";
 import { Selo } from "@/components/ui/Cartao";
 import { BotaoSalvar } from "@/components/salvos/BotaoSalvar";
@@ -27,8 +28,13 @@ export const COLUNAS_DA_LINHA =
  * O órgão e o cargo (ou o que existir no lugar dele), coluna 1 da linha e
  * cabeçalho do cartão do celular.
  *
- * `semOrgao` é para a página do órgão: ele já é o `h1` da página, e repetir a
- * sigla em toda linha da lista dele seria a mesma afirmação duas vezes.
+ * Fora da página do órgão, o título é sempre o nome do órgão, e o cargo vai
+ * para a linha de baixo. A sigla é nula na maior parte do acervo (o engine
+ * só a preenche quando tem certeza), e com o cargo no título a busca mostrava
+ * "Agente de Polícia Federal" sem dizer de que órgão era.
+ *
+ * `semOrgao` é para a página do órgão: ele já é o `h1` da página, e repetir o
+ * nome em toda linha da lista dele seria a mesma afirmação duas vezes.
  */
 export function orgaoECargo(
   concurso: ConcursoResumo,
@@ -38,10 +44,8 @@ export function orgaoECargo(
   const edital = tituloDoAto(tituloSemOrgao(concurso.titulo, concurso.orgao));
   const banca = concurso.banca?.nome && `Banca ${concurso.banca.nome}`;
 
-  if (cargos.informado) {
-    const partes = [!semOrgao && concurso.orgao.sigla, edital, banca].filter(
-      (parte): parte is string => Boolean(parte),
-    );
+  if (semOrgao && cargos.informado) {
+    const partes = [edital, banca].filter((parte): parte is string => Boolean(parte));
     return { titulo: cargos.texto, subtitulo: partes.join(" · ") };
   }
 
@@ -53,7 +57,9 @@ export function orgaoECargo(
     };
   }
 
-  const partes = [edital, banca].filter((parte): parte is string => Boolean(parte));
+  const partes = [cargos.informado ? cargos.texto : edital, banca].filter(
+    (parte): parte is string => Boolean(parte),
+  );
   return {
     titulo: concurso.orgao.nome,
     subtitulo: partes.length > 0 ? partes.join(" · ") : "Cargos ainda não informados",
@@ -147,10 +153,12 @@ export function LinhaConcurso({
   return (
     <Raiz
       role={emGrade ? "row" : undefined}
+      // `relative`: o link do título se estica por cima da linha inteira
+      // (`after:inset-0`), e salvar e Ver ficam acima dele com `z-10`.
       className={
         emGrade
-          ? `grid ${COLUNAS_DA_LINHA} ${extra ? "min-h-[5.5rem] py-4" : "h-[5.5rem]"} items-center gap-4 border-b border-linha-fraca px-5 text-[0.9375rem]`
-          : "h-[5.5rem] border-b border-linha-fraca text-[0.9375rem]"
+          ? `relative grid ${COLUNAS_DA_LINHA} ${extra ? "min-h-[5.5rem] py-4" : "h-[5.5rem]"} items-center gap-4 border-b border-linha-fraca px-5 text-[0.9375rem] hover:bg-pagina`
+          : "relative h-[5.5rem] border-b border-linha-fraca text-[0.9375rem] hover:bg-pagina"
       }
     >
       <Celula role={emGrade ? "cell" : undefined} className={emGrade ? "min-w-0" : "px-5"}>
@@ -161,7 +169,12 @@ export function LinhaConcurso({
             tamanho={44}
           />
           <div className="min-w-0">
-            <div className="truncate font-bold">{titulo}</div>
+            <Link
+              href={`/concursos/${concurso.slug}`}
+              className="line-clamp-2 font-bold leading-snug after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:rounded-controle focus-visible:after:ring-2 focus-visible:after:ring-verde"
+            >
+              {titulo}
+            </Link>
             <div className="mt-0.5 truncate text-[0.8125rem] text-tinta-600">{subtitulo}</div>
           </div>
         </div>
@@ -200,7 +213,7 @@ export function LinhaConcurso({
       </Celula>
 
       <Celula role={emGrade ? "cell" : undefined} className={emGrade ? undefined : "px-5"}>
-        <div className="flex items-center justify-end gap-1.5">
+        <div className="relative z-10 flex items-center justify-end gap-1.5">
           <BotaoSalvar
             slug={concurso.slug}
             className="flex size-[42px] shrink-0 items-center justify-center rounded-controle text-tinta-600 hover:bg-rebaixada aria-pressed:text-verde-texto"
@@ -214,7 +227,7 @@ export function LinhaConcurso({
         </div>
       </Celula>
       {extra && emGrade && (
-        <div role="cell" className="col-span-full -mt-1">
+        <div role="cell" className="relative z-10 col-span-full -mt-1">
           {extra}
         </div>
       )}
